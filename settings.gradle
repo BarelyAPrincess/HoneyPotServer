@@ -1,0 +1,9 @@
+include ':HPNetworking', ':HPConfiguration', ':HPLib', ':HPPlugins', ':HPScripting', ':HPPermissions'
+project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
+project( ':HPConfiguration' ).projectDir = new File( 'modules/HPConfiguration' )
+project( ':HPLib' ).projectDir = new File( 'modules/HPLib' )
+project( ':HPPlugins' ).projectDir = new File( 'modules/HPPlugins' )
+project( ':HPScripting' ).projectDir = new File( 'modules/HPScripting' )
+project( ':HPPermissions' ).projectDir = new File( 'modules/HPPermissions' )
+
+rootProject.name = 'HoneyPotServer'

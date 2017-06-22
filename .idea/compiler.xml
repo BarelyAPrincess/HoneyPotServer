@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="HoneyPotServer_main" target="1.8" />
+      <module name="HoneyPotServer_test" target="1.8" />
+      <module name="HPConfiguration_main" target="1.8" />
+      <module name="HPConfiguration_test" target="1.8" />
+      <module name="HPLib_main" target="1.8" />
+      <module name="HPLib_test" target="1.8" />
+      <module name="HPNetworking_main" target="1.8" />
+      <module name="HPNetworking_test" target="1.8" />
+      <module name="HPPermissions_main" target="1.8" />
+      <module name="HPPermissions_test" target="1.8" />
+      <module name="HPPlugins_main" target="1.8" />
+      <module name="HPPlugins_test" target="1.8" />
+      <module name="HPScripting_main" target="1.8" />
+      <module name="HPScripting_test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

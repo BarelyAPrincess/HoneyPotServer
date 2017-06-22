@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":HPConfiguration" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPConfiguration" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.version="1.0.0-341675b-dev" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../../modules/HPConfiguration">
+      <excludeFolder url="file://$MODULE_DIR$/../../../../modules/HPConfiguration/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../modules/HPConfiguration/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

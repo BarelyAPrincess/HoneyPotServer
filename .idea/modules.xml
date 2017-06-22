@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration.iml" group="HPConfiguration" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration_main.iml" group="HPConfiguration" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfiguration/HPConfiguration_test.iml" group="HPConfiguration" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" group="HPLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" group="HPLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" group="HPLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" group="HPNetworking" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" group="HPNetworking" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" group="HPNetworking" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" group="HPPermissions" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" group="HPPermissions" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" group="HPPermissions" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" group="HPPlugins" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" group="HPPlugins" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" group="HPPlugins" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" group="HPScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" group="HPScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" group="HPScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" group="HoneyPotServer" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" group="HoneyPotServer" />
+    </modules>
+  </component>
+</project>
