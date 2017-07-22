@@ -1,14 +1,16 @@
 package io.amelia.foundation.binding;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.Deployment;
+import io.amelia.foundation.Kernel;
+import io.amelia.foundation.binding.resolvers.AppServiceResolver;
+import io.amelia.foundation.binding.resolvers.ServiceResolverBase;
+import io.amelia.foundation.binding.resolvers.ServiceResolverPriority;
 import io.amelia.helpers.Arrs;
 import io.amelia.helpers.Objs;
 import io.amelia.helpers.Maps;
 import io.amelia.lang.UncaughtException;
 import io.amelia.lang.annotation.Default;
 import io.amelia.lang.annotation.Null;
-import javafx.event.EventDispatcher;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -25,12 +27,12 @@ import java.util.stream.Collectors;
 public class BindingRegistry
 {
 	private static Class[] buildStack = new Class[0];
-	private static Map<String, ServiceResolver> resolvers = new HashMap<>();
+	private static Map<String, ServiceResolverBase> resolvers = new HashMap<>();
 	private static Map<String, String> resolversAlias = new HashMap<>();
 
 	static
 	{
-		registerResolver( ServiceResolver.Priority.NORMAL, new AppServiceResolver() );
+		registerResolver( ServiceResolverPriority.NORMAL, new AppServiceResolver() );
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class BindingRegistry
 	{
 		List<Object> dependencies = new ArrayList<>();
 		if ( primitives.containsKey( "app" ) )
-			primitives.put( "app", Deployment.application() );
+			primitives.put( "app", Kernel.application() );
 		for ( Parameter parameter : parameters )
 		{
 			try
@@ -243,7 +245,7 @@ public class BindingRegistry
 	 * @param name
 	 * @return ServiceResolver
 	 */
-	public static ServiceResolver getResolver( String name )
+	public static ServiceResolverBase getResolver( String name )
 	{
 		if ( resolvers.containsKey( name ) )
 			return resolvers.get( name );
@@ -269,12 +271,12 @@ public class BindingRegistry
 		} return $parameters;
 	}
 
-	public static void registerResolver( ServiceResolver resolver ) throws BindingException
+	public static void registerResolver( ServiceResolverBase resolver ) throws BindingException
 	{
-		registerResolver( ServiceResolver.Priority.NORMAL, resolver );
+		registerResolver( ServiceResolverPriority.NORMAL, resolver );
 	}
 
-	public static void registerResolver( ServiceResolver.Priority priority, ServiceResolver resolver ) throws BindingException
+	public static void registerResolver( ServiceResolverPriority priority, ServiceResolverBase resolver ) throws BindingException
 	{
 		if ( keys == null || keys.length == 0 )
 			keys = Arrs.array( resolver.key() );
@@ -307,7 +309,7 @@ public class BindingRegistry
 			// Ignore
 		}
 		String[] keys = key.split( "." );
-		ServiceResolver resolver = getResolver( keys[0] );
+		ServiceResolverBase resolver = getResolver( keys[0] );
 		if ( resolver != null )
 			return resolver.resolve( keys[0], Arrs.trimStart( keys, 1 ) );
 		return null;
@@ -325,11 +327,11 @@ public class BindingRegistry
 	public static Object resolveClass( Class<?> cls, boolean buildOnFailure =false, parameters )
 	{
 		if ( cls == Application.class )
-			return Deployment.application();
+			return Kernel.application();
 		if ( cls == Configuration.class )
-			return Deployment.config();
+			return Kernel.config();
 		if ( cls == Logger.class )
-			return Deployment.log();
+			return Kernel.log();
 		Object result;
 		for ( resolver:
 		      resolvers )
@@ -339,32 +341,4 @@ public class BindingRegistry
 		return null;
 	}
 
-	private static class AppServiceResolver extends ServiceResolver
-	{
-		private EventDispatcher eventDispatcher;
-
-		public AppServiceResolver()
-		{
-			setDefault( "instance" );
-
-			addClassAlias( EventDispatcher.class, "events" );
-		}
-
-		public EventDispatcher events()
-		{
-			if ( Objs.isNull( eventDispatcher ) )
-				eventDispatcher = new EventDispatcher();
-			return eventDispatcher;
-		}
-
-		public Application instance()
-		{
-			return Deployment.application();
-		}
-
-		public String key()
-		{
-			return "app";
-		}
-	}
 }

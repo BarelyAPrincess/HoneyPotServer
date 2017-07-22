@@ -4,18 +4,28 @@
     <bytecodeTargetLevel>
       <module name="HoneyPotServer_main" target="1.8" />
       <module name="HoneyPotServer_test" target="1.8" />
+      <module name="HPConfig_main" target="1.8" />
+      <module name="HPConfig_test" target="1.8" />
       <module name="HPConfiguration_main" target="1.8" />
       <module name="HPConfiguration_test" target="1.8" />
+      <module name="HPEvent_main" target="1.8" />
+      <module name="HPEvent_test" target="1.8" />
       <module name="HPLib_main" target="1.8" />
       <module name="HPLib_test" target="1.8" />
+      <module name="HPLog_main" target="1.8" />
+      <module name="HPLog_test" target="1.8" />
       <module name="HPNetworking_main" target="1.8" />
       <module name="HPNetworking_test" target="1.8" />
       <module name="HPPermissions_main" target="1.8" />
       <module name="HPPermissions_test" target="1.8" />
       <module name="HPPlugins_main" target="1.8" />
       <module name="HPPlugins_test" target="1.8" />
+      <module name="HPScheduling_main" target="1.8" />
+      <module name="HPScheduling_test" target="1.8" />
       <module name="HPScripting_main" target="1.8" />
       <module name="HPScripting_test" target="1.8" />
+      <module name="HPServices_main" target="1.8" />
+      <module name="HPServices_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

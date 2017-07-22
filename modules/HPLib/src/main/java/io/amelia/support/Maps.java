@@ -1,0 +1,328 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
+ * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
+package io.amelia.support;
+
+import com.sun.istack.internal.NotNull;
+import io.amelia.lang.ExceptionReport;
+import io.amelia.lang.MapCollisionException;
+import javafx.util.Pair;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class Maps
+{
+	/**
+	 * Checks and converts the string key to an integer. Non-numeric keys are removed from the treemap.
+	 *
+	 * @param map The map to sort
+	 * @param <T> The value type
+	 * @return The sorted map as a TreeMap
+	 */
+	public static <T> Map<Integer, T> asNumericallySortedMap( final Map<String, T> map )
+	{
+		return new TreeMap<Integer, T>()
+		{{
+			for ( Map.Entry<String, T> entry : map.entrySet() )
+			{
+				if ( UtilNumbers.isNumber( entry.getKey() ) )
+					put( Integer.parseInt( entry.getKey() ), entry.getValue() );
+			}
+		}};
+	}
+
+	public static <K, V> MapBuilder<K, V> builder()
+	{
+		return new MapBuilder<>();
+	}
+
+	public static <K, V> MapBuilder<K, V> builder( K key, V value )
+	{
+		return builder().put( key, value );
+	}
+
+	public static <K, V> MapBuilder<K, V> builder( Map<K, V> values )
+	{
+		return builder().putAll( values );
+	}
+
+	public static <K, V> MapBuilder<K, V> builder( Properties properties, Class<K> kClass, Class<V> vClass )
+	{
+		return builder().putAll( properties, kClass, vClass );
+	}
+
+	public static <V> MapBuilder<String, V> builder( Properties properties, Class<V> vClass )
+	{
+		return builder().putAll( properties, vClass );
+	}
+
+	public static MapBuilder<String, String> builder( Properties properties )
+	{
+		return builder().putAll( properties, String.class );
+	}
+
+	public static <K, V> boolean containsAll( Map<K, V> map, Collection<?> collection )
+	{
+		Iterator<?> it = collection.iterator();
+		while ( it.hasNext() )
+		{
+			if ( !map.containsKey( it.next() ) )
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static <T> boolean equalsSet( Set<T> set, Object object )
+	{
+		if ( set == object )
+		{
+			return true;
+		}
+		if ( object instanceof Set )
+		{
+			Set<?> s = ( Set<?> ) object;
+
+			try
+			{
+				return set.size() == s.size() && set.containsAll( s );
+			}
+			catch ( NullPointerException ignored )
+			{
+				return false;
+			}
+			catch ( ClassCastException ignored )
+			{
+				return false;
+			}
+		}
+		return false;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static <T> T first( Map<?, T> map )
+	{
+		if ( map.size() == 0 )
+			return null;
+		return ( T ) map.values().toArray()[0];
+	}
+
+	public static Map<String, Object> flattenMap( Map<String, Object> map )
+	{
+		Map<String, Object> result = new HashMap<>();
+		flattenMap( result, "", map );
+		return result;
+	}
+
+	private static void flattenMap( Map<String, Object> result, String path, Map<String, Object> map )
+	{
+		for ( Map.Entry<String, Object> entry : map.entrySet() )
+		{
+			String key = path.isEmpty() ? entry.getKey() : path + "/" + entry.getKey();
+
+			if ( entry.getValue() instanceof Map )
+				flattenMap( result, key, ( Map<String, Object> ) entry.getValue() );
+			else
+				result.put( key, entry.getValue() );
+		}
+	}
+
+	public static <T> Map<String, T> indexMap( List<T> list )
+	{
+		AtomicInteger inx = new AtomicInteger();
+		return list.stream().filter( Objects::nonNull ).map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( Pair::getKey, Pair::getValue ) );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static <T> T last( Map<?, T> map )
+	{
+		if ( map.size() == 0 )
+			return null;
+		return ( T ) map.values().toArray()[map.size() - 1];
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public static <T> T mapIndex( Map<?, T> map, int inx )
+	{
+		if ( inx < 0 || map.size() - inx < 1 )
+			throw new IndexOutOfBoundsException( "Map index out of bounds" );
+		if ( map.size() == 0 )
+			return null;
+		return ( T ) map.values().toArray()[inx];
+	}
+
+	@SafeVarargs
+	public static <T extends Object> void mergeMaps( Map<String, T> desc, Map<String, T>... maps ) throws Exception
+	{
+		if ( maps == null || maps.length == 0 )
+			return;
+
+		// It's important to note that each of these maps will overwrite the current map. If it's rewriteMap contains a key that exists in getMap, the ladder will be overwritten.
+
+		for ( Map<String, T> map : maps )
+		{
+			boolean hadConflicts = false;
+
+			for ( Map.Entry<String, T> entry : map.entrySet() )
+			{
+				if ( desc.containsKey( entry.getKey() ) )
+					hadConflicts = true;
+				desc.put( entry.getKey(), entry.getValue() );
+			}
+
+			if ( hadConflicts )
+			{
+				MapCollisionException e = new MapCollisionException();
+				ExceptionReport.throwExceptions( e );
+				// log.exceptions( e );
+			}
+		}
+	}
+
+	public static <T> Map<Integer, List<T>> paginate( List<T> list, int perPage )
+	{
+		return IntStream.iterate( 0, i -> i + perPage ).limit( ( list.size() + perPage - 1 ) / perPage ).boxed().collect( Collectors.toMap( i -> i / perPage, i -> list.subList( i, Math.min( i + perPage, list.size() ) ) ) );
+	}
+
+	public static <K, V> boolean removeAll( Map<K, V> map, Collection<?> collection )
+	{
+		int oldSize = map.size();
+		Iterator<?> it = collection.iterator();
+		while ( it.hasNext() )
+			map.remove( it.next() );
+		return oldSize != map.size();
+	}
+
+	public static <K, V> boolean retainAll( Map<K, V> map, Collection<?> collection )
+	{
+		int oldSize = map.size();
+		Iterator<K> it = map.keySet().iterator();
+		while ( it.hasNext() )
+			if ( !collection.contains( it.next() ) )
+				it.remove();
+		return oldSize != map.size();
+	}
+
+	private Maps()
+	{
+
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private static class MapBuilder<CK, CV>
+	{
+		final TreeMap<CK, CV> map;
+
+		private MapBuilder()
+		{
+			this.map = new TreeMap<>();
+		}
+
+		private MapBuilder( Map<CK, CV> map )
+		{
+			this.map = new TreeMap<>( map );
+		}
+
+		private MapBuilder( Map<?, ?> oldMap, CK key, CV value )
+		{
+			map = new TreeMap<>();
+			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
+				map.put( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
+			map.put( key, value );
+		}
+
+		private MapBuilder( Map<?, ?> oldMap, Map<CK, CV> newMap )
+		{
+			map = new TreeMap<>();
+			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
+				map.put( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
+			for ( Map.Entry<CK, CV> entry : newMap.entrySet() )
+				map.put( entry.getKey(), entry.getValue() );
+		}
+
+		public ConcurrentHashMap<CK, CV> concurrentHashMap()
+		{
+			return new ConcurrentHashMap<>( map );
+		}
+
+		public <K, V> MapBuilder<K, V> fill( @NotNull List<K> keys )
+		{
+			return new MapBuilder<>( map, keys.stream().collect( Collectors.toMap( v -> v, null ) ) );
+		}
+
+		public HashMap<CK, CV> hashMap()
+		{
+			return new HashMap<>( map );
+		}
+
+		public <V> MapBuilder<Integer, V> increment( @NotNull List<V> values )
+		{
+			AtomicInteger i = new AtomicInteger( 0 );
+			Map<Integer, V> newMap = new TreeMap<>();
+
+			for ( V value : values )
+			{
+				while ( map.containsKey( i.get() ) )
+					i.incrementAndGet();
+				newMap.put( i.get(), value );
+			}
+
+			return new MapBuilder<>( map, newMap );
+		}
+
+		public <K, V> MapBuilder<K, V> put( K key, V value )
+		{
+			return new MapBuilder<>( map, key, value );
+		}
+
+		public <K, V> MapBuilder<K, V> putAll( Map<K, V> values )
+		{
+			return new MapBuilder<>( map, values );
+		}
+
+		public <V> MapBuilder<String, V> putAll( Properties properties )
+		{
+			return new MapBuilder<>( map, properties.stringPropertyNames().stream().collect( Collectors.toMap( s -> s, s -> ( V ) properties.getProperty( s ) ) ) );
+		}
+
+		public <V> MapBuilder<String, V> putAll( Properties properties, Class<V> vClass )
+		{
+			return new MapBuilder<>( map, properties.stringPropertyNames().stream().collect( Collectors.toMap( s -> s, s -> Objs.castTo( properties.getProperty( s ), vClass ) ) ) );
+		}
+
+		public <K, V> MapBuilder<K, V> putAll( Properties properties, Class<K> kClass, Class<V> vClass )
+		{
+			return new MapBuilder<>( map, properties.stringPropertyNames().stream().collect( Collectors.toMap( s -> Objs.castTo( s, kClass ), s -> Objs.castTo( properties.getProperty( s ), vClass ) ) ) );
+		}
+
+		public Stream<Pair<CK, CV>> stream()
+		{
+			return map.entrySet().stream().map( e -> new Pair<>( e.getKey(), e.getValue() ) );
+		}
+
+		public TreeMap<CK, CV> treeMap()
+		{
+			return map;
+		}
+	}
+}

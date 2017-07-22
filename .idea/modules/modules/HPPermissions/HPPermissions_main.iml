@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":HPPermissions:main" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPPermissions" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="1.0.0-git+H341675b" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+<module external.linked.project.id=":HPPermissions:main" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPPermissions" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="1.0.0-git+H9c50cfe" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../../../modules/HPPermissions/build/classes/main" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../../modules/HPPermissions/src/main">
@@ -9,5 +9,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="HPLib_main" />
+    <orderEntry type="module" module-name="HPLog_main" />
+    <orderEntry type="module" module-name="HPConfig_main" />
+    <orderEntry type="module" module-name="HPEvent_main" />
+    <orderEntry type="module" module-name="HPServices_main" />
   </component>
 </module>

@@ -12,12 +12,12 @@ package io.amelia.foundation.injection;
 import com.chiorichan.utils.UtilHttp;
 import com.chiorichan.utils.UtilIO;
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.foundation.Deployment;
+import io.amelia.foundation.Kernel;
 import io.amelia.lang.EnumColor;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
-import io.amelia.helpers.LibIO;
-import io.amelia.logging.LogBuilder;
+import io.amelia.support.LibIO;
+import io.amelia.logcompat.LogBuilder;
 import org.apache.commons.lang3.Validate;
 
 import java.io.File;
@@ -47,7 +47,7 @@ public class Libraries implements LibrarySource
 	{
 
 
-		LIBRARY_DIR = Deployment.isDeployment() ? new File( "libraries" ) : ConfigRegistry.i().getDirectory( "lib", "libraries" );
+		LIBRARY_DIR = Kernel.isDeployment() ? new File( "libraries" ) : ConfigRegistry.i().getDirectory( "lib", "libraries" );
 
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 

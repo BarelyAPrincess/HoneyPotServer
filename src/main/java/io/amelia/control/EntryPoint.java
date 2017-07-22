@@ -1,30 +1,65 @@
 package io.amelia.control;
 
-import io.amelia.foundation.Deployment;
-import io.amelia.foundation.binding.BindingRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
+import io.amelia.foundation.Application;
+import io.amelia.foundation.Kernel;
+import io.amelia.lang.StartupException;
+import io.amelia.networking.NetworkLoader;
+import io.amelia.networking.packets.PacketRequestInfo;
+import io.amelia.networking.udp.UDPWorker;
 
 public class EntryPoint
 {
 	public static void main( String... args ) throws Exception
 	{
-		/* Statically sets the deployment libraries required to load the application */
-		List<String> libraries = new ArrayList<>();
-		libraries.add( "org.codehaus.groovy:groovy-all:2.4.7" );
-		libraries.add( "io.netty:netty-all:5.0.0.Alpha2" );
-		libraries.add( "com.google.javascript:closure-compiler:r2388" );
-		libraries.add( "org.mozilla:rhino:1.7R4" );
-		libraries.add( "com.asual.lesscss:lesscss-engine:1.3.0" );
-		ConfigRegistry.i().set( "deploy.libraries", libraries );
-
 		/* Prepare the environment by downloading and applying the builtin libraries required */
-		Deployment.prepare();
+		Kernel.prepare();
 
-		BindingRegistry.extend( Application.class, ServerKernel.class );
+		Kernel.setApplicationInterface( Application.class );
 
-		/* Finally load the application */
-		Deployment.start( new Application(), args );
+		Application app = Kernel.application();
+		UDPWorker udp = NetworkLoader.UDP().get();
+
+		app.onArg( "start", "Starts the daemon", () ->
+		{
+			if ( !udp.isStarted() )
+				throw new StartupException( "The UDP service failed to start for unknown reasons." );
+
+			Kernel.L.info( "Starting..." );
+			udp.sendPacket( new PacketRequestInfo(), r ->
+			{
+
+			} );
+		} );
+
+		app.onArg( "stop", "Stops the daemon", () ->
+		{
+			if ( !udp.isStarted() )
+				throw new StartupException( "The UDP service failed to start for unknown reasons." );
+
+			Kernel.L.info( "Stopping..." );
+			udp.sendPacket( new PacketRequestStop(), r ->
+			{
+
+			} );
+		} );
+
+		app.onArg( "status", "Prints the active daemon list", () ->
+		{
+			if ( !udp.isStarted() )
+				throw new StartupException( "The UDP service failed to start for unknown reasons." );
+
+			Kernel.L.info( "Waiting..." );
+			udp.sendPacket( new PacketRequestInfo(), r ->
+			{
+				L.info( "Found Instance: " + r.instanceId + " with IP " + r.ipAddress );
+			} );
+		} );
+
+		app.onEvent( ApplicationInitEvent.class, ( event ) ->
+		{
+			udp.start();
+		} );
+
+		app.start( args );
 	}
 }

@@ -13,32 +13,47 @@ public abstract class ApplicationException extends Exception implements IExcepti
 {
 	public static ApplicationException fatal( String message )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_ERROR, message );
+		return new Error( ReportingLevel.E_ERROR, message );
 	}
 
 	public static ApplicationException fatal( String message, Throwable cause )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_ERROR, message, cause );
+		return new Error( ReportingLevel.E_ERROR, message, cause );
 	}
 
 	public static ApplicationException fatal( Throwable cause )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_ERROR, cause );
+		return new Error( ReportingLevel.E_ERROR, cause );
 	}
 
-	public static ApplicationException notice( String message )
+	public static Ignorable ignorable( String message )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_NOTICE, message );
+		return new Ignorable( ReportingLevel.E_IGNORABLE, message );
+	}
+
+	public static Ignorable ignorable( Throwable cause )
+	{
+		return new Ignorable( ReportingLevel.E_IGNORABLE, cause );
+	}
+
+	public static Ignorable ignorable( String message, Throwable cause )
+	{
+		return new Ignorable( ReportingLevel.E_IGNORABLE, message, cause );
 	}
 
 	public static ApplicationException notice( String message, Throwable cause )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_NOTICE, message, cause );
+		return new Error( ReportingLevel.E_NOTICE, message, cause );
 	}
 
 	public static ApplicationException notice( Throwable cause )
 	{
-		return new DefaultApplicationException( ReportingLevel.E_NOTICE, cause );
+		return new Error( ReportingLevel.E_NOTICE, cause );
+	}
+
+	public static ApplicationException notice( String message )
+	{
+		return new Error( ReportingLevel.E_NOTICE, message );
 	}
 
 	protected final ReportingLevel level;
@@ -90,24 +105,24 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		return level;
 	}
 
-	public static class DefaultApplicationException extends ApplicationException
+	public static class Error extends ApplicationException
 	{
-		DefaultApplicationException( ReportingLevel level )
+		public Error( ReportingLevel level )
 		{
 			super( level );
 		}
 
-		DefaultApplicationException( ReportingLevel level, String message )
+		public Error( ReportingLevel level, String message )
 		{
 			super( level, message );
 		}
 
-		DefaultApplicationException( ReportingLevel level, String message, Throwable cause )
+		public Error( ReportingLevel level, String message, Throwable cause )
 		{
 			super( level, message, cause );
 		}
 
-		DefaultApplicationException( ReportingLevel level, Throwable cause )
+		public Error( ReportingLevel level, Throwable cause )
 		{
 			super( level, cause );
 		}
@@ -115,7 +130,99 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		@Override
 		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 		{
+			return null;
+		}
+	}
+
+	public static class Ignorable extends RuntimeException implements IException
+	{
+		private ReportingLevel level;
+
+		public Ignorable( ReportingLevel level )
+		{
+			this.level = level;
+		}
+
+		public Ignorable( ReportingLevel level, String message )
+		{
+			super( message );
+			this.level = level;
+		}
+
+		public Ignorable( ReportingLevel level, String message, Throwable cause )
+		{
+			super( message, cause );
+			this.level = level;
+		}
+
+		public Ignorable( ReportingLevel level, Throwable cause )
+		{
+			super( cause );
+			this.level = level;
+		}
+
+		@Override
+		public ReportingLevel reportingLevel()
+		{
 			return level;
+		}
+
+		@Override
+		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+		{
+			return null;
+		}
+
+		@Override
+		public boolean isIgnorable()
+		{
+			return level.isIgnorable();
+		}
+	}
+
+	public static class Runtime extends RuntimeException implements IException
+	{
+		protected final ReportingLevel level;
+
+		public Runtime( ReportingLevel level )
+		{
+			this.level = level;
+		}
+
+		public Runtime( ReportingLevel level, String message )
+		{
+			super( message );
+			this.level = level;
+		}
+
+		public Runtime( ReportingLevel level, String message, Throwable cause )
+		{
+			super( message, cause );
+			this.level = level;
+		}
+
+		public Runtime( ReportingLevel level, Throwable cause )
+		{
+			super( cause );
+			this.level = level;
+		}
+
+		@Override
+		public ReportingLevel reportingLevel()
+		{
+			return null;
+		}
+
+		@Override
+		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+		{
+			return null;
+		}
+
+		@Override
+		public boolean isIgnorable()
+		{
+			return level.isIgnorable();
 		}
 	}
 

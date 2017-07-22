@@ -9,11 +9,8 @@
  */
 package io.amelia.lang;
 
-import com.chiorichan.utils.UtilObjects;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.amelia.logging.LogBuilder;
-import org.apache.commons.lang3.Validate;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.support.Objs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 
@@ -29,7 +27,7 @@ import java.util.stream.Stream;
  */
 public class ExceptionReport
 {
-	private static final Map<Class<? extends Throwable>, ExceptionCallback> registered = Maps.newConcurrentMap();
+	private static final Map<Class<? extends Throwable>, ExceptionCallback> registered = new ConcurrentHashMap<>();
 
 	public static String printExceptions( IException... exceptions )
 	{
@@ -59,7 +57,7 @@ public class ExceptionReport
 
 	public static void throwExceptions( IException... exceptions ) throws Exception
 	{
-		List<IException> exps = Lists.newArrayList();
+		List<IException> exps = new ArrayList<>();
 
 		for ( IException e : exceptions )
 		{
@@ -132,7 +130,7 @@ public class ExceptionReport
 	 */
 	public final boolean handleException( Throwable cause, ExceptionContext context )
 	{
-		if ( UtilObjects.isNull( cause ) )
+		if ( Objs.isNull( cause ) )
 			return false;
 
 		/* Give an IException a chance to self-handle the exception report */
@@ -220,7 +218,7 @@ public class ExceptionReport
 	 */
 	public boolean hasException( Class<? extends Throwable> clz )
 	{
-		Validate.notNull( clz );
+		Objs.notNull( clz );
 
 		for ( IException e : caughtExceptions )
 		{

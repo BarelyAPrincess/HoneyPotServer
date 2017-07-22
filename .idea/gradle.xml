@@ -9,14 +9,19 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/modules/HPConfiguration" />
+            <option value="$PROJECT_DIR$/modules/HPConfig" />
+            <option value="$PROJECT_DIR$/modules/HPEvent" />
             <option value="$PROJECT_DIR$/modules/HPLib" />
+            <option value="$PROJECT_DIR$/modules/HPLog" />
             <option value="$PROJECT_DIR$/modules/HPNetworking" />
             <option value="$PROJECT_DIR$/modules/HPPermissions" />
             <option value="$PROJECT_DIR$/modules/HPPlugins" />
+            <option value="$PROJECT_DIR$/modules/HPScheduling" />
             <option value="$PROJECT_DIR$/modules/HPScripting" />
+            <option value="$PROJECT_DIR$/modules/HPServices" />
           </set>
         </option>
+        <option name="useAutoImport" value="true" />
       </GradleProjectSettings>
     </option>
   </component>
