@@ -15,7 +15,7 @@ import io.amelia.permission.PermissibleGroup;
 import io.amelia.permission.Permission;
 import io.amelia.permission.PermissionBackend;
 import io.amelia.permission.PermissionDefault;
-import io.amelia.permission.PermissionDispatcher;
+import io.amelia.permission.PermissionGuard;
 import io.amelia.permission.PermissionModelValue;
 import io.amelia.permission.PermissionType;
 import io.amelia.permission.References;
@@ -91,7 +91,7 @@ public class FileBackend extends PermissionBackend
 					ConfigurationSection groupSection = ( ConfigurationSection ) entry.getValue();
 
 					if ( groupSection.getBoolean( defaultGroupProperty, false ) )
-						return PermissionDispatcher.i().getGroup( entry.getKey() );
+						return PermissionGuard.i().getGroup( entry.getKey() );
 				}
 		}
 
@@ -153,7 +153,7 @@ public class FileBackend extends PermissionBackend
 		try
 		{
 			newPermissions.load( permissionsFile );
-			PermissionDispatcher.L.info( "Permissions file successfully loaded" );
+			PermissionGuard.L.info( "Permissions file successfully loaded" );
 			permissions = newPermissions;
 		}
 		catch ( FileNotFoundException e )
@@ -178,7 +178,7 @@ public class FileBackend extends PermissionBackend
 
 		if ( section != null )
 			for ( String s : section.getKeys( false ) )
-				PermissionDispatcher.getEntity( s );
+				PermissionGuard.getEntity( s );
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class FileBackend extends PermissionBackend
 
 		if ( section != null )
 			for ( String s : section.getKeys( false ) )
-				PermissionDispatcher.getGroup( s );
+				PermissionGuard.getGroup( s );
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class FileBackend extends PermissionBackend
 
 				if ( !ns.containsOnlyValidChars() )
 				{
-					PermissionDispatcher.L.warning( String.format( "The permission '%s' contains invalid characters, namespaces can only contain the characters a-z, 0-9, and _, this will be fixed automatically.", ns ) );
+					PermissionGuard.L.warning( String.format( "The permission '%s' contains invalid characters, namespaces can only contain the characters a-z, 0-9, and _, this will be fixed automatically.", ns ) );
 					ns.fixInvalidChars();
 					section.set( s, null );
 					section.set( ns.getLocalName(), node );
@@ -235,7 +235,7 @@ public class FileBackend extends PermissionBackend
 		catch ( PermissionException e )
 		{
 			e.printStackTrace();
-			PermissionDispatcher.getLogger().warning( e.getMessage() );
+			PermissionGuard.getLogger().warning( e.getMessage() );
 		}
 	}
 
@@ -283,7 +283,7 @@ public class FileBackend extends PermissionBackend
 
 		if ( !success )
 		{
-			PermissibleGroup pGroup = PermissionDispatcher.i().getGroup( group );
+			PermissibleGroup pGroup = PermissionGuard.i().getGroup( group );
 			pGroup.setDefault( true );
 			pGroup.save();
 		}

@@ -1,38 +1,17 @@
 package io.amelia.foundation.binding;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AppBindings
 {
-	private static BindingBase bindings = new BindingBase( "" );
+	private static BindingReference bindings = new BindingReference( "" );
 
-	public static Object call( String prefix, Map<String, Object> generics )
+	public static BindingReference getReference( String path )
 	{
-
-	}
-
-	public static Object call( Function function, Map<String, Object> generics )
-	{
-
-	}
-
-	private static void call( Supplier<String> testMethod )
-	{
-
-	}
-
-	public static BindingsLookup<?> lookup()
-	{
-		Object o = new Object();
-
-		call( o::toString );
-
-		return new BindingsLookup<>();
+		return bindings.getChild( path, true );
 	}
 
 	public static class BindingsLookup<T>
@@ -55,7 +34,7 @@ public class AppBindings
 			return child().collect( v -> aClass == null ? v.fetch() : v.fetch( aClass ) ).flatMap( s -> s ).map( o -> ( T ) o );
 		}
 
-		private BindingBase child()
+		private BindingReference child()
 		{
 			return ( key == null ? bindings : bindings.getChild( key, true ) );
 		}

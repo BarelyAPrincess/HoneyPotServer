@@ -9,6 +9,8 @@
  */
 package io.amelia.support;
 
+import com.sun.istack.internal.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,38 +22,24 @@ import java.util.stream.Collectors;
 
 public class Lists
 {
-	private Lists()
+	public static <V> V add( List<V> list, V obj )
 	{
+		Objs.notNull( list );
+		Objs.notNull( obj );
+
+		list.add( obj );
+		return obj;
 	}
 
-	public static boolean incremented( Set<String> values )
+	public static <V> V find( List<V> list, Function<? super V, Boolean> function )
 	{
-		Set<Integer> numbers = new TreeSet<>();
+		Objs.notNull( function );
 
-		int lowest = -1;
+		for ( V value : list )
+			if ( function.apply( value ) )
+				return value;
 
-		for ( String s : values )
-			try
-			{
-				int n = Integer.parseInt( s );
-				if ( lowest < 0 || n < lowest )
-					lowest = n;
-				numbers.add( n );
-			}
-			catch ( NumberFormatException e )
-			{
-				return false; // String is not a number, auto disqualified
-			}
-
-		for ( int i = lowest; i < numbers.size(); i++ )
-		{
-			if ( !numbers.contains( i ) )
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return null;
 	}
 
 	/**
@@ -84,17 +72,6 @@ public class Lists
 		return null;
 	}
 
-	public static <V> V find( List<V> list, Function<? super V, Boolean> function )
-	{
-		Objs.notNull( function );
-
-		for ( V value : list )
-			if ( function.apply( value ) )
-				return value;
-
-		return null;
-	}
-
 	public static <V> V findOrNew( List<V> list, Function<? super V, Boolean> function, V newValue )
 	{
 		V find = find( list, function );
@@ -106,13 +83,34 @@ public class Lists
 		return find;
 	}
 
-	public static <V> V add( List<V> list, V obj )
+	public static boolean incremented( Set<String> values )
 	{
-		Objs.notNull( list );
-		Objs.notNull( obj );
+		Set<Integer> numbers = new TreeSet<>();
 
-		list.add( obj );
-		return obj;
+		int lowest = -1;
+
+		for ( String s : values )
+			try
+			{
+				int n = Integer.parseInt( s );
+				if ( lowest < 0 || n < lowest )
+					lowest = n;
+				numbers.add( n );
+			}
+			catch ( NumberFormatException e )
+			{
+				return false; // String is not a number, auto disqualified
+			}
+
+		for ( int i = lowest; i < numbers.size(); i++ )
+		{
+			if ( !numbers.contains( i ) )
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static String joinQuery( Map<String, String> map )
@@ -124,5 +122,18 @@ public class Lists
 	public static <T> List<T> newArrayList( T... elements )
 	{
 		return new ArrayList<>( Arrays.asList( elements ) );
+	}
+
+	public static <T> List<T> subList( @NotNull List<T> list, int start, int length )
+	{
+		Objs.notNull( list );
+		Objs.notNegative( start );
+		Objs.notNegative( length );
+
+		return list.stream().skip( start ).limit( length ).collect( Collectors.toList() );
+	}
+
+	private Lists()
+	{
 	}
 }

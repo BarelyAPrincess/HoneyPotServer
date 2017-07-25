@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
 /**
  * Provides tick constants

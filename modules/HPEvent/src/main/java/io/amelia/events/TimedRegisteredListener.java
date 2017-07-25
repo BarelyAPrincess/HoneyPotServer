@@ -11,8 +11,11 @@ package io.amelia.events;
 
 import io.amelia.foundation.RegistrarBase;
 
-public class TimedRegisteredListener extends RegisteredListener
+@Deprecated
+public class TimedRegisteredListener // extends RegisteredListener
 {
+	// TODO merge the fundamental idea of tracking event timings into the main class
+
 	private static Class<?> getCommonSuperclass( Class<?> class1, Class<?> class2 )
 	{
 		while ( !class1.isAssignableFrom( class2 ) )
@@ -25,17 +28,17 @@ public class TimedRegisteredListener extends RegisteredListener
 	private boolean multiple = false;
 	private long totalTime;
 
-	public TimedRegisteredListener( final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final RegistrarBase context, final boolean listenCancelled )
+	public TimedRegisteredListener( final EventListener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final RegistrarBase context, final boolean listenCancelled )
 	{
-		super( pluginListener, eventExecutor, eventPriority, context, listenCancelled );
+		// super( pluginListener, eventExecutor, eventPriority, context, listenCancelled );
 	}
 
-	@Override
+	// @Override
 	public void callEvent( AbstractEvent event ) throws EventException
 	{
 		if ( event.isAsynchronous() )
 		{
-			super.callEvent( event );
+			// super.callEvent( event );
 			return;
 		}
 		count++;
@@ -48,7 +51,7 @@ public class TimedRegisteredListener extends RegisteredListener
 			eventClass = getCommonSuperclass( newEventClass, eventClass ).asSubclass( AbstractEvent.class );
 		}
 		long start = System.nanoTime();
-		super.callEvent( event );
+		// super.callEvent( event );
 		totalTime += System.nanoTime() - start;
 	}
 

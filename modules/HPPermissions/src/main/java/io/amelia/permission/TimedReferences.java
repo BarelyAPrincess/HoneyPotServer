@@ -9,7 +9,7 @@
  */
 package io.amelia.permission;
 
-import io.amelia.scheduling.Timings;
+import io.amelia.tasks.Timings;
 
 public class TimedReferences extends References
 {

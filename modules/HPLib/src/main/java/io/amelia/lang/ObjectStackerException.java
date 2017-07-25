@@ -1,6 +1,6 @@
 package io.amelia.lang;
 
-import io.amelia.support.ObjectStackerBase;
+import io.amelia.support.ObjectStackerWithValue;
 
 public class ObjectStackerException
 {
@@ -11,27 +11,27 @@ public class ObjectStackerException
 
 	public static abstract class Error extends UtilException.Error
 	{
-		protected final ObjectStackerBase node;
+		protected final ObjectStackerWithValue node;
 
-		public <T extends ObjectStackerBase> Error( T node )
+		public <T extends ObjectStackerWithValue> Error( T node )
 		{
 			super();
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Error( T node, String message )
+		public <T extends ObjectStackerWithValue> Error( T node, String message )
 		{
 			super( message );
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Error( T node, String message, Throwable cause )
+		public <T extends ObjectStackerWithValue> Error( T node, String message, Throwable cause )
 		{
 			super( message, cause );
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Error( T node, Throwable cause )
+		public <T extends ObjectStackerWithValue> Error( T node, Throwable cause )
 		{
 			super( cause );
 			this.node = node;
@@ -40,27 +40,27 @@ public class ObjectStackerException
 
 	public static abstract class Ignorable extends UtilException.Ignorable
 	{
-		protected final ObjectStackerBase node;
+		protected final ObjectStackerWithValue node;
 
-		public <T extends ObjectStackerBase> Ignorable( T node )
+		public <T extends ObjectStackerWithValue> Ignorable( T node )
 		{
 			super();
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Ignorable( T node, String message )
+		public <T extends ObjectStackerWithValue> Ignorable( T node, String message )
 		{
 			super( message );
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Ignorable( T node, String message, Throwable cause )
+		public <T extends ObjectStackerWithValue> Ignorable( T node, String message, Throwable cause )
 		{
 			super( message, cause );
 			this.node = node;
 		}
 
-		public <T extends ObjectStackerBase> Ignorable( T node, Throwable cause )
+		public <T extends ObjectStackerWithValue> Ignorable( T node, Throwable cause )
 		{
 			super( cause );
 			this.node = node;

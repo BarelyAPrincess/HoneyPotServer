@@ -7,19 +7,18 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
-
-import io.amelia.foundation.Registrar;
+import io.amelia.foundation.RegistrarBase;
 
 class AsyncTaskDebugger
 {
-	private final Class<? extends Runnable> clazz;
-	private final Registrar creator;
+	private final Class<? extends CallableTask> clazz;
+	private final RegistrarBase creator;
 	private final int expiry;
 	private AsyncTaskDebugger next = null;
 
-	AsyncTaskDebugger( final int expiry, final Registrar creator, final Class<? extends Runnable> clazz )
+	AsyncTaskDebugger( final int expiry, final RegistrarBase creator, final Class<? extends CallableTask> clazz )
 	{
 		this.expiry = expiry;
 		this.creator = creator;

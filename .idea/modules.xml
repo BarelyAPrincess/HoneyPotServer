@@ -23,15 +23,15 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" group="HPPlugins" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" group="HPPlugins" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" group="HPPlugins" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling.iml" group="HPScheduling" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling_main.iml" group="HPScheduling" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScheduling/HPScheduling_test.iml" group="HPScheduling" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices.iml" group="HPServices" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_main.iml" group="HPServices" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_test.iml" group="HPServices" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" group="HPTasks" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" group="HPTasks" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" group="HPTasks" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" group="HoneyPotServer" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" group="HoneyPotServer" />

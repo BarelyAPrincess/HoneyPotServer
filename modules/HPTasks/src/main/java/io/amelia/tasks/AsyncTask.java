@@ -7,9 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
-import io.amelia.foundation.Registrar;
+import io.amelia.foundation.RegistrarBase;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -18,12 +18,23 @@ import java.util.Map;
 class AsyncTask extends Task
 {
 	private final Map<Integer, Task> runners;
-	private final LinkedList<Worker> workers = new LinkedList<Worker>();
+	private final LinkedList<Worker> workers = new LinkedList<>();
 
-	AsyncTask( final Map<Integer, Task> runners, final Registrar creator, final Runnable task, final int id, final long delay )
+	AsyncTask( final Map<Integer, Task> runners, final RegistrarBase creator, final CallableTask task, final int id, final long delay )
 	{
 		super( creator, task, id, delay );
 		this.runners = runners;
+	}
+
+	LinkedList<Worker> getWorkers()
+	{
+		return workers;
+	}
+
+	@Override
+	public boolean isSync()
+	{
+		return false;
 	}
 
 	@Override
@@ -34,17 +45,9 @@ class AsyncTask extends Task
 			// Synchronizing here prevents race condition for a completing task
 			setPeriod( -2L );
 			if ( workers.isEmpty() )
-			{
 				runners.remove( getTaskId() );
-			}
 		}
 		return true;
-	}
-
-	@Override
-	public boolean isSync()
-	{
-		return false;
 	}
 
 	@Override
@@ -62,15 +65,15 @@ class AsyncTask extends Task
 			workers.add( new Worker()
 			{
 				@Override
-				public int getTaskId()
+				public RegistrarBase getRegistrar()
 				{
-					return AsyncTask.this.getTaskId();
+					return AsyncTask.this.getRegistrar();
 				}
 
 				@Override
-				public Registrar getOwner()
+				public int getTaskId()
 				{
-					return AsyncTask.this.getOwner();
+					return AsyncTask.this.getTaskId();
 				}
 
 				@Override
@@ -110,7 +113,7 @@ class AsyncTask extends Task
 					}
 					if ( !removed )
 					{
-						throw new IllegalStateException( String.format( "Unable to remove worker %s on task %s for %s", thread.getName(), getTaskId(), getOwner().getName() ), thrown ); // We
+						throw new IllegalStateException( String.format( "Unable to remove worker %s on task %s for %s", thread.getName(), getTaskId(), getRegistrar().getName() ), thrown ); // We
 						// don't want to lose the original exception, if any
 					}
 				}
@@ -125,10 +128,5 @@ class AsyncTask extends Task
 				}
 			}
 		}
-	}
-
-	LinkedList<Worker> getWorkers()
-	{
-		return workers;
 	}
 }

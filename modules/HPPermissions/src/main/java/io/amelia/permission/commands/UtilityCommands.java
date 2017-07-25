@@ -14,7 +14,7 @@ import io.amelia.lang.EnumColor;
 import io.amelia.permission.PermissibleEntity;
 import io.amelia.permission.PermissibleGroup;
 import io.amelia.permission.PermissionBackend;
-import io.amelia.permission.PermissionDispatcher;
+import io.amelia.permission.PermissionGuard;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,7 +49,7 @@ public class UtilityCommands extends PermissionBaseCommand
 			switch ( args.get( "type" ) )
 			{
 				case "entity":
-					PermissibleEntity entity = PermissionDispatcher.i().getEntity( args.get( "id" ) );
+					PermissibleEntity entity = PermissionGuard.i().getEntity( args.get( "id" ) );
 					if ( entity == null )
 						sender.sendMessage( EnumColor.RED + "We could not find an entity with id `" + args.get( "id" ) + "`!" );
 					else
@@ -59,7 +59,7 @@ public class UtilityCommands extends PermissionBaseCommand
 					}
 					break;
 				case "group":
-					PermissibleGroup group = PermissionDispatcher.getGroup( args.get( "id" ) );
+					PermissibleGroup group = PermissionGuard.getGroup( args.get( "id" ) );
 					if ( group == null )
 						sender.sendMessage( EnumColor.RED + "We could not find a group with id `" + args.get( "id" ) + "`!" );
 					else
@@ -69,7 +69,7 @@ public class UtilityCommands extends PermissionBaseCommand
 					}
 					break;
 				case "io/amelia/permission":
-					Permission perm = PermissionDispatcher.i().getNode( args.get( "id" ) );
+					Permission perm = PermissionGuard.i().getNode( args.get( "id" ) );
 					if ( perm == null )
 						sender.sendMessage( EnumColor.RED + "We could not find a permission with namespace `" + args.get( "id" ) + "`!" );
 					else
@@ -81,12 +81,12 @@ public class UtilityCommands extends PermissionBaseCommand
 			}
 		else
 		{
-			PermissionDispatcher.i().saveData();
+			PermissionGuard.i().saveData();
 			sender.sendMessage( EnumColor.AQUA + "Wonderful news, we successfully committed any changes to the backend!" );
 		}
 
 		// Force backend to finally flush changes
-		PermissionDispatcher.getBackend().commit();
+		PermissionGuard.getBackend().commit();
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -148,7 +148,7 @@ public class UtilityCommands extends PermissionBaseCommand
 		catch ( Throwable t )
 		{
 			sender.sendMessage( EnumColor.RED + "Error: " + t.getMessage() );
-			PermissionDispatcher.getLogger().severe( "Error: " + t.getMessage(), t );
+			PermissionGuard.getLogger().severe( "Error: " + t.getMessage(), t );
 			// t.printStackTrace();
 		}
 	}
@@ -156,7 +156,7 @@ public class UtilityCommands extends PermissionBaseCommand
 	@CommandHandler( name = "pex", syntax = "backend", permission = "permissions.manage.backend", description = "Print currently used backend" )
 	public void getBackend( TerminalEntity sender, Map<String, String> args )
 	{
-		sender.sendMessage( "Current backend: " + PermissionDispatcher.i().getBackend() );
+		sender.sendMessage( "Current backend: " + PermissionGuard.i().getBackend() );
 	}
 
 	@CommandHandler( name = "pex", syntax = "hierarchy [ref]", permission = "permissions.manage.users", description = "Print complete user/group hierarchy" )
@@ -171,11 +171,11 @@ public class UtilityCommands extends PermissionBaseCommand
 	{
 		if ( args.containsKey( "id" ) )
 		{
-			PermissibleEntity entity = PermissionDispatcher.i().getEntity( args.get( "id" ), false );
+			PermissibleEntity entity = PermissionGuard.i().getEntity( args.get( "id" ), false );
 
 			if ( entity == null )
 			{
-				PermissibleGroup group = PermissionDispatcher.i().getGroup( args.get( "id" ), false );
+				PermissibleGroup group = PermissionGuard.i().getGroup( args.get( "id" ), false );
 
 				if ( group == null )
 					sender.sendMessage( EnumColor.RED + "We could not find anything with id `" + args.get( "id" ) + "`!" );
@@ -194,13 +194,13 @@ public class UtilityCommands extends PermissionBaseCommand
 		else
 			try
 			{
-				PermissionDispatcher.i().reload();
+				PermissionGuard.i().reload();
 				sender.sendMessage( EnumColor.AQUA + "Wonderful news, we successfully reloaded all entities and groups from the backend!" );
 			}
 			catch ( PermissionBackendException e )
 			{
 				sender.sendMessage( EnumColor.RED + "Failed to reload! Check configuration!\n" + EnumColor.RED + "Error (see console for full): " + e.getMessage() );
-				PermissionDispatcher.getLogger().log( Level.WARNING, "Failed to reload permissions when " + sender.getDisplayName() + " ran `pex reload`", e );
+				PermissionGuard.getLogger().log( Level.WARNING, "Failed to reload permissions when " + sender.getDisplayName() + " ran `pex reload`", e );
 			}
 	}
 
@@ -222,7 +222,7 @@ public class UtilityCommands extends PermissionBaseCommand
 
 		try
 		{
-			PermissionDispatcher.i().setBackend( args.get( "backend" ) );
+			PermissionGuard.i().setBackend( args.get( "backend" ) );
 			sender.sendMessage( EnumColor.WHITE + "Permission backend changed!" );
 		}
 		catch ( RuntimeException e )
@@ -238,7 +238,7 @@ public class UtilityCommands extends PermissionBaseCommand
 		catch ( PermissionBackendException e )
 		{
 			sender.sendMessage( EnumColor.RED + "Backend initialization failed! Fix your configuration!\n" + EnumColor.RED + "Error (see console for more): " + e.getMessage() );
-			PermissionDispatcher.getLogger().log( Level.WARNING, "Backend initialization failed when " + sender.getDisplayName() + " was initializing " + args.get( "backend" ), e );
+			PermissionGuard.getLogger().log( Level.WARNING, "Backend initialization failed when " + sender.getDisplayName() + " was initializing " + args.get( "backend" ), e );
 		}
 	}
 
@@ -282,11 +282,11 @@ public class UtilityCommands extends PermissionBaseCommand
 	@CommandHandler( name = "pex", syntax = "toggle debug", permission = "permissions.debug", description = "Enable/disable debug mode" )
 	public void toggleFeature( TerminalEntity sender, Map<String, String> args )
 	{
-		PermissionDispatcher.setDebug( !PermissionDispatcher.isDebug() );
+		PermissionGuard.setDebug( !PermissionGuard.isDebug() );
 
-		String debugStatusMessage = "[Permissions] Debug mode " + ( PermissionDispatcher.isDebug() ? "enabled" : "disabled" );
+		String debugStatusMessage = "[Permissions] Debug mode " + ( PermissionGuard.isDebug() ? "enabled" : "disabled" );
 
 		sender.sendMessage( debugStatusMessage );
-		PermissionDispatcher.getLogger().warning( debugStatusMessage );
+		PermissionGuard.getLogger().warning( debugStatusMessage );
 	}
 }

@@ -553,9 +553,20 @@ public class Objs
 		notFalse( bool, "Object is false" );
 	}
 
-	public static <T> void notFalse( T bool, String message, String... objects )
+	public static <T> void notFalse( T bool, String message, Object... objects )
 	{
 		if ( !castToBoolean( bool ) )
+			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+	}
+
+	public static void notNegative( Number number )
+	{
+		notNegative( number, "Number must be positive." );
+	}
+
+	public static void notNegative( Number number, String message, Object... objects )
+	{
+		if ( number.longValue() < 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
 	}
 
@@ -568,6 +579,28 @@ public class Objs
 	{
 		if ( object == null )
 			throw new NullPointerException( values == null || values.length == 0 ? message : String.format( message, values ) );
+	}
+
+	public static void notPositive( Number number )
+	{
+		notNegative( number, "Number must be negative." );
+	}
+
+	public static void notPostive( Number number, String message, Object... objects )
+	{
+		if ( number.longValue() > 0 )
+			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+	}
+
+	public static void notZero( Number number )
+	{
+		notNegative( number, "Number must be positive or negative." );
+	}
+
+	public static void notZero( Number number, String message, Object... objects )
+	{
+		if ( number.longValue() == 0 )
+			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
 	}
 
 	public static int safeLongToInt( long l )

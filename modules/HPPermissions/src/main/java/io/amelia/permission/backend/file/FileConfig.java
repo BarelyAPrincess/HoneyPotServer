@@ -9,7 +9,7 @@
  */
 package io.amelia.permission.backend.file;
 
-import io.amelia.permission.PermissionDispatcher;
+import io.amelia.permission.PermissionGuard;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,7 +58,7 @@ public class FileConfig extends YamlConfiguration
 		}
 		catch ( IOException e )
 		{
-			PermissionDispatcher.L.severe( "Error during saving permissions file: " + e.getMessage() );
+			PermissionGuard.L.severe( "Error during saving permissions file: " + e.getMessage() );
 		}
 	}
 }

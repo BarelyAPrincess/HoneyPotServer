@@ -43,8 +43,8 @@ public abstract class PermissibleEntity
 
 	public PermissibleEntity( String id )
 	{
-		if ( PermissionDispatcher.isDebug() )
-			PermissionDispatcher.L.info( String.format( "%sThe %s `%s` has been created.", EnumColor.YELLOW, isGroup() ? "group" : "entity", id ) );
+		if ( PermissionGuard.isDebug() )
+			PermissionGuard.L.info( String.format( "%sThe %s `%s` has been created.", EnumColor.YELLOW, isGroup() ? "group" : "entity", id ) );
 
 		this.id = id;
 		reload();
@@ -67,7 +67,7 @@ public abstract class PermissibleEntity
 		removeTimedGroup( group, ref );
 
 		if ( isDebug() )
-			PermissionDispatcher.L.info( String.format( "%sThe group `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, group.getId(), refs.join(), getId() ) );
+			PermissionGuard.L.info( String.format( "%sThe group `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, group.getId(), refs.join(), getId() ) );
 	}
 
 	protected final void addPermission( ChildPermission perm, References refs )
@@ -77,7 +77,7 @@ public abstract class PermissibleEntity
 		if ( checkPermission( perm.getPermission() ).isAssigned() )
 		{
 			if ( isDebug() )
-				PermissionDispatcher.L.info( String.format( "%sThe permission `%s` with reference `%s` is already attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs == null ? "null" : refs.join(), getId() ) );
+				PermissionGuard.L.info( String.format( "%sThe permission `%s` with reference `%s` is already attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs == null ? "null" : refs.join(), getId() ) );
 			return;
 		}
 
@@ -90,7 +90,7 @@ public abstract class PermissibleEntity
 		permissions.put( perm, refs );
 
 		if ( isDebug() )
-			PermissionDispatcher.L.info( String.format( "%sThe permission `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs.join(), getId() ) );
+			PermissionGuard.L.info( String.format( "%sThe permission `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs.join(), getId() ) );
 
 		recalculatePermissions();
 	}
@@ -102,7 +102,7 @@ public abstract class PermissibleEntity
 
 	public void addPermission( String node, Object val, References refs )
 	{
-		Permission perm = PermissionDispatcher.createNode( node );
+		Permission perm = PermissionGuard.createNode( node );
 		if ( perm == null )
 			throw new PermissionException( String.format( "The permission node %s is non-existent, you must create it first.", node ) );
 		addPermission( perm, val, refs );
@@ -119,7 +119,7 @@ public abstract class PermissibleEntity
 	{
 		permissions.put( perm, refs );
 		if ( isDebug() )
-			PermissionDispatcher.L.info( String.format( "%sThe permission `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs.toString(), getId() ) );
+			PermissionGuard.L.info( String.format( "%sThe permission `%s` with reference `%s` was attached to entity `%s`.", EnumColor.YELLOW, perm.getPermission().getNamespace(), refs.toString(), getId() ) );
 		recalculatePermissions();
 	}
 
@@ -138,7 +138,7 @@ public abstract class PermissibleEntity
 
 	public void addTimedPermission( String perm, Object val, References refs, int lifeTime )
 	{
-		addTimedPermission( PermissionDispatcher.createNode( perm ), val, refs, lifeTime );
+		addTimedPermission( PermissionGuard.createNode( perm ), val, refs, lifeTime );
 	}
 
 	public PermissionResult checkPermission( Permission perm )
@@ -167,7 +167,7 @@ public abstract class PermissibleEntity
 		cachedResults.put( perm.getNamespace() + "-" + refs.hash(), result );
 
 		if ( isDebug() && !perm.getNamespace().equalsIgnoreCase( PermissionDefault.OP.getNamespace() ) )
-			PermissionDispatcher.L.info( EnumColor.YELLOW + "Entity `" + getId() + "` checked for permission `" + perm.getNamespace() + "`" + ( refs.isEmpty() ? "" : " with reference `" + refs.toString() + "`" ) + " with result `" + result + "`" );
+			PermissionGuard.L.info( EnumColor.YELLOW + "Entity `" + getId() + "` checked for permission `" + perm.getNamespace() + "`" + ( refs.isEmpty() ? "" : " with reference `" + refs.toString() + "`" ) + " with result `" + result + "`" );
 
 		return result;
 	}
@@ -179,8 +179,8 @@ public abstract class PermissibleEntity
 
 	public PermissionResult checkPermission( String perm, References ref )
 	{
-		perm = PermissionDispatcher.parseNode( perm );
-		Permission permission = PermissionDispatcher.createNode( perm );
+		perm = PermissionGuard.parseNode( perm );
+		Permission permission = PermissionGuard.createNode( perm );
 		PermissionResult result = checkPermission( permission, ref );
 
 		return result;
@@ -340,7 +340,7 @@ public abstract class PermissibleEntity
 	private String getMatchingExpression( Collection<Permission> permissions, String permission )
 	{
 		for ( Permission exp : permissions )
-			if ( PermissionDispatcher.getMatcher().isMatches( exp, permission ) )
+			if ( PermissionGuard.getMatcher().isMatches( exp, permission ) )
 				return exp.getNamespace();
 		return null;
 	}
@@ -481,7 +481,7 @@ public abstract class PermissibleEntity
 	public boolean isBanned()
 	{
 		// You can't ban an OP entity, unless OPs are disabled.
-		if ( PermissionDispatcher.allowOps && isOp() )
+		if ( PermissionGuard.allowOps && isOp() )
 			return false;
 
 		PermissionResult result = checkPermission( PermissionDefault.BANNED.getNode() );
@@ -505,7 +505,7 @@ public abstract class PermissibleEntity
 
 	public boolean isDebug()
 	{
-		return debugMode || PermissionDispatcher.isDebug();
+		return debugMode || PermissionGuard.isDebug();
 	}
 
 	public void setDebug( boolean debug )
@@ -549,7 +549,7 @@ public abstract class PermissibleEntity
 		if ( isBanned() )
 			return false;
 
-		if ( !PermissionDispatcher.hasWhitelist() || PermissionDispatcher.allowOps && isOp() || isAdminOnly() || isNoneEntity() )
+		if ( !PermissionGuard.hasWhitelist() || PermissionGuard.allowOps && isOp() || isAdminOnly() || isNoneEntity() )
 			return true;
 
 		PermissionResult result = checkPermission( PermissionDefault.WHITELISTED.getNode() );
@@ -595,7 +595,7 @@ public abstract class PermissibleEntity
 			return;
 
 		if ( isDebug() )
-			PermissionDispatcher.L.info( EnumColor.YELLOW + "Entity '" + getId() + "' being reloaded from backend" );
+			PermissionGuard.L.info( EnumColor.YELLOW + "Entity '" + getId() + "' being reloaded from backend" );
 
 		reloadGroups();
 		reloadPermissions();
@@ -631,7 +631,7 @@ public abstract class PermissibleEntity
 
 	public void removeGroup( String group, References refs )
 	{
-		removeGroup( PermissionDispatcher.getGroup( group ), refs );
+		removeGroup( PermissionGuard.getGroup( group ), refs );
 	}
 
 	public final void removePermission( Permission perm, References refs )
@@ -644,7 +644,7 @@ public abstract class PermissibleEntity
 
 	public void removePermission( String permission, References refs )
 	{
-		removePermission( PermissionDispatcher.createNode( permission ), refs );
+		removePermission( PermissionGuard.createNode( permission ), refs );
 	}
 
 	private boolean removeRefs( @NotNull References current, @NotNull References refs )
@@ -678,7 +678,7 @@ public abstract class PermissibleEntity
 
 	public void removeTimedPermission( String perm, References refs )
 	{
-		removeTimedPermission( PermissionDispatcher.createNode( perm ), refs );
+		removeTimedPermission( PermissionGuard.createNode( perm ), refs );
 	}
 
 	/**

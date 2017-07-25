@@ -64,18 +64,18 @@ public enum PermissionDefault
 
 	public Permission getNode()
 	{
-		Permission result = PermissionDispatcher.getNode( namespace );
+		Permission result = PermissionGuard.getNode( namespace );
 
 		if ( result == null )
 		{
 			if ( this == EVERYBODY )
 			{
-				result = PermissionDispatcher.createNode( getNamespace(), PermissionType.BOOL );
+				result = PermissionGuard.createNode( getNamespace(), PermissionType.BOOL );
 				result.getModel().setValue( true );
 				result.getModel().setValueDefault( true );
 			}
 			else
-				result = PermissionDispatcher.createNode( getNamespace() );
+				result = PermissionGuard.createNode( getNamespace() );
 
 			switch ( this )
 			{

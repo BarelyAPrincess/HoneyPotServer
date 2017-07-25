@@ -71,7 +71,7 @@ public class MessageDispatch
 	 */
 	public static void sendMessage( Object... objs ) throws MessageException
 	{
-		List<MessageReceiver> receivers = AppBindings.lookup().filterKey( BINDING_PREFIX ).filterClass( MessageReceiver.class ).asStream().filter( MessageReceiver::validate ).collect( Collectors.toList() );
+		List<MessageReceiver> receivers = AppBindings.getReference( BINDING_PREFIX ).fetch( MessageReceiver.class ).filter( MessageReceiver::validate ).collect( Collectors.toList() );
 		sendMessage( MessageBuilder.msg( objs ).to( receivers ) );
 	}
 }

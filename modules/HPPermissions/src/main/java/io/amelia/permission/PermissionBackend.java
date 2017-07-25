@@ -36,7 +36,7 @@ public abstract class PermissionBackend
 	{
 		try
 		{
-			PermissionDispatcher.L.info( "Initializing " + backendClass.getName() + " backend" );
+			PermissionGuard.L.info( "Initializing " + backendClass.getName() + " backend" );
 			Constructor<? extends PermissionBackend> constructor = backendClass.getConstructor();
 			return constructor.newInstance();
 		}
@@ -129,8 +129,8 @@ public abstract class PermissionBackend
 	public static PermissionBackend getBackendWithException( String backendName ) throws ClassNotFoundException
 	{
 		Class<? extends PermissionBackend> backendClass = getBackendClass( backendName );
-		if ( PermissionDispatcher.getBackend() != null && PermissionDispatcher.getBackend().getClass() == backendClass )
-			return PermissionDispatcher.getBackend();
+		if ( PermissionGuard.getBackend() != null && PermissionGuard.getBackend().getClass() == backendClass )
+			return PermissionGuard.getBackend();
 		else
 			return getBackend( backendClass );
 	}
@@ -153,7 +153,7 @@ public abstract class PermissionBackend
 		}
 		catch ( ClassNotFoundException e )
 		{
-			PermissionDispatcher.L.warning( "Specified backend \"" + backendName + "\" was not found." );
+			PermissionGuard.L.warning( "Specified backend \"" + backendName + "\" was not found." );
 
 			if ( fallBackBackend == null )
 				throw e;
@@ -178,7 +178,7 @@ public abstract class PermissionBackend
 
 		registeredAliases.put( alias, backendClass );
 
-		PermissionDispatcher.L.fine( alias + " backend registered!" );
+		PermissionGuard.L.fine( alias + " backend registered!" );
 	}
 
 	public abstract void commit();

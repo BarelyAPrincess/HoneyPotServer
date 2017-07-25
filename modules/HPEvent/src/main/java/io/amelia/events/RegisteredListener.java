@@ -11,21 +11,19 @@ package io.amelia.events;
 
 import io.amelia.foundation.RegistrarBase;
 
-public class RegisteredListener
-{
-	private final RegistrarBase context;
-	private final EventExecutor executor;
-	private final boolean ignoreCancelled;
-	private final Listener listener;
-	private final EventPriority priority;
+import java.util.function.Consumer;
 
-	public RegisteredListener( final Listener listener, final EventExecutor executor, final EventPriority priority, final RegistrarBase context, final boolean ignoreCancelled )
+public final class RegisteredListener<E extends AbstractEvent>
+{
+	private final Consumer<E> listener;
+	private final EventPriority priority;
+	private final RegistrarBase registrar;
+
+	public RegisteredListener( final RegistrarBase registrar, final EventPriority priority, final Consumer<E> listener )
 	{
-		this.listener = listener;
+		this.registrar = registrar;
 		this.priority = priority;
-		this.context = context;
-		this.executor = executor;
-		this.ignoreCancelled = ignoreCancelled;
+		this.listener = listener;
 	}
 
 	/**
@@ -34,37 +32,17 @@ public class RegisteredListener
 	 * @param event The event
 	 * @throws EventException If an event handler throws an exception.
 	 */
-	public void callEvent( final AbstractEvent event ) throws EventException
+	public void callEvent( final E event ) throws EventException
 	{
-		if ( event instanceof Cancellable )
-			if ( ( ( Cancellable ) event ).isCancelled() && isIgnoringCancelled() )
+		if ( priority != EventPriority.MONITOR )
+		{
+			if ( event instanceof Cancellable && ( ( Cancellable ) event ).isCancelled() )
 				return;
-
-		if ( event instanceof Conditional )
-			if ( priority != EventPriority.MONITOR && !( ( Conditional ) event ).conditional( this ) )
+			if ( !event.onEventConditional( this ) )
 				return;
+		}
 
-		executor.execute( listener, event );
-	}
-
-	/**
-	 * Gets the plugin for this registration
-	 *
-	 * @return Registered Plugin
-	 */
-	public RegistrarBase getContext()
-	{
-		return context;
-	}
-
-	/**
-	 * Gets the listener for this registration
-	 *
-	 * @return Registered Listener
-	 */
-	public Listener getListener()
-	{
-		return listener;
+		listener.accept( event );
 	}
 
 	/**
@@ -78,12 +56,12 @@ public class RegisteredListener
 	}
 
 	/**
-	 * Whether this listener accepts cancelled events
+	 * Gets the plugin for this registration
 	 *
-	 * @return True when ignoring cancelled events
+	 * @return Registered Plugin
 	 */
-	public boolean isIgnoringCancelled()
+	public RegistrarBase getRegistrar()
 	{
-		return ignoreCancelled;
+		return registrar;
 	}
 }

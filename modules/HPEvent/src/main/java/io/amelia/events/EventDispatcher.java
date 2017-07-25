@@ -9,11 +9,8 @@
  */
 package io.amelia.events;
 
-import io.amelia.config.ConfigRegistry;
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.NaggableRegistrar;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.lang.AuthorNagException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.annotation.DeprecatedDetail;
 import io.amelia.logcompat.LogBuilder;
@@ -22,11 +19,12 @@ import io.amelia.support.Objs;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class EventDispatcher
@@ -36,7 +34,6 @@ public class EventDispatcher
 	private static Map<Class<? extends AbstractEvent>, EventHandlers> handlers = new ConcurrentHashMap<>();
 
 	private static Object lock = new Object();
-	private static boolean useTimings = ConfigRegistry.getBoolean( "plugins.useTimings" );
 
 	/**
 	 * Calls an event with the given details.<br>
@@ -84,138 +81,41 @@ public class EventDispatcher
 		return event;
 	}
 
-	public static Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> createRegisteredListeners( Listener listener, final RegistrarBase registrar )
-	{
-		Objs.notNull( registrar, "Registrar can not be null" );
-		Objs.notNull( listener, "Listener can not be null" );
-
-		Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> ret = new HashMap<>();
-		Set<Method> methods;
-		try
-		{
-			Method[] publicMethods = listener.getClass().getMethods();
-			methods = new HashSet<>( publicMethods.length, Float.MAX_VALUE );
-			for ( Method method : publicMethods )
-				methods.add( method );
-			for ( Method method : listener.getClass().getDeclaredMethods() )
-				methods.add( method );
-		}
-		catch ( NoClassDefFoundError e )
-		{
-			L.severe( String.format( "Plugin %s has failed to register events for %s because %s does not exist.", registrar.getName(), listener.getClass(), e.getMessage() ) );
-			return ret;
-		}
-
-		for ( final Method method : methods )
-		{
-			final EventHandler eh = method.getAnnotation( EventHandler.class );
-			if ( eh == null )
-				continue;
-			final Class<?> checkClass;
-			if ( method.getParameterTypes().length != 1 || !AbstractEvent.class.isAssignableFrom( checkClass = method.getParameterTypes()[0] ) )
-			{
-				L.severe( registrar.getName() + " attempted to register an invalid EventHandler method signature \"" + method.toGenericString() + "\" in " + listener.getClass() );
-				continue;
-			}
-			final Class<? extends AbstractEvent> eventClass = checkClass.asSubclass( AbstractEvent.class );
-			method.setAccessible( true );
-			Set<RegisteredListener> eventSet = ret.get( eventClass );
-			if ( eventSet == null )
-			{
-				eventSet = new HashSet<>();
-				ret.put( eventClass, eventSet );
-			}
-
-			if ( ReportingLevel.E_DEPRECATED.isEnabled() )
-				for ( Class<?> clazz = eventClass; AbstractEvent.class.isAssignableFrom( clazz ); clazz = clazz.getSuperclass() )
-				{
-					if ( clazz.isAnnotationPresent( DeprecatedDetail.class ) )
-					{
-						DeprecatedDetail deprecated = clazz.getAnnotation( DeprecatedDetail.class );
-
-						L.warning( String.format( "The creator '%s' has registered a listener for %s on method '%s', but the event is Deprecated for reason '%s'.", registrar.getName(), clazz.getName(), method.toGenericString(), deprecated.reason() ) );
-						break;
-					}
-
-					if ( clazz.isAnnotationPresent( Deprecated.class ) )
-					{
-						L.warning( String.format( "The creator '%s' has registered a listener for %s on method '%s', but the event is Deprecated!", registrar.getName(), clazz.getName(), method.toGenericString() ) );
-						break;
-					}
-				}
-
-			EventExecutor executor = ( listener1, event ) ->
-			{
-				try
-				{
-					if ( !eventClass.isAssignableFrom( event.getClass() ) )
-						return;
-					method.invoke( listener1, event );
-				}
-				catch ( InvocationTargetException ex )
-				{
-					throw new EventException( ex.getCause() );
-				}
-				catch ( Throwable t )
-				{
-					throw new EventException( t );
-				}
-			};
-
-			if ( useTimings )
-				eventSet.add( new TimedRegisteredListener( listener, executor, eh.priority(), registrar, eh.ignoreCancelled() ) );
-			else
-				eventSet.add( new RegisteredListener( listener, executor, eh.priority(), registrar, eh.ignoreCancelled() ) );
-		}
-		return ret;
-	}
-
 	private static void fireEvent( AbstractEvent event ) throws EventException
 	{
+		event.onEventPreCall();
+
 		for ( RegisteredListener registration : getEventListeners( event.getClass() ) )
 		{
-			if ( !registration.getContext().isEnabled() )
+			if ( !registration.getRegistrar().isEnabled() )
 				continue;
 
+			// TODO Look into if exceptions needs better handling, such as reporting them to plugin vendors.
 			try
 			{
 				registration.callEvent( event );
-			}
-			catch ( AuthorNagException ex )
-			{
-				if ( registration.getContext() instanceof NaggableRegistrar )
-				{
-					NaggableRegistrar naggableRegistrar = ( NaggableRegistrar ) registration.getContext();
-
-					if ( naggableRegistrar.isNaggable() )
-					{
-						naggableRegistrar.setNaggable( false );
-						L.log( Level.SEVERE, String.format( "Nag author(s): '%s' of '%s' about the following: %s", naggableRegistrar.getMeta().getAuthors(), naggableRegistrar.getName(), ex.getMessage() ) );
-					}
-				}
 			}
 			catch ( EventException ex )
 			{
 				if ( ex.getCause() == null )
 				{
 					ex.printStackTrace();
-					L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getContext().getName() + "\nEvent Exception Reason: " + ex.getMessage() );
+					L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getRegistrar().getName() + "\nEvent Exception Reason: " + ex.getMessage() );
 				}
 				else
 				{
 					ex.getCause().printStackTrace();
-					L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getContext().getName() + "\nEvent Exception Reason: " + ex.getCause().getMessage() );
+					L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getRegistrar().getName() + "\nEvent Exception Reason: " + ex.getCause().getMessage() );
 				}
 				throw ex;
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getContext().getName(), ex );
+				L.log( Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getRegistrar().getName(), ex );
 			}
 		}
 
-		if ( event instanceof SelfHandling )
-			( ( SelfHandling ) event ).handle();
+		event.onEventPostCall();
 	}
 
 	private static EventHandlers getEventListeners( Class<? extends AbstractEvent> event )
@@ -231,63 +131,111 @@ public class EventDispatcher
 		return eventHandlers;
 	}
 
-	public static void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, RegistrarBase registrar )
+	private static void listen( final RegistrarBase registrar, final EventListener listener, final Method method ) throws EventException
 	{
-		registerEvent( event, listener, priority, executor, registrar, false );
+		final EventHandler eventHandler = method.getAnnotation( EventHandler.class );
+		if ( eventHandler == null )
+			return;
+
+		final Class<?> checkClass;
+		if ( method.getParameterTypes().length != 1 || !AbstractEvent.class.isAssignableFrom( checkClass = method.getParameterTypes()[0] ) )
+			throw new EventException( "The EventHandler method signature \"" + method.toGenericString() + "\" in \"" + listener.getClass() + "\" is invalid. It must has at least one argument with an event that extends AbstractEvent." );
+
+		final Class<? extends AbstractEvent> eventClass = checkClass.asSubclass( AbstractEvent.class );
+		method.setAccessible( true );
+
+		if ( ReportingLevel.E_DEPRECATED.isEnabled() )
+			for ( Class<?> clazz = eventClass; AbstractEvent.class.isAssignableFrom( clazz ); clazz = clazz.getSuperclass() )
+			{
+				if ( clazz.isAnnotationPresent( DeprecatedDetail.class ) )
+				{
+					DeprecatedDetail deprecated = clazz.getAnnotation( DeprecatedDetail.class );
+
+					L.warning( String.format( "The creator '%s' has registered a listener for %s on method '%s', but the event is Deprecated for reason '%s'.", registrar.getName(), clazz.getName(), method.toGenericString(), deprecated.reason() ) );
+					break;
+				}
+
+				if ( clazz.isAnnotationPresent( Deprecated.class ) )
+				{
+					L.warning( String.format( "The creator '%s' has registered a listener for %s on method '%s', but the event is Deprecated!", registrar.getName(), clazz.getName(), method.toGenericString() ) );
+					break;
+				}
+			}
+
+		EventExecutor executor = ( listener1, event ) ->
+		{
+			try
+			{
+				if ( !eventClass.isAssignableFrom( event.getClass() ) )
+					return;
+				method.invoke( listener1, event );
+			}
+			catch ( InvocationTargetException ex )
+			{
+				throw new EventException( ex.getCause() );
+			}
+			catch ( Throwable t )
+			{
+				throw new EventException( t );
+			}
+		};
+
+		listen( registrar, eventHandler.priority(), eventClass, ( e ) ->
+		{
+
+		} );
+	}
+
+	public static void listen( final RegistrarBase registrar, final EventListener listener )
+	{
+		Objs.notNull( registrar, "Registrar can not be null" );
+		Objs.notNull( listener, "Listener can not be null" );
+
+		try
+		{
+			Set<Method> methods = new HashSet<>();
+			methods.addAll( Arrays.asList( listener.getClass().getMethods() ) );
+			methods.addAll( Arrays.asList( listener.getClass().getDeclaredMethods() ) );
+			for ( Method method : methods )
+				listen( registrar, listener, method );
+		}
+		catch ( NoClassDefFoundError e )
+		{
+			// TODO Does this need better handling? Shouldn't it pass to the caller in some form?
+			L.severe( String.format( "%s has failed to register events for %s because %s does not exist.", registrar.getName(), listener.getClass(), e.getMessage() ) );
+		}
+		catch ( EventException e )
+		{
+			L.severe( e.getMessage() );
+		}
+	}
+
+	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, Class<E> event, Consumer<E> listener )
+	{
+		listen( registrar, EventPriority.NORMAL, event, listener );
 	}
 
 	/**
 	 * Registers the given event to the specified listener using a directly passed EventExecutor
 	 *
-	 * @param event           Event class to register
-	 * @param listener        Listener to register
-	 * @param priority        Priority of this event
-	 * @param executor        EventExecutor to register
-	 * @param registrar       Registrar of event registration
-	 * @param ignoreCancelled Do not call executor if event was already cancelled
+	 * @param registrar Registrar of event registration
+	 * @param priority  Priority of this event
+	 * @param event     Event class to register
+	 * @param listener  Consumer that will receive the event
 	 */
-	public static void registerEvent( Class<? extends AbstractEvent> event, Listener listener, EventPriority priority, EventExecutor executor, RegistrarBase registrar, boolean ignoreCancelled )
+	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, EventPriority priority, Class<E> event, Consumer<E> listener )
 	{
-		Objs.notNull( listener, "Listener cannot be null" );
-		Objs.notNull( priority, "Priority cannot be null" );
-		Objs.notNull( executor, "Executor cannot be null" );
 		Objs.notNull( registrar, "Registrar cannot be null" );
+		Objs.notNull( priority, "Priority cannot be null" );
+		Objs.notNull( event, "Event cannot be null" );
+		Objs.notNull( listener, "Listener cannot be null" );
 
-		if ( useTimings )
-			getEventListeners( event ).register( new TimedRegisteredListener( listener, executor, priority, registrar, ignoreCancelled ) );
-		else
-			getEventListeners( event ).register( new RegisteredListener( listener, executor, priority, registrar, ignoreCancelled ) );
+		getEventListeners( event ).register( new RegisteredListener<>( registrar, priority, listener ) );
 	}
 
-	public static void registerEvents( Listener listener, RegistrarBase registrar )
+	public static void unregisterEvents( RegistrarBase registrar )
 	{
-		for ( Map.Entry<Class<? extends AbstractEvent>, Set<RegisteredListener>> entry : createRegisteredListeners( listener, registrar ).entrySet() )
-			getEventListeners( entry.getKey() ).registerAll( entry.getValue() );
-	}
-
-	public static void unregisterEvents( EventRegistrar creator )
-	{
-		EventHandlers.unregisterAll( creator );
-	}
-
-	public static void unregisterEvents( Listener listener )
-	{
-		EventHandlers.unregisterAll( listener );
-	}
-
-	public static boolean useTimings()
-	{
-		return useTimings;
-	}
-
-	/**
-	 * Sets whether or not per event timing code should be used
-	 *
-	 * @param use True if per event timing code should be used
-	 */
-	public static void useTimings( boolean use )
-	{
-		useTimings = use;
+		EventHandlers.unregisterAll( registrar );
 	}
 
 	private EventDispatcher()

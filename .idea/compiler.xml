@@ -26,6 +26,8 @@
       <module name="HPScripting_test" target="1.8" />
       <module name="HPServices_main" target="1.8" />
       <module name="HPServices_test" target="1.8" />
+      <module name="HPTasks_main" target="1.8" />
+      <module name="HPTasks_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

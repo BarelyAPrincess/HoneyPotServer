@@ -7,15 +7,15 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
-import io.amelia.foundation.Registrar;
+import io.amelia.foundation.RegistrarBase;
 
 public class Task implements ITask, Runnable
 {
-	private final Registrar creator;
+	private final RegistrarBase creator;
 	private final int id;
-	private final Runnable task;
+	private final CallableTask task;
 	private volatile Task next = null;
 	private long nextRun;
 	/**
@@ -34,17 +34,41 @@ public class Task implements ITask, Runnable
 		this( null, null, -1, -1 );
 	}
 
-	Task( final Runnable task )
+	Task( final CallableTask task )
 	{
 		this( null, task, -1, -1 );
 	}
 
-	Task( final Registrar creator, final Runnable task, final int id, final long period )
+	Task( final RegistrarBase creator, final CallableTask task, final int id, final long period )
 	{
 		this.creator = creator;
 		this.task = task;
 		this.id = id;
 		this.period = period;
+	}
+
+	@Override
+	public void cancel()
+	{
+		TaskDispatcher.cancelTask( id );
+	}
+
+	@Override
+	public final RegistrarBase getRegistrar()
+	{
+		return creator;
+	}
+
+	@Override
+	public final int getTaskId()
+	{
+		return id;
+	}
+
+	@Override
+	public boolean isSync()
+	{
+		return true;
 	}
 
 	/**
@@ -64,7 +88,7 @@ public class Task implements ITask, Runnable
 	 * @param r The runnable to compare
 	 * @return Does the runnable compare to the scheduled task
 	 */
-	boolean compare( Runnable r )
+	boolean compare( CallableTask r )
 	{
 		return r == task;
 	}
@@ -99,38 +123,22 @@ public class Task implements ITask, Runnable
 		this.period = period;
 	}
 
-	Class<? extends Runnable> getTaskClass()
+	Class<? extends CallableTask> getTaskClass()
 	{
 		return task.getClass();
 	}
 
 	@Override
-	public final int getTaskId()
-	{
-		return id;
-	}
-
-	@Override
-	public final Registrar getOwner()
-	{
-		return creator;
-	}
-
-	@Override
-	public boolean isSync()
-	{
-		return true;
-	}
-
-	@Override
-	public void cancel()
-	{
-		Scheduler.cancelTask( id );
-	}
-
-	@Override
 	public void run()
 	{
-		task.run();
+		try
+		{
+			task.call();
+		}
+		catch ( Exception e )
+		{
+			e.printStackTrace();
+			// TODO Handle exception
+		}
 	}
 }

@@ -1,12 +1,3 @@
-/**
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
- * <p>
- * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
- * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
- * All Rights Reserved.
- */
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
@@ -16,40 +7,31 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings( "unchecked" )
-public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
+public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 {
 	protected final List<B> children = new ArrayList<>();
 	private final String key;
-	protected EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
+	protected EnumSet<ObjectStackerWithValue.Flag> flags = EnumSet.noneOf( ObjectStackerWithValue.Flag.class );
 	protected B parent;
-	protected T value;
 
 	protected ObjectStackerBase( String key )
 	{
-		this( null, key, null );
+		this( null, key );
 	}
 
 	protected ObjectStackerBase( B parent, String key )
-	{
-		this( parent, key, null );
-	}
-
-	protected ObjectStackerBase( B parent, String key, T value )
 	{
 		Objs.notNull( key );
 
 		this.parent = parent;
 		this.key = key;
-		this.value = value;
 	}
 
 	public final B addFlag( Flag... flags )
@@ -64,10 +46,10 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return ( B ) this;
 	}
 
-	private ObjectStackerBase<B, T> child( @NotNull String key, boolean create )
+	private B child( @NotNull String key, boolean create )
 	{
 		disposeCheck();
-		for ( ObjectStackerBase<B, T> child : children )
+		for ( B child : children )
 			if ( child.key() == null )
 				children.remove( child );
 			else if ( child.key().equals( key ) )
@@ -75,11 +57,12 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return create ? createChild( key ) : null;
 	}
 
-	public final void clear()
+	public void clear()
 	{
 		disposeCheck();
 		children.clear();
-		value = null;
+
+		Reflection.methodCall( Reflection.getMethod( getClass(), "clear" ) );
 	}
 
 	public final <C> Stream<C> collect( Function<B, C> function )
@@ -88,15 +71,14 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return Stream.concat( Stream.of( function.apply( ( B ) this ) ), children.stream().flatMap( c -> c.collect( function ) ) ).filter( Objects::nonNull );
 	}
 
-	public abstract ObjectStackerBase<B, T> createChild( String key );
+	protected abstract B createChild( String key );
 
-	protected final void delete()
+	protected void delete()
 	{
 		disposeCheck();
 		parent.children.remove( this );
 		parent = null;
 		children.clear();
-		value = null;
 		flags = EnumSet.of( Flag.DISPOSED );
 	}
 
@@ -112,13 +94,6 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return ( B ) ( flags.contains( flag ) ? this : parent == null ? null : parent.findFlag( flag ) );
 	}
 
-	public final Stream<T> flatValues()
-	{
-		disposeCheck();
-		Stream<T> stream = children.stream().flatMap( ObjectStackerBase::flatValues );
-		return Optional.ofNullable( value ).map( t -> Stream.concat( Stream.of( t ), stream ) ).orElse( stream );
-	}
-
 	public final B getChild( @NotNull Namespace nodes, boolean create )
 	{
 		disposeCheck();
@@ -126,8 +101,8 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		if ( nodes.getNodeCount() == 0 )
 			return ( B ) this;
 		String key = nodes.getFirst();
-		ObjectStackerBase<B, T> child = child( key, create );
-		return child == null ? null : nodes.getNodeCount() <= 1 ? ( B ) child : child.getChild( nodes.subNamespace( 1 ), create );
+		B child = child( key, create );
+		return child == null ? null : nodes.getNodeCount() <= 1 ? child : child.getChild( nodes.subNamespace( 1 ), create );
 	}
 
 	public final B getChild( @NotNull String nodes )
@@ -154,16 +129,16 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return children.stream();
 	}
 
-	public final Stream<ObjectStackerBase> getChildrenRecursive()
+	public final Stream<B> getChildrenRecursive()
 	{
 		disposeCheck();
 		return children.stream().flatMap( ObjectStackerBase::getChildrenRecursive0 );
 	}
 
-	protected final Stream<ObjectStackerBase> getChildrenRecursive0()
+	protected final Stream<B> getChildrenRecursive0()
 	{
 		disposeCheck();
-		return Stream.concat( Stream.of( this ), children.stream().flatMap( ObjectStackerBase::getChildrenRecursive0 ) );
+		return Stream.concat( Stream.of( ( B ) this ), children.stream().flatMap( ObjectStackerBase::getChildrenRecursive0 ) );
 	}
 
 	public Flag[] getFlags()
@@ -196,54 +171,28 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return hasParent() ? getParent().getNamespaceObj().append( key() ) : Namespace.parseString( key() );
 	}
 
-	public final ObjectStackerBase<B, T> getParent()
+	public final B getParent()
 	{
 		disposeCheck();
 		return parent;
 	}
 
-	public final Stream<ObjectStackerBase> getParents()
+	public final Stream<B> getParents()
 	{
 		disposeCheck();
 		return Stream.of( parent ).flatMap( ObjectStackerBase::getParents0 );
 	}
 
-	protected final Stream<ObjectStackerBase> getParents0()
+	protected final Stream<B> getParents0()
 	{
 		disposeCheck();
-		return Stream.concat( Stream.of( this ), Stream.of( parent ).flatMap( ObjectStackerBase::getParents0 ) );
+		return Stream.concat( Stream.of( ( B ) this ), Stream.of( parent ).flatMap( ObjectStackerBase::getParents0 ) );
 	}
 
 	public final String getRootNamespace()
 	{
 		disposeCheck();
 		return new NamespaceParser( getNamespace() ).getTld().getString();
-	}
-
-	public final Optional<T> getValue()
-	{
-		disposeCheck();
-		return Optional.ofNullable( value );
-	}
-
-	public final void setValue( T value )
-	{
-		disposeCheck();
-		if ( hasFlag( Flag.READ_ONLY ) )
-			throwExceptionIgnorable( getNamespace() + " is READ_ONLY" );
-		this.value = value;
-	}
-
-	public final Optional<T> getValue( String nodes )
-	{
-		return getValue( nodes, Optional.empty() );
-	}
-
-	public final Optional<T> getValue( String nodes, Optional<T> def )
-	{
-		disposeCheck();
-		ObjectStackerBase<B, T> child = getChild( nodes );
-		return child == null ? def : child.getValue();
 	}
 
 	public final boolean hasChild( String nodes )
@@ -264,11 +213,6 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 	public final boolean hasParent()
 	{
 		return parent != null;
-	}
-
-	private final boolean hasValue()
-	{
-		return value != null;
 	}
 
 	public final boolean isDisposed()
@@ -312,38 +256,14 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B, T>, T>
 		return removeFlag( flags );
 	}
 
-	public final void setValue( Namespace ns, T value )
-	{
-		disposeCheck();
-		ObjectStackerBase<B, T> child = getChild( ns, true );
-		if ( child.hasFlag( Flag.NO_VALUE ) )
-			throwExceptionIgnorable( getNamespace() + " has NO_VALUE flag" );
-		if ( child.hasFlag( Flag.NO_OVERRIDE ) && child.hasValue() )
-			throwExceptionIgnorable( getNamespace() + " has NO_OVERRIDE flag" );
-		child.setValue( value );
-	}
+	protected abstract void throwExceptionError( String message ) throws ObjectStackerException.Error;
 
-	public final void setValue( String nodes, T value )
-	{
-		setValue( Namespace.parseString( nodes ), value );
-	}
-
-	public abstract void throwExceptionError( String message ) throws ObjectStackerException.Error;
-
-	public abstract void throwExceptionIgnorable( String message ) throws ObjectStackerException.Ignorable;
-
-	public final Map<String, T> values()
-	{
-		disposeCheck();
-		return children.stream().filter( ObjectStackerBase::hasValue ).collect( Collectors.toMap( ObjectStackerBase::key, c -> c.getValue().get() ) );
-	}
+	protected abstract void throwExceptionIgnorable( String message ) throws ObjectStackerException.Ignorable;
 
 	public enum Flag
 	{
 		/* Values and children can never be written to this object */
 		READ_ONLY,
-		/* This object has no value and will throw an exception if a value is attempted to be set */
-		NO_VALUE,
 		/* This object will be ignored, if there is an attempt to write it to persistent disk */
 		NO_SAVE,
 		/* Prevents the overwriting of existing children and values */

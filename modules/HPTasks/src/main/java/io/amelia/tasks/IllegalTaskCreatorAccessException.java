@@ -7,29 +7,32 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
+
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ReportingLevel;
 
 /**
  * Thrown when a creator attempts to interact with the server when it is not enabled
  */
 @SuppressWarnings( "serial" )
-public class IllegalTaskCreatorAccessException extends RuntimeException
+public class IllegalTaskCreatorAccessException extends ApplicationException.Runtime
 {
 	/**
 	 * Creates a new instance of <code>IllegalPluginAccessException</code> without detail message.
 	 */
 	public IllegalTaskCreatorAccessException()
 	{
+		super( ReportingLevel.E_STRICT );
 	}
-	
+
 	/**
 	 * Constructs an instance of <code>IllegalPluginAccessException</code> with the specified detail message.
-	 * 
-	 * @param msg
-	 *            the detail message.
+	 *
+	 * @param msg the detail message.
 	 */
 	public IllegalTaskCreatorAccessException( String msg )
 	{
-		super( msg );
+		super( ReportingLevel.E_STRICT, msg );
 	}
 }

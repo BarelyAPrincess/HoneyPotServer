@@ -2,7 +2,7 @@ package io.amelia.config;
 
 import com.sun.istack.internal.NotNull;
 import io.amelia.lang.ConfigException;
-import io.amelia.support.ObjectStackerBase;
+import io.amelia.support.ObjectStackerWithValue;
 import io.amelia.support.Objs;
 import io.amelia.util.OptionalBoolean;
 
@@ -12,7 +12,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
-public class ConfigNode extends ObjectStackerBase<ConfigNode, Object>
+public class ConfigNode extends ObjectStackerWithValue<ConfigNode, Object>
 {
 	protected ConfigNode()
 	{

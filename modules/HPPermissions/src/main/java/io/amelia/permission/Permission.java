@@ -9,7 +9,6 @@
  */
 package io.amelia.permission;
 
-import io.amelia.foundation.service.ServiceProvider;
 import io.amelia.lang.EnumColor;
 import io.amelia.permission.lang.PermissionException;
 import io.amelia.support.Namespace;
@@ -32,12 +31,12 @@ public final class Permission implements Comparable<Permission>
 
 	public Permission( Namespace ns )
 	{
-		this( ns.getLocalName(), PermissionType.DEFAULT, ns.getNodeCount() <= 1 ? null : PermissionDispatcher.createNode( ns.getParent() ) );
+		this( ns.getLocalName(), PermissionType.DEFAULT, ns.getNodeCount() <= 1 ? null : PermissionGuard.createNode( ns.getParent() ) );
 	}
 
 	public Permission( Namespace ns, PermissionType type )
 	{
-		this( ns.getLocalName(), type, ns.getNodeCount() <= 1 ? null : PermissionDispatcher.createNode( ns.getParent() ) );
+		this( ns.getLocalName(), type, ns.getNodeCount() <= 1 ? null : PermissionGuard.createNode( ns.getParent() ) );
 	}
 
 	public Permission( String localName )
@@ -64,7 +63,7 @@ public final class Permission implements Comparable<Permission>
 		this.parent = parent;
 
 		model = new PermissionModelValue( localName, type, this );
-		PermissionDispatcher.addPermission( this );
+		PermissionGuard.addPermission( this );
 	}
 
 	public void addChild( Permission node )
@@ -74,7 +73,7 @@ public final class Permission implements Comparable<Permission>
 
 	public void commit()
 	{
-		PermissionDispatcher.getBackend().nodeCommit( this );
+		PermissionGuard.getBackend().nodeCommit( this );
 	}
 
 	@Override

@@ -25,7 +25,7 @@ public abstract class Permissible
 			String id = getId();
 			if ( UtilObjects.isEmpty( id ) )
 				throw new IllegalStateException( "getId() must return a valid (non-empty) entity Id." );
-			entity = PermissionDispatcher.i().getEntity( id );
+			entity = PermissionGuard.i().getEntity( id );
 		}
 
 		if ( entity == null )
@@ -36,14 +36,14 @@ public abstract class Permissible
 
 	public final PermissionResult checkPermission( String perm )
 	{
-		perm = PermissionDispatcher.parseNode( perm );
-		return checkPermission( PermissionDispatcher.i().createNode( perm ) );
+		perm = PermissionGuard.parseNode( perm );
+		return checkPermission( PermissionGuard.i().createNode( perm ) );
 	}
 
 	public final PermissionResult checkPermission( String perm, References refs )
 	{
-		perm = PermissionDispatcher.parseNode( perm );
-		return checkPermission( PermissionDispatcher.i().createNode( perm ), refs );
+		perm = PermissionGuard.parseNode( perm );
+		return checkPermission( PermissionGuard.i().createNode( perm ), refs );
 	}
 
 	public final PermissionResult checkPermission( Permission perm, References refs )
@@ -129,14 +129,14 @@ public abstract class Permissible
 	 */
 	public final PermissionResult requirePermission( String req, References refs ) throws PermissionDeniedException
 	{
-		req = PermissionDispatcher.parseNode( req );
-		return requirePermission( PermissionDispatcher.i().createNode( req ), refs );
+		req = PermissionGuard.parseNode( req );
+		return requirePermission( PermissionGuard.i().createNode( req ), refs );
 	}
 
 	public final PermissionResult requirePermission( String req, String... refs ) throws PermissionDeniedException
 	{
-		req = PermissionDispatcher.parseNode( req );
-		return requirePermission( PermissionDispatcher.i().createNode( req ), References.format( refs ) );
+		req = PermissionGuard.parseNode( req );
+		return requirePermission( PermissionGuard.i().createNode( req ), References.format( refs ) );
 	}
 
 	public final PermissionResult requirePermission( Permission req, String... refs ) throws PermissionDeniedException

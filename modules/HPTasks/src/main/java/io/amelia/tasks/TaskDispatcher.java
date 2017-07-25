@@ -7,10 +7,10 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.Registrar;
+import io.amelia.foundation.RegistrarBase;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.Objs;
@@ -29,14 +29,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
  * Manages task scheduled in the main thread
  */
-public class Scheduler
+public class TaskDispatcher
 {
-	public static final Logger L = LogBuilder.get( Scheduler.class );
+	public static final Logger L = LogBuilder.get( TaskDispatcher.class );
 
 	private static final int RECENT_TICKS = 20;
 	/**
@@ -84,11 +86,11 @@ public class Scheduler
 	/**
 	 * Tail of a linked-list. AtomicReference only matters when adding to queue
 	 */
-	private static final AtomicReference<Task> tail = new AtomicReference<Task>( head );
+	private static final AtomicReference<Task> tail = new AtomicReference<>( head );
 
 	private static void addTask( final Task task )
 	{
-		final AtomicReference<Task> tail = Scheduler.tail;
+		final AtomicReference<Task> tail = TaskDispatcher.tail;
 		Task tailTask = tail.get();
 		while ( !tail.compareAndSet( tailTask, task ) )
 			tailTask = tail.get();
@@ -104,14 +106,15 @@ public class Scheduler
 	/**
 	 * Calls a method on the main thread and returns a Future object This task will be executed by the main server thread.
 	 * <p>
-	 * Note: The Future.get() methods must NOT be called from the main thread. Note2: There is at least an average of 10ms latency until the isDone() method returns true.
+	 * Note: The Future.get() methods must NOT be called from the main thread.
+	 * Note2: There is at least an average of 10ms latency until the isDone() method returns true.
 	 *
 	 * @param <T>     The callable's return type
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
 	 * @return Future Future object related to the task
 	 */
-	public static <T> Future<T> callSyncMethod( final Registrar creator, final Callable<T> task )
+	public static <T> Future<T> callSyncMethod( final RegistrarBase creator, final Callable<T> task )
 	{
 		validate( creator, task );
 		if ( !creator.isEnabled() )
@@ -127,22 +130,18 @@ public class Scheduler
 	 */
 	public static void cancelAllTasks()
 	{
-		final Task task = new Task( new Runnable()
+		final Task task = new Task( () ->
 		{
-			@Override
-			public void run()
+			Iterator<Task> it = runners.values().iterator();
+			while ( it.hasNext() )
 			{
-				Iterator<Task> it = runners.values().iterator();
-				while ( it.hasNext() )
-				{
-					Task task = it.next();
-					task.cancel0();
-					if ( task.isSync() )
-						it.remove();
-				}
-				pending.clear();
-				temp.clear();
+				Task task0 = it.next();
+				task0.cancel0();
+				if ( task0.isSync() )
+					it.remove();
 			}
+			pending.clear();
+			temp.clear();
 		} );
 		handle( task, 0L );
 		for ( Task taskPending = head.getNext(); taskPending != null; taskPending = taskPending.getNext() )
@@ -168,14 +167,14 @@ public class Scheduler
 	}
 
 	/**
-	 * Removes the task based on the runnable.
+	 * Removes the task based on the callable.
 	 *
-	 * @param runnable The runnable assigned to the task
+	 * @param callable The callable assigned to the task
 	 */
-	public static void cancelTask( Runnable runnable )
+	public static void cancelTask( CallableTask callable )
 	{
 		for ( Task t : getPendingTasks() )
-			if ( t.compare( runnable ) )
+			if ( t.compare( callable ) )
 				cancelTask( t );
 	}
 
@@ -184,33 +183,30 @@ public class Scheduler
 		Objs.notNull( task );
 		final int taskId = task.getTaskId();
 		task.cancel0();
-		task = new Task( new Runnable()
+		task = new Task( () ->
 		{
-			private boolean check( final Iterable<Task> collection )
+			Function<Iterable<Task>, Boolean> check = ( collection ) ->
 			{
 				final Iterator<Task> tasks = collection.iterator();
 				while ( tasks.hasNext() )
 				{
-					final Task task = tasks.next();
-					if ( task.getTaskId() == taskId )
+					final Task task0 = tasks.next();
+					if ( task0.getTaskId() == taskId )
 					{
-						task.cancel0();
+						task0.cancel0();
 						tasks.remove();
-						if ( task.isSync() )
+						if ( task0.isSync() )
 							runners.remove( taskId );
 						return true;
 					}
 				}
 				return false;
-			}
+			};
 
-			@Override
-			public void run()
-			{
-				if ( !check( temp ) )
-					check( pending );
-			}
+			if ( !check.apply( temp ) )
+				check.apply( pending );
 		} );
+
 		handle( task, 0L );
 		for ( Task taskPending = head.getNext(); taskPending != null; taskPending = taskPending.getNext() )
 		{
@@ -226,44 +222,41 @@ public class Scheduler
 	 *
 	 * @param creator Owner of tasks to be removed
 	 */
-	public static void cancelTasks( final Registrar creator )
+	public static void cancelTasks( final RegistrarBase creator )
 	{
 		Objs.notNull( creator, "Cannot cancel tasks of null creator" );
-		final Task task = new Task( new Runnable()
+		final Task task = new Task( () ->
 		{
-			void check( final Iterable<Task> collection )
+			Consumer<Iterable<Task>> check = ( collection ) ->
 			{
 				final Iterator<Task> tasks = collection.iterator();
 				while ( tasks.hasNext() )
 				{
-					final Task task = tasks.next();
-					if ( task.getOwner().equals( creator ) )
+					final Task task0 = tasks.next();
+					if ( task0.getRegistrar().equals( creator ) )
 					{
-						task.cancel0();
+						task0.cancel0();
 						tasks.remove();
-						if ( task.isSync() )
-							runners.remove( task.getTaskId() );
+						if ( task0.isSync() )
+							runners.remove( task0.getTaskId() );
 					}
 				}
-			}
+			};
 
-			@Override
-			public void run()
-			{
-				check( pending );
-				check( temp );
-			}
+			check.accept( pending );
+			check.accept( temp );
 		} );
+
 		handle( task, 0L );
 		for ( Task taskPending = head.getNext(); taskPending != null; taskPending = taskPending.getNext() )
 		{
 			if ( taskPending == task )
 				return;
-			if ( taskPending.getTaskId() != -1 && taskPending.getOwner().equals( creator ) )
+			if ( taskPending.getTaskId() != -1 && taskPending.getRegistrar().equals( creator ) )
 				taskPending.cancel0();
 		}
 		for ( Task runner : runners.values() )
-			if ( runner.getOwner().equals( creator ) )
+			if ( runner.getRegistrar().equals( creator ) )
 				runner.cancel0();
 	}
 
@@ -331,8 +324,8 @@ public class Scheduler
 		if ( !Kernel.isPrimaryThread() )
 			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
 
-		Scheduler.currentTick = currentTick;
-		final List<Task> temp = Scheduler.temp;
+		TaskDispatcher.currentTick = currentTick;
+		final List<Task> temp = TaskDispatcher.temp;
 		parsePending();
 		while ( isReady( currentTick ) )
 		{
@@ -352,13 +345,13 @@ public class Scheduler
 				}
 				catch ( final Throwable throwable )
 				{
-					L.log( Level.WARNING, String.format( "Task #%s for %s generated an exception", task.getTaskId(), task.getOwner().getName() ), throwable );
+					L.log( Level.WARNING, String.format( "Task #%s for %s generated an exception", task.getTaskId(), task.getRegistrar().getName() ), throwable );
 				}
 				parsePending();
 			}
 			else
 			{
-				debugTail = debugTail.setNext( new AsyncTaskDebugger( currentTick + RECENT_TICKS, task.getOwner(), task.getTaskClass() ) );
+				debugTail = debugTail.setNext( new AsyncTaskDebugger( currentTick + RECENT_TICKS, task.getRegistrar(), task.getTaskClass() ) );
 				executor.execute( task );
 				// We don't need to parse pending
 				// (async tasks must live with race-conditions if they attempt to cancel between these few lines of code)
@@ -376,9 +369,9 @@ public class Scheduler
 		// Scans the backlog map for unscheduled tasks awaiting for their owner to become enabled
 		if ( !backlogTasks.isEmpty() )
 			for ( Entry<Long, Task> e : backlogTasks.entrySet() )
-				if ( e.getValue() == null || e.getValue().getOwner() == null )
+				if ( e.getValue() == null || e.getValue().getRegistrar() == null )
 					backlogTasks.remove( e.getKey() );
-				else if ( e.getValue().getOwner().isEnabled() )
+				else if ( e.getValue().getRegistrar().isEnabled() )
 				{
 					handle( e.getValue(), e.getKey() );
 					backlogTasks.remove( e.getKey() );
@@ -444,7 +437,7 @@ public class Scheduler
 
 	private static void parsePending()
 	{
-		Task head = Scheduler.head;
+		Task head = TaskDispatcher.head;
 		Task task = head.getNext();
 		Task lastTask = head;
 		for ( ; task != null; task = ( lastTask = task ).getNext() )
@@ -462,21 +455,21 @@ public class Scheduler
 			head = task.getNext();
 			task.setNext( null );
 		}
-		Scheduler.head = lastTask;
+		TaskDispatcher.head = lastTask;
 	}
 
 	/**
 	 * Returns a task that will run on the next server tick.
 	 *
 	 * @param creator  the reference to the creator scheduling task
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a {@link Task} that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTask( Registrar creator, Runnable runnable )
+	public static Task runTask( RegistrarBase creator, CallableTask callable )
 	{
-		return runTaskLater( creator, 0L, runnable );
+		return runTaskLater( creator, 0L, callable );
 	}
 
 	/**
@@ -485,14 +478,14 @@ public class Scheduler
 	 * Returns a task that will run asynchronously.
 	 *
 	 * @param creator  the reference to the creator scheduling task
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTaskAsynchronously( Registrar creator, Runnable runnable )
+	public static Task runTaskAsynchronously( RegistrarBase creator, CallableTask callable )
 	{
-		return runTaskLaterAsynchronously( creator, 0L, runnable );
+		return runTaskLaterAsynchronously( creator, 0L, callable );
 	}
 
 	/**
@@ -500,14 +493,14 @@ public class Scheduler
 	 *
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a {@link Task} that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTaskLater( Registrar creator, long delay, Runnable runnable )
+	public static Task runTaskLater( RegistrarBase creator, long delay, CallableTask callable )
 	{
-		return runTaskTimer( creator, delay, -1L, runnable );
+		return runTaskTimer( creator, delay, -1L, callable );
 	}
 
 	/**
@@ -517,14 +510,14 @@ public class Scheduler
 	 *
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTaskLaterAsynchronously( Registrar creator, long delay, Runnable runnable )
+	public static Task runTaskLaterAsynchronously( RegistrarBase creator, long delay, CallableTask callable )
 	{
-		return runTaskTimerAsynchronously( creator, delay, -1L, runnable );
+		return runTaskTimerAsynchronously( creator, delay, -1L, callable );
 	}
 
 	/**
@@ -533,14 +526,14 @@ public class Scheduler
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task
 	 * @param period   the ticks to wait between runs
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTaskTimer( Registrar creator, long delay, long period, Runnable runnable )
+	public static Task runTaskTimer( RegistrarBase creator, long delay, long period, CallableTask callable )
 	{
-		validate( creator, runnable );
+		validate( creator, callable );
 
 		if ( delay < 0L )
 			delay = 0;
@@ -549,7 +542,7 @@ public class Scheduler
 		else if ( period < -1L )
 			period = -1L;
 
-		Task task = new Task( creator, runnable, nextId(), period );
+		Task task = new Task( creator, callable, nextId(), period );
 
 		if ( creator.isEnabled() )
 			return handle( task, delay );
@@ -565,14 +558,14 @@ public class Scheduler
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task for the first time
 	 * @param period   the ticks to wait between runs
-	 * @param runnable the task to be run
+	 * @param callable the task to be run
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
 	 */
-	public static Task runTaskTimerAsynchronously( Registrar creator, long delay, long period, Runnable runnable )
+	public static Task runTaskTimerAsynchronously( RegistrarBase creator, long delay, long period, CallableTask callable )
 	{
-		validate( creator, runnable );
+		validate( creator, callable );
 
 		if ( delay < 0L )
 			delay = 0;
@@ -581,7 +574,7 @@ public class Scheduler
 		else if ( period < -1L )
 			period = -1L;
 
-		Task task = new AsyncTask( runners, creator, runnable, nextId(), period );
+		Task task = new AsyncTask( runners, creator, callable, nextId(), period );
 
 		if ( !creator.isEnabled() )
 			return handle( task, delay );
@@ -589,17 +582,10 @@ public class Scheduler
 			return backlog( task, delay );
 	}
 
-	public static void runTaskWithTimeout( final Registrar creator, final long timeout, final Runnable runnable )
+	public static void runTaskWithTimeout( final RegistrarBase creator, final long timeout, final CallableTask callable )
 	{
-		final Task task = runTaskAsynchronously( creator, runnable );
-		runTaskLaterAsynchronously( creator, timeout, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				task.cancel();
-			}
-		} );
+		final Task task = runTaskAsynchronously( creator, callable );
+		runTaskLaterAsynchronously( creator, timeout, () -> task.cancel() );
 
 		int cnt = 0;
 
@@ -634,7 +620,7 @@ public class Scheduler
 	 * @param delay   Delay in server ticks before executing task
 	 * @return Task id number (-1 if scheduling failed)
 	 */
-	public static int scheduleAsyncDelayedTask( final Registrar creator, final long delay, final Runnable task )
+	public static int scheduleAsyncDelayedTask( final RegistrarBase creator, final long delay, final CallableTask task )
 	{
 		return scheduleAsyncRepeatingTask( creator, delay, -1L, task );
 	}
@@ -648,7 +634,7 @@ public class Scheduler
 	 * @param task    Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
-	public static int scheduleAsyncDelayedTask( final Registrar creator, final Runnable task )
+	public static int scheduleAsyncDelayedTask( final RegistrarBase creator, final CallableTask task )
 	{
 		return scheduleAsyncDelayedTask( creator, 0L, task );
 	}
@@ -661,12 +647,12 @@ public class Scheduler
 	 * @param creator  TaskCreator that owns the task
 	 * @param delay    Delay in server ticks before executing first repeat
 	 * @param period   Period in server ticks of the task
-	 * @param runnable Task to be executed
+	 * @param callable Task to be executed
 	 * @return Task id number (-1 if scheduling failed), calling {@link #cancelTask(int)} will cancel it
 	 */
-	public static int scheduleAsyncRepeatingTask( final Registrar creator, long delay, long period, final Runnable runnable )
+	public static int scheduleAsyncRepeatingTask( final RegistrarBase creator, long delay, long period, final CallableTask callable )
 	{
-		return runTaskTimerAsynchronously( creator, delay, period, runnable ).getTaskId();
+		return runTaskTimerAsynchronously( creator, delay, period, callable ).getTaskId();
 	}
 
 	/**
@@ -677,7 +663,7 @@ public class Scheduler
 	 * @param delay   Delay in server ticks before executing task
 	 * @return Task id number (-1 if scheduling failed)
 	 */
-	public static int scheduleSyncDelayedTask( final Registrar creator, final long delay, final Runnable task )
+	public static int scheduleSyncDelayedTask( final RegistrarBase creator, final long delay, final CallableTask task )
 	{
 		return scheduleSyncRepeatingTask( creator, delay, -1L, task );
 	}
@@ -689,7 +675,7 @@ public class Scheduler
 	 * @param task    Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
-	public static int scheduleSyncDelayedTask( final Registrar creator, final Runnable task )
+	public static int scheduleSyncDelayedTask( final RegistrarBase creator, final CallableTask task )
 	{
 		return scheduleSyncDelayedTask( creator, 0L, task );
 	}
@@ -700,12 +686,12 @@ public class Scheduler
 	 * @param creator  TaskCreator that owns the task
 	 * @param delay    Delay in server ticks before executing first repeat
 	 * @param period   Period in server ticks of the task
-	 * @param runnable Task to be executed
+	 * @param callable Task to be executed
 	 * @return Task id number (-1 if scheduling failed)
 	 */
-	public static int scheduleSyncRepeatingTask( final Registrar creator, long delay, long period, final Runnable runnable )
+	public static int scheduleSyncRepeatingTask( final RegistrarBase creator, long delay, long period, final CallableTask callable )
 	{
-		return runTaskTimer( creator, delay, period, runnable ).getTaskId();
+		return runTaskTimer( creator, delay, period, callable ).getTaskId();
 	}
 
 	public static void shutdown()
@@ -719,7 +705,7 @@ public class Scheduler
 	 * @param creator The object owning this task
 	 * @param task    The task to validate
 	 */
-	private static void validate( final Registrar creator, final Object task )
+	private static void validate( final RegistrarBase creator, final Object task )
 	{
 		Objs.notNull( creator, "TaskCreator cannot be null" );
 		Objs.notNull( task, "Task cannot be null" );
@@ -734,7 +720,7 @@ public class Scheduler
 	/**
 	 * Schedule Service is a static
 	 */
-	private Scheduler()
+	private TaskDispatcher()
 	{
 
 	}

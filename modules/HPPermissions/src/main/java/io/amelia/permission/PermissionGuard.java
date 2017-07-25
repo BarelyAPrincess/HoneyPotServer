@@ -27,6 +27,7 @@ import io.amelia.permission.event.PermissibleEntityEvent;
 import io.amelia.permission.event.PermissibleEvent;
 import io.amelia.permission.event.PermissibleSystemEvent;
 import io.amelia.permission.lang.PermissionBackendException;
+import io.amelia.tasks.Tasker;
 import io.amelia.support.Objs;
 
 import java.util.ArrayList;
@@ -41,9 +42,9 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class PermissionDispatcher
+public class PermissionGuard
 {
-	public static final Logger L = LogBuilder.get( PermissionDispatcher.class );
+	public static final Logger L = LogBuilder.get( PermissionGuard.class );
 	public static final PermissionModular modular = new PermissionModular();
 	private static final Set<Permission> permissions = new HashSet<>();
 	static boolean allowOps = true;
@@ -84,19 +85,6 @@ public class PermissionDispatcher
 	protected static void callEvent( PermissibleEvent event )
 	{
 		EventDispatcher.callEvent( event );
-	}
-
-	/**
-	 * Check if entity has specified permission in ref
-	 *
-	 * @param entity entity object
-	 * @param perm   permission as string to check against
-	 * @param ref    ref used for this perm
-	 * @return true on success false otherwise
-	 */
-	public static PermissionResult checkPermission( AccountInstance entity, String perm, String ref )
-	{
-		return this.checkPermission( entity.getId(), perm, ref );
 	}
 
 	/**
@@ -299,7 +287,7 @@ public class PermissionDispatcher
 	 *
 	 * @param perm The permission to check for.
 	 * @return a list of permissibles that have that permission assigned to them.
-	 * @see PermissionDispatcher#getEntitiesWithPermission(Permission)
+	 * @see PermissionGuard#getEntitiesWithPermission(Permission)
 	 */
 	public static List<PermissibleEntity> getEntitiesWithPermission( String perm )
 	{
@@ -609,7 +597,7 @@ public class PermissionDispatcher
 	 */
 	protected static void registerTask( TimerTask task, int delay )
 	{
-		TaskManager.instance().scheduleAsyncDelayedTask( this, delay * 50, task );
+		Tasker.scheduleAsyncDelayedTask( this, delay * 50, task );
 	}
 
 	public static void reload() throws PermissionBackendException
@@ -701,7 +689,7 @@ public class PermissionDispatcher
 		ConfigRegistry.setObject( "settings.whitelist", value );
 	}
 
-	private PermissionDispatcher()
+	private PermissionGuard()
 	{
 
 	}
@@ -711,7 +699,7 @@ public class PermissionDispatcher
 		@Override
 		public Class<?> getModularClass()
 		{
-			return PermissionDispatcher.class;
+			return PermissionGuard.class;
 		}
 	}
 }

@@ -9,6 +9,8 @@
  */
 package io.amelia.events;
 
+import io.amelia.foundation.RegistrarBase;
+
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +41,7 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 				{
 					for ( List<RegisteredListener> list : handler.listeners.values() )
 						for ( RegisteredListener listener : list )
-							if ( listener.getContext().getSource().equals( source ) )
+							if ( listener.getRegistrar().equals( source ) )
 								listeners.add( listener );
 				}
 		}
@@ -63,30 +65,16 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	}
 
 	/**
-	 * Unregister a specific creator's listeners from all handler lists.
+	 * Unregister a specific registrar's listeners from all handler lists.
 	 *
-	 * @param creator creator to unregister
+	 * @param registrar registrar to unregister
 	 */
-	public static void unregisterAll( EventRegistrar creator )
+	public static void unregisterAll( RegistrarBase registrar )
 	{
 		synchronized ( handlers )
 		{
 			for ( EventHandlers handler : handlers )
-				handler.unregister( creator );
-		}
-	}
-
-	/**
-	 * Unregister a specific listener from all handler lists.
-	 *
-	 * @param listener listener to unregister
-	 */
-	public static void unregisterAll( Listener listener )
-	{
-		synchronized ( handlers )
-		{
-			for ( EventHandlers handler : handlers )
-				handler.unregister( listener );
+				handler.unregister( registrar );
 		}
 	}
 
@@ -142,28 +130,15 @@ public class EventHandlers extends AbstractList<RegisteredListener>
 	}
 
 	/**
-	 * Remove a specific listener from this handler
-	 *
-	 * @param listener listener to remove
-	 */
-	public synchronized void unregister( Listener listener )
-	{
-		for ( List<RegisteredListener> list : listeners.values() )
-			for ( ListIterator<RegisteredListener> i = list.listIterator(); i.hasNext(); )
-				if ( i.next().getListener().equals( listener ) )
-					i.remove();
-	}
-
-	/**
 	 * Remove a specific creator's listeners from this handler
 	 *
-	 * @param source creator to remove
+	 * @param registrar creator to remove
 	 */
-	public synchronized void unregister( Object source )
+	public synchronized void unregister( RegistrarBase registrar )
 	{
 		for ( List<RegisteredListener> list : listeners.values() )
 			for ( ListIterator<RegisteredListener> i = list.listIterator(); i.hasNext(); )
-				if ( i.next().getContext().getSource().equals( source ) )
+				if ( i.next().getRegistrar().equals( registrar ) )
 					i.remove();
 	}
 

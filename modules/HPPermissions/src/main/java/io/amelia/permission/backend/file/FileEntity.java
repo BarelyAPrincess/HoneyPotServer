@@ -13,7 +13,7 @@ import io.amelia.lang.EnumColor;
 import io.amelia.permission.ChildPermission;
 import io.amelia.permission.PermissibleEntity;
 import io.amelia.permission.Permission;
-import io.amelia.permission.PermissionDispatcher;
+import io.amelia.permission.PermissionGuard;
 import io.amelia.permission.PermissionNamespace;
 import io.amelia.permission.PermissionValue;
 import io.amelia.permission.References;
@@ -32,7 +32,7 @@ public class FileEntity extends PermissibleEntity
 	public void reloadGroups()
 	{
 		if ( isDebug() )
-			PermissionDispatcher.L.info( EnumColor.YELLOW + "Groups being loaded for entity " + getId() );
+			PermissionGuard.L.info( EnumColor.YELLOW + "Groups being loaded for entity " + getId() );
 
 		clearGroups();
 		clearTimedGroups();
@@ -40,14 +40,14 @@ public class FileEntity extends PermissibleEntity
 		ConfigurationSection groups = FileBackend.getBackend().permissions.getConfigurationSection( "entities." + getId() + ".groups" );
 		if ( groups != null )
 			for ( String key : groups.getKeys( false ) )
-				addGroup0( PermissionDispatcher.i().getGroup( key ), References.format( groups.getString( key ) ) );
+				addGroup0( PermissionGuard.i().getGroup( key ), References.format( groups.getString( key ) ) );
 	}
 
 	@Override
 	public void reloadPermissions()
 	{
 		if ( isDebug() )
-			PermissionDispatcher.L.info( EnumColor.YELLOW + "Permissions being loaded for entity " + getId() );
+			PermissionGuard.L.info( EnumColor.YELLOW + "Permissions being loaded for entity " + getId() );
 
 		ConfigurationSection permissions = FileBackend.getBackend().permissions.getConfigurationSection( "entities." + getId() + ".permissions" );
 		clearPermissions();
@@ -61,11 +61,11 @@ public class FileEntity extends PermissibleEntity
 
 				if ( !ns.containsOnlyValidChars() )
 				{
-					PermissionDispatcher.L.warning( "We failed to add the permission %s to entity %s because it contained invalid characters, namespaces can only contain 0-9, a-z and _." );
+					PermissionGuard.L.warning( "We failed to add the permission %s to entity %s because it contained invalid characters, namespaces can only contain 0-9, a-z and _." );
 					continue;
 				}
 
-				List<Permission> perms = ns.containsRegex() ? PermissionDispatcher.getNodes( ns ) : Arrays.asList( ns.createPermission() );
+				List<Permission> perms = ns.containsRegex() ? PermissionGuard.getNodes( ns ) : Arrays.asList( ns.createPermission() );
 
 				for ( Permission perm : perms )
 				{
@@ -91,7 +91,7 @@ public class FileEntity extends PermissibleEntity
 			return;
 
 		if ( isDebug() )
-			PermissionDispatcher.L.info( EnumColor.YELLOW + "Entity " + getId() + " being saved to backend" );
+			PermissionGuard.L.info( EnumColor.YELLOW + "Entity " + getId() + " being saved to backend" );
 
 		ConfigurationSection root = FileBackend.getBackend().permissions.getConfigurationSection( "entities." + getId(), true );
 

@@ -1,7 +1,7 @@
 group 'io.amelia'
 version rootProject.getVersion()
 
-apply plugin: 'java'
+apply plugin: 'java'scheduling
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

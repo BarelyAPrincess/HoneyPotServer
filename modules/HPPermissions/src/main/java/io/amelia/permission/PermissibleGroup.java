@@ -46,7 +46,7 @@ public abstract class PermissibleGroup extends PermissibleEntity implements Comp
 	public Collection<PermissibleEntity> getChildEntities( boolean recursive, References refs )
 	{
 		List<PermissibleEntity> children = new ArrayList<>();
-		for ( PermissibleEntity entity : PermissionDispatcher.getEntities() )
+		for ( PermissibleEntity entity : PermissionGuard.getEntities() )
 			if ( entity.getGroups( refs ).contains( this ) )
 				children.add( entity );
 		if ( recursive )
@@ -64,7 +64,7 @@ public abstract class PermissibleGroup extends PermissibleEntity implements Comp
 	public Collection<PermissibleGroup> getChildGroups( boolean recursive, References refs )
 	{
 		List<PermissibleGroup> children = new ArrayList<>();
-		for ( PermissibleGroup group : PermissionDispatcher.getGroups() )
+		for ( PermissibleGroup group : PermissionGuard.getGroups() )
 			if ( group.getGroups( refs ).contains( this ) )
 			{
 				children.add( group );
@@ -121,7 +121,7 @@ public abstract class PermissibleGroup extends PermissibleEntity implements Comp
 	public final void setWeight( int weight )
 	{
 		this.weight = weight;
-		PermissionDispatcher.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.WEIGHT_CHANGED ) );
+		PermissionGuard.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.WEIGHT_CHANGED ) );
 	}
 
 	public boolean isRanked()

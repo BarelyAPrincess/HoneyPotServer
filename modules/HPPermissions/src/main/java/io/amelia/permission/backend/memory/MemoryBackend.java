@@ -13,7 +13,7 @@ import io.amelia.permission.PermissibleEntity;
 import io.amelia.permission.PermissibleGroup;
 import io.amelia.permission.Permission;
 import io.amelia.permission.PermissionBackend;
-import io.amelia.permission.PermissionDispatcher;
+import io.amelia.permission.PermissionGuard;
 import io.amelia.permission.References;
 import io.amelia.permission.lang.PermissionBackendException;
 
@@ -48,7 +48,7 @@ public class MemoryBackend extends PermissionBackend
 	@Override
 	public PermissibleGroup getDefaultGroup( References refs )
 	{
-		return PermissionDispatcher.getGroup( "Default" );
+		return PermissionGuard.getGroup( "Default" );
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class MemoryBackend extends PermissionBackend
 	@Override
 	public void nodeCommit( Permission perm )
 	{
-		PermissionDispatcher.L.fine( "MemoryPermission nodes can not be saved. Sorry for the inconvenience. Might you consider changing permission backend. :(" );
+		PermissionGuard.L.fine( "MemoryPermission nodes can not be saved. Sorry for the inconvenience. Might you consider changing permission backend. :(" );
 	}
 
 	@Override

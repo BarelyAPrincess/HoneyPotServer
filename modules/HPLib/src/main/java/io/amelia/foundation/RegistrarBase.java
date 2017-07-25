@@ -5,6 +5,15 @@ package io.amelia.foundation;
  */
 public abstract class RegistrarBase
 {
+	public static final RegistrarBase INTERNAL = new RegistrarBase()
+	{
+		@Override
+		public String getName()
+		{
+			return "HoneyPotServer";
+		}
+	};
+
 	private Class<?> cls;
 
 	public RegistrarBase()

@@ -11,5 +11,5 @@ package io.amelia.events;
 
 public interface EventExecutor
 {
-	void execute( Listener listener, AbstractEvent event ) throws EventException;
+	void execute( EventListener listener, AbstractEvent event ) throws EventException;
 }

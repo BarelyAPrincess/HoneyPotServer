@@ -11,7 +11,7 @@ package io.amelia.permission;
 
 import io.amelia.permission.lang.PermissionException;
 import io.amelia.permission.lang.PermissionValueException;
-import io.amelia.scheduling.Timings;
+import io.amelia.tasks.Timings;
 import io.amelia.support.Objs;
 
 /**
@@ -232,7 +232,7 @@ public class PermissionResult
 			throw new PermissionValueException( String.format( "The permission %s is not of type boolean.", perm.getNamespace() ) );
 
 		// We can check and allow OPs but ONLY if we are not checking a PermissionDefault node, for one 'sys.op' is the node we check for OPs.
-		if ( allowOps && PermissionDispatcher.allowOps && !perm.getNamespace().equals( PermissionDefault.OP.getNamespace() ) && entity.isOp() )
+		if ( allowOps && PermissionGuard.allowOps && !perm.getNamespace().equals( PermissionDefault.OP.getNamespace() ) && entity.isOp() )
 			return ( boolean ) ( perm.getType() == PermissionType.BOOL ? perm.getModel().getValue() : true );
 
 		if ( perm.getType() == PermissionType.DEFAULT )

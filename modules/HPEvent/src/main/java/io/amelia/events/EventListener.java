@@ -12,6 +12,6 @@ package io.amelia.events;
 /**
  * Simple interface for marking all EventListeners
  */
-public interface Listener
+public interface EventListener
 {
 }

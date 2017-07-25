@@ -85,4 +85,41 @@ public abstract class AbstractEvent
 	{
 		return async;
 	}
+
+	public final boolean isRemote()
+	{
+		return false;
+	}
+
+	public final boolean isLocal()
+	{
+		return !isRemote();
+	}
+
+	/**
+	 * Intended to be overridden to provide event internal signaling
+	 */
+	protected void onEventPreCall()
+	{
+
+	}
+
+	/**
+	 * Intended to be overridden to provide event internal signaling
+	 */
+	protected void onEventPostCall()
+	{
+
+	}
+
+	/**
+	 * Should we execute the next {@link RegisteredListener}
+	 *
+	 * @param registeredListener The next {@link RegisteredListener} in the event chain
+	 * @return return true to execute
+	 */
+	protected boolean onEventConditional( RegisteredListener registeredListener )
+	{
+		return true;
+	}
 }

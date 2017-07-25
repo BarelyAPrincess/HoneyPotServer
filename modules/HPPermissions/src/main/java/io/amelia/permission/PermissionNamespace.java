@@ -66,17 +66,17 @@ public class PermissionNamespace extends NamespaceBase<PermissionNamespace>
 
 	public Permission createPermission()
 	{
-		return PermissionDispatcher.createNode( getString() );
+		return PermissionGuard.createNode( getString() );
 	}
 
 	public Permission createPermission( PermissionType type )
 	{
-		return PermissionDispatcher.createNode( getString(), type );
+		return PermissionGuard.createNode( getString(), type );
 	}
 
 	public Permission getPermission()
 	{
-		return PermissionDispatcher.getNode( getString() );
+		return PermissionGuard.getNode( getString() );
 	}
 
 	public boolean matches( Permission perm )

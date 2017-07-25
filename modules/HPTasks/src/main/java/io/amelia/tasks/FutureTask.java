@@ -7,9 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.scheduling;
+package io.amelia.tasks;
 
-import io.amelia.foundation.Registrar;
+import io.amelia.foundation.RegistrarBase;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -25,7 +25,7 @@ class FutureTask<T> extends Task implements Future<T>
 	private Exception exception = null;
 	private T value;
 
-	FutureTask( final Callable<T> callable, final Registrar creator, final int id )
+	FutureTask( final Callable<T> callable, final RegistrarBase creator, final int id )
 	{
 		super( creator, null, id, -1L );
 		this.callable = callable;
