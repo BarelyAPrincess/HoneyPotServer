@@ -18,8 +18,7 @@ public enum PermissionDefault
 	DEFAULT( "default" ),
 	EVERYBODY( "" ),
 	OP( "sys.op" ),
-	WHITELISTED( "sys.whitelisted" ),
-	QUERY( "sys.query" );
+	WHITELISTED( "sys.whitelisted" );
 
 	/**
 	 * By calling each Permission node we forces it's creation if non-existent
@@ -33,7 +32,6 @@ public enum PermissionDefault
 		EVERYBODY.getNode();
 		OP.getNode();
 		WHITELISTED.getNode();
-		QUERY.getNode();
 	}
 
 	public static boolean isDefault( Permission perm )
@@ -68,40 +66,33 @@ public enum PermissionDefault
 
 		if ( result == null )
 		{
+			result = PermissionGuard.getPermission( getNamespace() );
+
 			if ( this == EVERYBODY )
-			{
-				result = PermissionGuard.createNode( getNamespace(), PermissionType.BOOL );
-				result.getModel().setValue( true );
-				result.getModel().setValueDefault( true );
-			}
-			else
-				result = PermissionGuard.createNode( getNamespace() );
+				result.getPermissionMeta().setDefault( true );
 
 			switch ( this )
 			{
 				case DEFAULT:
-					result.getModel().setDescription( "Used as the default permission node if one does not exist. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Used as the default permission node if one does not exist. (DO NOT EDIT!)" );
 					break;
 				case EVERYBODY:
-					result.getModel().setDescription( "This node is used for the 'everyone' permission. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "This node is used for the 'everyone' permission. (DO NOT EDIT!)" );
 					break;
 				case OP:
-					result.getModel().setDescription( "Indicates OP entities. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Indicates OP entities. (DO NOT EDIT!)" );
 					break;
 				case USER:
-					result.getModel().setDescription( "Indicates a general USER entity. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Indicates a general USER entity. (DO NOT EDIT!)" );
 					break;
 				case ADMIN:
-					result.getModel().setDescription( "Indicates ADMIN entities. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Indicates ADMIN entities. (DO NOT EDIT!)" );
 					break;
 				case BANNED:
-					result.getModel().setDescription( "Indicates BANNED entities. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Indicates BANNED entities. (DO NOT EDIT!)" );
 					break;
 				case WHITELISTED:
-					result.getModel().setDescription( "Indicates WHITELISTED entities. (DO NOT EDIT!)" );
-					break;
-				case QUERY:
-					result.getModel().setDescription( "Indicates entities allowed to login thru QUERY server. (DO NOT EDIT!)" );
+					result.getPermissionMeta().setDescription( "Indicates WHITELISTED entities. (DO NOT EDIT!)" );
 					break;
 			}
 

@@ -20,6 +20,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import javax.security.auth.callback.Callback;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,7 +39,7 @@ public class Application extends ApplicationInterface
 	}
 
 	private final Logger L = LogBuilder.get( Application.class );
-	private final Map<String, NoRtnFunction> actions = new HashMap<>();
+	private final Map<String, Callback> actions = new HashMap<>();
 	private final Env env = new Env();
 	private final OptionParser p = new OptionParser();
 	private final RunlevelEvent runlevel = new RunlevelEvent();
@@ -100,7 +101,7 @@ public class Application extends ApplicationInterface
 		// TODO Throw runlevel change events
 	}
 
-	public void onArg( String arg, String desc, NoRtnFunction func )
+	public void onArg( String arg, String desc, Callback func )
 	{
 		p.accepts( arg, desc );
 		actions.put( arg, func );

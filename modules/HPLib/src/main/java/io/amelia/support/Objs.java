@@ -10,7 +10,8 @@
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.lang.StartupException;
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
 import io.amelia.util.Pair;
 
@@ -24,7 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -378,6 +382,21 @@ public class Objs
 		return left == right;
 	}
 
+	public static <T> Class<T> getClassByName( @NotNull String aClass )
+	{
+		if ( isEmpty( aClass ) )
+			return null;
+
+		try
+		{
+			return ( Class<T> ) Class.forName( aClass );
+		}
+		catch ( ClassNotFoundException e )
+		{
+			throw new ApplicationException.Runtime( ReportingLevel.E_ERROR, e );
+		}
+	}
+
 	private static <T> Method getMethodSafe( T obj, String methodName )
 	{
 		try
@@ -406,14 +425,14 @@ public class Objs
 			if ( e.getTargetException() instanceof UncaughtException )
 				throw ( UncaughtException ) e.getTargetException();
 			else
-				throw new StartupException( String.format( "Failed to initialize a new instance of %s, because it has thrown an exception.", clz.getSimpleName() ), e.getTargetException() );
+				throw new UncaughtException( ReportingLevel.E_ERROR, String.format( "Failed to initialize a new instance of %s, because it has thrown an exception.", clz.getSimpleName() ), e.getTargetException() );
 		}
 		catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e )
 		{
 			String argClasses = Arrays.stream( args ).map( o -> o.getClass().getSimpleName() ).collect( Collectors.joining( ", " ) );
 			if ( argClasses.length() == 0 )
 				argClasses = "None";
-			throw new StartupException( String.format( "Failed to initialize a new instance of %s, does the class have a constructor to match arguments '%s'?", clz.getSimpleName(), argClasses ), e );
+			throw new UncaughtException( ReportingLevel.E_ERROR, String.format( "Failed to initialize a new instance of %s, does the class have a constructor to match arguments '%s'?", clz.getSimpleName(), argClasses ), e );
 		}
 	}
 
@@ -601,6 +620,18 @@ public class Objs
 	{
 		if ( number.longValue() == 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+	}
+
+	public static <T, R> R onPresent( @NotNull Optional<T> value, @NotNull Function<T, R> present, Supplier<R> not )
+	{
+		if ( not == null )
+			not = () -> null;
+		return value == null ? not.get() : value.map( present ).orElseGet( not );
+	}
+
+	public static <T, R> R onPresent( @NotNull Optional<T> value, @NotNull Function<T, R> present )
+	{
+		return onPresent( value, present, null );
 	}
 
 	public static int safeLongToInt( long l )

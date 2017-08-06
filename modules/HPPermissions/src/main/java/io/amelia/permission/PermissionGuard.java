@@ -13,10 +13,12 @@ import io.amelia.config.ConfigRegistry;
 import io.amelia.events.EventDispatcher;
 import io.amelia.events.EventHandler;
 import io.amelia.events.EventPriority;
-import io.amelia.foundation.modular.ModularInstance;
-import io.amelia.foundation.service.ServiceDispatcher;
-import io.amelia.foundation.service.ServicePriority;
-import io.amelia.foundation.service.ServiceProvider;
+import io.amelia.foundation.RegistrarBase;
+import io.amelia.foundation.binding.AppBindings;
+import io.amelia.foundation.facades.interfaces.PermissionService;
+import io.amelia.foundation.service.IPermission;
+import io.amelia.foundation.service.IWhitelist;
+import io.amelia.foundation.facades.FacadePriority;
 import io.amelia.lang.EnumColor;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
@@ -27,8 +29,9 @@ import io.amelia.permission.event.PermissibleEntityEvent;
 import io.amelia.permission.event.PermissibleEvent;
 import io.amelia.permission.event.PermissibleSystemEvent;
 import io.amelia.permission.lang.PermissionBackendException;
-import io.amelia.tasks.Tasker;
 import io.amelia.support.Objs;
+import io.amelia.tasks.CallableTask;
+import io.amelia.tasks.TaskDispatcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,15 +41,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class PermissionGuard
+public class PermissionGuard implements PermissionService
 {
 	public static final Logger L = LogBuilder.get( PermissionGuard.class );
-	public static final PermissionModular modular = new PermissionModular();
-	private static final Set<Permission> permissions = new HashSet<>();
+	private static final String PERMISSION_PREFIX = "io.amelia.permissions";
+	// private static final Set<Permission> permissions = new HashSet<>();
 	static boolean allowOps = true;
 	static boolean debugMode = false;
 	private static PermissionBackend backend = null;
@@ -59,22 +61,18 @@ public class PermissionGuard
 
 	static
 	{
-		ConfigRegistry config = ConfigRegistry.i();
-		debugMode = config.getBoolean( "permissions.debug", debugMode );
-		allowOps = config.getBoolean( "permissions.allowOps", allowOps );
+		hasWhitelist = ConfigRegistry.getBoolean( "settings.whitelist" ).orElse( hasWhitelist );
+		debugMode = ConfigRegistry.getBoolean( "permissions.debug" ).orElse( debugMode );
+		allowOps = ConfigRegistry.getBoolean( "permissions.allowOps" ).orElse( allowOps );
 
-		hasWhitelist = config.getBoolean( "settings.whitelist" );
+		AppBindings.registerFacade( Whitelist.class, FacadePriority.LOWEST, PermissionGuard::new );
+		AppBindings.registerFacade( Permissions.class, FacadePriority.LOWEST, PermissionGuard::new );
 
-		ServiceDispatcher.registerService( Permission.class, modular, modular, ServicePriority.Lowest );
-		ServiceDispatcher.registerService( PermissibleGroup.class, modular, modular, ServicePriority.Lowest );
-		ServiceDispatcher.registerService( PermissibleEntity.class, modular, modular, ServicePriority.Lowest );
+		// ServiceDispatcher.registerService( Permission.class, modular, modular, ServicePriority.Lowest );
+		// ServiceDispatcher.registerService( PermissibleGroup.class, modular, modular, ServicePriority.Lowest );
+		// ServiceDispatcher.registerService( PermissibleEntity.class, modular, modular, ServicePriority.Lowest );
 
 		initBackend();
-	}
-
-	public static void addPermission( Permission permission )
-	{
-		permissions.add( permission );
 	}
 
 	protected static void callEvent( PermissibleSystemEvent.Action action )
@@ -217,12 +215,12 @@ public class PermissionGuard
 
 	public static PermissibleGroup getDefaultGroup()
 	{
-		return this.getDefaultGroup( null );
+		return getDefaultGroup( null );
 	}
 
 	public static void setDefaultGroup( PermissibleGroup group )
 	{
-		this.setDefaultGroup( group, null );
+		setDefaultGroup( group, null );
 	}
 
 	/**
@@ -235,7 +233,7 @@ public class PermissionGuard
 		String refIndex = ""; // refs != null ? refs : "";
 
 		if ( !defaultGroups.containsKey( refIndex ) )
-			defaultGroups.put( refIndex, this.getDefaultGroup( refs, this.getDefaultGroup( null, null ) ) );
+			defaultGroups.put( refIndex, getDefaultGroup( refs, getDefaultGroup( null, null ) ) );
 
 		return defaultGroups.get( refIndex );
 	}
@@ -419,12 +417,19 @@ public class PermissionGuard
 		if ( ns == null || ns.getNodeCount() < 1 )
 			return new ArrayList<>();
 
+
+
 		return permissions.stream().filter( p -> ns.matches( p ) ).collect( Collectors.toList() );
 	}
 
 	public static List<Permission> getNodes( String ns )
 	{
 		return getNodes( PermissionNamespace.parseString( ns ) );
+	}
+
+	public static Permission getPermission( String path )
+	{
+		return AppBindings.getReference( Permission::new, PERMISSION_PREFIX, path );
 	}
 
 	public static Set<String> getRefInheritance( String ref )
@@ -466,7 +471,7 @@ public class PermissionGuard
 		PermissionBackend.registerBackendAlias( "file", FileBackend.class );
 		PermissionBackend.registerBackendAlias( "memory", MemoryBackend.class );
 
-		String backendName = ConfigRegistry.getString( "permissions.backend" );
+		String backendName = ConfigRegistry.getString( "permissions.backend" ).orElse( null );
 
 		if ( Objs.isEmpty( backendName ) )
 		{
@@ -595,9 +600,9 @@ public class PermissionGuard
 	 * @param task  TimerTask object
 	 * @param delay delay in seconds
 	 */
-	protected static void registerTask( TimerTask task, int delay )
+	protected static void registerTask( CallableTask task, int delay )
 	{
-		Tasker.scheduleAsyncDelayedTask( this, delay * 50, task );
+		TaskDispatcher.scheduleAsyncDelayedTask( RegistrarBase.INTERNAL, delay * 50, task );
 	}
 
 	public static void reload() throws PermissionBackendException
@@ -608,7 +613,7 @@ public class PermissionGuard
 		backend.loadEntities();
 		backend.loadGroups();
 
-		hasWhitelist = ConfigRegistry.getBoolean( "settings.whitelist" );
+		hasWhitelist = ConfigRegistry.getBoolean( "settings.whitelist" ).orElse( false );
 	}
 
 	/**
@@ -648,8 +653,10 @@ public class PermissionGuard
 	 */
 	public static void saveData()
 	{
-		for ( Permission p : permissions )
-			p.commit();
+		AppBindings.getReference( Permission::new, PERMISSION_PREFIX, "" ).getChildren().forEach( Permission::commit );
+
+		// for ( Permission p : permissions )
+		// p.commit();
 
 		for ( PermissibleGroup entity : groups.values() )
 			entity.save();
@@ -678,7 +685,7 @@ public class PermissionGuard
 
 	public static void setRefInheritance( String ref, Collection<String> heir )
 	{
-		Collection<String> cur = getRefInheritance( ref );
+		Set<String> cur = getRefInheritance( ref );
 		cur.addAll( heir );
 		refInheritance.put( ref, cur );
 	}
@@ -691,15 +698,25 @@ public class PermissionGuard
 
 	private PermissionGuard()
 	{
-
+		// Static Class
 	}
 
-	private static class PermissionModular extends ModularInstance implements ServiceProvider
+	public static class PermissionService implements IPermission
 	{
-		@Override
-		public Class<?> getModularClass()
+		public PermissionService()
 		{
-			return PermissionGuard.class;
+
+		}
+	}
+
+	/**
+	 * Provides access control for logins
+	 */
+	public static class WhitelistService implements IWhitelist
+	{
+		public WhitelistService()
+		{
+
 		}
 	}
 }

@@ -1,13 +1,11 @@
-include ':HPNetworking', ':HPConfig', ':HPEvent', ':HPLib', ':HPLog', ':HPPlugins', ':HPTasks', ':HPScripting', ':HPPermissions', ':HPServices'
+include ':HPNetworking', ':HPConfig', ':HPLib', ':HPLog', ':HPPlugins', ':HPTasks', ':HPScripting', ':HPPermissions'
 project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
 project( ':HPConfig' ).projectDir = new File( 'modules/HPConfig' )
-project( ':HPEvent' ).projectDir = new File( 'modules/HPEvent' )
 project( ':HPLib' ).projectDir = new File( 'modules/HPLib' )
 project( ':HPLog' ).projectDir = new File( 'modules/HPLog' )
 project( ':HPPlugins' ).projectDir = new File( 'modules/HPPlugins' )
 project( ':HPTasks' ).projectDir = new File( 'modules/HPTasks' )
 project( ':HPScripting' ).projectDir = new File( 'modules/HPScripting' )
 project( ':HPPermissions' ).projectDir = new File( 'modules/HPPermissions' )
-project( ':HPServices' ).projectDir = new File( 'modules/HPServices' )
 
 rootProject.name = 'HoneyPotServer'

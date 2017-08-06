@@ -17,7 +17,7 @@ import io.amelia.lang.ReportingLevel;
 /**
  * This exception is thrown when a permissions backend has issues loading
  */
-public class PermissionBackendException extends ApplicationException
+public class PermissionBackendException extends ApplicationException.Runtime
 {
 	private static final long serialVersionUID = -133147199740089646L;
 

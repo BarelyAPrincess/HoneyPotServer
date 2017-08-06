@@ -43,6 +43,11 @@ public class PermissionNamespace extends NamespaceBase<PermissionNamespace>
 		return new PermissionNamespace( Strs.split( namespace, regex ).collect( Collectors.toList() ) );
 	}
 
+	public static PermissionNamespace transform( NamespaceBase ns )
+	{
+		return new PermissionNamespace( ns.getNodes() );
+	}
+
 	public PermissionNamespace( String[] nodes )
 	{
 		super( nodes );

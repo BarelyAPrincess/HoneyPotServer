@@ -40,7 +40,7 @@ public class FileEntity extends PermissibleEntity
 		ConfigurationSection groups = FileBackend.getBackend().permissions.getConfigurationSection( "entities." + getId() + ".groups" );
 		if ( groups != null )
 			for ( String key : groups.getKeys( false ) )
-				addGroup0( PermissionGuard.i().getGroup( key ), References.format( groups.getString( key ) ) );
+				addGroup0( PermissionGuard.getGroup( key ), References.format( groups.getString( key ) ) );
 	}
 
 	@Override

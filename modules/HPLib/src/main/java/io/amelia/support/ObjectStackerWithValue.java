@@ -102,6 +102,6 @@ public abstract class ObjectStackerWithValue<B extends ObjectStackerWithValue<B,
 	public final Map<String, T> values()
 	{
 		disposeCheck();
-		return children.stream().filter( ObjectStackerWithValue::hasValue ).collect( Collectors.toMap( ObjectStackerWithValue::key, c -> c.getValue().get() ) );
+		return children.stream().filter( ObjectStackerWithValue::hasValue ).collect( Collectors.toMap( ObjectStackerWithValue::getLocalName, c -> c.getValue().get() ) );
 	}
 }

@@ -85,6 +85,12 @@ public class UncaughtException extends RuntimeException implements IException
 	}
 
 	@Override
+	public ReportingLevel reportingLevel()
+	{
+		return level;
+	}
+
+	@Override
 	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 	{
 		return ReportingLevel.E_UNHANDLED;
@@ -94,12 +100,6 @@ public class UncaughtException extends RuntimeException implements IException
 	public boolean isIgnorable()
 	{
 		return level.isIgnorable();
-	}
-
-	@Override
-	public ReportingLevel reportingLevel()
-	{
-		return level;
 	}
 
 	public void setReportingLevel( ReportingLevel level )

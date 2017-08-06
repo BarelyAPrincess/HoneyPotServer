@@ -17,21 +17,24 @@ import java.util.stream.Stream;
 public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 {
 	protected final List<B> children = new ArrayList<>();
-	private final String key;
+	private final String localName;
 	protected EnumSet<ObjectStackerWithValue.Flag> flags = EnumSet.noneOf( ObjectStackerWithValue.Flag.class );
 	protected B parent;
 
-	protected ObjectStackerBase( String key )
+	protected ObjectStackerBase( String localName )
 	{
-		this( null, key );
+		this( null, localName );
 	}
 
-	protected ObjectStackerBase( B parent, String key )
+	protected ObjectStackerBase( B parent, String localName )
 	{
-		Objs.notNull( key );
+		Objs.notNull( localName );
+
+		if ( !localName.matches( "[a-z0-9_]*" ) )
+			throwExceptionIgnorable( String.format( "The local name '%s' can only contain characters a-z, 0-9, and _.", localName ) );
 
 		this.parent = parent;
-		this.key = key;
+		this.localName = localName;
 	}
 
 	public final B addFlag( Flag... flags )
@@ -46,15 +49,15 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 		return ( B ) this;
 	}
 
-	private B child( @NotNull String key, boolean create )
+	private B child( @NotNull String localName, boolean create )
 	{
 		disposeCheck();
 		for ( B child : children )
-			if ( child.key() == null )
+			if ( child.getLocalName() == null )
 				children.remove( child );
-			else if ( child.key().equals( key ) )
+			else if ( child.getLocalName().equals( localName ) )
 				return child;
-		return create ? createChild( key ) : null;
+		return create ? createChild( localName ) : null;
 	}
 
 	public void clear()
@@ -94,27 +97,32 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 		return ( B ) ( flags.contains( flag ) ? this : parent == null ? null : parent.findFlag( flag ) );
 	}
 
-	public final B getChild( @NotNull Namespace nodes, boolean create )
+	public final B getChild( @NotNull Namespace path )
+	{
+		return getChild( path, true );
+	}
+
+	public final B getChild( @NotNull Namespace path, boolean create )
 	{
 		disposeCheck();
-		Objs.notNull( nodes, "nodes can not be null" );
-		if ( nodes.getNodeCount() == 0 )
+		Objs.notNull( path, "path can not be null" );
+		if ( path.getNodeCount() == 0 )
 			return ( B ) this;
-		String key = nodes.getFirst();
+		String key = path.getFirst();
 		B child = child( key, create );
-		return child == null ? null : nodes.getNodeCount() <= 1 ? child : child.getChild( nodes.subNamespace( 1 ), create );
+		return child == null ? null : path.getNodeCount() <= 1 ? child : child.getChild( path.subNamespace( 1 ), create );
 	}
 
-	public final B getChild( @NotNull String nodes )
+	public final B getChild( @NotNull String path )
 	{
-		return getChild( nodes, false );
+		return getChild( path, true );
 	}
 
-	public final B getChild( @NotNull String nodes, boolean create )
+	public final B getChild( @NotNull String path, boolean create )
 	{
 		disposeCheck();
-		Objs.notNull( nodes );
-		return getChild( Namespace.parseString( nodes ), create );
+		Objs.notNull( path );
+		return getChild( Namespace.parseString( path ), create );
 	}
 
 	public final String getChildNamespace()
@@ -149,13 +157,18 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 	public final Set<String> getKeys()
 	{
 		disposeCheck();
-		return children.stream().map( ObjectStackerBase::key ).collect( Collectors.toSet() );
+		return children.stream().map( ObjectStackerBase::getLocalName ).collect( Collectors.toSet() );
 	}
 
 	public final Set<String> getKeysDeep()
 	{
 		disposeCheck();
-		return Stream.concat( getKeys().stream(), getChildren().flatMap( n -> n.getKeysDeep().stream().map( s -> n.key() + "." + s ) ) ).sorted().collect( Collectors.toSet() );
+		return Stream.concat( getKeys().stream(), getChildren().flatMap( n -> n.getKeysDeep().stream().map( s -> n.getLocalName() + "." + s ) ) ).sorted().collect( Collectors.toSet() );
+	}
+
+	public final String getLocalName()
+	{
+		return localName;
 	}
 
 	public final String getNamespace()
@@ -166,9 +179,9 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 	public final Namespace getNamespaceObj()
 	{
 		disposeCheck();
-		if ( Objs.isEmpty( key ) )
+		if ( Objs.isEmpty( localName ) )
 			return new Namespace();
-		return hasParent() ? getParent().getNamespaceObj().append( key() ) : Namespace.parseString( key() );
+		return hasParent() ? getParent().getNamespaceObj().append( getLocalName() ) : Namespace.parseString( getLocalName() );
 	}
 
 	public final B getParent()
@@ -220,15 +233,10 @@ public abstract class ObjectStackerBase<B extends ObjectStackerBase<B>>
 		return hasFlag( Flag.DISPOSED );
 	}
 
-	public final String key()
-	{
-		return key;
-	}
-
 	protected final void putChild( B child ) throws ObjectStackerException.Ignorable
 	{
 		disposeCheck();
-		B oldChild = getChild( child.key() );
+		B oldChild = getChild( child.getLocalName() );
 		if ( oldChild != null )
 		{
 			if ( hasFlag( Flag.NO_OVERRIDE ) )

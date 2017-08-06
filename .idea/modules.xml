@@ -5,9 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" group="HPConfig" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" group="HPConfig" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" group="HPConfig" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent.iml" group="HPEvent" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_main.iml" group="HPEvent" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_test.iml" group="HPEvent" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" group="HPLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" group="HPLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" group="HPLib" />
@@ -26,9 +23,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" group="HPScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices.iml" group="HPServices" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_main.iml" group="HPServices" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_test.iml" group="HPServices" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" group="HPTasks" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" group="HPTasks" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" group="HPTasks" />

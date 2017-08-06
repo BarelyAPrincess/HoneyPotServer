@@ -1,10 +1,11 @@
 package io.amelia.serializable;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.util.AnonFunction;
 import io.amelia.support.LibTime;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 /**
  * Defines a message containing a description and arbitrary data object that can be
@@ -252,7 +253,7 @@ public final class Message implements Parcelable
 	 * with other handlers.
 	 */
 	public int what;
-	AnonFunction callback;
+	Consumer callback;
 	Bundle data;
 	int flags;
 	// sometimes we store linked lists of these things
@@ -337,7 +338,7 @@ public final class Message implements Parcelable
 	 * not set, the message will be dispatched to the receiving Handler's
 	 * {@link Handler#handleMessage(Message Handler.handleMessage())}.
 	 */
-	public Runnable getCallback()
+	public Callable getCallback()
 	{
 		return callback;
 	}

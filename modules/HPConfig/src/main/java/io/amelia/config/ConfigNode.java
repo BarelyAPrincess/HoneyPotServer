@@ -62,6 +62,11 @@ public class ConfigNode extends ObjectStackerWithValue<ConfigNode, Object>
 		return OptionalDouble.of( Objs.castToDouble( getValue( key ).orElse( -1D ) ) );
 	}
 
+	public <T extends Enum<T>> T getEnum( String enumKey, Class<T> enumClass )
+	{
+		return Objs.onPresent( getString( enumKey ), s -> Enum.valueOf( enumClass, s ) );
+	}
+
 	@Deprecated
 	public OptionalInt getInt( String key )
 	{
@@ -88,6 +93,21 @@ public class ConfigNode extends ObjectStackerWithValue<ConfigNode, Object>
 		return Optional.ofNullable( Objs.castToString( getValue( key ).orElse( null ) ) );
 	}
 
+	public <T> Class<T> getStringAsClass( @NotNull String classKey )
+	{
+		return getStringAsClass( classKey, null );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	public <T> Class<T> getStringAsClass( @NotNull String classKey, Class<T> expectedClass )
+	{
+		Optional<String> sClass = getString( classKey );
+		if ( !sClass.isPresent() )
+			return null;
+		Class<T> aClass = Objs.getClassByName( sClass.orElse( null ) );
+		return expectedClass == null ? aClass : aClass == null || !expectedClass.isAssignableFrom( aClass ) ? null : aClass;
+	}
+
 	public void setChild( @NotNull String key, @NotNull ConfigNode node, boolean preserve )
 	{
 		getChild( key, true ).setChild( node, preserve );
@@ -95,7 +115,7 @@ public class ConfigNode extends ObjectStackerWithValue<ConfigNode, Object>
 
 	public void setChild( @NotNull ConfigNode node, boolean preserve )
 	{
-		ConfigNode config = getChild( node.key(), true );
+		ConfigNode config = getChild( node.getLocalName(), true );
 
 		if ( !preserve )
 			config.clear();

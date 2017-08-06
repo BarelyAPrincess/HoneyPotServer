@@ -2,6 +2,7 @@ package io.amelia.config;
 
 import com.sun.istack.internal.NotNull;
 import io.amelia.env.Env;
+import io.amelia.foundation.binding.AppBindings;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ConfigException;
 import io.amelia.support.Arrs;
@@ -192,6 +193,8 @@ public class ConfigRegistry
 		for ( Map.Entry<String, Object> entry : env.map().entrySet() )
 			envNode.setValue( entry.getKey(), entry.getValue() );
 		envNode.addFlag( ConfigNode.Flag.READ_ONLY, ConfigNode.Flag.NO_SAVE );
+
+		AppBindings.init();
 	}
 
 	private static void loadConfig( @NotNull File configPath, @NotNull String nestingPrefix ) throws ConfigException.Error
@@ -224,7 +227,7 @@ public class ConfigRegistry
 					{
 						Properties prop = new Properties();
 						prop.load( new FileReader( file ) );
-						node.setValue( nesting, Maps.newHashMap( prop ) );
+						node.setValue( nesting, Maps.builder( prop ).hashMap() );
 					}
 
 					// TODO Add more supported types

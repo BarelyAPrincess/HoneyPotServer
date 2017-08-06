@@ -1,155 +1,152 @@
 package io.amelia.foundation.binding;
 
-import io.amelia.lang.ObjectStackerException;
-import io.amelia.support.Lists;
-import io.amelia.support.ObjectStackerBase;
+import com.sun.istack.internal.NotNull;
+import io.amelia.support.Namespace;
+import io.amelia.support.NamespaceBase;
+import io.amelia.support.Objs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-@SuppressWarnings( "unchecked" )
-public final class BindingReference extends ObjectStackerBase<BindingReference>
+public abstract class BindingReference<T extends BindingReference<T, V>, V>
 {
-	private final Map<ObjectListenerEvent, List<BiConsumer<BindingReference, List<Object>>>> objectListeners = new ConcurrentHashMap<>();
+	BindingBase binding;
+	BindingReference<T, V> parent = null;
+	Namespace prefix;
+	Supplier<T> supplier;
+	Class<V> valueClass;
 
-	private final List<Object> objects = new ArrayList<>();
-
-	protected BindingReference( String key )
+	public BindingReference( @NotNull Class<V> valueClass )
 	{
-		super( key );
+		this.valueClass = valueClass;
 	}
 
-	protected BindingReference( BindingReference parent, String key )
+	public V computeValue( Function<Optional<V>, V> function )
 	{
-		super( parent, key );
-	}
+		Supplier<Stream<V>> values = () -> binding.fetch( 1, valueClass );
 
-	public BindingReference addObjectListener( ObjectListenerEvent event, BiConsumer<BindingReference, List<Object>> listener )
-	{
-		objectListeners.compute( event, ( k, v ) -> v == null ? new ArrayList<>() : v ).add( listener );
-		return this;
-	}
+		if ( values.get().count() > 1 )
+			values.get().skip( 1 ).forEach( v -> binding.remove( v ) );
 
-	public <T> Stream<T> compute( Function<T, T> function )
-	{
-		synchronized ( objects )
+		Optional<V> value = values.get().findFirst();
+
+		V returnedValue = function.apply( value );
+
+		if ( !value.isPresent() || !Objects.equals( value, returnedValue ) )
 		{
-			return objects.stream().map( o ->
-			{
-				T t = function.apply( ( T ) o );
-				if ( !objects.contains( t ) )
-				{
-					objects.remove( o );
-					objects.add( t );
-				}
-				return t;
-			} );
+			value.ifPresent( v -> binding.remove( v ) );
+			binding.store( returnedValue );
 		}
+
+		return returnedValue;
 	}
 
-	@Override
-	protected BindingReference createChild( String key )
+	T create( BindingBase bindingBase, BindingReference parent )
 	{
-		return new BindingReference( this, key );
+		@NotNull
+		T bindingReference = supplier.get();
+		bindingReference.parent = parent;
+		return bindingReference;
 	}
 
-	@Override
-	protected void throwExceptionError( String message ) throws BindingException.Error
+	T create( BindingBase bindingBase )
 	{
-		throw new BindingException.Error( this, message );
+		@NotNull
+		T bindingReference = supplier.get();
+		bindingReference.prefix = prefix;
+		bindingReference.supplier = supplier;
+		bindingReference.binding = bindingBase;
+		return bindingReference;
 	}
 
-	@Override
-	protected void throwExceptionIgnorable( String message ) throws ObjectStackerException.Ignorable
+	public final T getChild( @NotNull Namespace path )
 	{
-		throw new BindingException.Ignorable( this, message );
+		goCheck();
+		@NotNull
+		T bindingReference = create( binding.getChild( path ) );
+		bindingReference.parent = this;
+		return bindingReference;
 	}
 
-	public <T> Stream<T> fetch( int depth, Class<T> aClass )
+	public final T getChild( @NotNull String path )
 	{
-		Stream<T> stream = objects.stream().filter( o -> o.getClass() == aClass ).map( o -> ( T ) o );
-		if ( depth > 1 )
-			for ( BindingReference child : children )
-				stream = Stream.concat( stream, child.fetch( depth - 1, aClass ) );
-		return stream;
+		return getChild( Namespace.parseString( path ) );
 	}
 
-	public <T, U> Stream<U> fetch( int depth, Function<T, U> function )
+	public String getChildNamespace()
 	{
-		Stream<U> stream = objects.stream().map( o -> function.apply( ( T ) o ) ).filter( Objects::nonNull );
-		if ( depth > 1 )
-			for ( BindingReference child : children )
-				stream = Stream.concat( stream, child.fetch( depth - 1, function ) );
-		return stream;
+		goCheck();
+		return binding.getChildNamespace();
 	}
 
-	public <T, U> Stream<U> fetch( Function<T, U> function )
+	public Stream<T> getChildren()
 	{
-		return fetch( 1, function );
+		goCheck();
+		return binding.getChildren().filter( v -> v.fetch( 1, valueClass ).count() > 0 ).map( v -> create( v, this ) );
 	}
 
-	public <T> Stream<T> fetch( Class<T> aClass )
+	public final Stream<T> getChildrenRecursive()
 	{
-		return fetch( 1, aClass );
+		return getChildren().flatMap( BindingReference::getChildrenRecursive0 );
 	}
 
-	public <T> Stream<T> fetch( int depth )
+	protected final Stream<T> getChildrenRecursive0()
 	{
-		Stream<T> stream = objects.stream().map( o -> ( T ) o );
-		if ( depth > 1 )
-			for ( BindingReference child : children )
-				stream = Stream.concat( stream, child.fetch( depth - 1 ) );
-		return stream;
+		goCheck();
+		return Stream.concat( Stream.of( ( T ) this ), getChildren().flatMap( BindingReference::getChildrenRecursive0 ) );
 	}
 
-	public <T> Stream<T> fetch()
+	public String getLocalName()
 	{
-		return fetch( 1 );
+		goCheck();
+		return binding.getLocalName();
 	}
 
-	public void remove( Object obj )
+	public String getNamespace()
 	{
-		remove( Lists.newArrayList( obj ) );
+		goCheck();
+		return binding.getNamespace().substring( prefix.getNodeCount() );
 	}
 
-	public void remove( List<Object> objs )
+	public NamespaceBase getNamespaceObj()
 	{
-		signalObjectListeners( ObjectListenerEvent.REMOVE, this, objs );
-		signalObjectListeners( ObjectListenerEvent.ALL, this, objs );
-
-		synchronized ( objects )
-		{
-			objects.remove( objs );
-		}
+		goCheck();
+		return binding.getNamespaceObj().subNamespace( prefix.getNodeCount() );
 	}
 
-	protected void signalObjectListeners( ObjectListenerEvent event, BindingReference ref, List<Object> objs )
+	public boolean hasParent()
 	{
-		if ( hasParent() )
-			parent.signalObjectListeners( event, ref, objs );
-		for ( BiConsumer<BindingReference, List<Object>> listener : objectListeners.compute( event, ( k, v ) -> v == null ? new ArrayList<>() : v ) )
-			listener.accept( ref, objs );
+		goCheck();
+		return binding.getNamespaceObj().getNodeCount() - prefix.getNodeCount() > 0;
 	}
 
-	public void store( Object obj )
+	public BindingReference<T, V> getParent()
 	{
-		store( Lists.newArrayList( obj ) );
+		goCheck();
+		if ( parent == null && hasParent() )
+			parent = create( binding.getParent() );
+		return parent;
 	}
 
-	public void store( List<Object> objs )
+	public String getRootNamespace()
 	{
-		signalObjectListeners( ObjectListenerEvent.STORE, this, objs );
-		signalObjectListeners( ObjectListenerEvent.ALL, this, objs );
+		return binding.getRootNamespace();
+	}
 
-		synchronized ( objects )
-		{
-			objects.addAll( objs );
-		}
+	protected void goCheck()
+	{
+		Objs.notNull( binding );
+		Objs.notNull( valueClass );
+		Objs.notNull( prefix );
+		Objs.notNull( supplier );
+	}
+
+	public boolean hasChildren()
+	{
+		goCheck();
+		return binding.getChildren().filter( v -> v.fetch( 1, valueClass ).count() > 0 ).count() > 0;
 	}
 }

@@ -2,10 +2,10 @@ package io.amelia.serializable;
 
 import io.amelia.foundation.ApplicationInterface;
 import io.amelia.foundation.Kernel;
-import io.amelia.util.AnonFunction;
-import io.amelia.support.NoRtnFunction;
 
 import java.lang.reflect.Modifier;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 /**
  * A Handler allows you to send and process {@link Message} and Runnable
@@ -56,14 +56,14 @@ public class Handler
 	 */
 	private static final boolean FIND_POTENTIAL_LEAKS = false;
 
-	private static Message getPostMessage( AnonFunction r )
+	private static Message getPostMessage( Callable r )
 	{
 		Message m = Message.obtain();
 		m.callback = r;
 		return m;
 	}
 
-	private static Message getPostMessage( AnonFunction r, Object token )
+	private static Message getPostMessage( Callable r, Object token )
 	{
 		Message m = Message.obtain();
 		m.obj = token;
@@ -73,11 +73,11 @@ public class Handler
 
 	private static void handleCallback( Message message )
 	{
-		message.callback.run();
+		message.callback.accept( message );
 	}
 
 	final boolean mAsynchronous;
-	final NoRtnFunction<Message> mCallback;
+	final Consumer<Message> mCallback;
 	final Looper mLooper;
 	final MessageQueue mQueue;
 	IMessenger mMessenger;
@@ -104,7 +104,7 @@ public class Handler
 	 *
 	 * @param callback The callback interface in which to handle messages, or null.
 	 */
-	public Handler( NoRtnFunction<Message> callback )
+	public Handler( Consumer<Message> callback )
 	{
 		this( callback, false );
 	}
@@ -167,7 +167,7 @@ public class Handler
 	 *                 each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
 	 * @hide
 	 */
-	public Handler( NoRtnFunction<Message> callback, boolean async )
+	public Handler( Consumer<Message> callback, boolean async )
 	{
 		if ( FIND_POTENTIAL_LEAKS )
 		{

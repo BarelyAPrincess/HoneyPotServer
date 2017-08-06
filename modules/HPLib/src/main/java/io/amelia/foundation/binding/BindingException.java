@@ -14,57 +14,57 @@ public class BindingException
 
 	public static class Error extends ObjectStackerException.Error
 	{
-		public Error( BindingReference node )
+		public Error( BindingBase node )
 		{
 			super( node );
 		}
 
-		public Error( BindingReference node, String message )
+		public Error( BindingBase node, String message )
 		{
 			super( node, message );
 		}
 
-		public Error( BindingReference node, String message, Throwable cause )
+		public Error( BindingBase node, String message, Throwable cause )
 		{
 			super( node, message, cause );
 		}
 
-		public Error( BindingReference node, Throwable cause )
+		public Error( BindingBase node, Throwable cause )
 		{
 			super( node, cause );
 		}
 
-		public BindingReference getBindingNode()
+		public BindingBase getBindingNode()
 		{
-			return ( BindingReference ) node;
+			return ( BindingBase ) node;
 		}
 	}
 
 	public static class Ignorable extends ObjectStackerException.Ignorable
 	{
-		public Ignorable( BindingReference node )
+		public Ignorable( BindingBase node )
 		{
 			super( node );
 		}
 
-		public Ignorable( BindingReference node, String message )
+		public Ignorable( BindingBase node, String message )
 		{
 			super( node, message );
 		}
 
-		public Ignorable( BindingReference node, String message, Throwable cause )
+		public Ignorable( BindingBase node, String message, Throwable cause )
 		{
 			super( node, message, cause );
 		}
 
-		public Ignorable( BindingReference node, Throwable cause )
+		public Ignorable( BindingBase node, Throwable cause )
 		{
 			super( node, cause );
 		}
 
-		public BindingReference getBindingNode()
+		public BindingBase getBindingNode()
 		{
-			return ( BindingReference ) node;
+			return ( BindingBase ) node;
 		}
 	}
 

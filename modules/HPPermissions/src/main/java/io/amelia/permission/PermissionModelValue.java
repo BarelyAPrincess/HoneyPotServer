@@ -25,9 +25,6 @@ public class PermissionModelValue
 	private final String name;
 	private final Permission perm;
 	private final PermissionType type;
-	private String description = "";
-	private Set<String> enums = new HashSet<>();
-	private int maxLen = -1;
 	private PermissionValue value;
 	private Object valueDefault;
 
@@ -58,143 +55,14 @@ public class PermissionModelValue
 		}
 	}
 
-	/**
-	 * Gets a brief description of this permission, if set
-	 *
-	 * @return Brief description of this permission
-	 */
-	public String getDescription()
-	{
-		return description;
-	}
-
-	/**
-	 * Sets the description of this permission.
-	 * <p>
-	 * This will not be saved to disk, and is a temporary operation until the server reloads permissions.
-	 *
-	 * @param description The new description to set
-	 */
-	public PermissionModelValue setDescription( String description )
-	{
-		this.description = description == null ? "" : description;
-		return this;
-	}
-
-	public Set<String> getEnums()
-	{
-		return enums;
-	}
-
-	public void setEnums( Set<String> enums )
-	{
-		if ( type != PermissionType.ENUM )
-			throw new PermissionValueException( "This model value does not support enumerates, %s", this );
-
-		this.enums = enums;
-	}
-
-	public String getEnumsString()
-	{
-		return Strs.join( enums, "|" );
-	}
-
-	public int getMaxLen()
-	{
-		return maxLen;
-	}
-
-	public void setMaxLen( int maxLen )
-	{
-		if ( !type.hasMax() )
-			throw new PermissionValueException( String.format( "This model value does not support the maxLen ability, %s", this ) );
-
-		this.maxLen = maxLen;
-	}
-
 	public PermissionValue getModelValue()
 	{
 		return value;
 	}
 
-	public String getName()
-	{
-		return name;
-	}
-
-	public Permission getPermission()
-	{
-		return perm;
-	}
-
 	public PermissionType getType()
 	{
 		return type;
-	}
-
-	public <T> T getValue()
-	{
-		if ( value == null )
-			return getValueDefault();
-
-		return ( T ) value.getValue();
-	}
-
-	public PermissionModelValue setValue( Object value )
-	{
-		if ( value == null )
-			value = getValueDefault();
-
-		try
-		{
-			Object obj = type.cast( value );
-			if ( obj == null )
-				throw new ClassCastException();
-			this.value = new PermissionValue( this, obj );
-		}
-		catch ( ClassCastException e )
-		{
-			throw new PermissionValueException( "Can't cast %s to type %s", value.getClass().getName(), type );
-		}
-
-		return this;
-	}
-
-	public <T> T getValueDefault()
-	{
-		assert ( !( valueDefault instanceof PermissionValue ) );
-
-		if ( value == null && this != PermissionDefault.DEFAULT.getNode().getModel() )
-			return ( T ) PermissionDefault.DEFAULT.getNode().getModel().getValue();
-		else if ( value == null )
-			return ( T ) getType().getBlankValue();
-
-		return ( T ) valueDefault;
-	}
-
-	public PermissionModelValue setValueDefault( Object valueDefault )
-	{
-		if ( valueDefault == null )
-			valueDefault = type.getBlankValue();
-
-		try
-		{
-			Object obj = type.cast( valueDefault );
-			if ( obj == null )
-				throw new ClassCastException();
-			this.valueDefault = obj;
-		}
-		catch ( ClassCastException e )
-		{
-			throw new PermissionValueException( "Can't cast %s to type %s", valueDefault.getClass().getName(), type );
-		}
-
-		return this;
-	}
-
-	public boolean hasDescription()
-	{
-		return description != null && !description.isEmpty();
 	}
 
 	@Override

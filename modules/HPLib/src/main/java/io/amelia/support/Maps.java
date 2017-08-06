@@ -229,7 +229,7 @@ public class Maps
 	}
 
 	@SuppressWarnings( "unchecked" )
-	private static class MapBuilder<CK, CV>
+	public static class MapBuilder<CK, CV>
 	{
 		final TreeMap<CK, CV> map;
 

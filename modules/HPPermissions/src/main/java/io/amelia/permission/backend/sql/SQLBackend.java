@@ -331,7 +331,7 @@ public class SQLBackend extends PermissionBackend
 					PermissionDispatcher.getLogger().warning( "The SQLBackend failed to remove the permission node '" + perm.getNamespace() + "' from the database." );
 				else
 				{
-					Namespace ns = perm.getPermissionNamespace();
+					Namespace ns = perm.getPermissionObj();
 
 					updateDBValue( ns, "type", perm.getType().name() );
 

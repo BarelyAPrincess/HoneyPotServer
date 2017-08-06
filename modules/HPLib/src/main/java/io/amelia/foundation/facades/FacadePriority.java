@@ -7,13 +7,13 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.service;
+package io.amelia.foundation.facades;
 
-public enum ServicePriority
+public enum FacadePriority
 {
-	Lowest,
-	Low,
-	Normal,
-	High,
-	Highest
+	LOWEST,
+	LOW,
+	NORMAL,
+	HIGH,
+	HIGHEST
 }
