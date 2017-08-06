@@ -211,30 +211,7 @@ public class ConfigRegistry
 				if ( file.isDirectory() )
 					loadConfig( file, nesting );
 				else
-				{
-					String name = file.getName().toLowerCase();
-
-					if ( name.endsWith( ".yaml" ) )
-						node.setValue( nesting, ConfigLoader.parseYaml( file ) );
-
-					if ( name.endsWith( ".json" ) )
-						node.setValue( nesting, ConfigLoader.parseJson( file ) );
-
-					if ( name.endsWith( ".list" ) )
-						node.setValue( nesting, LibIO.readFileToLines( file, "#" ) );
-
-					if ( name.endsWith( ".properties" ) )
-					{
-						Properties prop = new Properties();
-						prop.load( new FileReader( file ) );
-						node.setValue( nesting, Maps.builder( prop ).hashMap() );
-					}
-
-					// TODO Add more supported types
-
-					//if ( file.getName().endsWith( ".groovy" ) )
-					// Future Use - Parse using scripting factory.
-				}
+					node.setValue( nesting, ConfigLoader.parseFile( file ) );
 			}
 			catch ( Exception e )
 			{

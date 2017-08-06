@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -133,7 +134,15 @@ public class Lists
 		return list.stream().skip( start ).limit( length ).collect( Collectors.toList() );
 	}
 
+	public static <T, R> List<R> walk( List<T> list, Function<T, R> function )
+	{
+		if ( list == null )
+			return null;
+		return list.stream().map( function ).filter( Objects::nonNull ).collect( Collectors.toList() );
+	}
+
 	private Lists()
 	{
+		// Static Helper
 	}
 }

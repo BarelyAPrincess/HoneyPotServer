@@ -1,28 +1,21 @@
 package io.amelia.foundation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
 public abstract class VendorRegistrar extends RegistrarBase
 {
 	private VendorMeta meta;
 
-	public VendorRegistrar( Class<?> cls )
+	public VendorRegistrar( VendorMeta meta )
 	{
-		super( cls );
+		this.meta = meta;
 	}
 
-	public VendorMeta getMeta()
+	public VendorMeta getVendorMeta()
 	{
 		return meta;
 	}
 
-	public class VendorMeta extends HashMap<String, String>
+	public String getName()
 	{
-		public List<String> getAuthors()
-		{
-			return Arrays.asList( get( "authors" ).split( "|" ) );
-		}
+		return meta.getName();
 	}
 }

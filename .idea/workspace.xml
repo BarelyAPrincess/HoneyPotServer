@@ -2,110 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7684425a-3f41-4c96-b67d-2b02523c4713" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingBase.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/GenericBinding.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/Permissions.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/events/FacadeEvent.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/events/FacadeRegisterEvent.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/events/FacadeUnregisterEvent.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/EventService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/FacadeService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/PermissionService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionMeta.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_main.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPEvent/HPEvent_test.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_main.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPServices/HPServices_test.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPEvent/build.gradle" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingRegistry.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingSupplier.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/ServiceBinding.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/NoRtnFunction.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/util/AnonFunction.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/build.gradle" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/ServiceDispatcher.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/ServiceManager.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/ServiceProvider.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/events/ServiceEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/events/ServiceRegisterEvent.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/events/ServiceUnregisterEvent.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/AbstractEvent.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/AbstractEvent.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/Cancellable.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/Cancellable.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventDispatcher.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventDispatcher.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventException.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventExecutor.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventExecutor.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventHandler.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventHandler.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventHandlers.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventHandlers.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventListener.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventListener.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/EventPriority.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/EventPriority.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/Events.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/Events.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/RegisteredListener.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/RegisteredListener.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/TimedRegisteredListener.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/TimedRegisteredListener.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/application/ApplicationEvent.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/application/ApplicationEvent.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/application/RunlevelEvent.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/application/RunlevelEvent.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/messaging/MessageEvent.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/events/messaging/MessageEvent.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageBuilder.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageBuilder.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageChannel.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageChannel.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageDispatch.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageDispatch.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageException.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageReceiver.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageReceiver.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging/MessageSender.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/messaging/MessageSender.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPServices/src/main/java/io/amelia/foundation/service/ServicePriority.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/FacadePriority.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/MetaMap.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorMeta.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginManager.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginMeta.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/JavaPluginLoader.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/PluginClassLoader.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/PluginLoader.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginDependencyUnknownException.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginInvalidException.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginNotFoundException.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginUnconfiguredException.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/PluginException.java" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginException.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/PluginInformationException.java" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginMetaException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigNode.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigNode.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigLoader.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigLoader.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingReference.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingReference.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/UncaughtException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/UncaughtException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Handler.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Handler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Message.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Message.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorRegistrar.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorRegistrar.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ObjectStackerException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ObjectStackerException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerWithValue.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerWithValue.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/Permission.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/Permission.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionDefault.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionDefault.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionGuard.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionModelValue.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionModelValue.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionNamespace.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionNamespace.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/file/FileEntity.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/file/FileEntity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/sql/SQLBackend.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/sql/SQLBackend.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/lang/PermissionBackendException.java" afterPath="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/lang/PermissionBackendException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPTasks/build.gradle" afterPath="$PROJECT_DIR$/modules/HPTasks/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/settings.gradle" afterPath="$PROJECT_DIR$/settings.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/io/amelia/foundation/Application.java" afterPath="$PROJECT_DIR$/src/main/java/io/amelia/foundation/Application.java" />
     </list>
     <ignored path="$PROJECT_DIR$/modules/HPLib/.gradle/" />
     <ignored path="$PROJECT_DIR$/modules/HPLib/build/" />
@@ -171,39 +91,88 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Permissions.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/Permissions.java">
+      <file leaf-file-name="ConfigRegistry.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="14" column="0" lean-forward="false" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+            <state relative-caret-position="186">
+              <caret line="213" column="0" lean-forward="false" selection-start-line="213" selection-start-column="0" selection-end-line="213" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PluginManager.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginManager.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="192">
+              <caret line="87" column="41" lean-forward="false" selection-start-line="87" selection-start-column="41" selection-end-line="87" selection-end-column="41" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#222#223#0" expanded="true" />
-                <element signature="e#284#285#0" expanded="true" />
+                <element signature="e#1827#1850#0" expanded="true" />
+                <element signature="e#1914#1930#0" expanded="true" />
+                <element signature="e#1985#1993#0" expanded="true" />
+                <element signature="e#9906#9914#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AppBindings.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java">
+      <file leaf-file-name="Plugin.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="122" column="6" lean-forward="false" selection-start-line="122" selection-start-column="6" selection-end-line="122" selection-end-column="6" />
+            <state relative-caret-position="400">
+              <caret line="213" column="50" lean-forward="true" selection-start-line="213" selection-start-column="50" selection-end-line="213" selection-end-column="50" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1124#1125#0" expanded="true" />
-                <element signature="e#1169#1170#0" expanded="true" />
-                <element signature="e#1251#1252#0" expanded="true" />
-                <element signature="e#1381#1382#0" expanded="true" />
-                <element signature="e#1609#1641#0" expanded="true" />
-                <element signature="e#2082#2114#0" expanded="true" />
-                <element signature="e#2402#2434#0" expanded="true" />
-                <element signature="e#2833#2834#0" expanded="true" />
-                <element signature="e#2865#2866#0" expanded="true" />
-                <element signature="e#4009#4010#0" expanded="true" />
-                <element signature="e#4047#4048#0" expanded="true" />
+                <element signature="e#4513#4514#0" expanded="true" />
+                <element signature="e#4537#4538#0" expanded="true" />
+                <element signature="e#4717#4718#0" expanded="true" />
+                <element signature="e#4741#4742#0" expanded="true" />
+                <element signature="e#4929#4930#0" expanded="true" />
+                <element signature="e#4947#4948#0" expanded="true" />
+                <element signature="e#5149#5150#0" expanded="true" />
+                <element signature="e#5172#5173#0" expanded="true" />
+                <element signature="e#5362#5363#0" expanded="true" />
+                <element signature="e#5382#5383#0" expanded="true" />
+                <element signature="e#5891#5892#0" expanded="true" />
+                <element signature="e#5913#5914#0" expanded="true" />
+                <element signature="e#5977#5978#0" expanded="true" />
+                <element signature="e#6001#6002#0" expanded="true" />
+                <element signature="e#8707#8708#0" expanded="true" />
+                <element signature="e#8754#8755#0" expanded="true" />
+                <element signature="e#8793#8794#0" expanded="true" />
+                <element signature="e#8811#8812#0" expanded="true" />
+                <element signature="e#9298#9299#0" expanded="true" />
+                <element signature="e#9333#9334#0" expanded="true" />
+                <marker date="1501990370670" expanded="false" signature="4124:4130" ph=" { " />
+                <marker date="1501990370670" expanded="false" signature="4167:4170" ph=" }" />
+                <marker date="1501990370670" expanded="false" signature="4327:4333" ph=" { " />
+                <marker date="1501990370670" expanded="false" signature="4352:4355" ph=" }" />
+                <marker date="1501990370670" expanded="false" signature="8650:8656" ph=" { " />
+                <marker date="1501990370670" expanded="false" signature="8668:8671" ph=" }" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PluginBase.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="224">
+              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="VendorRegistrar.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorRegistrar.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="64">
+              <caret line="4" column="5" lean-forward="false" selection-start-line="4" selection-start-column="5" selection-end-line="19" selection-end-column="6" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -221,9 +190,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>CH_ID</find>
-      <find>toList</find>
-      <find>parent</find>
       <find>Child</find>
       <find>value</find>
       <find>Domain</find>
@@ -251,6 +217,9 @@
       <find>AnonFunction</find>
       <find>Permission::</find>
       <find>ifFac</find>
+      <find>getList</find>
+      <find>Validate.notNull</find>
+      <find>YamlConfiguration</find>
     </findStrings>
     <replaceStrings>
       <replace>Info</replace>
@@ -270,7 +239,6 @@
       <replace>ObjectStackerBase</replace>
       <replace>T</replace>
       <replace>BindingBase</replace>
-      <replace>ConfigNode</replace>
       <replace>ObjectStackerException</replace>
       <replace>BindingException.Error</replace>
       <replace>ServiceException</replace>
@@ -279,6 +247,8 @@
       <replace>Task</replace>
       <replace>CallableTask</replace>
       <replace>RegistrarBase</replace>
+      <replace>Objs.notNull</replace>
+      <replace>ConfigNode</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -4082,26 +4052,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/modules/HPScheduling/src/main/java/io/amelia/scheduling/Scheduler.java" />
-        <option value="$PROJECT_DIR$/modules/HPScheduling/src/main/java/io/amelia/scheduling/AsyncTaskDebugger.java" />
-        <option value="$PROJECT_DIR$/modules/HPScheduling/src/main/java/io/amelia/scheduling/Tasks.java" />
-        <option value="$PROJECT_DIR$/modules/HPScheduling/src/main/java/io/amelia/scheduling/Tasker.java" />
-        <option value="$PROJECT_DIR$/modules/HPScheduling/src/main/java/io/amelia/tasks/Tasker.java" />
-        <option value="$PROJECT_DIR$/build.gradle" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/Task.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/IllegalTaskCreatorAccessException.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/Tasker.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/AsyncTaskDebugger.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/FutureTask.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/TaskDispatcher.java" />
-        <option value="$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/RunnableTask.java" />
-        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/RegistrarBase.java" />
-        <option value="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/lang/PermissionBackendException.java" />
-        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/UncaughtException.java" />
-        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/GenericBinding.java" />
-        <option value="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionType.java" />
-        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingBase.java" />
-        <option value="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionModelValue.java" />
         <option value="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionDefault.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingReference.java" />
         <option value="$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionNamespace.java" />
@@ -4118,8 +4068,6 @@
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/Permissions.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/PermissionService.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/FacadeService.java" />
-        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" />
-        <option value="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Message.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Handler.java" />
@@ -4133,6 +4081,28 @@
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/events/FacadeRegisterEvent.java" />
         <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java" />
         <option value="$PROJECT_DIR$/settings.gradle" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ObjectStackerException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/UnknownDependencyException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginNotFoundException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginInvalidException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginUnconfiguredException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginInformationException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginDependencyUnknownException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/PluginLoader.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginInformation.java" />
+        <option value="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java" />
+        <option value="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigLoader.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/MetaMap.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginMeta.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorRegistrar.java" />
+        <option value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorMeta.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginException.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginManager.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java" />
+        <option value="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java" />
       </list>
     </option>
   </component>
@@ -4478,6 +4448,120 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="main" />
               <option name="myItemType" value="org.jetbrains.plugins.gradle.projectView.GradleTreeStructureProvider$GradleSourceSetDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="modules" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HPPlugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="org.jetbrains.plugins.gradle.projectView.GradleTreeStructureProvider$GradleSourceSetDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="amelia" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="modules" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HPPlugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="org.jetbrains.plugins.gradle.projectView.GradleTreeStructureProvider$GradleSourceSetDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="amelia" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="plugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HoneyPotServer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="modules" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="HPPlugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="org.jetbrains.plugins.gradle.projectView.GradleTreeStructureProvider$GradleSourceSetDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="amelia" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="plugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="loader" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -5733,7 +5817,7 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia" />
-    <property name="SearchEverywhereHistoryKey" value="ServiceDis&#9;PSI&#9;JAVA://io.amelia.foundation.service.ServiceDispatcher&#10;AppBindings&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java&#10;Runnable&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/Runnable.java&#10;Callable&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/concurrent/Callable.java&#10;Object&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java&#10;Maps&#9;PSI&#9;JAVA://io.amelia.support.Maps&#10;Message&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPEvent/src/main/java/io/amelia/messaging/MessageDispatch.java&#10;Optional&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Optional.java&#10;BindingRe&#9;PSI&#9;JAVA://io.amelia.foundation.binding.BindingRegistry" />
+    <property name="SearchEverywhereHistoryKey" value="Exception&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java&#10;PermissionE&#9;PSI&#9;JAVA://io.amelia.permission.lang.PermissionException&#10;ServiceDis&#9;PSI&#9;JAVA://io.amelia.foundation.service.ServiceDispatcher&#10;AppBindings&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java&#10;Runnable&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/Runnable.java&#10;Callable&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/concurrent/Callable.java&#10;Object&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java&#10;Maps&#9;PSI&#9;JAVA://io.amelia.support.Maps&#10;Message&#9;FILE&#9;file:///home/amelia/Development/Java/HoneyPotServer/modules/HPEvent/src/main/java/io/amelia/messaging/MessageDispatch.java&#10;Optional&#9;FILE&#9;jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Optional.java&#10;BindingRe&#9;PSI&#9;JAVA://io.amelia.foundation.binding.BindingRegistry" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
@@ -5748,11 +5832,11 @@
       <recent name="io.amelia.networking" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="io.amelia.foundation" />
       <recent name="io.amelia.foundation.facades.interfaces" />
       <recent name="io.amelia.foundation.service" />
       <recent name="io.amelia.permission" />
       <recent name="io.amelia.foundation.binding" />
-      <recent name="io.amelia.scheduling" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="io.amelia.lang" />
@@ -5762,11 +5846,11 @@
       <recent name="io.amelia.util" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang" />
+      <recent name="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins" />
       <recent name="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades" />
       <recent name="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/service" />
       <recent name="$PROJECT_DIR$/modules/HPPermissions/src/main/java" />
-      <recent name="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/events/services" />
-      <recent name="$PROJECT_DIR$/modules/HPEvent/src/main/java/io/amelia/messaging" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -6186,15 +6270,15 @@
       <workItem from="1498167914463" duration="28446000" />
       <workItem from="1498962825044" duration="64398000" />
       <workItem from="1499790469221" duration="61291000" />
-      <workItem from="1500479475587" duration="131951000" />
+      <workItem from="1500479475587" duration="143681000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="286086000" />
+    <option name="totallyTimeSpent" value="297816000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1920" height="1056" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1056" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -6245,324 +6329,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionNamespace.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="67" column="6" lean-forward="false" selection-start-line="67" selection-start-column="6" selection-end-line="67" selection-end-column="6" />
-          <folding>
-            <element signature="e#1426#1427#0" expanded="true" />
-            <element signature="e#1480#1481#0" expanded="true" />
-            <element signature="e#1791#1792#0" expanded="true" />
-            <element signature="e#1833#1834#0" expanded="true" />
-            <element signature="e#1888#1889#0" expanded="true" />
-            <element signature="e#2150#2151#0" expanded="true" />
-            <element signature="e#2194#2195#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/Permission.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
-          <folding>
-            <element signature="e#644#645#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#706#707#0" expanded="true" />
-            <element signature="e#760#761#0" expanded="true" />
-            <element signature="e#1299#1300#0" expanded="true" />
-            <element signature="e#1338#1339#0" expanded="true" />
-            <element signature="e#1815#1816#0" expanded="true" />
-            <element signature="e#1885#1886#0" expanded="true" />
-            <element signature="e#1932#1933#0" expanded="true" />
-            <element signature="e#2027#2028#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissibleEntity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1216">
-          <caret line="32" column="22" lean-forward="false" selection-start-line="32" selection-start-column="22" selection-end-line="32" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionModelValue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="21" column="32" lean-forward="true" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionMeta.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1248">
-          <caret line="78" column="30" lean-forward="true" selection-start-line="78" selection-start-column="30" selection-end-line="78" selection-end-column="30" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#414#415#0" expanded="true" />
-            <element signature="e#447#448#0" expanded="true" />
-            <element signature="e#891#892#0" expanded="true" />
-            <element signature="e#922#923#0" expanded="true" />
-            <element signature="e#1077#1078#0" expanded="true" />
-            <element signature="e#1102#1103#0" expanded="true" />
-            <element signature="e#1504#1505#0" expanded="true" />
-            <element signature="e#1543#1544#0" expanded="true" />
-            <element signature="e#1713#1714#0" expanded="true" />
-            <element signature="e#1755#1756#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/file/FileConfig.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="80">
-          <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/file/FileBackend.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="217" column="65" lean-forward="true" selection-start-line="217" selection-start-column="65" selection-end-line="217" selection-end-column="65" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/backend/file/FileGroup.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-176">
-          <caret line="26" column="13" lean-forward="false" selection-start-line="26" selection-start-column="13" selection-end-line="26" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/service/IService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="4" column="5" lean-forward="false" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/service/IWhitelist.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="2" column="44" lean-forward="false" selection-start-line="2" selection-start-column="44" selection-end-line="2" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/service/IPermission.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32">
-          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/PermissionGuard.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="69" column="0" lean-forward="true" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#3487#3488#0" expanded="true" />
-            <element signature="e#3528#3529#0" expanded="true" />
-            <element signature="e#4545#4546#0" expanded="true" />
-            <element signature="e#4606#4607#0" expanded="true" />
-            <element signature="e#9045#9046#0" expanded="true" />
-            <element signature="e#9080#9081#0" expanded="true" />
-            <element signature="e#12102#12103#0" expanded="true" />
-            <element signature="e#12184#12185#0" expanded="true" />
-            <element signature="e#12796#12797#0" expanded="true" />
-            <element signature="e#12951#12952#0" expanded="true" />
-            <element signature="e#17006#17007#0" expanded="true" />
-            <element signature="e#17096#17097#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="80">
-          <caret line="61" column="13" lean-forward="false" selection-start-line="61" selection-start-column="13" selection-end-line="61" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="196" column="26" lean-forward="false" selection-start-line="196" selection-start-column="26" selection-end-line="196" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="298">
-          <caret line="231" column="43" lean-forward="true" selection-start-line="231" selection-start-column="43" selection-end-line="231" selection-end-column="43" />
-          <folding>
-            <element signature="e#2164#2165#0" expanded="true" />
-            <element signature="e#2222#2223#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerBase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="210" column="0" lean-forward="false" selection-start-line="210" selection-start-column="0" selection-end-line="210" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ApplicationException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="186" column="17" lean-forward="false" selection-start-line="186" selection-start-column="17" selection-end-line="186" selection-end-column="17" />
-          <folding>
-            <element signature="e#4439#4440#0" expanded="false" />
-            <element signature="e#4466#4467#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/Class.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="490">
-          <caret line="509" column="26" lean-forward="false" selection-start-line="509" selection-start-column="26" selection-end-line="509" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/FacadePriority.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="11" column="12" lean-forward="false" selection-start-line="11" selection-start-column="12" selection-end-line="11" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Reflection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-128">
-          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Message.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="255" column="17" lean-forward="false" selection-start-line="255" selection-start-column="17" selection-end-line="255" selection-end-column="17" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/io/amelia/foundation/Application.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-422">
-          <caret line="41" column="67" lean-forward="true" selection-start-line="41" selection-start-column="67" selection-end-line="41" selection-end-column="67" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/NoRtnFunction.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="11" column="25" lean-forward="true" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/io/amelia/control/EntryPoint.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="256">
-          <caret line="21" column="18" lean-forward="true" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Handler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="170" column="6" lean-forward="true" selection-start-line="170" selection-start-column="6" selection-end-line="170" selection-end-column="6" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#3135#3136#0" expanded="true" />
-            <element signature="e#3176#3177#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Map.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="950" column="14" lean-forward="false" selection-start-line="950" selection-start-column="14" selection-end-line="950" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="426">
-          <caret line="419" column="49" lean-forward="true" selection-start-line="419" selection-start-column="49" selection-end-line="419" selection-end-column="49" />
-          <folding>
-            <element signature="e#17229#17230#0" expanded="true" />
-            <element signature="e#17276#17277#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigNode.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="73" column="6" lean-forward="true" selection-start-line="73" selection-start-column="6" selection-end-line="73" selection-end-column="6" />
-          <folding>
-            <element signature="e#1512#1513#0" expanded="true" />
-            <element signature="e#1599#1600#0" expanded="true" />
-            <element signature="e#2218#2219#0" expanded="true" />
-            <element signature="e#2266#2267#0" expanded="true" />
-            <element signature="e#2270#2302#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/FacadeService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="112">
-          <caret line="7" column="1" lean-forward="false" selection-start-line="7" selection-start-column="1" selection-end-line="7" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/PermissionService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/facades/interfaces/EventService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="48">
-          <caret line="3" column="1" lean-forward="false" selection-start-line="3" selection-start-column="1" selection-end-line="3" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/HPServices/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
@@ -6597,9 +6363,9 @@
         <state relative-caret-position="288">
           <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#791#792#0" expanded="true" />
-            <element signature="e#823#824#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#791#792#0" expanded="false" />
+            <element signature="e#823#824#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6633,8 +6399,8 @@
         <state relative-caret-position="32">
           <caret line="2" column="43" lean-forward="false" selection-start-line="2" selection-start-column="43" selection-end-line="2" selection-end-column="43" />
           <folding>
-            <element signature="e#144#145#0" expanded="true" />
-            <element signature="e#172#173#0" expanded="true" />
+            <element signature="e#144#145#0" expanded="false" />
+            <element signature="e#172#173#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6651,14 +6417,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="32">
           <caret line="2" column="21" lean-forward="true" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
           <folding />
         </state>
       </provider>
@@ -6750,6 +6508,336 @@
             <element signature="e#2865#2866#0" expanded="true" />
             <element signature="e#4009#4010#0" expanded="true" />
             <element signature="e#4047#4048#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPermissions/src/main/java/io/amelia/permission/lang/PermissionException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80">
+          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ObjectStackerWithValue.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="17" column="113" lean-forward="false" selection-start-line="17" selection-start-column="96" selection-end-line="17" selection-end-column="113" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ObjectStackerException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="19" column="11" lean-forward="true" selection-start-line="19" selection-start-column="11" selection-end-line="19" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="36" column="45" lean-forward="true" selection-start-line="36" selection-start-column="45" selection-end-line="36" selection-end-column="45" />
+          <folding>
+            <element signature="e#374#375#0" expanded="false" />
+            <element signature="e#396#397#0" expanded="false" />
+            <element signature="e#452#453#0" expanded="false" />
+            <element signature="e#483#484#0" expanded="false" />
+            <element signature="e#556#557#0" expanded="false" />
+            <element signature="e#594#595#0" expanded="false" />
+            <element signature="e#651#652#0" expanded="false" />
+            <element signature="e#680#681#0" expanded="false" />
+            <element signature="e#723#724#0" expanded="false" />
+            <element signature="e#759#760#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginNotFoundException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginInvalidException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginUnconfiguredException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="15" column="0" lean-forward="false" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginDependencyUnknownException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginMetaException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding>
+            <element signature="e#555#556#0" expanded="true" />
+            <element signature="e#594#595#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/PluginLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/javafx-src.zip!/com/sun/javafx/collections/ImmutableObservableList.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="35" column="13" lean-forward="false" selection-start-line="35" selection-start-column="13" selection-end-line="35" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Arrays.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="298">
+          <caret line="3811" column="8" lean-forward="false" selection-start-line="3811" selection-start-column="8" selection-end-line="3811" selection-end-column="8" />
+          <folding>
+            <element signature="e#177013#177014#0" expanded="false" />
+            <element signature="e#177054#177055#0" expanded="false" />
+            <element signature="e#177353#177354#0" expanded="false" />
+            <element signature="e#177410#177411#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="213" column="0" lean-forward="false" selection-start-line="213" selection-start-column="0" selection-end-line="213" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Properties.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="642">
+          <caret line="315" column="29" lean-forward="false" selection-start-line="315" selection-start-column="29" selection-end-line="315" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="70" column="25" lean-forward="false" selection-start-line="70" selection-start-column="25" selection-end-line="70" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/io/FileReader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="615">
+          <caret line="70" column="11" lean-forward="false" selection-start-line="70" selection-start-column="11" selection-end-line="70" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="873" column="45" lean-forward="true" selection-start-line="873" selection-start-column="45" selection-end-line="873" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="15" column="39" lean-forward="false" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="688">
+          <caret line="138" column="29" lean-forward="true" selection-start-line="138" selection-start-column="29" selection-end-line="138" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/HashMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="553" column="13" lean-forward="false" selection-start-line="553" selection-start-column="13" selection-end-line="553" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/PluginInformationException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16">
+          <caret line="9" column="23" lean-forward="true" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="370">
+          <caret line="324" column="29" lean-forward="true" selection-start-line="324" selection-start-column="29" selection-end-line="324" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/MetaMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="622">
+          <caret line="62" column="0" lean-forward="true" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#505#506#0" expanded="true" />
+            <element signature="e#528#529#0" expanded="true" />
+            <element signature="e#681#682#0" expanded="true" />
+            <element signature="e#751#752#0" expanded="true" />
+            <element signature="e#847#848#0" expanded="true" />
+            <element signature="e#906#907#0" expanded="true" />
+            <element signature="e#910#942#0" expanded="true" />
+            <element signature="e#1765#1766#0" expanded="true" />
+            <element signature="e#1841#1842#0" expanded="true" />
+            <element signature="e#1890#1891#0" expanded="true" />
+            <element signature="e#1935#1936#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPTasks/src/main/java/io/amelia/tasks/TaskDispatcher.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="224" column="24" lean-forward="false" selection-start-line="224" selection-start-column="24" selection-end-line="224" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/RegistrarBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80">
+          <caret line="5" column="22" lean-forward="false" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorMeta.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="15" column="10" lean-forward="false" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/lang/PluginException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="19" column="6" lean-forward="true" selection-start-line="19" selection-start-column="6" selection-end-line="19" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="87" column="41" lean-forward="false" selection-start-line="87" selection-start-column="41" selection-end-line="87" selection-end-column="41" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1827#1850#0" expanded="true" />
+            <element signature="e#1914#1930#0" expanded="true" />
+            <element signature="e#1985#1993#0" expanded="true" />
+            <element signature="e#9906#9914#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginMeta.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-270">
+          <caret line="140" column="13" lean-forward="false" selection-start-line="140" selection-start-column="13" selection-end-line="140" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorRegistrar.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="4" column="5" lean-forward="false" selection-start-line="4" selection-start-column="5" selection-end-line="19" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="224">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="400">
+          <caret line="213" column="50" lean-forward="true" selection-start-line="213" selection-start-column="50" selection-end-line="213" selection-end-column="50" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#4513#4514#0" expanded="true" />
+            <element signature="e#4537#4538#0" expanded="true" />
+            <element signature="e#4717#4718#0" expanded="true" />
+            <element signature="e#4741#4742#0" expanded="true" />
+            <element signature="e#4929#4930#0" expanded="true" />
+            <element signature="e#4947#4948#0" expanded="true" />
+            <element signature="e#5149#5150#0" expanded="true" />
+            <element signature="e#5172#5173#0" expanded="true" />
+            <element signature="e#5362#5363#0" expanded="true" />
+            <element signature="e#5382#5383#0" expanded="true" />
+            <element signature="e#5891#5892#0" expanded="true" />
+            <element signature="e#5913#5914#0" expanded="true" />
+            <element signature="e#5977#5978#0" expanded="true" />
+            <element signature="e#6001#6002#0" expanded="true" />
+            <element signature="e#8707#8708#0" expanded="true" />
+            <element signature="e#8754#8755#0" expanded="true" />
+            <element signature="e#8793#8794#0" expanded="true" />
+            <element signature="e#8811#8812#0" expanded="true" />
+            <element signature="e#9298#9299#0" expanded="true" />
+            <element signature="e#9333#9334#0" expanded="true" />
+            <marker date="1501990370670" expanded="false" signature="4124:4130" ph=" { " />
+            <marker date="1501990370670" expanded="false" signature="4167:4170" ph=" }" />
+            <marker date="1501990370670" expanded="false" signature="4327:4333" ph=" { " />
+            <marker date="1501990370670" expanded="false" signature="4352:4355" ph=" }" />
+            <marker date="1501990370670" expanded="false" signature="8650:8656" ph=" { " />
+            <marker date="1501990370670" expanded="false" signature="8668:8671" ph=" }" />
           </folding>
         </state>
       </provider>

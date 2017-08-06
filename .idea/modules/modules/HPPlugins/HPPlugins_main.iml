@@ -9,5 +9,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="HPLog_main" />
+    <orderEntry type="module" module-name="HPLib_main" />
+    <orderEntry type="module" module-name="HPConfig_main" />
+    <orderEntry type="module" module-name="HPTasks_main" />
   </component>
 </module>

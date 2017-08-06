@@ -10,6 +10,7 @@
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
+import io.amelia.foundation.MetaMap;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MapCollisionException;
 import javafx.util.Pair;
@@ -25,6 +26,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -243,21 +246,41 @@ public class Maps
 			this.map = new TreeMap<>( map );
 		}
 
+		private MapBuilder( Map<?, ?> oldMap, Class<CK> keyClass, Class<CV> valueClass )
+		{
+			map = new TreeMap<>();
+			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
+				putNotNull( Objs.castTo( entry.getKey(), keyClass ), Objs.castTo( entry.getValue(), valueClass ) );
+		}
+
 		private MapBuilder( Map<?, ?> oldMap, CK key, CV value )
 		{
 			map = new TreeMap<>();
 			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
-				map.put( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
-			map.put( key, value );
+				putNotNull( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
+			putNotNull( key, value );
 		}
 
 		private MapBuilder( Map<?, ?> oldMap, Map<CK, CV> newMap )
 		{
 			map = new TreeMap<>();
 			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
-				map.put( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
+				putNotNull( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
 			for ( Map.Entry<CK, CV> entry : newMap.entrySet() )
-				map.put( entry.getKey(), entry.getValue() );
+				putNotNull( entry.getKey(), entry.getValue() );
+		}
+
+		public MapBuilder( Map<?, ?> oldMap, BiFunction<CK, CV, Boolean> function )
+		{
+			map = new TreeMap<>();
+			for ( Map.Entry<?, ?> entry : oldMap.entrySet() )
+				if ( function.apply( ( CK ) entry.getKey(), ( CV ) entry.getValue() ) )
+					putNotNull( ( CK ) entry.getKey(), ( CV ) entry.getValue() );
+		}
+
+		public <K, V> MapBuilder<K, V> castTo( Class<K> keyClass, Class<V> valueClass )
+		{
+			return new MapBuilder<>( map, keyClass, valueClass );
 		}
 
 		public ConcurrentHashMap<CK, CV> concurrentHashMap()
@@ -268,6 +291,11 @@ public class Maps
 		public <K, V> MapBuilder<K, V> fill( @NotNull List<K> keys )
 		{
 			return new MapBuilder<>( map, keys.stream().collect( Collectors.toMap( v -> v, null ) ) );
+		}
+
+		public MapBuilder<CK, CV> filter( BiFunction<CK, CV, Boolean> function )
+		{
+			return new MapBuilder<>( map, function );
 		}
 
 		public HashMap<CK, CV> hashMap()
@@ -288,6 +316,13 @@ public class Maps
 			}
 
 			return new MapBuilder<>( map, newMap );
+		}
+
+		public <M extends Map> M map( Supplier<M> mapSupplier )
+		{
+			M newMap = mapSupplier.get();
+			newMap.putAll( map );
+			return newMap;
 		}
 
 		public <K, V> MapBuilder<K, V> put( K key, V value )
@@ -315,9 +350,20 @@ public class Maps
 			return new MapBuilder<>( map, properties.stringPropertyNames().stream().collect( Collectors.toMap( s -> Objs.castTo( s, kClass ), s -> Objs.castTo( properties.getProperty( s ), vClass ) ) ) );
 		}
 
+		private void putNotNull( CK key, CV value )
+		{
+			if ( !Objs.isNull( key ) && !Objs.isNull( value ) )
+				map.put( key, value );
+		}
+
 		public Stream<Pair<CK, CV>> stream()
 		{
 			return map.entrySet().stream().map( e -> new Pair<>( e.getKey(), e.getValue() ) );
+		}
+
+		public void to( Map<CK, CV> surrogateMap )
+		{
+			surrogateMap.putAll( map );
 		}
 
 		public TreeMap<CK, CV> treeMap()

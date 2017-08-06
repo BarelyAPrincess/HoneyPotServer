@@ -12,49 +12,43 @@ package io.amelia.lang;
 /**
  * Thrown when attempting to load an invalid PluginDescriptionFile
  */
-public class PluginInformationException extends PluginException
+public class PluginMetaException extends PluginException.Error
 {
-	private static final long serialVersionUID = 5721389122281775896L;
-	
 	/**
 	 * Constructs a new InvalidDescriptionException
 	 */
-	public PluginInformationException()
+	public PluginMetaException()
 	{
-		super( "Invalid plugin.yaml" );
+		super( "Invalid plugin config" );
 	}
-	
+
 	/**
 	 * Constructs a new InvalidDescriptionException with the given message
-	 * 
-	 * @param message
-	 *            Brief message explaining the cause of the exception
+	 *
+	 * @param message Brief message explaining the cause of the exception
 	 */
-	public PluginInformationException( final String message )
+	public PluginMetaException( final String message )
 	{
 		super( message );
 	}
-	
+
 	/**
 	 * Constructs a new InvalidDescriptionException based on the given Exception
-	 * 
-	 * @param cause
-	 *            Exception that triggered this Exception
+	 *
+	 * @param cause Exception that triggered this Exception
 	 */
-	public PluginInformationException( final Throwable cause )
+	public PluginMetaException( final Throwable cause )
 	{
 		super( "Invalid plugin.yaml", cause );
 	}
-	
+
 	/**
 	 * Constructs a new InvalidDescriptionException based on the given Exception
-	 * 
-	 * @param message
-	 *            Brief message explaining the cause of the exception
-	 * @param cause
-	 *            Exception that triggered this Exception
+	 *
+	 * @param message Brief message explaining the cause of the exception
+	 * @param cause   Exception that triggered this Exception
 	 */
-	public PluginInformationException( final Throwable cause, final String message )
+	public PluginMetaException( final Throwable cause, final String message )
 	{
 		super( message, cause );
 	}

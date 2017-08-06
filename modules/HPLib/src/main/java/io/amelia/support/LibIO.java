@@ -796,31 +796,32 @@ public class LibIO
 		putResource( LibIO.class, resource, file );
 	}
 
-	public static List<String> readFileToLines( @NotNull File file, @NotNull String ignorePrefix ) throws IOException
+	public static List<String> readFileToLines( @NotNull File file, @NotNull String ignorePrefix ) throws FileNotFoundException
 	{
 		return readFileToStream( file, ignorePrefix ).collect( Collectors.toList() );
 	}
 
-	public static List<String> readFileToLines( @NotNull File file ) throws IOException
+	public static List<String> readFileToLines( @NotNull File file ) throws FileNotFoundException
 	{
 		return readFileToStream( file ).collect( Collectors.toList() );
 	}
 
-	public static Stream<String> readFileToStream( @NotNull File file, @NotNull String ignorePrefix ) throws IOException
+	public static Stream<String> readFileToStream( @NotNull File file, @NotNull String ignorePrefix ) throws FileNotFoundException
 	{
+		Objs.notNull( file );
 		Objs.notNull( ignorePrefix );
 
 		return new BufferedReader( new InputStreamReader( new FileInputStream( file ) ) ).lines().filter( s -> !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
 	}
 
-	public static Stream<String> readFileToStream( @NotNull File file ) throws IOException
+	public static Stream<String> readFileToStream( @NotNull File file ) throws FileNotFoundException
 	{
 		Objs.notNull( file );
 
 		return new BufferedReader( new InputStreamReader( new FileInputStream( file ) ) ).lines();
 	}
 
-	public static String readFileToString( File file ) throws IOException
+	public static String readFileToString( @NotNull File file ) throws IOException
 	{
 		InputStream in = null;
 		try
@@ -840,6 +841,46 @@ public class LibIO
 		finally
 		{
 			closeQuietly( in );
+		}
+	}
+
+	public static List<String> readStreamToLines( @NotNull InputStream is, @NotNull String ignorePrefix ) throws FileNotFoundException
+	{
+		return readStreamToStream( is, ignorePrefix ).collect( Collectors.toList() );
+	}
+
+	public static Stream<String> readStreamToStream( @NotNull InputStream is, @NotNull String ignorePrefix ) throws FileNotFoundException
+	{
+		Objs.notNull( is );
+		Objs.notNull( ignorePrefix );
+
+		return new BufferedReader( new InputStreamReader( is ) ).lines().filter( s -> !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
+	}
+
+	public static Stream<String> readStreamToStream( @NotNull InputStream is ) throws FileNotFoundException
+	{
+		Objs.notNull( is );
+
+		return new BufferedReader( new InputStreamReader( is ) ).lines();
+	}
+
+	public static String readStreamToString( @NotNull InputStream is ) throws IOException
+	{
+		try
+		{
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ( ( nRead = is.read( data, 0, data.length ) ) != -1 )
+				buffer.write( data, 0, nRead );
+
+			return new String( buffer.toByteArray(), Charset.defaultCharset() );
+		}
+		finally
+		{
+			closeQuietly( is );
 		}
 	}
 
