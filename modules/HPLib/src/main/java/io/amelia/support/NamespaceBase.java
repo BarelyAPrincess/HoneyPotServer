@@ -20,22 +20,27 @@ import java.util.stream.Stream;
 
 public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneable
 {
-	protected static Pattern rangeExpression = Pattern.compile( "(0-9+)-(0-9+)" );
+	public static final Pattern RANGE_EXPRESSION = Pattern.compile( "(0-9+)-(0-9+)" );
+
+	private final NotNullFunction<String[], T> creator;
 
 	protected String[] nodes;
 
-	protected NamespaceBase( String[] nodes )
+	protected NamespaceBase( NotNullFunction<String[], T> creator, String[] nodes )
 	{
+		this.creator = creator;
 		this.nodes = Strs.toLowerCase( nodes );
 	}
 
-	protected NamespaceBase( List<String> nodes )
+	protected NamespaceBase( NotNullFunction<String[], T> creator, List<String> nodes )
 	{
+		this.creator = creator;
 		this.nodes = Strs.toLowerCase( nodes.toArray( new String[0] ) );
 	}
 
-	protected NamespaceBase()
+	protected NamespaceBase( NotNullFunction<String[], T> creator )
 	{
+		this.creator = creator;
 		this.nodes = new String[0];
 	}
 
@@ -56,13 +61,13 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		return create( Arrs.merge( this.nodes, nodes ) );
+		return creator.apply( Arrs.merge( this.nodes, nodes ) );
 	}
 
 	@Override
 	public T clone()
 	{
-		return create( nodes );
+		return creator.apply( nodes );
 	}
 
 	@Override
@@ -92,8 +97,6 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		return false;
 	}
 
-	protected abstract T create( String[] nodes );
-
 	/**
 	 * Filters out invalid characters from namespace.
 	 *
@@ -104,7 +107,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		String[] result = new String[nodes.length];
 		for ( int i = 0; i < nodes.length; i++ )
 			result[i] = nodes[i].replaceAll( "[^a-z0-9_]", "" );
-		return create( result );
+		return creator.apply( result );
 	}
 
 	public String getFirst()
@@ -164,7 +167,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public T getParentNamespace( int depth )
 	{
-		return getNodeCount() >= depth ? subNamespace( 0, getNodeCount() - depth ) : create( new String[0] );
+		return getNodeCount() >= depth ? subNamespace( 0, getNodeCount() - depth ) : creator.apply( new String[0] );
 	}
 
 	public String getRootName()
@@ -241,7 +244,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public T merge( Namespace ns )
 	{
-		return create( Stream.of( nodes, ns.nodes ).flatMap( Stream::of ).toArray( String[]::new ) );
+		return creator.apply( Stream.of( nodes, ns.nodes ).flatMap( Stream::of ).toArray( String[]::new ) );
 	}
 
 	/**
@@ -256,7 +259,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 		try
 		{
-			Matcher rangeMatcher = rangeExpression.matcher( regexp );
+			Matcher rangeMatcher = RANGE_EXPRESSION.matcher( regexp );
 			while ( rangeMatcher.find() )
 			{
 				StringBuilder range = new StringBuilder();
@@ -309,7 +312,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		return create( Arrs.merge( nodes, this.nodes ) );
+		return creator.apply( Arrs.merge( nodes, this.nodes ) );
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -321,7 +324,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public T replaceNew( String literal, String replacement )
 	{
-		return create( Arrays.stream( nodes ).map( s -> s.replace( literal, replacement ) ).collect( Collectors.toList() ).toArray( new String[0] ) );
+		return creator.apply( Arrays.stream( nodes ).map( s -> s.replace( literal, replacement ) ).collect( Collectors.toList() ).toArray( new String[0] ) );
 	}
 
 	public T reverseOrder()
@@ -336,7 +339,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	{
 		List<String> tmpNodes = Arrays.asList( nodes );
 		Collections.reverse( tmpNodes );
-		return create( tmpNodes.toArray( new String[0] ) );
+		return creator.apply( tmpNodes.toArray( new String[0] ) );
 	}
 
 	private String[] splitString( String str )
@@ -358,7 +361,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public T subNamespace( int start, int end )
 	{
-		return create( subNodes( start, end ) );
+		return creator.apply( subNodes( start, end ) );
 	}
 
 	public String[] subNodes( int start )

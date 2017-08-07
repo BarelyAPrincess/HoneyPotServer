@@ -567,59 +567,65 @@ public class Objs
 		return obj;
 	}
 
-	public static <T> void notFalse( T bool )
+	public static <T> T notFalse( T bool )
 	{
-		notFalse( bool, "Object is false" );
+		return notFalse( bool, "Object is false" );
 	}
 
-	public static <T> void notFalse( T bool, String message, Object... objects )
+	public static <T> T notFalse( T bool, String message, Object... objects )
 	{
 		if ( !castToBoolean( bool ) )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return bool;
 	}
 
-	public static void notNegative( Number number )
+	public static <T extends Number> T notNegative( T number )
 	{
-		notNegative( number, "Number must be positive." );
+		return notNegative( number, "Number must be positive." );
 	}
 
-	public static void notNegative( Number number, String message, Object... objects )
+	public static <T extends Number> T notNegative( T number, String message, Object... objects )
 	{
 		if ( number.longValue() < 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return number;
 	}
 
-	public static <T> void notNull( final T object )
+	public static <T> T notNull( final T object )
 	{
 		notNull( object, "Object is null" );
+		return object;
 	}
 
-	public static <T> void notNull( final T object, String message, Object... values )
+	public static <T> T notNull( final T object, String message, Object... values )
 	{
 		if ( object == null )
 			throw new NullPointerException( values == null || values.length == 0 ? message : String.format( message, values ) );
+		return object;
 	}
 
-	public static void notPositive( Number number )
+	public static <T extends Number> T notPositive( T number )
 	{
-		notNegative( number, "Number must be negative." );
+		return notNegative( number, "Number must be negative." );
 	}
 
-	public static void notPostive( Number number, String message, Object... objects )
+	public static <T extends Number> T notPostive( T number, String message, Object... objects )
 	{
 		if ( number.longValue() > 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return number;
 	}
 
-	public static void notZero( Number number )
+	public static <T extends Number> T notZero( T number )
 	{
-		notNegative( number, "Number must be positive or negative." );
+		return notNegative( number, "Number must be positive or negative." );
 	}
 
-	public static void notZero( Number number, String message, Object... objects )
+	public static <T extends Number> T notZero( T number, String message, Object... objects )
 	{
 		if ( number.longValue() == 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return number;
 	}
 
 	public static <T, R> R onPresent( @NotNull Optional<T> value, @NotNull Function<T, R> present, Supplier<R> not )

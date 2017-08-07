@@ -40,22 +40,16 @@ public class Namespace extends NamespaceBase<Namespace>
 
 	public Namespace( String[] nodes )
 	{
-		super( nodes );
+		super( Namespace::new, nodes );
 	}
 
 	public Namespace( List<String> nodes )
 	{
-		super( nodes );
+		super( Namespace::new, nodes );
 	}
 
 	public Namespace()
 	{
-		super();
-	}
-
-	@Override
-	protected Namespace create( String[] nodes )
-	{
-		return new Namespace( nodes );
+		super( Namespace::new );
 	}
 }
