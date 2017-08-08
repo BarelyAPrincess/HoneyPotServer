@@ -144,7 +144,7 @@ public class AppBindings
 				registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
 			}
 			else
-				Kernel.L.warning( "We found malformed arguments in the facade config for key -> " + c.getLocalName() );
+				Kernel.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
 		} );
 	}
 

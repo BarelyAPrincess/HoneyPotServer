@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public abstract class ApplicationInterface implements ExceptionContext
+public abstract class ApplicationInterface extends VendorRegistrar implements ExceptionContext
 {
 	// sThreadLocal.get() will return null unless you've called prepare().
 	private static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<>();
@@ -57,6 +57,12 @@ public abstract class ApplicationInterface implements ExceptionContext
 	}
 
 	private MainLoop mainLoop = new MainLoop();
+
+	public ApplicationInterface()
+	{
+		// TODO THIS!
+		super( new VendorMeta() );
+	}
 
 	/**
 	 * Returns the application's main looper, which lives in the main thread of the application.
@@ -137,7 +143,7 @@ public abstract class ApplicationInterface implements ExceptionContext
 	public void reloadApplication( String reason )
 	{
 		if ( Objs.isEmpty( reason ) )
-			reason = String.format( "Server %s is restarting, be back soon... :D", ConfigRegistry.getString("env.instance-id") );
+			reason = String.format( "Server %s is restarting, be back soon... :D", ConfigRegistry.getString( "env.instance-id" ) );
 
 		Kernel.L.notice( reason );
 

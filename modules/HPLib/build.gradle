@@ -19,4 +19,5 @@ dependencies {
 	compile project( ':HPLog' )
 
 	compile group: 'joda-time', name: 'joda-time', version: '2.7'
+	compile group: 'com.google.guava', name: 'guava', version: '18.0'
 }

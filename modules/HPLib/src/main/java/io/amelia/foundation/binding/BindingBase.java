@@ -2,7 +2,7 @@ package io.amelia.foundation.binding;
 
 import io.amelia.lang.ObjectStackerException;
 import io.amelia.support.Lists;
-import io.amelia.support.ObjectStackerBase;
+import io.amelia.support.StackerBase;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @SuppressWarnings( "unchecked" )
-public final class BindingBase extends ObjectStackerBase<BindingBase>
+public final class BindingBase extends StackerBase<BindingBase>
 {
 	private final Map<ObjectListenerEvent, List<BiConsumer<BindingBase, List<Object>>>> objectListeners = new ConcurrentHashMap<>();
 

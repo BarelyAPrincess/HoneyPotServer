@@ -79,7 +79,7 @@ public abstract class BindingReference<T extends BindingReference<T, V>, V>
 	public String getChildNamespace()
 	{
 		goCheck();
-		return binding.getChildNamespace();
+		return binding.getDomainChild();
 	}
 
 	public Stream<T> getChildren()
@@ -102,25 +102,25 @@ public abstract class BindingReference<T extends BindingReference<T, V>, V>
 	public String getLocalName()
 	{
 		goCheck();
-		return binding.getLocalName();
+		return binding.getName();
 	}
 
 	public String getNamespace()
 	{
 		goCheck();
-		return binding.getNamespace().substring( prefix.getNodeCount() );
+		return binding.getCurrentPath().substring( prefix.getNodeCount() );
 	}
 
 	public NamespaceBase getNamespaceObj()
 	{
 		goCheck();
-		return binding.getNamespaceObj().subNamespace( prefix.getNodeCount() );
+		return binding.getNamespace().subNamespace( prefix.getNodeCount() );
 	}
 
 	public boolean hasParent()
 	{
 		goCheck();
-		return binding.getNamespaceObj().getNodeCount() - prefix.getNodeCount() > 0;
+		return binding.getNamespace().getNodeCount() - prefix.getNodeCount() > 0;
 	}
 
 	public BindingReference<T, V> getParent()
@@ -133,7 +133,7 @@ public abstract class BindingReference<T extends BindingReference<T, V>, V>
 
 	public String getRootNamespace()
 	{
-		return binding.getRootNamespace();
+		return binding.getDomainTLD();
 	}
 
 	protected void goCheck()

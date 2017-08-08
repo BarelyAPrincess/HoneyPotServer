@@ -26,21 +26,26 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	protected String[] nodes;
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator, String[] nodes )
+	private String glue;
+
+	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue, String[] nodes )
 	{
 		this.creator = creator;
+		this.glue = glue;
 		this.nodes = Strs.toLowerCase( nodes );
 	}
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator, List<String> nodes )
+	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue, List<String> nodes )
 	{
 		this.creator = creator;
+		this.glue = glue;
 		this.nodes = Strs.toLowerCase( nodes.toArray( new String[0] ) );
 	}
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator )
+	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue )
 	{
 		this.creator = creator;
+		this.glue = glue;
 		this.nodes = new String[0];
 	}
 
@@ -157,7 +162,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		if ( nodes.length <= 1 )
 			return "";
 
-		return Strs.join( Arrays.copyOf( nodes, nodes.length - 1 ), "." );
+		return Strs.join( Arrays.copyOf( nodes, nodes.length - 1 ), glue );
 	}
 
 	public T getParentNamespace()
@@ -177,26 +182,20 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public String getString()
 	{
-		return getString( "." );
-	}
-
-	public String getString( String separator )
-	{
-		return getString( separator, false );
+		return getString( false );
 	}
 
 	/**
 	 * Converts Namespace to a String
 	 *
-	 * @param separator The node separator
-	 * @param escape    Shall we escape separator characters in node names
+	 * @param escape Shall we escape separator characters in node names
 	 * @return The converted String
 	 */
-	public String getString( String separator, boolean escape )
+	public String getString( boolean escape )
 	{
 		if ( escape )
-			return Arrays.stream( nodes ).map( n -> n.replace( separator, "\\" + separator ) ).collect( Collectors.joining( separator ) );
-		return Strs.join( nodes, separator );
+			return Arrays.stream( nodes ).map( n -> n.replace( glue, "\\" + glue ) ).collect( Collectors.joining() );
+		return Strs.join( nodes, glue );
 	}
 
 	public boolean isEmpty()
@@ -342,16 +341,21 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		return creator.apply( tmpNodes.toArray( new String[0] ) );
 	}
 
+	public T setGlue( String glue )
+	{
+		this.glue = glue;
+		return ( T ) this;
+	}
+
 	private String[] splitString( String str )
 	{
 		return splitString( str, null );
 	}
 
-	private String[] splitString( String str, String separator )
+	private String[] splitString( String str, String glue )
 	{
-		if ( Objs.isEmpty( separator ) )
-			separator = ".";
-		return Strs.split( str, separator ).filter( v -> !Objs.isEmpty( v ) ).toArray( String[]::new );
+		glue = Objs.notEmptyOrDef( glue, "." );
+		return Strs.split( str, glue ).filter( v -> !Objs.isEmpty( v ) ).toArray( String[]::new );
 	}
 
 	public T subNamespace( int start )
@@ -379,5 +383,15 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "End can't be more than node count" );
 
 		return Arrays.copyOfRange( nodes, start, end );
+	}
+
+	public String subString( int start )
+	{
+		return subString( start, getNodeCount() );
+	}
+
+	public String subString( int start, int end )
+	{
+		return Strs.join( subNodes( start, end ), glue );
 	}
 }

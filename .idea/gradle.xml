@@ -16,7 +16,6 @@
             <option value="$PROJECT_DIR$/modules/HPPermissions" />
             <option value="$PROJECT_DIR$/modules/HPPlugins" />
             <option value="$PROJECT_DIR$/modules/HPScripting" />
-            <option value="$PROJECT_DIR$/modules/HPTasks" />
           </set>
         </option>
         <option name="useAutoImport" value="true" />

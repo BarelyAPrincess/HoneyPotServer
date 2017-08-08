@@ -8,13 +8,11 @@ import io.amelia.lang.ConfigException;
 import io.amelia.support.Arrs;
 import io.amelia.support.LibIO;
 import io.amelia.support.Lists;
-import io.amelia.support.Maps;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 import io.amelia.util.OptionalBoolean;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -24,7 +22,6 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -64,14 +61,14 @@ public class ConfigRegistry
 		return node.getBoolean( key );
 	}
 
-	public static ConfigNode getChild( String key, boolean create )
-	{
-		return node.getChild( key, create );
-	}
-
 	public static ConfigNode getChild( String key )
 	{
 		return node.getChild( key );
+	}
+
+	public static ConfigNode getChildOrCreate( String key )
+	{
+		return node.getChildOrCreate( key );
 	}
 
 	public static OptionalDouble getDouble( String key )
@@ -254,7 +251,7 @@ public class ConfigRegistry
 
 	public static boolean warnOnOverload()
 	{
-		return false;
+		return node.isTrue( "general.warnOnOverload" );
 	}
 
 	/**

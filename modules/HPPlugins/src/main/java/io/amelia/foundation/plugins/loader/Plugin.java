@@ -10,6 +10,7 @@
 package io.amelia.foundation.plugins.loader;
 
 import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigRegistry;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.PluginBase;
 import io.amelia.foundation.plugins.PluginManager;
@@ -17,6 +18,7 @@ import io.amelia.foundation.plugins.PluginMeta;
 import io.amelia.lang.PluginException;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.Objs;
+import io.amelia.support.Strs;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -307,6 +309,11 @@ public abstract class Plugin extends PluginBase
 		}
 	}
 
+	public ConfigNode getConfigNode()
+	{
+		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
+	}
+
 	/**
 	 * Returns the file which contains this plugin
 	 *
@@ -327,6 +334,11 @@ public abstract class Plugin extends PluginBase
 		return meta;
 	}
 
+	public String getSimpleName()
+	{
+		return Strs.toCamelCase( getName() );
+	}
+
 	final void init( PluginLoader loader, PluginMeta meta, File dataFolder, File file, ClassLoader classLoader )
 	{
 		this.loader = loader;
@@ -334,14 +346,16 @@ public abstract class Plugin extends PluginBase
 		this.meta = meta;
 		this.dataFolder = dataFolder;
 		this.classLoader = classLoader;
+		this.configFile = new File( dataFolder, "config.yaml" );
+	}
 
-		File yamlFile = new File( dataFolder, "config.yaml" );
-		File ymlFile = new File( dataFolder, "config.yml" );
+	public void publishConfig()
+	{
+		ConfigNode node = getConfigNode().destroyChildThenCreate( "conf" );
 
-		if ( ymlFile.exists() )
-			ymlFile.renameTo( yamlFile );
 
-		configFile = yamlFile;
+
+
 	}
 
 	@Override

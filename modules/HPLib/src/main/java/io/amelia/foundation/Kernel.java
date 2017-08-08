@@ -41,6 +41,11 @@ public class Kernel
 		}
 	}
 
+	public static ApplicationInterface getApplicationInterface()
+	{
+		return app;
+	}
+
 	public static void dispose()
 	{
 		finished = true;

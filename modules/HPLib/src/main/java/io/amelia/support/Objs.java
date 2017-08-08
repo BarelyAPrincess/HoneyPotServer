@@ -567,6 +567,11 @@ public class Objs
 		return obj;
 	}
 
+	public static <T> T notEmptyOrDef( T obj, T def )
+	{
+		return isEmpty( obj ) ? def : obj;
+	}
+
 	public static <T> T notFalse( T bool )
 	{
 		return notFalse( bool, "Object is false" );
@@ -602,6 +607,11 @@ public class Objs
 		if ( object == null )
 			throw new NullPointerException( values == null || values.length == 0 ? message : String.format( message, values ) );
 		return object;
+	}
+
+	public static <T> T notNullOrDef( T obj, T def )
+	{
+		return isNull( obj ) ? def : obj;
 	}
 
 	public static <T extends Number> T notPositive( T number )

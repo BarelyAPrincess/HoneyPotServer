@@ -11,7 +11,6 @@ package io.amelia.config;
 
 import io.amelia.support.Lists;
 import io.amelia.support.Namespace;
-import io.amelia.support.NamespaceParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +38,11 @@ public final class ConfigTree
 		return domains.keySet().stream();
 	}
 
-	public static ConfigNode parseDomain( NamespaceParser fullDomain )
+	public static ConfigNode parseDomain( String fullDomain )
 	{
-		Namespace root = fullDomain.getTld();
-		Namespace child = fullDomain.getSub().reverseOrder();
+		Namespace.Domain domain = Namespace.parseDomain( fullDomain );
+		Namespace root = domain.getTld();
+		Namespace child = domain.getChild().reverseOrder();
 
 		if ( root.isEmpty() && child.isEmpty() )
 			return defaultConfigNode;
@@ -60,11 +60,6 @@ public final class ConfigTree
 				node = node.getConfigNode( s, true );
 
 		return node;
-	}
-
-	public static ConfigNode parseDomain( String fullDomain )
-	{
-		return parseDomain( new NamespaceParser( fullDomain ) );
 	}
 
 	private ConfigTree()

@@ -10,7 +10,6 @@
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.MetaMap;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MapCollisionException;
 import javafx.util.Pair;
@@ -130,6 +129,21 @@ public class Maps
 		return ( T ) map.values().toArray()[0];
 	}
 
+	public static int firstKey( Map<Integer, ?> map )
+	{
+		int n = 0;
+		while ( map.containsKey( n ) )
+			n++;
+		return n;
+	}
+
+	public static <V> int firstKeyAndPut( Map<Integer, V> map, V val )
+	{
+		int n = firstKey( map );
+		map.put( n, val );
+		return n;
+	}
+
 	public static Map<String, Object> flattenMap( Map<String, Object> map )
 	{
 		Map<String, Object> result = new HashMap<>();
@@ -154,6 +168,17 @@ public class Maps
 	{
 		AtomicInteger inx = new AtomicInteger();
 		return list.stream().filter( Objects::nonNull ).map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( Pair::getKey, Pair::getValue ) );
+	}
+
+	public static <K, V> K keyOf( Map<K, V> map, @NotNull V val )
+	{
+		if ( map == null )
+			return null;
+		Objs.notNull( val );
+		for ( Map.Entry<K, V> entry : map.entrySet() )
+			if ( entry.getValue() == val )
+				return entry.getKey();
+		return null;
 	}
 
 	@SuppressWarnings( "unchecked" )
