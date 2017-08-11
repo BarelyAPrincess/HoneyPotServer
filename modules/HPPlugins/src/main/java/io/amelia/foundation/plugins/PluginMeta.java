@@ -15,7 +15,7 @@ import io.amelia.foundation.MetaMap;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.injection.MavenReference;
 import io.amelia.lang.PluginMetaException;
-import io.amelia.lang.RunLevel;
+import io.amelia.lang.Runlevel;
 import io.amelia.support.Lists;
 
 import java.io.File;
@@ -226,8 +226,8 @@ public class PluginMeta extends VendorMeta
 	/**
 	 * Gives the phase of server startup that the plugin should be loaded.
 	 * <ul>
-	 * <li>Possible values are in {@link RunLevel}.
-	 * <li>Defaults to {@link RunLevel#INITIALIZED}.
+	 * <li>Possible values are in {@link Runlevel}.
+	 * <li>Defaults to {@link Runlevel#INITIALIZED}.
 	 * <li>Certain caveats apply to each phase.
 	 * <li>When different, {@link #getDepend()}, {@link #getSoftDepend()}, and {@link #getLoadBefore()}
 	 * become relative in order loaded per-phase. If a plugin loads at <code>STARTUP</code>, but a dependency
@@ -246,15 +246,15 @@ public class PluginMeta extends VendorMeta
 	 *
 	 * @return the phase when the plugin should be loaded
 	 */
-	public RunLevel getLoad()
+	public Runlevel getLoad()
 	{
 		try
 		{
-			return RunLevel.valueOf( getString( "runlevel" ) );
+			return Runlevel.valueOf( getString( "runlevel" ) );
 		}
 		catch ( IllegalArgumentException | NullPointerException e )
 		{
-			return RunLevel.STARTUP;
+			return Runlevel.STARTUP;
 		}
 	}
 

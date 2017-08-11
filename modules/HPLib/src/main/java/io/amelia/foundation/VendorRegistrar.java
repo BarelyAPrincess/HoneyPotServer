@@ -1,21 +1,11 @@
 package io.amelia.foundation;
 
-public abstract class VendorRegistrar extends RegistrarBase
+public interface VendorRegistrar extends RegistrarBase
 {
-	private VendorMeta meta;
-
-	public VendorRegistrar( VendorMeta meta )
+	default String getName()
 	{
-		this.meta = meta;
+		return getVendorMeta().getName();
 	}
 
-	public VendorMeta getVendorMeta()
-	{
-		return meta;
-	}
-
-	public String getName()
-	{
-		return meta.getName();
-	}
+	VendorMeta getVendorMeta();
 }

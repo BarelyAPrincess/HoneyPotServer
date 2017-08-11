@@ -3,29 +3,8 @@ package io.amelia.foundation;
 /**
  * Used to track event and task registration.
  */
-public abstract class RegistrarBase
+public interface RegistrarBase
 {
-	public static final RegistrarBase INTERNAL = new RegistrarBase()
-	{
-		@Override
-		public String getName()
-		{
-			return "HoneyPotServer";
-		}
-	};
-
-	private Class<?> cls;
-
-	public RegistrarBase()
-	{
-
-	}
-
-	public RegistrarBase( Class<?> cls )
-	{
-		this.cls = cls;
-	}
-
 	/**
 	 * Returns the name of the creator.
 	 * <p>
@@ -33,23 +12,15 @@ public abstract class RegistrarBase
 	 *
 	 * @return name of the creator
 	 */
-	public String getName()
-	{
-		return cls == null ? null : cls.getSimpleName();
-	}
+	String getName();
 
 	/**
 	 * Returns a value indicating whether or not this creator is currently enabled
 	 *
 	 * @return true if this creator is enabled, otherwise false
 	 */
-	public boolean isEnabled()
+	default boolean isEnabled()
 	{
 		return true;
-	}
-
-	protected void setClass( Class<?> cls )
-	{
-		this.cls = cls;
 	}
 }

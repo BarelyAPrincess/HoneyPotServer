@@ -46,7 +46,7 @@ public class Maps
 		{{
 			for ( Map.Entry<String, T> entry : map.entrySet() )
 			{
-				if ( UtilNumbers.isNumber( entry.getKey() ) )
+				if ( LibMath.isNumber( entry.getKey() ) )
 					put( Integer.parseInt( entry.getKey() ), entry.getValue() );
 			}
 		}};

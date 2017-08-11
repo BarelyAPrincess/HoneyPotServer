@@ -11,6 +11,7 @@ package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
 import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ApplicationInterface;
 import io.amelia.foundation.injection.Libraries;
 import io.amelia.lang.EnumColor;
 import io.amelia.lang.ReportingLevel;
@@ -103,12 +104,12 @@ public class LibIO
 		return cBuffer.toString();
 	}
 
-	public static boolean checkMd5( File file, String expectedMd5 )
+	public static boolean checkMd5( File file, String expectedMd5 ) throws IOException
 	{
 		if ( expectedMd5 == null || file == null || !file.exists() )
 			return false;
 
-		String md5 = md5( file );
+		String md5 = LibEncrypt.md5Hex( new FileInputStream( file ) );
 		return md5 != null && md5.equals( expectedMd5 );
 	}
 
@@ -557,7 +558,7 @@ public class LibIO
 
 	public static boolean extractResourceZip( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File cache = ConfigRegistry.getPath( ConfigRegistry.PATH_CACHE );
+		File cache = ConfigRegistry.getPath( ApplicationInterface.PATH_CACHE );
 		if ( !cache.exists() )
 			cache.mkdirs();
 		File temp = new File( cache, "temp.zip" );
@@ -697,29 +698,6 @@ public class LibIO
 		gzos.close();
 	}
 
-	public static ByteArrayOutputStream inputStream2ByteArray( InputStream is ) throws IOException
-	{
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-		int len;
-		byte[] buffer = new byte[4096];
-		while ( -1 != ( len = is.read( buffer ) ) )
-			bos.write( buffer, 0, len );
-
-		bos.flush();
-		return bos;
-	}
-
-	public static byte[] inputStream2Bytes( InputStream is ) throws IOException
-	{
-		return inputStream2ByteArray( is ).toByteArray();
-	}
-
-	public static String inputStream2String( InputStream is ) throws IOException
-	{
-		return new String( inputStream2Bytes( is ) );
-	}
-
 	public static boolean isAbsolute( String dir )
 	{
 		return dir.startsWith( "/" ) || dir.startsWith( ":\\", 1 );
@@ -750,27 +728,6 @@ public class LibIO
 		for ( File f : files )
 			result.compute( f.lastModified(), ( k, l ) -> l == null ? new ArrayList<>() : l ).add( f );
 		return result;
-	}
-
-	public static String md5( File file )
-	{
-		return LibEncrypt.md5( file );
-	}
-
-	public static String nameSpaceToPath( String namespace )
-	{
-		return nameSpaceToPath( namespace, false );
-	}
-
-	public static String nameSpaceToPath( String namespace, boolean flip )
-	{
-		String output = "";
-
-		if ( flip )
-			for ( String s : namespace.split( "\\." ) )
-				output = s + "." + output;
-
-		return output.replaceAll( "\\.", PATH_SEPERATOR );
 	}
 
 	public static void putResource( Class<?> clz, String resource, File file ) throws IOException
@@ -844,6 +801,32 @@ public class LibIO
 		}
 	}
 
+	public static ByteArrayOutputStream readStreamToByteArray( InputStream is ) throws IOException
+	{
+		try
+		{
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ( ( nRead = is.read( data, 0, data.length ) ) != -1 )
+				buffer.write( data, 0, nRead );
+
+			buffer.flush();
+			return buffer;
+		}
+		finally
+		{
+			closeQuietly( is );
+		}
+	}
+
+	public static byte[] readStreamToBytes( InputStream is ) throws IOException
+	{
+		return readStreamToByteArray( is ).toByteArray();
+	}
+
 	public static List<String> readStreamToLines( @NotNull InputStream is, @NotNull String ignorePrefix ) throws FileNotFoundException
 	{
 		return readStreamToStream( is, ignorePrefix ).collect( Collectors.toList() );
@@ -866,22 +849,7 @@ public class LibIO
 
 	public static String readStreamToString( @NotNull InputStream is ) throws IOException
 	{
-		try
-		{
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-			int nRead;
-			byte[] data = new byte[16384];
-
-			while ( ( nRead = is.read( data, 0, data.length ) ) != -1 )
-				buffer.write( data, 0, nRead );
-
-			return new String( buffer.toByteArray(), Charset.defaultCharset() );
-		}
-		finally
-		{
-			closeQuietly( is );
-		}
+		return Strs.encodeDefault( readStreamToByteArray( is ).toByteArray() );
 	}
 
 	public static List<File> recursiveFiles( final File dir )
@@ -958,7 +926,7 @@ public class LibIO
 		if ( is == null )
 			return null;
 
-		return new String( inputStream2Bytes( is ), "UTF-8" );
+		return new String( readStreamToBytes( is ), "UTF-8" );
 	}
 
 	public static boolean setDirectoryAccess( File file )

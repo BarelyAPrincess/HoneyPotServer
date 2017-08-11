@@ -1,17 +1,28 @@
 package io.amelia.networking;
 
 import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.NetworkException;
 
-public interface NetworkWorker
+public interface NetworkWorker<T>
 {
-	void start( ConfigNode config ) throws NetworkException;
+	default ConfigNode getConfig()
+	{
+		return ConfigRegistry.getChildOrCreate( "config.network." + getId() );
+	}
 
-	void stop() throws NetworkException;
+	default ConfigNode getConfig( String key )
+	{
+		return getConfig().getChild( key );
+	}
 
 	String getId();
 
+	void heartbeat();
+
 	boolean isStarted();
 
-	void heartbeat();
+	T start() throws NetworkException;
+
+	T stop() throws NetworkException;
 }

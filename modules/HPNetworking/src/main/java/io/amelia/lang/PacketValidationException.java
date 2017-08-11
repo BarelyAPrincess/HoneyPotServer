@@ -7,19 +7,19 @@ public class PacketValidationException extends NetworkException
 {
 	private final Packet packet;
 
-	public PacketValidationException( @NotNull String message, @NotNull Packet packet )
+	public PacketValidationException( @NotNull Packet packet, @NotNull String message )
 	{
 		super( message );
 		this.packet = packet;
 	}
 
-	public PacketValidationException( @NotNull String message, @NotNull Throwable cause, @NotNull Packet packet )
+	public PacketValidationException( @NotNull Packet packet, @NotNull String message, @NotNull Throwable cause )
 	{
 		super( message, cause );
 		this.packet = packet;
 	}
 
-	public PacketValidationException( @NotNull Throwable cause, @NotNull Packet packet )
+	public PacketValidationException( @NotNull Packet packet, @NotNull Throwable cause )
 	{
 		super( cause );
 		this.packet = packet;

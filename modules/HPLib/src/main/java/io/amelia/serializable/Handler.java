@@ -1,6 +1,6 @@
 package io.amelia.serializable;
 
-import io.amelia.foundation.ApplicationInterface;
+import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Kernel;
 
 import java.lang.reflect.Modifier;
@@ -176,7 +176,7 @@ public class Handler
 				Kernel.L.warning( "The following Handler class should be static or leaks might occur: " + klass.getCanonicalName() );
 		}
 
-		mLooper = ApplicationInterface.myLooper();
+		mLooper = DefaultApplication.myLooper();
 		if ( mLooper == null )
 			throw new RuntimeException( "Can't create handler inside thread that has not called Looper.prepare()" );
 		mQueue = mLooper.mQueue;

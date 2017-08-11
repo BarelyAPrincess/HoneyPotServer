@@ -23,9 +23,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" group="HPScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" group="HPScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks.iml" group="HPTasks" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_main.iml" group="HPTasks" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPTasks/HPTasks_test.iml" group="HPTasks" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" group="HoneyPotServer" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" group="HoneyPotServer" />

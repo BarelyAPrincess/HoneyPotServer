@@ -9,6 +9,7 @@
  */
 package io.amelia.support;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.sun.istack.internal.NotNull;
 import io.amelia.foundation.Kernel;
@@ -17,6 +18,7 @@ import java.awt.Color;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -263,6 +265,26 @@ public class Strs
 			if ( str.charAt( i ) == chr )
 				cnt++;
 		return cnt;
+	}
+
+	public static byte[] decodeDefault( @NotNull String str )
+	{
+		return str.getBytes( Charset.defaultCharset() );
+	}
+
+	public static byte[] decodeUtf8( @NotNull String str )
+	{
+		return str.getBytes( Charsets.UTF_8 );
+	}
+
+	public static String encodeDefault( byte[] bytes )
+	{
+		return new String( bytes, Charset.defaultCharset() );
+	}
+
+	public static String encodeUtf8( byte[] bytes )
+	{
+		return new String( bytes, Charsets.UTF_8 );
 	}
 
 	public static String escapeHtml( String str )

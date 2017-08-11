@@ -8,12 +8,26 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 public class VendorMeta extends MetaMap
 {
+	public static final String NAME = "name";
+	public static final String AUTHORS = "authors";
+	public static final String DESCRIPTION = "description";
+	public static final String GITHUB_BASE_URL = "gitHubBaseUrl";
+	public static final String PREFIX = "prefix";
+	public static final String VERSION = "version";
+	public static final String WEBSITE = "website";
+
 	public VendorMeta()
 	{
 
+	}
+
+	public VendorMeta( final Map<String, String> data )
+	{
+		putAll( data );
 	}
 
 	public VendorMeta( final File file ) throws IOException
@@ -75,7 +89,7 @@ public class VendorMeta extends MetaMap
 	 */
 	public List<String> getAuthors()
 	{
-		return getList( "authors", "|" );
+		return getList( AUTHORS, "|" );
 	}
 
 	/**
@@ -99,7 +113,7 @@ public class VendorMeta extends MetaMap
 	 */
 	public String getDescription()
 	{
-		return getString( "description" );
+		return getString( DESCRIPTION );
 	}
 
 	/**
@@ -120,7 +134,7 @@ public class VendorMeta extends MetaMap
 	 */
 	public String getGitHubBaseUrl()
 	{
-		return getString( "gitHubBaseUrl" );
+		return getString( GITHUB_BASE_URL );
 	}
 
 	/**
@@ -145,17 +159,17 @@ public class VendorMeta extends MetaMap
 	 */
 	public String getLoggerPrefix()
 	{
-		return getString( "prefix" );
+		return getString( PREFIX );
 	}
 
 	public String getName()
 	{
-		return getString( "name" );
+		return getString( NAME );
 	}
 
 	public String getVersion()
 	{
-		return getString( "version" );
+		return getString( VERSION );
 	}
 
 	/**
@@ -180,7 +194,7 @@ public class VendorMeta extends MetaMap
 	 */
 	public String getVersionRequired()
 	{
-		return getRequired( "version", "Version is not defined" );
+		return getRequired( VERSION, "Version is not defined" );
 	}
 
 	/**
@@ -204,6 +218,6 @@ public class VendorMeta extends MetaMap
 	 */
 	public String getWebsite()
 	{
-		return getString( "website" );
+		return getString( WEBSITE );
 	}
 }

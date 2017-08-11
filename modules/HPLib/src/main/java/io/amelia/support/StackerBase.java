@@ -196,7 +196,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 				if ( entry.getValue().flags.contains( StackerListener.Flags.FIRE_ONCE ) )
 					listeners.remove( entry.getKey() );
 				if ( first || !entry.getValue().flags.contains( StackerListener.Flags.NO_RECURSIVE ) )
-					TaskDispatcher.runTaskAsynchronously( Kernel.getApplicationInterface(), () -> entry.getValue().call( objs ) );
+					TaskDispatcher.runTaskAsynchronously( Kernel.getApplication(), () -> entry.getValue().call( objs ) );
 			}
 	}
 

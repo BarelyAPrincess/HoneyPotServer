@@ -44,7 +44,7 @@ public class Info
 	 */
 	public static String getCopyright()
 	{
-		return metadata.getProperty( "project.copyright", "Copyright &copy; 2015 Chiori-chan" );
+		return metadata.getProperty( "project.copyright", "Copyright &copy; 2017 Amelia DeWitt" );
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class Info
 	 */
 	public static String getDeveloperContact()
 	{
-		return metadata.getProperty( "project.email", "me@chiorichan.com" );
+		return metadata.getProperty( "project.email", "me@ameliadewitt.com" );
 	}
 
 	/**
@@ -80,27 +80,33 @@ public class Info
 	}
 
 	/**
-	 * Get the server product name, e.g., Chiori-chan's Web Server
+	 * Get the server product name, e.g., Honey Pot Server
 	 *
 	 * @return The Product Name
 	 */
 	public static String getProduct()
 	{
-		return metadata.getProperty( "project.name", "Chiori-chan's Web Server" );
+		return metadata.getProperty( "project.name", "Honey Pot Server" );
 	}
 
-	/*
-	 * Operating System Methods
+	/**
+	 * Describe this product
+	 *
+	 * @return
 	 */
+	public static String getProductDescribe()
+	{
+		return "Running " + Info.getProduct() + " version " + Info.getVersion() + " (Build #" + getBuildNumber() + ")";
+	}
 
 	/**
-	 * Get the server product name without spaces or special characters, e.g., ChioriWebServer
+	 * Get the server product name without spaces or special characters, e.g., HoneyPot
 	 *
 	 * @return The Product Name Simple
 	 */
 	public static String getProductSimple()
 	{
-		return metadata.getProperty( "project.name", "ChioriWebServer" ).replaceAll( " ", "" );
+		return metadata.getProperty( "project.name", "HoneyPot" ).replaceAll( " ", "" );
 	}
 
 	/**
@@ -130,7 +136,7 @@ public class Info
 	 */
 	public static boolean isDevelopment()
 	{
-		return "0".equals( getBuildNumber() ) || ConfigRegistry.getBoolean( "server.developmentMode", false );
+		return "0".equals( getBuildNumber() ) || ConfigRegistry.getBoolean( "server.developmentMode" ).orElse( false );
 	}
 
 	/**

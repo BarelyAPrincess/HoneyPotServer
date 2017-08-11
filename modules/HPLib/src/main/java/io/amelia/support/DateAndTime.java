@@ -13,9 +13,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class UtilDate
+public class DateAndTime
 {
-	private UtilDate()
+	private DateAndTime()
 	{
 
 	}

@@ -11,6 +11,7 @@ package io.amelia.foundation.plugins;
 
 import io.amelia.config.ConfigRegistry;
 import io.amelia.events.EventHandlers;
+import io.amelia.foundation.ApplicationInterface;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.plugins.loader.Plugin;
 import io.amelia.foundation.plugins.loader.PluginLoader;
@@ -19,7 +20,7 @@ import io.amelia.lang.PluginException;
 import io.amelia.lang.PluginInvalidException;
 import io.amelia.lang.PluginMetaException;
 import io.amelia.lang.PluginNotFoundException;
-import io.amelia.lang.RunLevel;
+import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.LibIO;
@@ -65,10 +66,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	private void checkUpdate( File file )
 	{
-		if ( !ConfigRegistry.getPath( ConfigRegistry.PATH_UPDATES ).isDirectory() )
+		if ( !ConfigRegistry.getPath( ApplicationInterface.PATH_UPDATES ).isDirectory() )
 			return;
 
-		File updateFile = new File( ConfigRegistry.getPath( ConfigRegistry.PATH_UPDATES ), file.getName() );
+		File updateFile = new File( ConfigRegistry.getPath( ApplicationInterface.PATH_UPDATES ), file.getName() );
 		if ( updateFile.isFile() && LibIO.copy( updateFile, file ) )
 			updateFile.delete();
 	}
@@ -597,7 +598,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	@EventHandler( priority = EventPriority.NORMAL )
 	public void onServerRunLevelEvent( RunlevelEvent event )
 	{
-		RunLevel level = event.getRunLevel();
+		Runlevel level = event.getRunLevel();
 
 		Plugin[] plugins = getPlugins();
 

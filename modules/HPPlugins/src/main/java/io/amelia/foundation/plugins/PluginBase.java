@@ -11,7 +11,6 @@ package io.amelia.foundation.plugins;
 
 import io.amelia.config.ConfigNode;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
 
@@ -20,6 +19,25 @@ import java.io.InputStream;
 
 public abstract class PluginBase extends RegistrarBase
 {
+	@Override
+	public final boolean equals( Object obj )
+	{
+		if ( this == obj )
+			return true;
+		if ( obj == null )
+			return false;
+		if ( !( obj instanceof PluginBase ) )
+			return false;
+		try
+		{
+			return getName().equals( ( ( PluginBase ) obj ).getName() );
+		}
+		catch ( NullPointerException e )
+		{
+			return false;
+		}
+	}
+
 	/**
 	 * Gets a {@link ConfigNode} for this plugin, read through "config.yml"
 	 * <p>
@@ -59,14 +77,6 @@ public abstract class PluginBase extends RegistrarBase
 	}
 
 	/**
-	 * Returns a value indicating whether or not this plugin is currently enabled
-	 *
-	 * @return true if this plugin is enabled, otherwise false
-	 */
-	@Override
-	public abstract boolean isEnabled();
-
-	/**
 	 * Gets the associated PluginLoader responsible for this plugin
 	 *
 	 * @return PluginLoader that controls this plugin
@@ -94,24 +104,13 @@ public abstract class PluginBase extends RegistrarBase
 		}
 	}
 
+	/**
+	 * Returns a value indicating whether or not this plugin is currently enabled
+	 *
+	 * @return true if this plugin is enabled, otherwise false
+	 */
 	@Override
-	public final boolean equals( Object obj )
-	{
-		if ( this == obj )
-			return true;
-		if ( obj == null )
-			return false;
-		if ( !( obj instanceof PluginBase ) )
-			return false;
-		try
-		{
-			return getName().equals( ( ( PluginBase ) obj ).getName() );
-		}
-		catch ( NullPointerException e )
-		{
-			return false;
-		}
-	}
+	public abstract boolean isEnabled();
 
 	/**
 	 * Simple boolean if we can still nag to the logs about things

@@ -1,7 +1,7 @@
 package io.amelia.foundation;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.RunLevel;
+import io.amelia.lang.Runlevel;
 import joptsimple.OptionParser;
 
 public interface Loader
@@ -19,7 +19,7 @@ public interface Loader
 	 * @param level The new runlevel
 	 * @throws ApplicationException Thrown for direct application exception
 	 */
-	void onRunlevelChange( RunLevel level ) throws ApplicationException;
+	void onRunlevelChange( Runlevel level ) throws ApplicationException;
 
 	/**
 	 * Adds options to the deployment OptionParser

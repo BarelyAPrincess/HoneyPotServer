@@ -495,7 +495,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	{
 		public InternalHandler()
 		{
-			super( Kernel.application().getMainLooper() );
+			super( Kernel.getApplication().getMainLooper() );
 		}
 
 		@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )

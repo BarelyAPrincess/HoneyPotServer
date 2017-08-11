@@ -1,9 +1,12 @@
 package io.amelia.env;
 
+import io.amelia.lang.UncaughtException;
 import io.amelia.support.Objs;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,12 +15,21 @@ import java.util.Properties;
 public class Env
 {
 	private final Map<String, Object> env = new HashMap<>();
+	private final File envFile;
 
-	public Env defs( Map<String, Object> defs )
+	public Env( File envFile ) throws IOException
 	{
-		Objs.notNull( defs );
-		env.putAll( defs );
-		return this;
+		Objs.notNull( envFile );
+		this.envFile = envFile;
+
+		synchronized ( env )
+		{
+			Properties prop = new Properties();
+			prop.load( new FileInputStream( envFile ) );
+
+			for ( String key : prop.stringPropertyNames() )
+				env.put( key, prop.getProperty( key ) );
+		}
 	}
 
 	public boolean getBoolean( String key )
@@ -40,42 +52,32 @@ public class Env
 		return env.containsKey( key ) && !Objs.isNull( env.get( key ) );
 	}
 
-	public Env load( InputStream is ) throws IOException
-	{
-		load( null, is );
-		return this;
-	}
-
-	public Env load( Map<String, Object> defs, InputStream is ) throws IOException
-	{
-		Objs.notNull( is );
-		synchronized ( env )
-		{
-			Properties prop = new Properties();
-			prop.load( is );
-
-			if ( defs != null )
-				env.putAll( defs );
-
-			for ( String key : prop.stringPropertyNames() )
-				env.put( key, prop.getProperty( key ) );
-		}
-		return this;
-	}
-
 	public Map<String, Object> map()
 	{
 		return Collections.unmodifiableMap( env );
 	}
 
-	public Env set( String key, Object value )
+	public Env set( String key, Object value, boolean updateEnvFile )
 	{
 		Objs.notNull( key );
 		Objs.notNull( value );
-		synchronized ( env )
+		env.put( key, value );
+
+		if ( updateEnvFile )
 		{
-			env.put( key, value );
+			try
+			{
+				Properties prop = new Properties();
+				prop.load( new FileInputStream( envFile ) );
+				prop.setProperty( key, Objs.castToString( value ) );
+				prop.store( new FileOutputStream( envFile ), "" );
+			}
+			catch ( IOException e )
+			{
+				throw new UncaughtException( e );
+			}
 		}
+
 		return this;
 	}
 }

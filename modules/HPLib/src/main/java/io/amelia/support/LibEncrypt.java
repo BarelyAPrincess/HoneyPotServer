@@ -9,17 +9,14 @@
  */
 package io.amelia.support;
 
-import com.chiorichan.tasks.Timings;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Chars;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -33,13 +30,39 @@ import java.util.UUID;
  */
 public class LibEncrypt
 {
-	private LibEncrypt()
-	{
+	/**
+	 * The MD2 message digest algorithm defined in RFC 1319.
+	 */
+	public static final String MD2 = "MD2";
 
-	}
+	/**
+	 * The MD5 message digest algorithm defined in RFC 1321.
+	 */
+	public static final String MD5 = "MD5";
 
-	private static final char[] randomCharMap;
+	/**
+	 * The SHA-1 hash algorithm defined in the FIPS PUB 180-2.
+	 */
+	public static final String SHA_1 = "SHA-1";
+
+	/**
+	 * The SHA-256 hash algorithm defined in the FIPS PUB 180-2.
+	 */
+	public static final String SHA_256 = "SHA-256";
+
+	/**
+	 * The SHA-384 hash algorithm defined in the FIPS PUB 180-2.
+	 */
+	public static final String SHA_384 = "SHA-384";
+
+	/**
+	 * The SHA-512 hash algorithm defined in the FIPS PUB 180-2.
+	 */
+	public static final String SHA_512 = "SHA-512";
+
 	private static final char[] allowedCharMap;
+	private static final Random random = new Random();
+	private static final char[] randomCharMap;
 
 	static
 	{
@@ -99,68 +122,78 @@ public class LibEncrypt
 		return Base64.getEncoder().encodeToString( str.getBytes() );
 	}
 
-	public static String guid() throws UnsupportedEncodingException
+	/**
+	 * Returns a <code>MessageDigest</code> for the given <code>algorithm</code>.
+	 *
+	 * @param algorithm the name of the algorithm requested. See <a
+	 *                  href="http://java.sun.com/j2se/1.3/docs/guide/security/CryptoSpec.html#AppA">Appendix A in the Java
+	 *                  Cryptography Architecture API Specification & Reference</a> for information about standard algorithm
+	 *                  names.
+	 * @return A digest instance.
+	 * @throws IllegalArgumentException when a {@link NoSuchAlgorithmException} is caught.
+	 * @see MessageDigest#getInstance(String)
+	 */
+	public static MessageDigest getDigest( final String algorithm )
 	{
-		return guid( Timings.epoch() + "-guid" );
-	}
-
-	public static String guid( String seed )
-	{
-		if ( seed == null )
-			seed = "";
-
-		byte[] bytes;
 		try
 		{
-			bytes = seed.getBytes( "ISO-8859-1" );
+			return MessageDigest.getInstance( algorithm );
 		}
-		catch ( UnsupportedEncodingException e )
+		catch ( final NoSuchAlgorithmException e )
 		{
-			bytes = new byte[0];
+			throw new IllegalArgumentException( e );
 		}
-
-		byte[] bytesScrambled = new byte[0];
-
-		for ( byte b : bytes )
-		{
-			byte[] tbyte = new byte[2];
-			new Random().nextBytes( bytes );
-
-			tbyte[0] = ( byte ) ( b + tbyte[0] );
-			tbyte[1] = ( byte ) ( b + tbyte[1] );
-
-			bytesScrambled = ArrayUtils.addAll( bytesScrambled, tbyte );
-		}
-
-		return "{" + UUID.nameUUIDFromBytes( bytesScrambled ).toString() + "}";
 	}
 
-	public static String md5( byte[] bytes )
+	public static Random getRandom()
 	{
-		return DigestUtils.md5Hex( bytes );
+		return random;
 	}
 
-	public static String md5( File file )
+	public static String hash()
 	{
-		if ( file == null || !file.exists() )
-			return null;
-		try
-		{
-			return md5( IOUtils.toByteArray( new FileInputStream( file ) ) );
-		}
-		catch ( IOException e )
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return hash( seed( 16 ) );
 	}
 
-	public static String md5( String str )
+	/**
+	 * Creates a basic 16-bit hash string using the UUID and MD5 methods
+	 */
+	public static String hash( byte[] seed )
+	{
+		return md5Hex( uuid( seed ) );
+	}
+
+	public static byte[] md5( byte[] bytes )
+	{
+		return getDigest( MD5 ).digest( bytes );
+	}
+
+	public static byte[] md5( InputStream is ) throws IOException
+	{
+		return getDigest( MD5 ).digest( LibIO.readStreamToBytes( is ) );
+	}
+
+	public static byte[] md5( final String str )
+	{
+		return getDigest( MD5 ).digest( Strs.decodeUtf8( str ) );
+	}
+
+	public static String md5Hex( byte[] bytes )
+	{
+		return String.format( "%040x", new BigInteger( 1, md5( bytes ) ) );
+	}
+
+	public static String md5Hex( InputStream is ) throws IOException
+	{
+		return md5Hex( LibIO.readStreamToString( is ) );
+	}
+
+	public static String md5Hex( String str )
 	{
 		if ( str == null )
 			return null;
 
-		return DigestUtils.md5Hex( str );
+		return String.format( "%040x", new BigInteger( 1, md5( Strs.decodeUtf8( str ) ) ) );
 	}
 
 	public static String rand()
@@ -189,16 +222,16 @@ public class LibEncrypt
 			allowedChars = new String[0];
 
 		if ( numbers )
-			allowedChars = ArrayUtils.addAll( allowedChars, "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
+			allowedChars = Arrs.concat( allowedChars, new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"} );
 
 		if ( letters )
-			allowedChars = ArrayUtils.addAll( allowedChars, "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" );
+			allowedChars = Arrs.concat( allowedChars, new String[] {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"} );
 
-		String rtn = "";
+		StringBuilder rtn = new StringBuilder();
 		for ( int i = 0; i < length; i++ )
-			rtn += allowedChars[new Random().nextInt( allowedChars.length )];
+			rtn.append( allowedChars[new Random().nextInt( allowedChars.length )] );
 
-		return rtn;
+		return rtn.toString();
 	}
 
 	/**
@@ -206,7 +239,7 @@ public class LibEncrypt
 	 */
 	public static Random random()
 	{
-		String seed = LibEncrypt.md5( LibEncrypt.seed( 4 ) ).replaceAll( "\\D", "" );
+		String seed = LibEncrypt.md5Hex( LibEncrypt.seed( 4 ) ).replaceAll( "\\D", "" );
 		return new Random( Long.parseLong( seed.length() > 12 ? seed.substring( 0, 12 ) : seed ) ^ System.nanoTime() );
 	}
 
@@ -323,13 +356,38 @@ public class LibEncrypt
 		}
 	}
 
-	public static String uuid() throws UnsupportedEncodingException
+	public static String uuid()
 	{
-		return uuid( Timings.epoch() + "-uuid" );
+		return uuid( seed( 16 ) );
 	}
 
-	public static String uuid( String seed ) throws UnsupportedEncodingException
+	public static String uuid( byte[] seed )
 	{
-		return DigestUtils.md5Hex( guid( seed ) );
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+		try
+		{
+			for ( byte b : seed )
+			{
+				byte[] tbyte = new byte[2];
+				new Random().nextBytes( tbyte );
+
+				tbyte[0] = ( byte ) ( b + tbyte[0] );
+				tbyte[1] = ( byte ) ( b + tbyte[1] );
+
+				bytes.write( tbyte );
+			}
+		}
+		catch ( IOException e )
+		{
+			// Ignore
+		}
+
+		return UUID.nameUUIDFromBytes( bytes.toByteArray() ).toString();
+	}
+
+	private LibEncrypt()
+	{
+
 	}
 }

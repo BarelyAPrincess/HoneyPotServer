@@ -5,6 +5,9 @@ import io.netty.buffer.ByteBuf;
 
 public class PacketRequestInfo extends PacketRequest<PacketRequestInfo>
 {
+	public String instanceId;
+	public String ipAddress;
+
 	@Override
 	public void validate() throws PacketValidationException
 	{

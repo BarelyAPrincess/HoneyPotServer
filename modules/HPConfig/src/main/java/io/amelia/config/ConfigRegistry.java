@@ -2,6 +2,8 @@ package io.amelia.config;
 
 import com.sun.istack.internal.NotNull;
 import io.amelia.env.Env;
+import io.amelia.foundation.ApplicationInterface;
+import io.amelia.foundation.Kernel;
 import io.amelia.foundation.binding.AppBindings;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ConfigException;
@@ -27,33 +29,29 @@ import java.util.stream.Stream;
 
 public class ConfigRegistry
 {
-	public static final String PATH_APP = "__app";
-	public static final String PATH_WEBROOT = "__webroot";
-	public static final String PATH_CONFIG = "__config";
-	public static final String PATH_PLUGINS = "__plugins";
-	public static final String PATH_UPDATES = "__updates";
-	public static final String PATH_DATABASE = "__database";
-	public static final String PATH_STORAGE = "__storage";
-	public static final String PATH_SESSIONS = "__sessions";
-	public static final String PATH_CACHE = "__cache";
-	public static final String PATH_LOGS = "__logs";
-
 	private static final Map<String, List<String>> appPaths = new ConcurrentHashMap<>();
 	private static File appPath = LibIO.buildFile( true );
 	private static File configFile = null;
 	private static ConfigNode node = new ConfigNode();
 
-	static
+	public static void clearCache( @NotNull File path, @NotNull long keepHistory )
 	{
-		setPath( "webroot", PATH_APP, "webroot" );
-		setPath( "config", PATH_APP, "config" );
-		setPath( "plugins", PATH_APP, "plugins" );
-		setPath( "updates", PATH_APP, "updates" );
-		setPath( "database", PATH_APP, "database" );
-		setPath( "storage", PATH_APP, "storage" );
-		setPath( "sessions", PATH_STORAGE, "sessions" );
-		setPath( "cache", PATH_STORAGE, "cache" );
-		setPath( "logs", PATH_STORAGE, "logs" );
+		Objs.notNull( path );
+		Objs.notNull( keepHistory );
+
+		if ( path.isDirectory() )
+		{
+			for ( File f : path.listFiles() )
+				if ( f.isFile() && f.lastModified() < System.currentTimeMillis() - keepHistory * 24 * 60 * 60 )
+					f.delete();
+				else if ( f.isDirectory() )
+					clearCache( f, keepHistory );
+		}
+	}
+
+	public static void clearCache( @NotNull long keepHistory )
+	{
+		clearCache( getPath( ApplicationInterface.PATH_CACHE ), keepHistory );
 	}
 
 	public static OptionalBoolean getBoolean( String key )
@@ -81,7 +79,7 @@ public class ConfigRegistry
 		return node.getInteger( key );
 	}
 
-	public static <T> List<T> getList( String key )
+	public static <T> Optional<List<T>> getList( String key )
 	{
 		return node.getList( key );
 	}
@@ -219,7 +217,12 @@ public class ConfigRegistry
 
 	private static void loadConfig() throws ConfigException.Error
 	{
-		loadConfig( getPath( ConfigRegistry.PATH_CONFIG, true ), "" );
+		loadConfig( getPath( ApplicationInterface.PATH_CONFIG, true ), "" );
+	}
+
+	public static void save()
+	{
+		// TODO Save
 	}
 
 	public static void setObject( String key, Object value )
@@ -230,21 +233,28 @@ public class ConfigRegistry
 			node.setValue( key, value );
 	}
 
-	public static void setPath( @NotNull String key, @NotNull String... paths )
+	public static void setPath( @NotNull String pathKey, @NotNull String... paths )
 	{
-		key = key.toLowerCase();
+		Objs.notEmpty( pathKey );
+		if ( pathKey.startsWith( "__" ) )
+			pathKey = pathKey.substring( 2 );
+
+		final String key = pathKey.toLowerCase();
+
 		if ( "app".equals( key ) )
 			throw new IllegalArgumentException( "App path is set using the setAppPath() method." );
 		if ( !Paths.get( paths[0] ).isAbsolute() && !paths[0].startsWith( "__" ) )
 			throw new IllegalArgumentException( "App paths must be absolute or reference another app path, i.e., __app. Paths: [" + Strs.join( paths ) + "]" );
 		appPaths.put( key, Lists.newArrayList( paths ) );
+
+		Kernel.getApplicationOptions().addCallbackWithValue( "dir-" + key, "Sets the " + key + " directory.", argumentValue -> setPath( key, argumentValue ) );
 	}
 
 	private static void vendorConfig() throws IOException
 	{
 		// WIP Copies config from resources and plugins to config directories.
 
-		File configPath = getPath( ConfigRegistry.PATH_CONFIG, true );
+		File configPath = getPath( ApplicationInterface.PATH_CONFIG, true );
 
 		LibIO.extractResourceDirectory( "config", configPath, ConfigRegistry.class );
 	}

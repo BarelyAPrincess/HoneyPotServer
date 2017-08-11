@@ -717,12 +717,9 @@ public class TaskDispatcher
 		}
 	}
 
-	/**
-	 * Schedule Service is a static
-	 */
 	private TaskDispatcher()
 	{
-
+		// Static Access
 	}
 
 	/*

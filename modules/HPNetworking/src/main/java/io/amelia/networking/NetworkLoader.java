@@ -1,7 +1,6 @@
 package io.amelia.networking;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.RegistrarBase;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.amelia.lang.NetworkException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
@@ -12,15 +11,16 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 public class NetworkLoader
 {
-	public static final RegistrarBase R = new RegistrarBase( NetworkLoader.class );
 	public static final Logger L = LogBuilder.get( NetworkLoader.class );
-	public static final EventLoopGroup IO_LOOP_GROUP = new NioEventLoopGroup( 250 );
-	private static final Map<Class<? extends NetworkWorker>, Worker<? extends NetworkWorker>> workerRefs = new HashMap<>();
+	public static final EventLoopGroup IO_LOOP_GROUP = new NioEventLoopGroup( 0, Executors.newCachedThreadPool( new ThreadFactoryBuilder().setNameFormat( "Netty Client IO #%d" ).setDaemon( true ).build() ) );
+	private static final Map<Class<? extends NetworkWorker>, NetworkWorker> networkWorkers = new ConcurrentHashMap<>();
 
 	static
 	{
@@ -28,71 +28,49 @@ public class NetworkLoader
 			Security.addProvider( new BouncyCastleProvider() );
 	}
 
+	public static UDPWorker UDP()
+	{
+		return getWorker( UDPWorker.class, UDPWorker::new );
+	}
+
+	/*
+	public static HTTPWorker HTTP()
+	{
+		return getWorker( HTTPWorker.class, HTTPWorker::new )
+	}
+	*/
+
+	public static void disposeWorker( Class<? extends NetworkWorker> workerClass ) throws NetworkException
+	{
+		Objs.ifPresent( networkWorkers.remove( workerClass ), NetworkWorker::stop );
+	}
+
 	@SuppressWarnings( "unchecked" )
-	public static Worker<UDPWorker> UDP()
+	public static <N extends NetworkWorker> N getWorker( Class<N> workerClass, Supplier<N> workerSupplier )
 	{
-		return ( Worker<UDPWorker> ) workerRefs.compute( UDPWorker.class, ( k, v ) -> v == null ? initWorker( UDPWorker.class ) : v );
+		return ( N ) networkWorkers.computeIfAbsent( workerClass, c -> workerSupplier.get() );
 	}
 
-	public static <N extends NetworkWorker> Worker<N> initWorker( Class<N> workerClass )
+	@SuppressWarnings( "unchecked" )
+	public static <N extends NetworkWorker> N getWorker( Class<N> workerClass )
 	{
-		return new Worker<>( workerClass );
+		return ( N ) networkWorkers.computeIfAbsent( workerClass, NetworkLoader::initWorker );
 	}
 
-	public void heartbeat()
+	public static void heartbeat()
 	{
-		// TODO Heartbeat from task manager
-
-		for ( Worker<? extends NetworkWorker> worker : workerRefs.values() )
+		for ( NetworkWorker worker : networkWorkers.values() )
 			if ( worker.isStarted() )
-				worker.get().heartbeat();
+				worker.heartbeat();
+	}
+
+	public static <N extends NetworkWorker> N initWorker( Class<N> workerClass )
+	{
+		return Objs.initClass( workerClass );
 	}
 
 	private NetworkLoader()
 	{
-
-	}
-
-	public static class Worker<N extends NetworkWorker>
-	{
-		private N i;
-
-		public Worker( Class<N> workerClass )
-		{
-			i = Objs.initClass( workerClass );
-			NetworkLoader.workerRefs.put( workerClass, this );
-		}
-
-		public N get()
-		{
-			return i;
-		}
-
-		public String getId()
-		{
-			return i.getId();
-		}
-
-		public boolean isStarted()
-		{
-			return i.isStarted();
-		}
-
-		protected void shutdown() throws NetworkException
-		{
-			i.stop();
-		}
-
-		public Worker<N> start() throws NetworkException
-		{
-			i.start( ConfigRegistry.getChild( "config.network." + getId() ) );
-			return this;
-		}
-
-		public Worker<N> stop() throws NetworkException
-		{
-			i.stop();
-			return this;
-		}
+		// Static Class
 	}
 }

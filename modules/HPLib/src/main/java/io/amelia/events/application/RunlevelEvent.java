@@ -9,51 +9,26 @@
  */
 package io.amelia.events.application;
 
-import com.chiorichan.AppController;
-import com.chiorichan.event.EventDispatcher;
-import com.chiorichan.event.EventException;
-import io.amelia.lang.RunLevel;
-import io.amelia.logging.LogBuilder;
+import io.amelia.lang.Runlevel;
 
 public class RunlevelEvent extends ApplicationEvent
 {
-	protected static RunLevel previousLevel;
-	protected static RunLevel currentLevel;
+	private final Runlevel previousRunlevel;
+	private final Runlevel currentRunlevel;
 
-	public RunlevelEvent()
+	public RunlevelEvent( Runlevel previousRunlevel, Runlevel currentRunlevel )
 	{
-		currentLevel = RunLevel.INITIALIZATION;
+		this.previousRunlevel = previousRunlevel;
+		this.currentRunlevel = currentRunlevel;
 	}
 
-	public RunlevelEvent( RunLevel level )
+	public Runlevel getLastRunLevel()
 	{
-		currentLevel = level;
+		return previousRunlevel;
 	}
 
-	public RunLevel getLastRunLevel()
+	public Runlevel getRunLevel()
 	{
-		return previousLevel;
-	}
-
-	public RunLevel getRunLevel()
-	{
-		return currentLevel;
-	}
-
-	public void setRunLevel( RunLevel level )
-	{
-		previousLevel = currentLevel;
-		currentLevel = level;
-
-		LogBuilder.get().fine( "Application Runlevel has been changed to '" + level.name() + "'" );
-
-		try
-		{
-			EventDispatcher.i().callEventWithException( this );
-		}
-		catch ( EventException e )
-		{
-			AppController.handleExceptions( e );
-		}
+		return currentRunlevel;
 	}
 }

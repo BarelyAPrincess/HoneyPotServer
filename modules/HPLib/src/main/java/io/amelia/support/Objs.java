@@ -409,6 +409,17 @@ public class Objs
 		}
 	}
 
+	public static <T, E extends Exception> void ifPresent( @NotNull Optional<T> value, @NotNull ConsumerWithException<T, E> consumer ) throws E
+	{
+		if ( value.isPresent() )
+			consumer.accept( value.get() );
+	}
+
+	public static <T, E extends Exception> void ifPresent( @NotNull T value, @NotNull ConsumerWithException<T, E> consumer ) throws E
+	{
+		ifPresent( Optional.ofNullable( value ), consumer );
+	}
+
 	public static <T> T initClass( @NotNull Class<T> clz, Object... args ) throws UncaughtException
 	{
 		try

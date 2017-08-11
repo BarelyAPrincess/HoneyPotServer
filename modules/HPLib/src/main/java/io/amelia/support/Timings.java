@@ -55,7 +55,7 @@ public class Timings
 	private static final Pattern INTERVAL_PATTERN = Pattern.compile( "((?:\\d+)|(?:\\d+\\.\\d+))\\s*(second|minute|hour|day|week|month|year|s|m|h|d|w)", Pattern.CASE_INSENSITIVE );
 	/**
 	 * Provides reference of context to start time.<br>
-	 * We use a WeakHashMap to prevent a memory leak, in case {@link #finish()} is never called and/or context was reclaimed by GC.
+	 * We use a WeakHashMap to prevent a memory leak, in case {@link #finish(Object)} is never called and/or context was reclaimed by GC.
 	 */
 	private static final Map<Object, Long> timings = new WeakHashMap<Object, Long>();
 

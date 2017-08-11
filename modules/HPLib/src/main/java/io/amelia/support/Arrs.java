@@ -114,6 +114,11 @@ public class Arrs
 		return leftSum.compareTo( rightSum );
 	}
 
+	public static <T> T[] concat( @NotNull T[]... arrs )
+	{
+		return ( T[] ) Arrays.stream( arrs ).flatMap( Arrays::stream ).toArray();
+	}
+
 	public static <T> T[] limit( @NotNull T[] arr, int limit )
 	{
 		return ( T[] ) Arrays.stream( arr ).limit( limit ).toArray();
