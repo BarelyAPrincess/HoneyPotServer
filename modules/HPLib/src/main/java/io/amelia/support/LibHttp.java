@@ -9,11 +9,8 @@
  */
 package io.amelia.support;
 
-import com.chiorichan.helpers.TrustManagerFactory;
 import com.google.common.base.Joiner;
-import io.amelia.foundation.ConfigRegistry;
 import io.amelia.logcompat.LogBuilder;
-import org.apache.commons.io.IOUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -43,14 +40,30 @@ import java.util.regex.Pattern;
  */
 public class LibHttp
 {
-	public static final String REGEX_IPV4 = "^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$";
-	public static final String REGEX_IPV6 = "^((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$";
-
 	private static final Pattern DNS_WILDCARD_PATTERN = Pattern.compile( "^\\*\\..*" );
 
-	private LibHttp()
+	public static void downloadFile( String url, File dest ) throws IOException
 	{
+		ReadableByteChannel rbc = null;
+		FileOutputStream fos = null;
+		try
+		{
+			URL conn = new URL( url );
+			rbc = Channels.newChannel( conn.openStream() );
+			fos = new FileOutputStream( dest );
 
+			fos.getChannel().transferFrom( rbc, 0, Long.MAX_VALUE );
+		}
+		finally
+		{
+			LibIO.closeQuietly( rbc );
+			LibIO.closeQuietly( fos );
+		}
+	}
+
+	public static String getUserAgent()
+	{
+		return Info.getProductSimple() + "/" + Info.getVersion() + "/" + Sys.getJavaVersion();
 	}
 
 	public static boolean matches( String strTemplate, String str )
@@ -80,58 +93,6 @@ public class LibHttp
 		if ( needsNormalization( str ) )
 			str = IDN.toASCII( str, IDN.ALLOW_UNASSIGNED );
 		return str.toLowerCase( Locale.US );
-	}
-
-	public static void downloadFile( String url, File dest ) throws IOException
-	{
-		ReadableByteChannel rbc = null;
-		FileOutputStream fos = null;
-		try
-		{
-			URL conn = new URL( url );
-			rbc = Channels.newChannel( conn.openStream() );
-			fos = new FileOutputStream( dest );
-
-			fos.getChannel().transferFrom( rbc, 0, Long.MAX_VALUE );
-		}
-		finally
-		{
-			LibIO.closeQuietly( rbc );
-			LibIO.closeQuietly( fos );
-		}
-	}
-
-	/* public static Date getNTPDate()
-	{
-		String[] hosts = new String[] {"ntp02.oal.ul.pt", "ntp04.oal.ul.pt", "ntp.xs4all.nl"};
-
-		NTPUDPClient client = new NTPUDPClient();
-		// We want to timeout if a response takes longer than 5 seconds
-		client.setDefaultTimeout( 5000 );
-
-		for ( String host : hosts )
-			try
-			{
-				InetAddress hostAddress = InetAddress.getByName( host );
-				// System.out.println( "> " + hostAddress.getHostName() + "/" + hostAddress.getHostAddress() );
-				TimeInfo info = client.getTime( hostAddress );
-				Date date = new Date( info.getReturnTime() );
-				return date;
-
-			}
-			catch ( IOException e )
-			{
-				e.printStackTrace();
-			}
-
-		client.close();
-
-		return null;
-	} */
-
-	public static String getUserAgent()
-	{
-		return Info.getProductSimple() + "/" + Info.getVersion() + "/" + UtilSystem.getJavaVersion();
 	}
 
 	/**
@@ -175,7 +136,7 @@ public class LibHttp
 			if ( responseFamily == 2 )
 			{
 				stream = conn.getInputStream();
-				IOUtils.closeQuietly( stream );
+				LibIO.closeQuietly( stream );
 				return true;
 			}
 			else
@@ -187,7 +148,7 @@ public class LibHttp
 		}
 		finally
 		{
-			IOUtils.closeQuietly( stream );
+			LibIO.closeQuietly( stream );
 		}
 	}
 
@@ -222,7 +183,7 @@ public class LibHttp
 		}
 		finally
 		{
-			IOUtils.closeQuietly( wr );
+			LibIO.closeQuietly( wr );
 		}
 
 		BufferedReader in = new BufferedReader( new InputStreamReader( con.getInputStream() ) );
@@ -237,7 +198,7 @@ public class LibHttp
 		}
 		finally
 		{
-			IOUtils.closeQuietly( in );
+			LibIO.closeQuietly( in );
 		}
 
 		return response.toString();
@@ -310,7 +271,7 @@ public class LibHttp
 			try
 			{
 				SSLContext ctx = SSLContext.getInstance( "SSL" );
-				ctx.init( null, TrustManagerFactory.getTrustManagers(), null );
+				ctx.init( null, UnsafeTrustManagerFactory.getTrustManagers(), null );
 				( ( HttpsURLConnection ) uc ).setSSLSocketFactory( ctx.getSocketFactory() );
 			}
 			catch ( KeyManagementException | NoSuchAlgorithmException e )
@@ -331,44 +292,8 @@ public class LibHttp
 		return out.toByteArray();
 	}
 
-	/**
-	 * TODO This was lagging the server! WHY???
-	 * Maybe we should change our metrics system
-	 */
-	public static boolean sendTracking( String category, String action, String label )
+	private LibHttp()
 	{
-		try
-		{
-			String url = "http://www.google-analytics.com/collect";
 
-			URL urlObj = new URL( url );
-			HttpURLConnection con = ( HttpURLConnection ) urlObj.openConnection();
-			con.setRequestMethod( "POST" );
-
-			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + ConfigRegistry.i().getClientId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
-
-			con.setDoOutput( true );
-			DataOutputStream wr = new DataOutputStream( con.getOutputStream() );
-			wr.writeBytes( urlParameters );
-			wr.flush();
-			wr.close();
-
-			int responseCode = con.getResponseCode();
-			LogBuilder.get().fine( "Analytics Response [" + category + "]: " + responseCode );
-
-			BufferedReader in = new BufferedReader( new InputStreamReader( con.getInputStream() ) );
-			String inputLine;
-			StringBuffer response = new StringBuffer();
-
-			while ( ( inputLine = in.readLine() ) != null )
-				response.append( inputLine );
-			in.close();
-
-			return true;
-		}
-		catch ( IOException e )
-		{
-			return false;
-		}
 	}
 }

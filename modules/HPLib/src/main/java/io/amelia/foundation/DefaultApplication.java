@@ -4,7 +4,7 @@ import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
-import io.amelia.serializable.Looper;
+import io.amelia.android.Looper;
 import io.amelia.tasks.TaskDispatcher;
 
 /**
@@ -17,9 +17,6 @@ import io.amelia.tasks.TaskDispatcher;
  */
 public abstract class DefaultApplication extends ApplicationInterface
 {
-	// sThreadLocal.get() will return null unless you've called prepare().
-	private static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<>();
-	private static Looper sMainLooper;  // guarded by Looper.class
 	private static String stopReason = null;
 
 	static

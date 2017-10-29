@@ -1,6 +1,6 @@
 package io.amelia.foundation;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.support.Lists;
@@ -49,8 +49,8 @@ public class MetaMap extends HashMap<String, Object>
 			return Maps.builder( ( Map<Object, Object> ) value ).castTo( String.class, Object.class ).map( MetaMap::new );
 		if ( value instanceof List )
 			return Maps.builder().increment( ( List<Object> ) value ).castTo( String.class, Object.class ).map( MetaMap::new );
-		if ( value instanceof ConfigNode )
-			return new MetaMap( ( ( ConfigNode ) value ).values() );
+		if ( value instanceof ConfigMap )
+			return new MetaMap( ( ( ConfigMap ) value ).values() );
 		return null;
 	}
 

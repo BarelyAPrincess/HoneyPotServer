@@ -175,6 +175,16 @@ public class Strs
 		return str.replaceAll( "[^\\x20-\\x7E]", "" );
 	}
 
+	public static String bytesToStringASCII( byte[] bytes )
+	{
+		return new String( bytes, Charsets.US_ASCII );
+	}
+
+	public static String bytesToStringUTF( byte[] bytes )
+	{
+		return new String( bytes, Charsets.UTF_8 );
+	}
+
 	public static String capitalizeWords( String str )
 	{
 		return capitalizeWords( str, ' ' );
@@ -627,15 +637,19 @@ public class Strs
 
 	public static byte[] stringToBytesASCII( String str )
 	{
-		byte[] b = new byte[str.length()];
+		return str == null ? null : str.getBytes( Charsets.US_ASCII );
+
+		/*byte[] b = new byte[str.length()];
 		for ( int i = 0; i < b.length; i++ )
 			b[i] = ( byte ) str.charAt( i );
-		return b;
+		return b;*/
 	}
 
 	public static byte[] stringToBytesUTF( String str )
 	{
-		byte[] b = new byte[str.length() << 1];
+		return str == null ? null : str.getBytes( Charsets.UTF_8 );
+
+		/*byte[] b = new byte[str.length() << 1];
 		for ( int i = 0; i < str.length(); i++ )
 		{
 			char strChar = str.charAt( i );
@@ -643,7 +657,7 @@ public class Strs
 			b[bytePos] = ( byte ) ( ( strChar & 0xFF00 ) >> 8 );
 			b[bytePos + 1] = ( byte ) ( strChar & 0x00FF );
 		}
-		return b;
+		return b;*/
 	}
 
 	/**

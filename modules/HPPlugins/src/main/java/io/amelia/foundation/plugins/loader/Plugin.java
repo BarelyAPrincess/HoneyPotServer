@@ -9,7 +9,7 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.config.ConfigRegistry;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.PluginBase;
@@ -84,7 +84,7 @@ public abstract class Plugin extends PluginBase
 	private PluginLoader loader = null;
 	private PluginMeta meta = null;
 	private boolean naggable = true;
-	private ConfigNode newConfig = null;
+	private ConfigMap newConfig = null;
 
 	/*
 	 * protected Plugin( final PluginLoader loader, final PluginDescriptionFile description, final File dataFolder, final File file ) { final ClassLoader classLoader = this.getClass().getClassLoader(); if ( classLoader instanceof PluginClassLoader ) {
@@ -107,7 +107,7 @@ public abstract class Plugin extends PluginBase
 	}
 
 	@Override
-	public ConfigNode getConfig()
+	public ConfigMap getConfig()
 	{
 		if ( newConfig == null )
 			reloadConfig();
@@ -202,7 +202,7 @@ public abstract class Plugin extends PluginBase
 	@Override
 	public void reloadConfig()
 	{
-		newConfig = ConfigNode.loadConfiguration( configFile );
+		newConfig = ConfigMap.loadConfiguration( configFile );
 
 		InputStream defConfigStream = getResource( "config.yaml" );
 
@@ -211,7 +211,7 @@ public abstract class Plugin extends PluginBase
 
 		if ( defConfigStream != null )
 		{
-			ConfigNode defConfig = ConfigNode.loadConfiguration( defConfigStream );
+			ConfigMap defConfig = ConfigMap.loadConfiguration( defConfigStream );
 
 			newConfig.setDefaults( defConfig );
 		}
@@ -309,7 +309,7 @@ public abstract class Plugin extends PluginBase
 		}
 	}
 
-	public ConfigNode getConfigNode()
+	public ConfigMap getConfigNode()
 	{
 		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
 	}
@@ -351,7 +351,7 @@ public abstract class Plugin extends PluginBase
 
 	public void publishConfig()
 	{
-		ConfigNode node = getConfigNode().destroyChildThenCreate( "conf" );
+		ConfigMap node = getConfigNode().destroyChildThenCreate( "conf" );
 
 
 

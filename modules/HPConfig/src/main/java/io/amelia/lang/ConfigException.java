@@ -1,6 +1,6 @@
 package io.amelia.lang;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 
 public class ConfigException
 {
@@ -9,59 +9,59 @@ public class ConfigException
 
 	}
 
-	public static class Error extends ObjectStackerException.Error
+	public static class Error extends StackerException.Error
 	{
-		public Error( ConfigNode node )
+		public Error( ConfigMap node )
 		{
 			super( node );
 		}
 
-		public Error( ConfigNode node, String message )
+		public Error( ConfigMap node, String message )
 		{
 			super( node, message );
 		}
 
-		public Error( ConfigNode node, String message, Throwable cause )
+		public Error( ConfigMap node, String message, Throwable cause )
 		{
 			super( node, message, cause );
 		}
 
-		public Error( ConfigNode node, Throwable cause )
+		public Error( ConfigMap node, Throwable cause )
 		{
 			super( node, cause );
 		}
 
-		public ConfigNode getConfigNode()
+		public ConfigMap getConfigNode()
 		{
-			return ( ConfigNode ) node;
+			return ( ConfigMap ) node;
 		}
 	}
 
-	public static class Ignorable extends ObjectStackerException.Ignorable
+	public static class Ignorable extends StackerException.Ignorable
 	{
-		public Ignorable( ConfigNode node )
+		public Ignorable( ConfigMap node )
 		{
 			super( node );
 		}
 
-		public Ignorable( ConfigNode node, String message )
+		public Ignorable( ConfigMap node, String message )
 		{
 			super( node, message );
 		}
 
-		public Ignorable( ConfigNode node, String message, Throwable cause )
+		public Ignorable( ConfigMap node, String message, Throwable cause )
 		{
 			super( node, message, cause );
 		}
 
-		public Ignorable( ConfigNode node, Throwable cause )
+		public Ignorable( ConfigMap node, Throwable cause )
 		{
 			super( node, cause );
 		}
 
-		public ConfigNode getConfigNode()
+		public ConfigMap getConfigNode()
 		{
-			return ( ConfigNode ) node;
+			return ( ConfigMap ) node;
 		}
 	}
 }

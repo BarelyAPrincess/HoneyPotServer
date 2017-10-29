@@ -1,71 +1,61 @@
 package io.amelia.networking.udp;
 
-import com.google.common.collect.BiMap;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
-import io.amelia.networking.PacketPayload;
-import io.amelia.networking.packets.Packet;
-import io.amelia.support.Info;
+import io.amelia.networking.packets.RawPacket;
+import io.amelia.support.LibIO;
+import io.amelia.support.Objs;
+import io.amelia.support.Timings;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageCodec;
+import io.netty.handler.codec.MessageToMessageCodec;
 
+import java.net.DatagramPacket;
 import java.util.List;
 
-public class UDPPacketCodec extends ByteToMessageCodec<Object>
+public class UDPPacketCodec extends MessageToMessageCodec<DatagramPacket, RawPacket>
 {
 	@Override
-	protected void encode( ChannelHandlerContext ctx, Object msg, ByteBuf out ) throws Exception
+	protected void encode( ChannelHandlerContext ctx, RawPacket msg, List<Object> out ) throws Exception
 	{
-		encode( ctx, ( Packet ) msg, out );
+		// Validate the packet has all the required information
+		msg.validate();
+
+		// Instruct the packet to serialize the packet into a ByteBuf payload
+		msg.encode();
+
+		ByteBuf payload = msg.getPayload();
+
+		if ( payload == null )
+			throw new NetworkException( msg.getClass().getSimpleName() + " had no payload. Is this a bug?" );
+
+		byte[] bytes = LibIO.readByteBufferToBytes( payload.nioBuffer() );
+		out.add( new DatagramPacket( bytes, bytes.length, ( ( UDPHandler ) ctx.pipeline().get( "handler" ) ).getInetSocketAddress() ) );
+
+		msg.sentTime = Timings.epoch();
+		msg.sent = true;
 	}
 
 	@Override
-	protected void decode( ChannelHandlerContext ctx, ByteBuf in, List<Object> out ) throws Exception
+	protected void decode( ChannelHandlerContext ctx, DatagramPacket msg, List<Object> out ) throws Exception
 	{
-		int readable = in.readableBytes();
+		ByteBuf buffer = Unpooled.wrappedBuffer( msg.getData() );
 
-		if ( readable != 0 )
-		{
-			PacketPayload packetPayload = new PacketPayload( in );
-			int var = packetPayload.readVarIntFromBuffer();
-			Packet packet = Packet.generatePacket( channel().attr( UDPHandler.attrKeyReceivable ).get(), var );
+		Class<? extends RawPacket> packetClass = NetworkLoader.getPacketClass( LibIO.readByteBufferToString( buffer.nioBuffer(), 32 ) ).orElse( null );
+		RawPacket packet = packetClass == null ? null : Objs.initClass( packetClass );
 
-			if ( packet == null )
-				throw new NetworkException( "Bad packet id " + var );
-			else
-			{
-				packet.readPacketData( packetPayload );
+		if ( packet == null )
+			throw new NetworkException( "We seemed to have a problem generating a packet from the supplied packet identifier." );
 
-				if ( packetPayload.readableBytes() > 0 )
-					throw new NetworkException( "Packet was larger than expected, found " + packetPayload.readableBytes() + " bytes extra whilst reading packet " + packet );
-				else
-				{
-					out.add( packet );
-					// field_152499_c.func_152469_a( var, ( long ) readable );
+		buffer.skipBytes( 32 );
 
-					if ( Info.isDevelopment() )
-						NetworkLoader.L.debug( "IN: [%s:%s] %s[%s]", ctx.channel().attr( UDPHandler.attrKeyConnectionState ).get(), Integer.valueOf( var ), packet.getClass().getName(), packet.serialize() );
-				}
-			}
-		}
-	}
+		packet.setPayload( buffer );
+		packet.decode();
 
-	protected void encode( ChannelHandlerContext ctx, Packet packet, ByteBuf out ) throws Exception
-	{
-		Integer var4 = ( Integer ) ( ( BiMap ) ctx.channel().attr( UDPHandler.attrKeySendable ).get() ).inverse().get( packet.getClass() );
+		if ( buffer.readableBytes() > 0 )
+			throw new NetworkException( "Packet was larger than expected, found " + buffer.readableBytes() + " bytes extra whilst reading packet " + packet );
 
-		if ( Info.isDevelopment() )
-			NetworkLoader.L.debug( "OUT: [{}:{}] {}[{}]", new Object[] {ctx.channel().attr( UDPWorker.attrKeyConnectionState ).get(), var4, packet.getClass().getName(), packet.serialize()} );
-
-		if ( var4 == null )
-			throw new NetworkException( "Can't serialize unregistered packet" );
-		else
-		{
-			PacketPayload packetPayload = new PacketPayload( out );
-			packetPayload.writeVarIntToBuffer( var4.intValue() );
-			packet.writePacketData( packetPayload );
-			// field_152500_c.func_152464_b( var4.intValue(), ( long ) packetPayload.readableBytes() );
-		}
+		out.add( packet );
 	}
 }

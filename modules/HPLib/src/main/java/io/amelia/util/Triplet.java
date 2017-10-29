@@ -48,7 +48,7 @@ public class Triplet<L, M, R> implements Comparable<Triplet<L, M, R>>, Serializa
 	@Override
 	public int compareTo( final Triplet<L, M, R> other )
 	{
-		return new CompareChain( left, other.left ).chain( middle, other.middle ).chain( right, other.right ).fin();
+		return new CompareChain( left, other.left ).chain( middle, other.middle ).chain( right, other.right ).result();
 	}
 
 	public R getEnd()

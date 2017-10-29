@@ -13,12 +13,18 @@ import com.sun.istack.internal.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Lists
@@ -30,6 +36,17 @@ public class Lists
 
 		list.add( obj );
 		return obj;
+	}
+
+	public static <V> List<V> emptyCopy( List<?> list )
+	{
+		if ( list instanceof CopyOnWriteArrayList )
+			return new CopyOnWriteArrayList<>();
+		if ( list instanceof LinkedList )
+			return new LinkedList<>();
+		if ( list instanceof Vector )
+			return new Vector<>();
+		return new ArrayList<>();
 	}
 
 	public static <V> V find( List<V> list, Function<? super V, Boolean> function )
@@ -73,15 +90,20 @@ public class Lists
 		return null;
 	}
 
-	public static <V> V findOrNew( List<V> list, Function<? super V, Boolean> function, V newValue )
+	public static <V> V findOrNew( List<V> list, Function<? super V, Boolean> function, Supplier<V> valueSupplier )
 	{
 		V find = find( list, function );
 		if ( find == null )
 		{
-			list.add( newValue );
-			find = newValue;
+			find = valueSupplier.get();
+			list.add( find );
 		}
 		return find;
+	}
+
+	public static <Type> Optional<Type> first( Collection<Type> list )
+	{
+		return Optional.ofNullable( list.size() == 0 ? null : ( Type ) list.toArray()[0] );
 	}
 
 	public static boolean incremented( Set<String> values )
@@ -114,9 +136,22 @@ public class Lists
 		return true;
 	}
 
+	public static boolean isOfType( List values, Class<?> aClass )
+	{
+		for ( Object obj : values )
+			if ( !aClass.isAssignableFrom( obj.getClass() ) )
+				return false;
+		return true;
+	}
+
 	public static String joinQuery( Map<String, String> map )
 	{
 		return map.entrySet().stream().map( e -> e.getKey() + "=" + e.getValue() ).collect( Collectors.joining( "&" ) );
+	}
+
+	public static <Type> Optional<Type> last( Collection<Type> list )
+	{
+		return Optional.ofNullable( list.size() == 0 ? null : ( Type ) list.toArray()[list.size() - 1] );
 	}
 
 	@SafeVarargs

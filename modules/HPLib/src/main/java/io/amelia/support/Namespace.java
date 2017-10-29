@@ -9,13 +9,13 @@
  */
 package io.amelia.support;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.Kernel;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.Kernel;
 
 public class Namespace extends NamespaceBase<Namespace>
 {
@@ -25,7 +25,7 @@ public class Namespace extends NamespaceBase<Namespace>
 	{
 		try
 		{
-			tldMaps.addAll( ConfigRegistry.getList( "conf.tlds" ) );
+			tldMaps.addAll( ConfigRegistry.getChild( "conf.tlds" ).getList( String.class ).orElse( new ArrayList<>() ) );
 		}
 		catch ( Exception e )
 		{

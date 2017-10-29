@@ -1,8 +1,8 @@
 package io.amelia.foundation.binding;
 
-import io.amelia.lang.ObjectStackerException;
+import io.amelia.lang.StackerException;
 import io.amelia.support.Lists;
-import io.amelia.support.StackerBase;
+import io.amelia.support.data.StackerBase;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -85,7 +85,7 @@ public final class BindingBase extends StackerBase<BindingBase>
 	}
 
 	@Override
-	protected void throwExceptionIgnorable( String message ) throws ObjectStackerException.Ignorable
+	protected void throwExceptionIgnorable( String message ) throws StackerException.Ignorable
 	{
 		throw new BindingException.Ignorable( this, message );
 	}

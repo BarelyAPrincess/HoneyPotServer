@@ -7,7 +7,7 @@ apply plugin: 'license'
 apply plugin: 'checkstyle'
 apply plugin: 'application'
 apply plugin: 'ch.raffael.pegdown-doclet'
-apply from: rootProject.file( 'etc/publish.gradle' )
+apply from: project.file( 'etc/publish.gradle' )
 
 defaultTasks 'clean', 'build'
 
@@ -159,7 +159,7 @@ def travis_build = System.getenv( "TRAVIS_BUILD_NUMBER" )
 def buildNumber = '0'
 
 group 'io.amelia'
-description = 'Yet Another Honey Pot is a multi-protocol networking server offering groovy scripting, plugins, ssl, events, orm, and more.'
+description = 'Honey Pot Server is a multi-protocol networking server offering groovy scripting, plugins, ssl, events, orm, and more.'
 
 distsDirName = 'dist'
 libsDirName = 'dist'
@@ -221,7 +221,7 @@ eclipse {
 
 jar {
 	manifest {
-		attributes 'Implementation-Title': 'Yet Another Honey Pot'
+		attributes 'Implementation-Title': 'Honey Pot Server'
 		attributes 'Implementation-Version': version
 		attributes 'Implementation-Vendor': 'Amelia DeWitt'
 		attributes 'Implementation-Vendor-Id': 'me@ameliadewitt.com'
@@ -240,7 +240,8 @@ task javadocArchive( type: Zip, dependsOn: 'javadoc' ) {
 }
 
 /**
- * Writes the project dependencies to a resource file for dependency injection within the application*/
+ * Writes the project dependencies to a resource file for dependency injection within the application
+ **/
 task writeDependenciesFile {
 	doFirst {
 		def allDependencies = []

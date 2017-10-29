@@ -23,12 +23,6 @@ public class BadParcelableException extends RuntimeException implements IExcepti
 	}
 
 	@Override
-	public ReportingLevel reportingLevel()
-	{
-		return ReportingLevel.E_ERROR;
-	}
-
-	@Override
 	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 	{
 		return null;
@@ -38,5 +32,11 @@ public class BadParcelableException extends RuntimeException implements IExcepti
 	public boolean isIgnorable()
 	{
 		return false;
+	}
+
+	@Override
+	public ReportingLevel reportingLevel()
+	{
+		return ReportingLevel.E_ERROR;
 	}
 }

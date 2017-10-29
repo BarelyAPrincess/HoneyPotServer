@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":HPPermissions:test" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPPermissions" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="1.0.0-git+Hd602a72" type="JAVA_MODULE" version="4">
+<module external.linked.project.id=":HPPermissions:test" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPPermissions" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="1.0.0-git+H6c76747" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output-test url="file://$MODULE_DIR$/../../../../modules/HPPermissions/build/classes/test" />
+    <output-test url="file://$MODULE_DIR$/../../../../modules/HPPermissions/out/test/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../../modules/HPPermissions/src/test">
       <sourceFolder url="file://$MODULE_DIR$/../../../../modules/HPPermissions/src/test/java" isTestSource="true" />

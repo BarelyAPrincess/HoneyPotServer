@@ -9,6 +9,7 @@ import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.support.Info;
+import io.amelia.support.LibEncrypt;
 import io.amelia.support.LibIO;
 import io.amelia.support.Objs;
 import joptsimple.OptionParser;
@@ -65,6 +66,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		if ( optionSet == null )
 			throw new ApplicationException.Runtime( ReportingLevel.E_ERROR, "parse( String[] ) was never called." );
+	}
+
+	public String getId()
+	{
+		return env.getString( "applicationId" );
 	}
 
 	public Env getEnv()
@@ -152,8 +158,15 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			/* Override defaults and env with command args */
 			for ( OptionSpec<?> optionSpec : optionSet.specs() )
 				for ( String optionKey : optionSpec.options() )
-					if ( env.isValueSet( optionKey ) && !Objs.isNull( optionSpec.value( optionSet ) ) )
-						env.set( optionKey, optionSpec.value( optionSet ), false );
+					if ( !Objs.isNull( optionSpec.value( optionSet ) ) )
+					{
+						if ( optionKey.startsWith( "dir-" ) )
+							ConfigRegistry.setPath( optionKey.substring( 4 ), ( String ) optionSpec.value( optionSet ) );
+						else if ( env.isValueSet( optionKey ) )
+							env.set( optionKey, optionSpec.value( optionSet ), false );
+					}
+
+			env.computeValue( "applicationId", LibEncrypt::hash, true );
 
 			ConfigRegistry.init( env );
 		}

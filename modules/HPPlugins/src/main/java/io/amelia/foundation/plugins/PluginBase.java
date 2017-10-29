@@ -9,7 +9,7 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
@@ -39,13 +39,13 @@ public abstract class PluginBase extends RegistrarBase
 	}
 
 	/**
-	 * Gets a {@link ConfigNode} for this plugin, read through "config.yml"
+	 * Gets a {@link ConfigMap} for this plugin, read through "config.yml"
 	 * <p>
 	 * If there is a default config.yml embedded in this plugin, it will be provided as a default for this Configuration.
 	 *
 	 * @return Plugin configuration
 	 */
-	public abstract ConfigNode getConfig();
+	public abstract ConfigMap getConfig();
 
 	public abstract File getConfigFile();
 
@@ -147,7 +147,7 @@ public abstract class PluginBase extends RegistrarBase
 	public abstract void reloadConfig();
 
 	/**
-	 * Saves the {@link ConfigNode} retrievable by {@link #getConfig()}.
+	 * Saves the {@link ConfigMap} retrievable by {@link #getConfig()}.
 	 */
 	public abstract void saveConfig();
 

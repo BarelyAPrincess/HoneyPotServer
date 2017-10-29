@@ -2,7 +2,7 @@ package io.amelia.foundation.binding;
 
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.IException;
-import io.amelia.lang.ObjectStackerException;
+import io.amelia.lang.StackerException;
 import io.amelia.lang.ReportingLevel;
 
 public class BindingException
@@ -12,7 +12,7 @@ public class BindingException
 
 	}
 
-	public static class Error extends ObjectStackerException.Error
+	public static class Error extends StackerException.Error
 	{
 		public Error( BindingBase node )
 		{
@@ -40,7 +40,7 @@ public class BindingException
 		}
 	}
 
-	public static class Ignorable extends ObjectStackerException.Ignorable
+	public static class Ignorable extends StackerException.Ignorable
 	{
 		public Ignorable( BindingBase node )
 		{

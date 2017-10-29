@@ -10,19 +10,21 @@
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.MapCollisionException;
-import javafx.util.Pair;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -30,6 +32,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import io.amelia.lang.ExceptionReport;
+import io.amelia.lang.MapCollisionException;
+import javafx.util.Pair;
 
 public class Maps
 {
@@ -95,6 +101,30 @@ public class Maps
 		return true;
 	}
 
+	public static <K, V, M extends Map<K, V>> M emptyCopy( M map )
+	{
+		try
+		{
+			if ( map instanceof LinkedHashMap )
+				return ( M ) new LinkedHashMap<K, V>();
+			if ( map instanceof TreeMap )
+				return ( M ) new TreeMap<K, V>();
+			if ( map instanceof Hashtable )
+				return ( M ) new Hashtable<K, V>();
+			if ( map instanceof WeakHashMap )
+				return ( M ) new WeakHashMap<K, V>();
+			if ( map instanceof ConcurrentHashMap )
+				return ( M ) new ConcurrentHashMap<K, V>();
+			if ( map instanceof IdentityHashMap )
+				return ( M ) new IdentityHashMap<K, V>();
+		}
+		catch ( ClassCastException e )
+		{
+
+		}
+		return ( M ) new HashMap<K, V>();
+	}
+
 	public static <T> boolean equalsSet( Set<T> set, Object object )
 	{
 		if ( set == object )
@@ -122,11 +152,9 @@ public class Maps
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public static <T> T first( Map<?, T> map )
+	public static <T> Optional<T> first( Map<?, T> map )
 	{
-		if ( map.size() == 0 )
-			return null;
-		return ( T ) map.values().toArray()[0];
+		return Optional.ofNullable( map.size() == 0 ? null : ( T ) map.values().toArray()[0] );
 	}
 
 	public static int firstKey( Map<Integer, ?> map )
@@ -162,6 +190,14 @@ public class Maps
 			else
 				result.put( key, entry.getValue() );
 		}
+	}
+
+	/**
+	 * Flips the map Key and Value
+	 */
+	static <K, V> Map<V, K> flipKeyValue( final Map<K, V> origMap )
+	{
+		return origMap.entrySet().stream().collect( Collectors.toMap( Map.Entry::getValue, Map.Entry::getKey ) );
 	}
 
 	public static <T> Map<String, T> indexMap( List<T> list )

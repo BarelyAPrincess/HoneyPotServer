@@ -79,7 +79,7 @@ public class CompareChain
 		return this;
 	}
 
-	public int fin()
+	public int result()
 	{
 		return comparison;
 	}

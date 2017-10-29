@@ -1,7 +1,7 @@
 package io.amelia.foundation;
 
 import io.amelia.config.ConfigLoader;
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.support.Maps;
 
 import java.io.File;
@@ -40,7 +40,7 @@ public class VendorMeta extends MetaMap
 		Maps.builder( ConfigLoader.parseStream( stream, streamType ) ).to( this );
 	}
 
-	public VendorMeta( final ConfigNode config )
+	public VendorMeta( final ConfigMap config )
 	{
 		Maps.builder( config.values() ).to( this );
 	}

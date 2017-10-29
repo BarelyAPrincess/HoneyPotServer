@@ -1,17 +1,17 @@
 package io.amelia.networking;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.NetworkException;
 
 public interface NetworkWorker<T>
 {
-	default ConfigNode getConfig()
+	default ConfigMap getConfig()
 	{
 		return ConfigRegistry.getChildOrCreate( "config.network." + getId() );
 	}
 
-	default ConfigNode getConfig( String key )
+	default ConfigMap getConfig( String key )
 	{
 		return getConfig().getChild( key );
 	}

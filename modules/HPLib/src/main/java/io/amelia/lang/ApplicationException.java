@@ -100,6 +100,12 @@ public abstract class ApplicationException extends Exception implements IExcepti
 	}
 
 	@Override
+	public boolean isIgnorable()
+	{
+		return level.isIgnorable();
+	}
+
+	@Override
 	public ReportingLevel reportingLevel()
 	{
 		return level;
@@ -162,12 +168,6 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		}
 
 		@Override
-		public ReportingLevel reportingLevel()
-		{
-			return level;
-		}
-
-		@Override
 		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 		{
 			return null;
@@ -177,6 +177,12 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		public boolean isIgnorable()
 		{
 			return level.isIgnorable();
+		}
+
+		@Override
+		public ReportingLevel reportingLevel()
+		{
+			return level;
 		}
 	}
 
@@ -208,12 +214,6 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		}
 
 		@Override
-		public ReportingLevel reportingLevel()
-		{
-			return null;
-		}
-
-		@Override
 		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
 		{
 			return null;
@@ -224,11 +224,11 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		{
 			return level.isIgnorable();
 		}
-	}
 
-	@Override
-	public boolean isIgnorable()
-	{
-		return level.isIgnorable();
+		@Override
+		public ReportingLevel reportingLevel()
+		{
+			return null;
+		}
 	}
 }

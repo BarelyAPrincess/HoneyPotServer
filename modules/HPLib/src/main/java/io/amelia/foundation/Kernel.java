@@ -20,6 +20,7 @@ import io.amelia.support.LibTime;
 import io.amelia.support.Lists;
 import io.amelia.support.Objs;
 import io.amelia.support.Timings;
+import io.amelia.synchronize.LooperFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -168,7 +169,7 @@ public final class Kernel
 	{
 		EventDispatcher.callEventWithException( new RunlevelEvent( previousRunlevel, currentRunlevel ) );
 
-		if ( currentRunlevel == Runlevel.RUNNING )
+		if ( currentRunlevel == Runlevel.DAEMON )
 		{
 			mainLoop = new DefaultMainLoop( getApplication() );
 			mainLoop.executeOnExecutor( threadPool );
@@ -207,6 +208,7 @@ public final class Kernel
 	public static void prepare()
 	{
 		primaryThread = Thread.currentThread();
+		LooperFactory.prepare();
 
 		LogBuilder.get().info( "Loading deployment libraries from " + Libraries.LIBRARY_DIR );
 		try
@@ -268,7 +270,7 @@ public final class Kernel
 
 		onRunlevelChange();
 
-		if ( level != Runlevel.DISPOSED && level != Runlevel.RUNNING )
+		if ( level != Runlevel.DISPOSED && level != Runlevel.DAEMON )
 			L.info( "Application Runlevel has been changed to " + level.name() + "! It took " + Timings.finish( currentRunlevelTimingObject ) + "ms!" );
 	}
 
@@ -297,25 +299,25 @@ public final class Kernel
 		 * INITIALIZED
 		 * Indicates the application has initialized all modules
 		 */
-		setRunlevel( Runlevel.INITIALIZED );
+		setRunlevel( Runlevel.STARTUP );
 
 		/*
 		 * STARTUP
 		 * Indicates the application has begun startup procedures
 		 */
-		setRunlevel( Runlevel.STARTUP );
+		setRunlevel( Runlevel.MAINLOOP );
 
 		/*
 		 * POSTSTARTUP
 		 * Indicates the application has started all and any networking
 		 */
-		setRunlevel( Runlevel.POSTSTARTUP );
+		setRunlevel( Runlevel.NETWORKING );
 
 		/*
 		 * RUNNING
 		 * Indicates the application is now ready to handle the main application loop
 		 */
-		setRunlevel( Runlevel.RUNNING );
+		setRunlevel( Runlevel.DAEMON );
 
 		/* From here, the application can SHUTDOWN, RELOAD, or CRASH */
 	}

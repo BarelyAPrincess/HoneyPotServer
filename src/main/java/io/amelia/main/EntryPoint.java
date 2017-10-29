@@ -10,7 +10,6 @@ import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
-import io.amelia.networking.IPC;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPWorker;
 
@@ -43,7 +42,7 @@ public class EntryPoint
 		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) ->
 		{
 			/* Start the Networking */
-			if ( event.getRunLevel() == Runlevel.STARTUP )
+			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
 				try
 				{
@@ -58,7 +57,7 @@ public class EntryPoint
 					throw new StartupException( "The UDP service failed to start for unknown reasons." );
 			}
 			/* Make sure I'm the only process with my instanceId running */
-			if ( event.getRunLevel() == Runlevel.POSTSTARTUP )
+			if ( event.getRunLevel() == Runlevel.NETWORKING )
 			{
 
 			}

@@ -9,7 +9,7 @@
  */
 package io.amelia.networking.udp;
 
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.config.ConfigRegistry;
 import io.amelia.foundation.Kernel;
 import io.amelia.lang.NetworkException;
@@ -22,7 +22,7 @@ import io.amelia.support.LibIO;
 import io.amelia.support.Sys;
 import io.amelia.support.Timings;
 import io.amelia.tasks.TaskDispatcher;
-import io.amelia.utils.NIO;
+import io.amelia.support.NIO;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -55,7 +55,6 @@ import static io.amelia.networking.NetworkLoader.L;
 public class UDPWorker implements NetworkWorker
 {
 	private final List<PacketContainer> awaiting = new CopyOnWriteArrayList<>();
-	private InetSocketAddress broadcast;
 	private NioDatagramChannel channel = null;
 
 	@Override
@@ -91,7 +90,7 @@ public class UDPWorker implements NetworkWorker
 
 	public UDPWorker start() throws NetworkException
 	{
-		ConfigNode config = getConfig();
+		ConfigMap config = getConfig();
 		String dest = config.getString( "broadcast" ).orElse( "239.255.255.255" );
 		int port = config.getInteger( "port" ).orElse( 4855 );
 		String ifs = config.getString( "interface" ).orElse( null );
@@ -101,7 +100,7 @@ public class UDPWorker implements NetworkWorker
 
 		L.info( "Starting UDP Service!" );
 
-		broadcast = new InetSocketAddress( dest, port );
+		InetSocketAddress broadcast = new InetSocketAddress( dest, port );
 
 		if ( Sys.isPrivilegedPort( port ) )
 		{
@@ -166,7 +165,7 @@ public class UDPWorker implements NetworkWorker
 
 					p.addLast( udpEncryptCodec );
 					p.addLast( udpPacketCodec );
-					p.addLast( new UDPHandler() );
+					p.addLast( "handler", new UDPHandler( broadcast ) );
 				}
 			} );
 

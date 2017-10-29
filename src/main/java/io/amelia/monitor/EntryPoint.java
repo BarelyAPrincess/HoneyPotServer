@@ -34,7 +34,7 @@ public class EntryPoint
 
 		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) ->
 		{
-			if ( event.getRunLevel() == Runlevel.STARTUP )
+			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
 				try
 				{
@@ -48,7 +48,7 @@ public class EntryPoint
 				if ( !udp.isStarted() )
 					throw new StartupException( "The UDP service failed to start for unknown reasons." );
 			}
-			if ( event.getRunLevel() == Runlevel.RUNNING )
+			if ( event.getRunLevel() == Runlevel.DAEMON )
 			{
 				if ( app.hasArgument( "status" ) )
 				{

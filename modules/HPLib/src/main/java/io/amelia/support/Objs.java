@@ -9,12 +9,6 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.UncaughtException;
-import io.amelia.util.Pair;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,28 +25,36 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ReportingLevel;
+import io.amelia.lang.UncaughtException;
+import io.amelia.util.Pair;
+
 public class Objs
 {
-	public static <V> Collection<V> castCollection( Collection<?> col, Class<V> clz )
+	public static <V> List<V> castList( @Nonnull List<?> list, @Nonnull Class<V> expectedObjectClass )
 	{
-		Collection<V> newCol = new LinkedList<>();
+		Objs.notNull( list );
 
-		for ( Object e : col )
+		List<V> newList = Lists.emptyCopy( list );
+
+		for ( Object e : list )
 		{
-			V v = Objs.castTo( e, clz );
-
+			V v = Objs.castTo( e, expectedObjectClass );
 			if ( v != null )
-				newCol.add( v );
+				newList.add( v );
 		}
 
-		return newCol;
+		return newList;
 	}
 
-	public static <K, V> Map<K, V> castMap( Map<?, ?> map, Class<K> keyClz, Class<V> valClz )
+	public static <K, V> Map<K, V> castMap( @Nonnull Map<K, V> map, @Nonnull Class<K> keyClz, @Nonnull Class<V> valClz )
 	{
 		Objs.notNull( map );
 
-		Map<K, V> newMap = new LinkedHashMap<>();
+		Map<K, V> newMap = Maps.emptyCopy( map );
 
 		for ( Map.Entry<?, ?> e : map.entrySet() )
 		{
@@ -308,7 +309,7 @@ public class Objs
 	public static <K, V> Map<K, V> castToMap( Object map, Class<K> keyClz, Class<V> valClz )
 	{
 		if ( map instanceof Map )
-			return castMap( ( Map<?, ?> ) map, keyClz, valClz );
+			return castMap( ( Map<K, V> ) map, keyClz, valClz );
 
 		AtomicInteger i = new AtomicInteger();
 
@@ -367,6 +368,68 @@ public class Objs
 		return false;
 	}
 
+	public static String dumpObject( Object... objs )
+	{
+		StringBuilder sb = new StringBuilder();
+
+		if ( objs == null )
+			return "null";
+
+		for ( Object obj : objs )
+			if ( obj != null )
+			{
+				Map<String, Object> children = new LinkedHashMap<>();
+
+				if ( obj instanceof Map )
+					for ( Map.Entry<Object, Object> e : ( ( Map<Object, Object> ) obj ).entrySet() )
+					{
+						String key = Objs.castToString( e.getKey() );
+						if ( key == null )
+							key = e.getKey().toString();
+						children.put( key, e.getValue() );
+					}
+				else if ( obj instanceof Collection )
+				{
+					int i = 0;
+					for ( Object o : ( Collection<Object> ) obj )
+					{
+						children.put( Integer.toString( i ), o );
+						i++;
+					}
+				}
+				else if ( obj instanceof Object[] )
+					for ( int i = 0; i < ( ( Object[] ) obj ).length; i++ )
+						children.put( Integer.toString( i ), ( ( Object[] ) obj )[i] );
+
+				// boolean[], byte[], short[], char[], int[], long[], float[], double[], Object[]
+
+				Object value = Objs.castToString( obj );
+				if ( value == null )
+					value = obj.toString();
+
+				if ( !children.isEmpty() )
+					value = children.size();
+
+				sb.append( "\n" ).append( obj.getClass().getName() ).append( "(" ).append( value ).append( ")" );
+
+				if ( !children.isEmpty() )
+				{
+					sb.append( " {" );
+					for ( Map.Entry<String, Object> c : children.entrySet() )
+					{
+						sb.append( "\n\t[" ).append( c.getKey() ).append( "]=>" );
+						for ( String s : dumpObject( c.getValue() ).split( "\n" ) )
+							sb.append( "\n\t" + s );
+					}
+					sb.append( "\n}" );
+				}
+			}
+			else
+				sb.append( "\nnull" );
+
+		return sb.length() < 1 ? "" : sb.substring( 1 );
+	}
+
 	@SuppressWarnings( "unchecked" )
 	public static boolean equals( Object left, Object right )
 	{
@@ -382,7 +445,7 @@ public class Objs
 		return left == right;
 	}
 
-	public static <T> Class<T> getClassByName( @NotNull String aClass )
+	public static <T> Class<T> getClassByName( @Nonnull String aClass )
 	{
 		if ( isEmpty( aClass ) )
 			return null;
@@ -409,18 +472,18 @@ public class Objs
 		}
 	}
 
-	public static <T, E extends Exception> void ifPresent( @NotNull Optional<T> value, @NotNull ConsumerWithException<T, E> consumer ) throws E
+	public static <T, E extends Exception> void ifPresent( @Nonnull Optional<T> value, @Nonnull ConsumerWithException<T, E> consumer ) throws E
 	{
 		if ( value.isPresent() )
 			consumer.accept( value.get() );
 	}
 
-	public static <T, E extends Exception> void ifPresent( @NotNull T value, @NotNull ConsumerWithException<T, E> consumer ) throws E
+	public static <T, E extends Exception> void ifPresent( @Nonnull T value, @Nonnull ConsumerWithException<T, E> consumer ) throws E
 	{
 		ifPresent( Optional.ofNullable( value ), consumer );
 	}
 
-	public static <T> T initClass( @NotNull Class<T> clz, Object... args ) throws UncaughtException
+	public static <T> T initClass( @Nonnull Class<T> clz, Object... args ) throws UncaughtException
 	{
 		try
 		{
@@ -649,14 +712,14 @@ public class Objs
 		return number;
 	}
 
-	public static <T, R> R onPresent( @NotNull Optional<T> value, @NotNull Function<T, R> present, Supplier<R> not )
+	public static <T, R> R onPresent( @Nonnull Optional<T> value, @Nonnull Function<T, R> present, Supplier<R> not )
 	{
 		if ( not == null )
 			not = () -> null;
 		return value == null ? not.get() : value.map( present ).orElseGet( not );
 	}
 
-	public static <T, R> R onPresent( @NotNull Optional<T> value, @NotNull Function<T, R> present )
+	public static <T, R> R onPresent( @Nonnull Optional<T> value, @Nonnull Function<T, R> present )
 	{
 		return onPresent( value, present, null );
 	}

@@ -10,14 +10,6 @@
 package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.ApplicationInterface;
-import io.amelia.foundation.injection.Libraries;
-import io.amelia.lang.EnumColor;
-import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.UncaughtException;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,6 +51,15 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ApplicationInterface;
+import io.amelia.foundation.injection.Libraries;
+import io.amelia.lang.EnumColor;
+import io.amelia.lang.ReportingLevel;
+import io.amelia.lang.UncaughtException;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.logcompat.Logger;
 
 public class LibIO
 {
@@ -597,7 +598,7 @@ public class LibIO
 		return fileExtension( file.getName() );
 	}
 
-	private static String fileExtension( String fileName )
+	public static String fileExtension( String fileName )
 	{
 		return Strs.regexCapture( fileName, ".*\\.(.*)$" );
 	}
@@ -618,7 +619,7 @@ public class LibIO
 	{
 		path = getFileName( path );
 		if ( path.contains( "." ) )
-			path = path.substring( 0, path.indexOf( "." ) );
+			path = path.substring( 0, path.lastIndexOf( "." ) );
 		return path;
 	}
 
@@ -827,12 +828,12 @@ public class LibIO
 		return readStreamToByteArray( is ).toByteArray();
 	}
 
-	public static List<String> readStreamToLines( @NotNull InputStream is, @NotNull String ignorePrefix ) throws FileNotFoundException
+	public static List<String> readStreamToLines( @NotNull InputStream is, @NotNull String ignorePrefix )
 	{
 		return readStreamToStream( is, ignorePrefix ).collect( Collectors.toList() );
 	}
 
-	public static Stream<String> readStreamToStream( @NotNull InputStream is, @NotNull String ignorePrefix ) throws FileNotFoundException
+	public static Stream<String> readStreamToStream( @NotNull InputStream is, @NotNull String ignorePrefix )
 	{
 		Objs.notNull( is );
 		Objs.notNull( ignorePrefix );
@@ -861,8 +862,7 @@ public class LibIO
 	{
 		final List<File> files = new ArrayList<>();
 
-		current.list( ( dir, name ) ->
-		{
+		current.list( ( dir, name ) -> {
 			dir = new File( dir, name );
 
 			if ( dir.isDirectory() && depth < maxDepth )

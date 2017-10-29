@@ -32,13 +32,15 @@ public class UDPEncryptCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 
 	UDPEncryptCodec() throws NetworkException
 	{
-		keyPair = NetworkLoader.UDP().get().getRSA();
+		keyPair = NetworkLoader.UDP().getRSA();
 	}
 
 	@Override
 	protected void encode( ChannelHandlerContext ctx, ByteBuf msg, List<Object> out ) throws Exception
 	{
-		if ( keyPair != null )
+		if ( keyPair == null )
+			out.add( msg );
+		else
 		{
 			byte[] dest = new byte[msg.readableBytes()];
 			msg.readBytes( dest );
@@ -49,14 +51,14 @@ public class UDPEncryptCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 
 			out.add( Unpooled.wrappedBuffer( dest ) );
 		}
-		else
-			out.add( msg );
 	}
 
 	@Override
 	protected void decode( ChannelHandlerContext ctx, ByteBuf msg, List<Object> out ) throws Exception
 	{
-		if ( keyPair != null )
+		if ( keyPair == null )
+			out.add( msg );
+		else
 		{
 			byte[] src = new byte[msg.readableBytes()];
 			msg.readBytes( src );
@@ -68,7 +70,5 @@ public class UDPEncryptCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 
 			out.add( Unpooled.wrappedBuffer( src ) );
 		}
-		else
-			out.add( msg );
 	}
 }

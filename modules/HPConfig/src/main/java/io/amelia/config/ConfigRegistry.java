@@ -12,7 +12,8 @@ import io.amelia.support.LibIO;
 import io.amelia.support.Lists;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
-import io.amelia.util.OptionalBoolean;
+import io.amelia.support.data.ParcelLoader;
+import io.amelia.support.data.ValueTypesOutline;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,18 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class ConfigRegistry
+public class ConfigRegistry implements ValueTypesOutline
 {
 	private static final Map<String, List<String>> appPaths = new ConcurrentHashMap<>();
 	private static File appPath = LibIO.buildFile( true );
 	private static File configFile = null;
-	private static ConfigNode node = new ConfigNode();
+	private static ConfigMap node = new ConfigMap();
 
 	public static void clearCache( @NotNull File path, @NotNull long keepHistory )
 	{
@@ -54,39 +52,32 @@ public class ConfigRegistry
 		clearCache( getPath( ApplicationInterface.PATH_CACHE ), keepHistory );
 	}
 
-	public static OptionalBoolean getBoolean( String key )
+	private static void decodeMap( Map<String, Object> mapEncoded, ConfigMap root )
 	{
-		return node.getBoolean( key );
+		for ( Map.Entry<String, Object> entry : mapEncoded.entrySet() )
+		{
+			if ( entry.getKey().equals( "__value" ) )
+				root.setValue( entry.getValue() );
+			else
+			{
+				ConfigMap child = root.getChildOrCreate( entry.getKey() );
+
+				if ( entry.getValue() instanceof Map )
+					decodeMap( ( Map<String, Object> ) entry.getValue(), child );
+				else
+					child.loadNewValue( entry.getValue() );
+			}
+		}
 	}
 
-	public static ConfigNode getChild( String key )
+	public static ConfigMap getChild( String key )
 	{
 		return node.getChild( key );
 	}
 
-	public static ConfigNode getChildOrCreate( String key )
+	public static ConfigMap getChildOrCreate( String key )
 	{
 		return node.getChildOrCreate( key );
-	}
-
-	public static OptionalDouble getDouble( String key )
-	{
-		return node.getDouble( key );
-	}
-
-	public static OptionalInt getInteger( String key )
-	{
-		return node.getInteger( key );
-	}
-
-	public static <T> Optional<List<T>> getList( String key )
-	{
-		return node.getList( key );
-	}
-
-	public static OptionalLong getLong( String key )
-	{
-		return node.getLong( key );
 	}
 
 	public static File getPath( @NotNull String slug )
@@ -171,23 +162,20 @@ public class ConfigRegistry
 		return appPath;
 	}
 
-	public static Optional<String> getString( String key )
-	{
-		return node.getString( key );
-	}
-
 	public static void init( Env env ) throws ConfigException.Error
 	{
 		appPath = LibIO.buildFile( true, env.getString( "app-dir" ) );
-		for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
-			setPath( key, Strs.split( env.getString( key + "-dir" ), "/" ).toArray( String[]::new ) );
+		// for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
+		// setPath( key, Strs.split( env.getString( "dir-" + key ), "/" ).toArray( String[]::new ) );
+
+		env.getStringsMap().filter( e -> e.getKey().startsWith( "dir-" ) ).forEach( e -> setPath( e.getKey().substring( 4 ), Strs.split( e.getValue(), "/" ).toArray( String[]::new ) ) );
 
 		loadConfig();
 
-		ConfigNode envNode = node.getChild( "env" );
+		ConfigMap envNode = node.getChild( "env" );
 		for ( Map.Entry<String, Object> entry : env.map().entrySet() )
 			envNode.setValue( entry.getKey(), entry.getValue() );
-		envNode.addFlag( ConfigNode.Flag.READ_ONLY, ConfigNode.Flag.NO_SAVE );
+		envNode.addFlag( ConfigMap.Flag.READ_ONLY, ConfigMap.Flag.NO_SAVE );
 
 		AppBindings.init();
 	}
@@ -206,7 +194,8 @@ public class ConfigRegistry
 				if ( file.isDirectory() )
 					loadConfig( file, nesting );
 				else
-					node.setValue( nesting, ConfigLoader.parseFile( file ) );
+					parseConfig( nesting, file );
+
 			}
 			catch ( Exception e )
 			{
@@ -220,6 +209,38 @@ public class ConfigRegistry
 		loadConfig( getPath( ApplicationInterface.PATH_CONFIG, true ), "" );
 	}
 
+	private static void parseConfig( @NotNull String nesting, @NotNull File file ) throws ConfigException.Error
+	{
+		if ( !file.isFile() )
+			return;
+
+		Map<String, Object> map;
+		ConfigMap child = node.getChildOrCreate( nesting );
+		String name = file.getName().toLowerCase();
+
+		try
+		{
+			if ( name.endsWith( ".yaml" ) || name.endsWith( ".yml" ) )
+				map = ParcelLoader.decodeYamlToMap( file );
+			else if ( name.endsWith( ".json" ) )
+				map = ParcelLoader.decodeJsonToMap( file );
+			else if ( name.endsWith( ".list" ) )
+				map = ParcelLoader.decodeListToMap( file );
+			else if ( name.endsWith( ".properties" ) )
+				map = ParcelLoader.decodePropToMap( file );
+			else
+				throw new ConfigException.Ignorable( null, "Could not parse file " + LibIO.relPath( file ) );
+
+			// TODO Add more supported types, .e.g., `.groovy` using the ScriptingFactory.
+		}
+		catch ( IOException e )
+		{
+			throw new ConfigException.Error( child, e );
+		}
+
+		ParcelLoader.decodeMap( map, child );
+	}
+
 	public static void save()
 	{
 		// TODO Save
@@ -227,8 +248,8 @@ public class ConfigRegistry
 
 	public static void setObject( String key, Object value )
 	{
-		if ( value instanceof ConfigNode )
-			node.setChild( key, ( ConfigNode ) value, false );
+		if ( value instanceof ConfigMap )
+			node.setChild( key, ( ConfigMap ) value, false );
 		else
 			node.setValue( key, value );
 	}
@@ -247,7 +268,7 @@ public class ConfigRegistry
 			throw new IllegalArgumentException( "App paths must be absolute or reference another app path, i.e., __app. Paths: [" + Strs.join( paths ) + "]" );
 		appPaths.put( key, Lists.newArrayList( paths ) );
 
-		Kernel.getApplicationOptions().addCallbackWithValue( "dir-" + key, "Sets the " + key + " directory.", argumentValue -> setPath( key, argumentValue ) );
+		Kernel.getApplication().addStringArgument( "dir-" + pathKey, "Sets the " + pathKey + " directory." );
 	}
 
 	private static void vendorConfig() throws IOException
@@ -270,5 +291,17 @@ public class ConfigRegistry
 	private ConfigRegistry()
 	{
 
+	}
+
+	@Override
+	public Optional<?> getValue( String key )
+	{
+		return node.getValue( key );
+	}
+
+	@Override
+	public Optional<?> getValue()
+	{
+		return Optional.empty();
 	}
 }

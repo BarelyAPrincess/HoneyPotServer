@@ -10,7 +10,7 @@
 package io.amelia.foundation.plugins;
 
 import io.amelia.config.ConfigLoader;
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.foundation.MetaMap;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.injection.MavenReference;
@@ -150,7 +150,7 @@ public class PluginMeta extends VendorMeta
 		super( stream, streamType );
 	}
 
-	public PluginMeta( final ConfigNode config )
+	public PluginMeta( final ConfigMap config )
 	{
 		super( config );
 	}
@@ -227,7 +227,7 @@ public class PluginMeta extends VendorMeta
 	 * Gives the phase of server startup that the plugin should be loaded.
 	 * <ul>
 	 * <li>Possible values are in {@link Runlevel}.
-	 * <li>Defaults to {@link Runlevel#INITIALIZED}.
+	 * <li>Defaults to {@link Runlevel#STARTUP}.
 	 * <li>Certain caveats apply to each phase.
 	 * <li>When different, {@link #getDepend()}, {@link #getSoftDepend()}, and {@link #getLoadBefore()}
 	 * become relative in order loaded per-phase. If a plugin loads at <code>STARTUP</code>, but a dependency
@@ -254,7 +254,7 @@ public class PluginMeta extends VendorMeta
 		}
 		catch ( IllegalArgumentException | NullPointerException e )
 		{
-			return Runlevel.STARTUP;
+			return Runlevel.MAINLOOP;
 		}
 	}
 

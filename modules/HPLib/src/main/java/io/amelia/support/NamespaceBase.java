@@ -75,12 +75,6 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		return creator.apply( nodes );
 	}
 
-	@Override
-	public String toString()
-	{
-		return getString();
-	}
-
 	/**
 	 * Checks is namespace only contains valid characters.
 	 *
@@ -100,6 +94,16 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			if ( s.contains( "*" ) || s.matches( ".*[0-9]+-[0-9]+.*" ) )
 				return true;
 		return false;
+	}
+
+	public T dropFirst()
+	{
+		return subNamespace( 1 );
+	}
+
+	public T dropLast()
+	{
+		return subNamespace( 0, getNodeCount() - 1 );
 	}
 
 	/**
@@ -393,5 +397,11 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	public String subString( int start, int end )
 	{
 		return Strs.join( subNodes( start, end ), glue );
+	}
+
+	@Override
+	public String toString()
+	{
+		return getString();
 	}
 }

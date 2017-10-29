@@ -1,7 +1,7 @@
 package io.amelia.foundation.binding;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.config.ConfigNode;
+import io.amelia.config.ConfigMap;
 import io.amelia.config.ConfigRegistry;
 import io.amelia.events.EventDispatcher;
 import io.amelia.foundation.Kernel;
@@ -133,7 +133,7 @@ public class AppBindings
 
 		// Load Facades from Config
 
-		ConfigNode facades = ConfigRegistry.getChild( "bindings.facades" );
+		ConfigMap facades = ConfigRegistry.getChild( "bindings.facades" );
 		facades.getChildren().forEach( c ->
 		{
 			if ( c.hasChild( "class" ) && c.hasChild( "priority" ) )

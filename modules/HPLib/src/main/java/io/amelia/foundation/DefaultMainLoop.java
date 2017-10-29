@@ -4,7 +4,7 @@ import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
-import io.amelia.serializable.AsyncTask;
+import io.amelia.android.AsyncTask;
 
 /**
  * Created by amelia on 8/9/17.
@@ -93,7 +93,7 @@ public final class DefaultMainLoop extends AsyncTask<Void, Void, Void>
 	{
 		super.onPreExecute();
 
-		if ( Kernel.getRunlevel() != Runlevel.RUNNING )
+		if ( Kernel.getRunlevel() != Runlevel.DAEMON )
 			throw new StartupException( "ApplicationMainLoop can only be started on RUNNING RunLevel." );
 		if ( !Kernel.isPrimaryThread() )
 			throw new StartupException( "ApplicationMainLoop can only be started from the PrimaryThread." );

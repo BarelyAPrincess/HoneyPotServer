@@ -25,7 +25,7 @@ public class Arrs
 	}
 
 	// This is Arrays.binarySearch(), but doesn't do any argument validation.
-	static int binarySearch( int[] array, int size, int value )
+	public static int binarySearch( int[] array, int size, int value )
 	{
 		int lo = 0;
 		int hi = size - 1;
@@ -45,7 +45,7 @@ public class Arrs
 		return ~lo;  // value not present
 	}
 
-	static int binarySearch( long[] array, int size, long value )
+	public static int binarySearch( long[] array, int size, long value )
 	{
 		int lo = 0;
 		int hi = size - 1;

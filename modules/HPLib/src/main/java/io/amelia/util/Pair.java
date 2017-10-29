@@ -25,6 +25,12 @@ public class Pair<K, V> implements Map.Entry<K, V>
 		this.val = null;
 	}
 
+	public Pair( Map.Entry<K, V> entry )
+	{
+		this.key = entry.getKey();
+		this.val = entry.getValue();
+	}
+
 	public Pair( K key, V val )
 	{
 		this.key = key;
@@ -43,16 +49,16 @@ public class Pair<K, V> implements Map.Entry<K, V>
 		return val;
 	}
 
-	public void setKey( K key )
-	{
-		this.key = key;
-	}
-
 	@Override
 	public V setValue( V val )
 	{
 		V old = this.val;
 		this.val = val;
 		return old;
+	}
+
+	public void setKey( K key )
+	{
+		this.key = key;
 	}
 }

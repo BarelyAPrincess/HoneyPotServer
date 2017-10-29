@@ -12,39 +12,45 @@ package io.amelia.lang;
 public enum Runlevel
 {
 	/**
-	 * Indicates the application has not done anything YET!
+	 * Indicates the application has not done anything. Variable initialization has only occurred.
 	 */
 	INITIALIZATION,
 	/**
-	 * Indicates the application has begun startup procedures
-	 */
-	INITIALIZED,
-	/**
-	 * Indicates the application has completed all required startup procedures and started the main thread tick
+	 * Indicates the application has started all managers and dispatchers then loads plugins.
 	 */
 	STARTUP,
 	/**
-	 * Indicates the application has started all and any networking
+	 * Indicates the application has started the main loop. Expect heartbeat and task execution.
 	 */
-	POSTSTARTUP,
+	MAINLOOP,
 	/**
-	 * Indicates the application is now ready to handle the main application loop
+	 * Indicates the application has started the networking (UDP in particular) and is waiting on the cluster.
 	 */
-	RUNNING,
+	NETWORKING,
 	/**
-	 * Indicates the application is reloading
+	 * Indicates the application had entered client mode.
+	 */
+	CLIENT,
+	/**
+	 * Indicates the application has entered daemon mode.
+	 */
+	DAEMON,
+	/**
+	 * Indicates the application is reloading.
+	 * TODO Not Implemented - Needs to disconnect from cluster, unload managers and dispatchers, then reload plugins.
 	 */
 	RELOAD,
 	/**
-	 * Indicates the application is shutting down but the final state could be either CRASHED or DISPOSED
+	 * Indicates the application is preparing to shutdown. Best point to get the most critical shutdown logic done before managers, dispatchers, and plugins are disposed of.
 	 */
 	SHUTDOWN,
 	/**
-	 * Indicates the application is preparing to shutdown
+	 * Indicates the application has been shutdown. The main loop will cease execution here. It's like no plugins will ever see this Runlevel as they have been unloaded.
 	 */
 	DISPOSED,
 	/**
-	 * Indicates the application has crashed
+	 * Indicates the application has CRASHED. Similar to DISPOSED with the exception that Plugins might see this one depending on the exception source.
+	 * A crash report will soon be generated and dispatched to the server admin.
 	 */
 	CRASHED;
 
@@ -60,17 +66,18 @@ public enum Runlevel
 		{
 			case INITIALIZATION:
 				return false;
-			case INITIALIZED:
-				return currentRunlevel == INITIALIZATION;
 			case STARTUP:
-				return currentRunlevel == INITIALIZED;
-			case POSTSTARTUP:
+				return currentRunlevel == INITIALIZATION || currentRunlevel == RELOAD;
+			case MAINLOOP:
 				return currentRunlevel == STARTUP;
-			case RUNNING:
-				return currentRunlevel == POSTSTARTUP;
+			case NETWORKING:
+				return currentRunlevel == MAINLOOP;
+			case CLIENT:
+			case DAEMON:
+				return currentRunlevel == NETWORKING;
 			case RELOAD:
 			case SHUTDOWN:
-				return currentRunlevel == RUNNING;
+				return currentRunlevel == DAEMON || currentRunlevel == CLIENT;
 			case DISPOSED:
 				return currentRunlevel == SHUTDOWN;
 		}
