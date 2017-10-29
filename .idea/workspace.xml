@@ -1,127 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7684425a-3f41-4c96-b67d-2b02523c4713" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyleSettings.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/deployment.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_findbugs_jsr305_1_3_9.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_code_gson_gson_2_8_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_errorprone_error_prone_annotations_2_0_18.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_guava_23_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_j2objc_j2objc_annotations_1_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_codehaus_mojo_animal_sniffer_annotations_1_14.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_yaml_snakeyaml_1_13.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__xmlpull_xmlpull_1_1_3_4d_b4_min.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigMap.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/SynchronizeException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/UnsafeTrustManagerFactory.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/Parcel.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/ParcelLoader.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/serialization/DataSerializable.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/serialization/DataSerialization.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/serialization/DelegateDeserialization.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/serialization/SerializableAs.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/yaml/YamlConstructor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/yaml/YamlRepresenter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/synchronize/LooperFactory.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/messages/ApplicationInfoMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/messages/Messages.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/messages/NetworkMessage.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/DataPacket.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/PacketResponse.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPPacketHandler.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_google_guava_guava_18_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigLoader.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigTree.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/DefaultConfigNode.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/BaseBundle.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Bundle.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Parcel.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/PersistableBundle.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/ArrayMap.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/MapCollections.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigNode.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/ValueTypesOutline.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ObjectStackerException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/StackerException.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/AsyncTask.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/AsyncTask.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Handler.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/Handler.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Looper.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/Looper.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Message.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/synchronize/Message.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/MessageQueue.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/MessageQueue.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/serializable/Parcelable.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/Parcelable.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/EscapeTranslator.groovy" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/EscapeTranslator.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/StackerBase.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/StackerBase.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/StackerListener.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/StackerListener.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/StackerWithValue.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/data/StackerWithValue.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/Packet.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/RawPacket.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/utils/NIO.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/NIO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPermissions/HPPermissions_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPPlugins/HPPlugins_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build.gradle" afterPath="$PROJECT_DIR$/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/config/ConfigRegistry.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/env/Env.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/env/Env.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/lang/ConfigException.java" afterPath="$PROJECT_DIR$/modules/HPConfig/src/main/java/io/amelia/lang/ConfigException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/build.gradle" afterPath="$PROJECT_DIR$/modules/HPLib/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/ApplicationInterface.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/ApplicationInterface.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/DefaultApplication.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/DefaultApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/DefaultMainLoop.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/DefaultMainLoop.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/Kernel.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/Kernel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/MetaMap.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/MetaMap.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorMeta.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/VendorMeta.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/AppBindings.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingBase.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/foundation/binding/BindingException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ApplicationException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/ApplicationException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/BadParcelableException.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/BadParcelableException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/Runlevel.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/lang/Runlevel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Arrs.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Arrs.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/CompareChain.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/CompareChain.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibHttp.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibHttp.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/LibIO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Lists.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Maps.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Namespace.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Namespace.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/NamespaceBase.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/NamespaceBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Objs.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Strs.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/support/Strs.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/util/Pair.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/util/Pair.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/util/Triplet.java" afterPath="$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/util/Triplet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/lang/PacketValidationException.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/lang/PacketValidationException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/NetworkLoader.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/NetworkLoader.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/NetworkWorker.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/NetworkWorker.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/PacketRequest.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/packets/PacketRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPEncryptCodec.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPEncryptCodec.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPHandler.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPPacketCodec.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPPacketCodec.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPWorker.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/networking/udp/UDPWorker.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginBase.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginMeta.java" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/PluginMeta.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java" afterPath="$PROJECT_DIR$/modules/HPPlugins/src/main/java/io/amelia/foundation/plugins/loader/Plugin.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/io/amelia/main/EntryPoint.java" afterPath="$PROJECT_DIR$/src/main/java/io/amelia/main/EntryPoint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/io/amelia/monitor/EntryPoint.java" afterPath="$PROJECT_DIR$/src/main/java/io/amelia/monitor/EntryPoint.java" />
-    </list>
+    <list default="true" id="7684425a-3f41-4c96-b67d-2b02523c4713" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/modules/HPLib/.gradle/" />
     <ignored path="$PROJECT_DIR$/modules/HPLib/build/" />
     <ignored path="$PROJECT_DIR$/modules/HPScripting/.gradle/" />
@@ -239,8 +119,8 @@
       <file leaf-file-name="MessageQueue.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/MessageQueue.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="468">
+              <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -4512,12 +4392,12 @@
       <workItem from="1505838238902" duration="222000" />
       <workItem from="1506655895424" duration="2202000" />
       <workItem from="1508873102255" duration="27497000" />
-      <workItem from="1509082227974" duration="30910000" />
+      <workItem from="1509082227974" duration="31584000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="578058000" />
+    <option name="totallyTimeSpent" value="578732000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1966" y="17" width="1851" height="1034" extended-state="0" />
@@ -5083,8 +4963,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modules/HPLib/src/main/java/io/amelia/android/MessageQueue.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="468">
+          <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
           <folding />
         </state>
       </provider>
