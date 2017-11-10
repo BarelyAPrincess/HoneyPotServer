@@ -9,27 +9,6 @@
  */
 package io.amelia.networking.udp;
 
-import io.amelia.config.ConfigMap;
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.Kernel;
-import io.amelia.lang.NetworkException;
-import io.amelia.lang.PacketValidationException;
-import io.amelia.lang.StartupException;
-import io.amelia.networking.NetworkLoader;
-import io.amelia.networking.NetworkWorker;
-import io.amelia.networking.packets.PacketRequest;
-import io.amelia.support.LibIO;
-import io.amelia.support.Sys;
-import io.amelia.support.Timings;
-import io.amelia.tasks.TaskDispatcher;
-import io.amelia.support.NIO;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.channel.socket.InternetProtocolFamily;
-import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -49,6 +28,29 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
+
+import io.amelia.config.ConfigMap;
+import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.Kernel;
+import io.amelia.foundation.Looper;
+import io.amelia.lang.NetworkException;
+import io.amelia.lang.PacketValidationException;
+import io.amelia.lang.StartupException;
+import io.amelia.networking.NetworkLoader;
+import io.amelia.networking.NetworkWorker;
+import io.amelia.networking.packets.PacketRequest;
+import io.amelia.support.IO;
+import io.amelia.support.NIO;
+import io.amelia.support.Sys;
+import io.amelia.support.Timings;
+import io.amelia.tasks.TaskDispatcher;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.DatagramPacket;
+import io.netty.channel.socket.InternetProtocolFamily;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 
 import static io.amelia.networking.NetworkLoader.L;
 
@@ -74,6 +76,50 @@ public class UDPWorker implements NetworkWorker
 		return "udp";
 	}
 
+	/**
+	 * Returns the KeyPair per configured in the configuration, e.g., server.udp.rsaSecret and server.udp.rsaKey.
+	 *
+	 * @return The KeyPair, null if config is unset or null.
+	 * @throws NetworkException if there is a failure to initialize the KeyPair
+	 */
+	public KeyPair getRSA() throws NetworkException
+	{
+		ObjectInputStream is = null;
+		try
+		{
+			File file = getConfig( "rsaKey" ).getStringAsFile().orElse( null );
+			if ( file == null )
+				return null;
+
+			PEMParser parser = new PEMParser( new FileReader( file ) );
+			Object obj = parser.readObject();
+			JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider( "BC" );
+			KeyPair kp;
+
+			if ( obj instanceof PEMEncryptedKeyPair )
+			{
+				PEMEncryptedKeyPair ckp = ( PEMEncryptedKeyPair ) obj;
+				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build( ConfigRegistry.getString( "server.udp.rsaSecret" ).orElse( "" ).toCharArray() );
+				kp = converter.getKeyPair( ckp.decryptKeyPair( decProv ) );
+			}
+			else
+			{
+				PEMKeyPair ukp = ( PEMKeyPair ) obj;
+				kp = converter.getKeyPair( ukp );
+			}
+
+			return kp;
+		}
+		catch ( Throwable t )
+		{
+			throw new NetworkException( "There was problem constructing the RSA file for UDP encryption.", t );
+		}
+		finally
+		{
+			IO.closeQuietly( is );
+		}
+	}
+
 	@Override
 	public void heartbeat()
 	{
@@ -86,6 +132,31 @@ public class UDPWorker implements NetworkWorker
 	public boolean isStarted()
 	{
 		return channel != null && channel.isConnected();
+	}
+
+	public <S extends PacketRequest, R extends PacketResponse> void sendPacket( S packet, BiConsumer<S, R> received ) throws PacketValidationException
+	{
+		// Confirm that the UDPWorker has been started.
+		if ( !isStarted() )
+			throw new IllegalStateException( "The UDPWorker has not been started." );
+
+		// Validate the packet has all the required information
+		packet.validate();
+
+		// Instruct the packet to encode the subclass into a ByteBuf payload
+		packet.encode();
+
+		// Place the packet into the awaiting response map
+		awaiting.add( new PacketContainer( packet, received ) );
+
+		// Schedule a timeout that removes the packet from the awaiting map
+		TaskDispatcher.scheduleAsyncDelayedTask( Kernel.getApplication(), packet.getTimeout(), () -> awaiting.remove( packet.getPacketId() ) );
+
+
+
+		channel.writeAndFlush( new DatagramPacket( packet.payload ) );
+		packet.sentTime = Timings.epoch();
+		packet.sent = true;
 	}
 
 	public UDPWorker start() throws NetworkException
@@ -171,8 +242,7 @@ public class UDPWorker implements NetworkWorker
 
 			channel = ( NioDatagramChannel ) b.bind( broadcast.getPort() ).sync().channel();
 
-			Kernel.registerRunnable( () ->
-			{
+			Looper.Factory.dispatch( () -> {
 				try
 				{
 					channel.joinGroup( broadcast, iface ).sync();
@@ -209,75 +279,6 @@ public class UDPWorker implements NetworkWorker
 	{
 		NIO.closeQuietly( channel );
 		return this;
-	}
-
-	/**
-	 * Returns the KeyPair per configured in the configuration, e.g., server.udp.rsaSecret and server.udp.rsaKey.
-	 *
-	 * @return The KeyPair, null if config is unset or null.
-	 * @throws NetworkException if there is a failure to initialize the KeyPair
-	 */
-	public KeyPair getRSA() throws NetworkException
-	{
-		ObjectInputStream is = null;
-		try
-		{
-			File file = getConfig( "rsaKey" ).getStringAsFile().orElse( null );
-			if ( file == null )
-				return null;
-
-			PEMParser parser = new PEMParser( new FileReader( file ) );
-			Object obj = parser.readObject();
-			JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider( "BC" );
-			KeyPair kp;
-
-			if ( obj instanceof PEMEncryptedKeyPair )
-			{
-				PEMEncryptedKeyPair ckp = ( PEMEncryptedKeyPair ) obj;
-				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build( ConfigRegistry.getString( "server.udp.rsaSecret" ).orElse( "" ).toCharArray() );
-				kp = converter.getKeyPair( ckp.decryptKeyPair( decProv ) );
-			}
-			else
-			{
-				PEMKeyPair ukp = ( PEMKeyPair ) obj;
-				kp = converter.getKeyPair( ukp );
-			}
-
-			return kp;
-		}
-		catch ( Throwable t )
-		{
-			throw new NetworkException( "There was problem constructing the RSA file for UDP encryption.", t );
-		}
-		finally
-		{
-			LibIO.closeQuietly( is );
-		}
-	}
-
-	public <S extends PacketRequest, R extends PacketResponse> void sendPacket( S packet, BiConsumer<S, R> received ) throws PacketValidationException
-	{
-		// Confirm that the UDPWorker has been started.
-		if ( !isStarted() )
-			throw new IllegalStateException( "The UDPWorker has not been started." );
-
-		// Validate the packet has all the required information
-		packet.validate();
-
-		// Instruct the packet to encode the subclass into a ByteBuf payload
-		packet.encode();
-
-		// Place the packet into the awaiting response map
-		awaiting.add( new PacketContainer( packet, received ) );
-
-		// Schedule a timeout that removes the packet from the awaiting map
-		TaskDispatcher.scheduleAsyncDelayedTask( Kernel.getApplication(), packet.getTimeout(), () -> awaiting.remove( packet.getPacketId() ) );
-
-
-
-		channel.writeAndFlush( new DatagramPacket( packet.payload ) );
-		packet.sentTime = Timings.epoch();
-		packet.sent = true;
 	}
 
 	private class PacketContainer

@@ -38,6 +38,14 @@ public class Lists
 		return obj;
 	}
 
+	public static <T> List<T> copy( List<?> list )
+	{
+		List<T> newList = emptyCopy( list );
+		for( Object o : list )
+			newList.add( ( T ) o );
+		return newList;
+	}
+
 	public static <V> List<V> emptyCopy( List<?> list )
 	{
 		if ( list instanceof CopyOnWriteArrayList )

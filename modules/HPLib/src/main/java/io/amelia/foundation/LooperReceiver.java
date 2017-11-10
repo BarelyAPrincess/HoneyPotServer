@@ -1,90 +1,48 @@
-package io.amelia.android;
+package io.amelia.foundation;
 
-import java.lang.reflect.Modifier;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import io.amelia.foundation.DefaultApplication;
-import io.amelia.foundation.Kernel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
-import io.amelia.synchronize.Message;
 
 /**
- * A Handler allows you to send and process {@link Message} and Runnable
- * objects associated with a thread's {@link MessageQueue}.  Each Handler
- * instance is associated with a single thread and that thread's message
- * queue.  When you create a new Handler, it is bound to the thread /
- * message queue of the thread that is creating it -- from that point on,
- * it will deliver messages and runnables to that message queue and execute
- * them as they come out of the message queue.
+ * A Handler allows you to send and process {@link InternalMessage} and Runnable
+ * objects associated with a thread's {@link Looper}.  Each Handler
+ * instance is associated with a single {@link Looper}.
  * <p>
- * <p>There are two main uses for a Handler: (1) to schedule messages and
+ * There are two main uses for a Handler: (1) to schedule messages and
  * runnables to be executed as some point in the future; and (2) to enqueue
  * an action to be performed on a different thread than your own.
  * <p>
- * <p>Scheduling messages is accomplished with the
+ * Scheduling messages is accomplished with the
  * {@link #post}, {@link #postAtTime(Runnable, long)},
- * {@link #postDelayed}, {@link #sendEmptyMessage},
- * {@link #sendMessage}, {@link #sendMessageAtTime}, and
- * {@link #sendMessageDelayed} methods.  The <em>post</em> versions allow
+ * {@link #postDelayed}, {@link #sendEmptyInternalMessage},
+ * {@link #sendInternalMessage}, {@link #sendInternalMessageAtTime}, and
+ * {@link #sendInternalMessageDelayed} methods.  The <em>post</em> versions allow
  * you to enqueue Runnable objects to be called by the message queue when
- * they are received; the <em>sendMessage</em> versions allow you to enqueue
- * a {@link Message} object containing a bundle of data that will be
- * processed by the Handler's {@link #handleMessage} method (requiring that
+ * they are received; the <em>sendInternalMessage</em> versions allow you to enqueue
+ * a {@link InternalMessage} object containing a bundle of data that will be
+ * processed by the Handler's {@link #handleInternalMessage} method (requiring that
  * you implement a subclass of Handler).
  * <p>
- * <p>When posting or sending to a Handler, you can either
+ * When posting or sending to a Handler, you can either
  * allow the item to be processed as soon as the message queue is ready
  * to do so, or specify a delay before it gets processed or absolute time for
  * it to be processed.  The latter two allow you to implement timeouts,
  * ticks, and other timing-based behavior.
  * <p>
- * <p>When a
- * process is created for your application, its main thread is dedicated to
+ * When a process is created for your application, its main thread is dedicated to
  * running a message queue that takes care of managing the top-level
- * application objects (activities, broadcast receivers, etc) and any windows
- * they create.  You can create your own threads, and communicate back with
- * the main application thread through a Handler.  This is done by calling
- * the same <em>post</em> or <em>sendMessage</em> methods as before, but from
- * your new thread.  The given Runnable or Message will then be scheduled
- * in the Handler's message queue and processed when appropriate.
+ * application tasks and messages.  You can create your own threads,
+ * and communicate back with the main application thread through a Handler.
  */
-public class Handler
+public class LooperReceiver
 {
-	public static final Logger LOG = LogBuilder.get( Handler.class );
+	public static final Logger LOG = LogBuilder.get( LooperReceiver.class );
 
-	/*
-	 * Set this flag to true to detect anonymous, local or member classes
-	 * that extend this Handler class and that are not static. These kind
-	 * of classes can potentially create leaks.
-	 */
-	private static final boolean FIND_POTENTIAL_LEAKS = false;
-
-	private static Message getPostMessage( Consumer msg )
-	{
-		Message m = Message.obtain();
-		m.obj = msg;
-		return m;
-	}
-
-	private static Message getPostMessage( Consumer msg, Object token )
-	{
-		Message m = Message.obtain();
-		m.obj = token;
-		m.callback = msg;
-		return m;
-	}
-
-	private static void handleCallback( Message message )
-	{
-		message.callback.accept( message );
-	}
-
-	final boolean mAsynchronous;
-	final Consumer<Message> mCallback;
-	final Looper mLooper;
-	final MessageQueue mQueue;
+	final boolean async;
+	final Consumer<InternalMessage> callback;
+	final Looper looper;
 
 	/**
 	 * Default constructor associates this handler with the {@link Looper} for the
@@ -93,7 +51,7 @@ public class Handler
 	 * If this thread does not have a looper, this handler won't be able to receive messages
 	 * so an exception is thrown.
 	 */
-	public Handler()
+	public LooperReceiver()
 	{
 		this( null, false );
 	}
@@ -108,7 +66,7 @@ public class Handler
 	 *
 	 * @param callback The callback interface in which to handle messages, or null.
 	 */
-	public Handler( Consumer<Message> callback )
+	public LooperReceiver( Consumer<InternalMessage> callback )
 	{
 		this( callback, false );
 	}
@@ -118,7 +76,7 @@ public class Handler
 	 *
 	 * @param looper The looper, must not be null.
 	 */
-	public Handler( Looper looper )
+	public LooperReceiver( Looper looper )
 	{
 		this( looper, null, false );
 	}
@@ -130,7 +88,7 @@ public class Handler
 	 * @param looper   The looper, must not be null.
 	 * @param callback The callback interface in which to handle messages, or null.
 	 */
-	public Handler( Looper looper, Consumer<Message> callback )
+	public LooperReceiver( Looper looper, Consumer<InternalMessage> callback )
 	{
 		this( looper, callback, false );
 	}
@@ -144,13 +102,13 @@ public class Handler
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
-	 * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
-	 *              each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+	 * @param async If true, the handler calls {@link InternalMessage#setAsync(boolean)} for
+	 *              each {@link InternalMessage} that is sent to it or {@link Runnable} that is posted to it.
 	 * @hide
 	 */
-	public Handler( boolean async )
+	public LooperReceiver( boolean async )
 	{
 		this( null, async );
 	}
@@ -164,28 +122,21 @@ public class Handler
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
 	 * @param callback The callback interface in which to handle messages, or null.
-	 * @param async    If true, the handler calls {@link Message#setAsynchronous(boolean)} for
-	 *                 each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+	 * @param async    If true, the handler calls {@link InternalMessage#setAsync(boolean)} for
+	 *                 each {@link InternalMessage} that is sent to it or {@link Runnable} that is posted to it.
 	 * @hide
 	 */
-	public Handler( Consumer<Message> callback, boolean async )
+	public LooperReceiver( Consumer<InternalMessage> callback, boolean async )
 	{
-		if ( FIND_POTENTIAL_LEAKS )
-		{
-			final Class<? extends Handler> klass = getClass();
-			if ( ( klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass() ) && ( klass.getModifiers() & Modifier.STATIC ) == 0 )
-				Kernel.L.warning( "The following Handler class should be static or leaks might occur: " + klass.getCanonicalName() );
-		}
-
-		mLooper = DefaultApplication.myLooper();
-		if ( mLooper == null )
+		looper = Looper.Factory.obtain();
+		if ( looper == null )
 			throw new RuntimeException( "Can't create handler inside thread that has not called Looper.prepare()" );
-		mQueue = mLooper.mQueue;
-		mCallback = callback;
-		mAsynchronous = async;
+		looper.queue = looper.getQueue();
+		this.callback = callback;
+		this.async = async;
 	}
 
 	/**
@@ -198,57 +149,50 @@ public class Handler
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
 	 * @param looper   The looper, must not be null.
 	 * @param callback The callback interface in which to handle messages, or null.
-	 * @param async    If true, the handler calls {@link Message#setAsynchronous(boolean)} for
-	 *                 each {@link Message} that is sent to it or {@link Runnable} that is posted to it.
+	 * @param async    If true, the handler calls {@link InternalMessage#setAsync(boolean)} for
+	 *                 each {@link InternalMessage} that is sent to it or {@link Runnable} that is posted to it.
 	 * @hide
 	 */
-	public Handler( Looper looper, Consumer<Message> callback, boolean async )
+	public LooperReceiver( Looper looper, Consumer<InternalMessage> callback, boolean async )
 	{
-		mLooper = looper;
-		mQueue = looper.mQueue;
-		mCallback = callback;
-		mAsynchronous = async;
+		this.looper = looper;
+		looper.queue = looper.getQueue();
+		this.callback = callback;
+		this.async = async;
 	}
 
 	/**
 	 * Handle system messages here.
 	 */
-	public void dispatchMessage( Message msg )
+	public void dispatchInternalMessage( InternalMessage msg )
 	{
 		if ( msg.callback != null )
 		{
-			handleCallback( msg );
+			msg.callback.accept( msg );
 		}
 		else
 		{
-			if ( mCallback != null )
+			if ( callback != null )
 			{
-				if ( mCallback.handleMessage( msg ) )
+				if ( callback.handleMessage( msg ) )
 				{
 					return;
 				}
 			}
-			handleMessage( msg );
+			handleInternalMessage( msg );
 		}
 	}
 
-	private boolean enqueueMessage( MessageQueue queue, Message msg, long uptimeMillis )
+	private boolean enqueueInternalMessage( LooperQueue queue, InternalMessage msg, long uptimeMillis )
 	{
 		msg.target = this;
-		if ( mAsynchronous )
-			msg.setAsynchronous( true );
-		return queue.enqueueMessage( msg, uptimeMillis );
-	}
-
-	// if we can get rid of this method, the handler need not remember its loop
-	// we could instead export a getMessageQueue() method...
-	public final Looper getLooper()
-	{
-		return mLooper;
+		if ( async )
+			msg.setAsync( true );
+		return queue.postMessage( msg, uptimeMillis );
 	}
 
 	/**
@@ -259,7 +203,7 @@ public class Handler
 	 *
 	 * @param message The message whose name is being queried
 	 */
-	public String getMessageName( Message message )
+	public String getInternalMessageName( InternalMessage message )
 	{
 		if ( message.callback != null )
 		{
@@ -268,10 +212,17 @@ public class Handler
 		return "0x" + Integer.toHexString( message.what );
 	}
 
+	// if we can get rid of this method, the handler need not remember its loop
+	// we could instead export a getLooperQueue() method...
+	public final Looper getLooper()
+	{
+		return looper;
+	}
+
 	/**
 	 * {@hide}
 	 */
-	public String getTraceName( Message message )
+	public String getTraceName( InternalMessage message )
 	{
 		final StringBuilder sb = new StringBuilder();
 		sb.append( getClass().getName() ).append( ": " );
@@ -289,7 +240,7 @@ public class Handler
 	/**
 	 * Subclasses must implement this to receive messages.
 	 */
-	public void handleMessage( Message msg )
+	public void handleInternalMessage( InternalMessage msg )
 	{
 	}
 
@@ -301,7 +252,7 @@ public class Handler
 	 */
 	public final boolean hasCallbacks( Runnable r )
 	{
-		return mQueue.hasMessages( this, r, null );
+		return looper.queue.hasMessages( this, r, null );
 	}
 
 	/**
@@ -310,7 +261,7 @@ public class Handler
 	 */
 	public final boolean hasMessages( int what )
 	{
-		return mQueue.hasMessages( this, what, null );
+		return looper.queue.hasMessages( this, what, null );
 	}
 
 	/**
@@ -319,70 +270,70 @@ public class Handler
 	 */
 	public final boolean hasMessages( int what, Object object )
 	{
-		return mQueue.hasMessages( this, what, object );
+		return looper.queue.hasMessages( this, what, object );
 	}
 
 	/**
-	 * Returns a new {@link Message} from the global message pool. More efficient than
-	 * creating and allocating new instances. The retrieved message has its handler set to this instance (Message.target == this).
-	 * If you don't want that facility, just call Message.obtain() instead.
+	 * Returns a new {@link InternalMessage} from the global message pool. More efficient than
+	 * creating and allocating new instances. The retrieved message has its handler set to this instance (InternalMessage.target == this).
+	 * If you don't want that facility, just call InternalMessage.obtain() instead.
 	 */
-	public final Message obtainMessage()
+	public final InternalMessage obtainInternalMessage()
 	{
-		return Message.obtain( this );
+		return InternalMessage.obtain( this );
 	}
 
 	/**
-	 * Same as {@link #obtainMessage()}, except that it also sets the what member of the returned Message.
+	 * Same as {@link #obtainInternalMessage()}, except that it also sets the what member of the returned InternalMessage.
 	 *
-	 * @param what Value to assign to the returned Message.what field.
-	 * @return A Message from the global message pool.
+	 * @param what Value to assign to the returned InternalMessage.what field.
+	 * @return A InternalMessage from the global message pool.
 	 */
-	public final Message obtainMessage( int what )
+	public final InternalMessage obtainInternalMessage( int what )
 	{
-		return Message.obtain( this, what );
+		return InternalMessage.obtain( this, what );
 	}
 
 	/**
-	 * Same as {@link #obtainMessage()}, except that it also sets the what and obj members
-	 * of the returned Message.
+	 * Same as {@link #obtainInternalMessage()}, except that it also sets the what and obj members
+	 * of the returned InternalMessage.
 	 *
-	 * @param what Value to assign to the returned Message.what field.
-	 * @param obj  Value to assign to the returned Message.obj field.
-	 * @return A Message from the global message pool.
+	 * @param what Value to assign to the returned InternalMessage.what field.
+	 * @param obj  Value to assign to the returned InternalMessage.obj field.
+	 * @return A InternalMessage from the global message pool.
 	 */
-	public final Message obtainMessage( int what, Object obj )
+	public final InternalMessage obtainInternalMessage( int what, Object obj )
 	{
-		return Message.obtain( this, what, obj );
+		return InternalMessage.obtain( this, what, obj );
 	}
 
 	/**
-	 * Same as {@link #obtainMessage()}, except that it also sets the what, arg1 and arg2 members of the returned
-	 * Message.
+	 * Same as {@link #obtainInternalMessage()}, except that it also sets the what, arg1 and arg2 members of the returned
+	 * InternalMessage.
 	 *
-	 * @param what Value to assign to the returned Message.what field.
-	 * @param arg1 Value to assign to the returned Message.arg1 field.
-	 * @param arg2 Value to assign to the returned Message.arg2 field.
-	 * @return A Message from the global message pool.
+	 * @param what Value to assign to the returned InternalMessage.what field.
+	 * @param arg1 Value to assign to the returned InternalMessage.arg1 field.
+	 * @param arg2 Value to assign to the returned InternalMessage.arg2 field.
+	 * @return A InternalMessage from the global message pool.
 	 */
-	public final Message obtainMessage( int what, int arg1, int arg2 )
+	public final InternalMessage obtainInternalMessage( int what, int arg1, int arg2 )
 	{
-		return Message.obtain( this, what, arg1, arg2 );
+		return InternalMessage.obtain( this, what, arg1, arg2 );
 	}
 
 	/**
-	 * Same as {@link #obtainMessage()}, except that it also sets the what, obj, arg1,and arg2 values on the
-	 * returned Message.
+	 * Same as {@link #obtainInternalMessage()}, except that it also sets the what, obj, arg1,and arg2 values on the
+	 * returned InternalMessage.
 	 *
-	 * @param what Value to assign to the returned Message.what field.
-	 * @param arg1 Value to assign to the returned Message.arg1 field.
-	 * @param arg2 Value to assign to the returned Message.arg2 field.
-	 * @param obj  Value to assign to the returned Message.obj field.
-	 * @return A Message from the global message pool.
+	 * @param what Value to assign to the returned InternalMessage.what field.
+	 * @param arg1 Value to assign to the returned InternalMessage.arg1 field.
+	 * @param arg2 Value to assign to the returned InternalMessage.arg2 field.
+	 * @param obj  Value to assign to the returned InternalMessage.obj field.
+	 * @return A InternalMessage from the global message pool.
 	 */
-	public final Message obtainMessage( int what, int arg1, int arg2, Object obj )
+	public final InternalMessage obtainInternalMessage( int what, int arg1, int arg2, Object obj )
 	{
-		return Message.obtain( this, what, arg1, arg2, obj );
+		return InternalMessage.obtain( this, what, arg1, arg2, obj );
 	}
 
 	/**
@@ -395,9 +346,9 @@ public class Handler
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
 	 */
-	public final boolean post( Callable r )
+	public final boolean post( Runnable r )
 	{
-		return sendMessageDelayed( getPostMessage( r ), 0 );
+		return sendInternalMessageDelayed( getPostInternalMessage( r ), 0 );
 	}
 
 	/**
@@ -416,7 +367,7 @@ public class Handler
 	 */
 	public final boolean postAtFrontOfQueue( Runnable r )
 	{
-		return sendMessageAtFrontOfQueue( getPostMessage( r ) );
+		return sendInternalMessageAtFrontOfQueue( getPostInternalMessage( r ) );
 	}
 
 	/**
@@ -438,7 +389,7 @@ public class Handler
 	 */
 	public final boolean postAtTime( Runnable r, long uptimeMillis )
 	{
-		return sendMessageAtTime( getPostMessage( r ), uptimeMillis );
+		return sendInternalMessageAtTime( getPostInternalMessage( r ), uptimeMillis );
 	}
 
 	/**
@@ -461,7 +412,7 @@ public class Handler
 	 */
 	public final boolean postAtTime( Runnable r, Object token, long uptimeMillis )
 	{
-		return sendMessageAtTime( getPostMessage( r, token ), uptimeMillis );
+		return sendInternalMessageAtTime( getPostInternalMessage( r, token ), uptimeMillis );
 	}
 
 	/**
@@ -484,7 +435,7 @@ public class Handler
 	 */
 	public final boolean postDelayed( Runnable r, long delayMillis )
 	{
-		return sendMessageDelayed( getPostMessage( r ), delayMillis );
+		return sendInternalMessageDelayed( getPostInternalMessage( r ), delayMillis );
 	}
 
 	/**
@@ -492,7 +443,7 @@ public class Handler
 	 */
 	public final void removeCallbacks( Runnable r )
 	{
-		mQueue.removeMessages( this, r, null );
+		looper.queue.removeInternalMessages( this, r, null );
 	}
 
 	/**
@@ -502,7 +453,7 @@ public class Handler
 	 */
 	public final void removeCallbacks( Runnable r, Object token )
 	{
-		mQueue.removeMessages( this, r, token );
+		looper.queue.removeInternalMessages( this, r, token );
 	}
 
 	/**
@@ -510,18 +461,18 @@ public class Handler
 	 * <var>obj</var> is <var>token</var>.  If <var>token</var> is null,
 	 * all callbacks and messages will be removed.
 	 */
-	public final void removeCallbacksAndMessages( Object token )
+	public final void removeCallbacksAndInternalMessages( Object token )
 	{
-		mQueue.removeCallbacksAndMessages( this, token );
+		looper.queue.removeCallbacksAndInternalMessages( this, token );
 	}
 
 	/**
 	 * Remove any pending posts of messages with code 'what' that are in the
 	 * message queue.
 	 */
-	public final void removeMessages( int what )
+	public final void removeInternalMessages( int what )
 	{
-		mQueue.removeMessages( this, what, null );
+		looper.queue.removeInternalMessages( this, what, null );
 	}
 
 	/**
@@ -529,9 +480,9 @@ public class Handler
 	 * 'object' that are in the message queue.  If <var>object</var> is null,
 	 * all messages will be removed.
 	 */
-	public final void removeMessages( int what, Object object )
+	public final void removeInternalMessages( int what, Object object )
 	{
-		mQueue.removeMessages( this, what, object );
+		looper.queue.removeInternalMessages( this, what, object );
 	}
 
 	/**
@@ -540,122 +491,114 @@ public class Handler
 	 * If the current thread is the same as the handler thread, then the runnable
 	 * runs immediately without being enqueued.  Otherwise, posts the runnable
 	 * to the handler and waits for it to complete before returning.
-	 * </p><p>
+	 * <p>
 	 * This method is dangerous!  Improper use can result in deadlocks.
 	 * Never call this method while any locks are held or use it in a
 	 * possibly re-entrant manner.
-	 * </p><p>
+	 * <p>
 	 * This method is occasionally useful in situations where a background thread
 	 * must synchronously await completion of a task that must run on the
 	 * handler's thread.  However, this problem is often a symptom of bad design.
 	 * Consider improving the design (if possible) before resorting to this method.
-	 * </p><p>
+	 * <p>
 	 * One example of where you might want to use this method is when you just
 	 * set up a Handler thread and need to perform some initialization steps on
 	 * it before continuing execution.
-	 * </p><p>
+	 * <p>
 	 * If timeout occurs then this method returns <code>false</code> but the runnable
 	 * will remain posted on the handler and may already be in progress or
 	 * complete at a later time.
-	 * </p><p>
+	 * <p>
 	 * When using this method, be sure to use {@link Looper#quitSafely} when
-	 * quitting the looper.  Otherwise {@link #runWithScissors} may hang indefinitely.
-	 * (TODO: We should fix this by making MessageQueue aware of blocking runnables.)
-	 * </p>
+	 * quitting the looper.  Otherwise {@link #runUnsafe} may hang indefinitely.
+	 * (TODO: We should fix this by making LooperQueue aware of blocking runnables.)
 	 *
 	 * @param r       The Runnable that will be executed synchronously.
-	 * @param timeout The timeout in milliseconds, or 0 to wait indefinitely.
+	 * @param timeout The timeout in milliseconds, or 0 to wait indefinitely (makes this dangerous method, even more dangerous).
 	 * @return Returns true if the Runnable was successfully executed.
 	 * Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
-	 * @hide This method is prone to abuse and should probably not be in the API.
-	 * If we ever do make it part of the API, we might want to rename it to something
-	 * less funny like runUnsafe().
 	 */
-	public final boolean runWithScissors( final Runnable r, long timeout )
+	public final boolean runUnsafe( final Runnable r, long timeout )
 	{
 		if ( r == null )
-		{
 			throw new IllegalArgumentException( "runnable must not be null" );
-		}
-		if ( timeout < 0 )
-		{
-			throw new IllegalArgumentException( "timeout must be non-negative" );
-		}
 
-		if ( Looper.myLooper() == mLooper )
+		if ( Looper.Factory.obtain() == looper )
 		{
 			r.run();
 			return true;
 		}
 
 		BlockingRunnable br = new BlockingRunnable( r );
-		return br.postAndWait( this, timeout );
+		if ( !post( br ) )
+			return false;
+		return br.postAndWait( timeout );
 	}
 
 	/**
-	 * Sends a Message containing only the what value.
+	 * Sends a InternalMessage containing only the what value.
 	 *
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
 	 */
-	public final boolean sendEmptyMessage( int what )
+	public final boolean sendEmptyInternalMessage( int what )
 	{
-		return sendEmptyMessageDelayed( what, 0 );
+		return sendEmptyInternalMessageDelayed( what, 0 );
 	}
 
 	/**
-	 * Sends a Message containing only the what value, to be delivered
+	 * Sends a InternalMessage containing only the what value, to be delivered
 	 * at a specific time.
 	 *
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
-	 * @see #sendMessageAtTime(Message, long)
+	 * @see #sendInternalMessageAtTime(InternalMessage, long)
 	 */
 
-	public final boolean sendEmptyMessageAtTime( int what, long uptimeMillis )
+	public final boolean sendEmptyInternalMessageAtTime( int what, long uptimeMillis )
 	{
-		Message msg = Message.obtain();
+		InternalMessage msg = InternalMessage.obtain();
 		msg.what = what;
-		return sendMessageAtTime( msg, uptimeMillis );
+		return sendInternalMessageAtTime( msg, uptimeMillis );
 	}
 
 	/**
-	 * Sends a Message containing only the what value, to be delivered
+	 * Sends a InternalMessage containing only the what value, to be delivered
 	 * after the specified amount of time elapses.
 	 *
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
-	 * @see #sendMessageDelayed(Message, long)
+	 * @see #sendInternalMessageDelayed(InternalMessage, long)
 	 */
-	public final boolean sendEmptyMessageDelayed( int what, long delayMillis )
+	public final boolean sendEmptyInternalMessageDelayed( int what, long delayMillis )
 	{
-		Message msg = Message.obtain();
+		InternalMessage msg = InternalMessage.obtain();
 		msg.what = what;
-		return sendMessageDelayed( msg, delayMillis );
+		return sendInternalMessageDelayed( msg, delayMillis );
 	}
 
 	/**
 	 * Pushes a message onto the end of the message queue after all pending messages
-	 * before the current time. It will be received in {@link #handleMessage},
+	 * before the current time. It will be received in {@link #handleInternalMessage},
 	 * in the thread attached to this handler.
 	 *
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
 	 */
-	public final boolean sendMessage( Message msg )
+	public final boolean sendInternalMessage( InternalMessage msg )
 	{
-		return sendMessageDelayed( msg, 0 );
+		return sendInternalMessageDelayed( msg, 0 );
 	}
 
 	/**
 	 * Enqueue a message at the front of the message queue, to be processed on
 	 * the next iteration of the message loop.  You will receive it in
-	 * {@link #handleMessage}, in the thread attached to this handler.
+	 * {@link #handleInternalMessage}, in the thread attached to this handler.
 	 * <b>This method is only for use in very special circumstances -- it
 	 * can easily starve the message queue, cause ordering problems, or have
 	 * other unexpected side-effects.</b>
@@ -664,16 +607,16 @@ public class Handler
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.
 	 */
-	public final boolean sendMessageAtFrontOfQueue( Message msg )
+	public final boolean sendInternalMessageAtFrontOfQueue( InternalMessage msg )
 	{
-		MessageQueue queue = mQueue;
+		LooperQueue queue = looper.queue;
 		if ( queue == null )
 		{
-			RuntimeException e = new RuntimeException( this + " sendMessageAtTime() called with no mQueue" );
-			Kernel.L.warning( e.getMessage(), e );
+			RuntimeException e = new RuntimeException( this + " sendInternalMessageAtTime() called with no looper.queue" );
+			Kernel.L.warning( e.getInternalMessage(), e );
 			return false;
 		}
-		return enqueueMessage( queue, msg, 0 );
+		return enqueueInternalMessage( queue, msg, 0 );
 	}
 
 	/**
@@ -681,7 +624,7 @@ public class Handler
 	 * before the absolute time (in milliseconds) <var>uptimeMillis</var>.
 	 * <b>The time-base is {@link Kernel#uptime()}.</b>
 	 * Time spent in deep sleep will add an additional delay to execution.
-	 * You will receive it in {@link #handleMessage}, in the thread attached
+	 * You will receive it in {@link #handleInternalMessage}, in the thread attached
 	 * to this handler.
 	 *
 	 * @param uptimeMillis The absolute time at which the message should be
@@ -694,22 +637,22 @@ public class Handler
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */
-	public boolean sendMessageAtTime( Message msg, long uptimeMillis )
+	public boolean sendInternalMessageAtTime( InternalMessage msg, long uptimeMillis )
 	{
-		MessageQueue queue = mQueue;
+		LooperQueue queue = looper.queue;
 		if ( queue == null )
 		{
-			RuntimeException e = new RuntimeException( this + " sendMessageAtTime() called with no mQueue" );
+			RuntimeException e = new RuntimeException( this + " sendInternalMessageAtTime() called with no looper.queue" );
 			LOG.warning( "Looper", e );
 			return false;
 		}
-		return enqueueMessage( queue, msg, uptimeMillis );
+		return enqueueInternalMessage( queue, msg, uptimeMillis );
 	}
 
 	/**
 	 * Enqueue a message into the message queue after all pending messages
 	 * before (current time + delayMillis). You will receive it in
-	 * {@link #handleMessage}, in the thread attached to this handler.
+	 * {@link #handleInternalMessage}, in the thread attached to this handler.
 	 *
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
@@ -718,11 +661,11 @@ public class Handler
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */
-	public final boolean sendMessageDelayed( Message msg, long delayMillis )
+	public final boolean sendInternalMessageDelayed( InternalMessage msg, long delayMillis )
 	{
 		if ( delayMillis < 0 )
 			delayMillis = 0;
-		return sendMessageAtTime( msg, Kernel.uptime() + delayMillis );
+		return sendInternalMessageAtTime( msg, Kernel.uptime() + delayMillis );
 	}
 
 	@Override
@@ -731,76 +674,4 @@ public class Handler
 		return "Handler (" + getClass().getName() + ") {" + Integer.toHexString( System.identityHashCode( this ) ) + "}";
 	}
 
-	private static final class BlockingRunnable implements Runnable
-	{
-		private final Runnable mTask;
-		private boolean mDone;
-
-		public BlockingRunnable( Runnable task )
-		{
-			mTask = task;
-		}
-
-		public boolean postAndWait( Handler handler, long timeout )
-		{
-			if ( !handler.post( this ) )
-			{
-				return false;
-			}
-
-			synchronized ( this )
-			{
-				if ( timeout > 0 )
-				{
-					final long expirationTime = Kernel.uptime() + timeout;
-					while ( !mDone )
-					{
-						long delay = expirationTime - Kernel.uptime();
-						if ( delay <= 0 )
-						{
-							return false; // timeout
-						}
-						try
-						{
-							wait( delay );
-						}
-						catch ( InterruptedException ex )
-						{
-						}
-					}
-				}
-				else
-				{
-					while ( !mDone )
-					{
-						try
-						{
-							wait();
-						}
-						catch ( InterruptedException ex )
-						{
-						}
-					}
-				}
-			}
-			return true;
-		}
-
-		@Override
-		public void run()
-		{
-			try
-			{
-				mTask.run();
-			}
-			finally
-			{
-				synchronized ( this )
-				{
-					mDone = true;
-					notifyAll();
-				}
-			}
-		}
-	}
 }

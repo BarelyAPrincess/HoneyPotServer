@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.support.LibIO;
+import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 import io.amelia.util.OptionalBoolean;
@@ -141,12 +141,12 @@ public interface ValueTypesOutline
 
 	default Optional<File> getStringAsFile( String key, File rel )
 	{
-		return getString( key ).map( s -> LibIO.buildFile( rel, s ) );
+		return getString( key ).map( s -> IO.buildFile( rel, s ) );
 	}
 
 	default Optional<File> getStringAsFile( String key )
 	{
-		return getString( key ).map( LibIO::buildFile );
+		return getString( key ).map( IO::buildFile );
 	}
 
 	default Optional<File> getStringAsFile()

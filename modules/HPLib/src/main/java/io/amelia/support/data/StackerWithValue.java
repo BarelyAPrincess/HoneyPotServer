@@ -10,9 +10,6 @@
 package io.amelia.support.data;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.Kernel;
-import io.amelia.support.Objs;
-import io.amelia.util.Pair;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -21,8 +18,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.amelia.foundation.Kernel;
+import io.amelia.support.Objs;
+import io.amelia.util.Pair;
 
 @SuppressWarnings( "unchecked" )
 public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> extends StackerBase<B>
@@ -139,13 +143,6 @@ public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> exte
 		value = null;
 	}
 
-	@Override
-	public void mergeChild( @NotNull B child )
-	{
-		super.mergeChild( child );
-		value = child.value;
-	}
-
 	public Stream<T> flatValues()
 	{
 		disposeCheck();
@@ -195,6 +192,23 @@ public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> exte
 		return children.stream().map( c -> new Pair( c.getName(), c.value ) );
 	}
 
+	public T getValue( String key, Function<T, T> computeFunction )
+	{
+		B child = findChild( key, true );
+		T val = computeFunction.apply( child.value );
+		if ( val != child.value )
+			child.setValue( val );
+		return val;
+	}
+
+	public T getValue( String key, Supplier<T> supplier )
+	{
+		B child = findChild( key, true );
+		if ( child.value == null )
+			child.setValue( supplier.get() );
+		return child.value;
+	}
+
 	public Optional<T> getValue( String key )
 	{
 		B child = findChild( key, false );
@@ -217,9 +231,36 @@ public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> exte
 		this.value = value;
 	}
 
+	public void getValueIfPresent( String key, Consumer<T> consumer )
+	{
+		B child = findChild( key, false );
+		if ( child != null && child.value != null )
+			consumer.accept( child.value );
+	}
+
 	public boolean hasValue()
 	{
 		return value != null;
+	}
+
+	@Override
+	public void mergeChild( @NotNull B child )
+	{
+		super.mergeChild( child );
+		value = child.value;
+	}
+
+	public Optional<T> pollValue( String key )
+	{
+		B child = findChild( key, false );
+		if ( child == null )
+			return Optional.empty();
+		else
+		{
+			T value = child.value;
+			child.value = null;
+			return Optional.ofNullable( value );
+		}
 	}
 
 	public void setValue( String key, T value )

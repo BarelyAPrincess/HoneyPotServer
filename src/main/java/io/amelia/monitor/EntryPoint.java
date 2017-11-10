@@ -19,9 +19,9 @@ public class EntryPoint
 		/* Prepare the environment by downloading and applying the builtin libraries required */
 		Kernel.prepare();
 
-		/* Specify and get the ApplicationInterface for this environment. */
-		Kernel.setApplicationInterface( MinimalApplication.class );
-		MinimalApplication app = Kernel.getApplication();
+		/* Specify the ApplicationInterface for this environment. */
+		MinimalApplication app = new MinimalApplication();
+		Kernel.setApplication( app );
 
 		app.addArgument( "start", "Starts the daemon" );
 		app.addArgument( "stop", "Stops the daemon" );
@@ -32,8 +32,7 @@ public class EntryPoint
 		/* Load up Network UDP Driver */
 		final UDPWorker udp = NetworkLoader.UDP().get();
 
-		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) ->
-		{
+		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) -> {
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
 				try
@@ -48,7 +47,7 @@ public class EntryPoint
 				if ( !udp.isStarted() )
 					throw new StartupException( "The UDP service failed to start for unknown reasons." );
 			}
-			if ( event.getRunLevel() == Runlevel.DAEMON )
+			if ( event.getRunLevel() == Runlevel.STARTED )
 			{
 				if ( app.hasArgument( "status" ) )
 				{

@@ -61,9 +61,9 @@ import io.amelia.lang.UncaughtException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 
-public class LibIO
+public class IO
 {
-	public static final Logger L = LogBuilder.get( LibIO.class );
+	public static final Logger L = LogBuilder.get( IO.class );
 	public static final String PATH_SEPERATOR = File.separator;
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 	private static final int EOF = -1;
@@ -492,7 +492,7 @@ public class LibIO
 
 	public static void extractResourceDirectory( String path, File dest ) throws IOException
 	{
-		extractResourceDirectory( path, dest, LibIO.class );
+		extractResourceDirectory( path, dest, IO.class );
 	}
 
 	public static void extractResourceDirectory( @NotNull String path, @NotNull File dest, @NotNull Class<?> clazz ) throws IOException
@@ -504,7 +504,7 @@ public class LibIO
 		dest = dest.getAbsoluteFile();
 
 		if ( !dest.isDirectory() )
-			throw new IOException( "Specified dest '" + LibIO.relPath( dest ) + "' is not a directory or does not exist." );
+			throw new IOException( "Specified dest '" + IO.relPath( dest ) + "' is not a directory or does not exist." );
 
 		final File jarFile = new File( clazz.getProtectionDomain().getCodeSource().getLocation().getPath() );
 
@@ -539,7 +539,7 @@ public class LibIO
 					final File dir = new File( url.toURI() );
 
 					if ( !dir.isDirectory() )
-						throw new IOException( "Specified resource path '" + LibIO.relPath( dir ) + "' is not a directory." );
+						throw new IOException( "Specified resource path '" + IO.relPath( dir ) + "' is not a directory." );
 
 					for ( File file : dir.listFiles() )
 						copy( file, new File( dest, file.getName() ) );
@@ -554,7 +554,7 @@ public class LibIO
 
 	public static boolean extractResourceZip( String path, File dest ) throws IOException
 	{
-		return extractResourceZip( path, dest, LibIO.class );
+		return extractResourceZip( path, dest, IO.class );
 	}
 
 	public static boolean extractResourceZip( String path, File dest, Class<?> clz ) throws IOException
@@ -751,7 +751,7 @@ public class LibIO
 
 	public static void putResource( String resource, File file ) throws IOException
 	{
-		putResource( LibIO.class, resource, file );
+		putResource( IO.class, resource, file );
 	}
 
 	public static List<String> readFileToLines( @NotNull File file, @NotNull String ignorePrefix ) throws FileNotFoundException
@@ -916,7 +916,7 @@ public class LibIO
 
 	public static String resourceToString( String resource ) throws IOException
 	{
-		return resourceToString( resource, LibIO.class );
+		return resourceToString( resource, IO.class );
 	}
 
 	public static String resourceToString( String resource, Class<?> clz ) throws IOException
@@ -1016,7 +1016,7 @@ public class LibIO
 		}
 	}
 
-	private LibIO()
+	private IO()
 	{
 
 	}

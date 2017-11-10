@@ -38,8 +38,8 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 	public final <T extends Parcelable> T getCreator( Parcelable.Creator<T> creator, ClassLoader loader )
 	{
 		if ( creator instanceof Parcelable.ClassLoaderCreator<?> )
-			return ( ( Parcelable.ClassLoaderCreator<T> ) creator ).createFromParcel( this, loader );
-		return creator.createFromParcel( this );
+			return ( ( Parcelable.ClassLoaderCreator<T> ) creator ).readFromParcel( this, loader );
+		return creator.readFromParcel( this );
 	}
 
 	public final <T extends Parcelable> T getParcelable( String key, ClassLoader loader )
@@ -48,8 +48,8 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 		if ( creator == null )
 			return null;
 		if ( creator instanceof Parcelable.ClassLoaderCreator<?> )
-			return ( ( Parcelable.ClassLoaderCreator<T> ) creator ).createFromParcel( this, loader );
-		return creator.createFromParcel( this );
+			return ( ( Parcelable.ClassLoaderCreator<T> ) creator ).readFromParcel( this, loader );
+		return creator.readFromParcel( this );
 	}
 
 	public final <T extends Parcelable> Parcelable.Creator<T> getParcelableCreator( String key, ClassLoader loader )

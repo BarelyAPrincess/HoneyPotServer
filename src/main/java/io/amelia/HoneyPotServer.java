@@ -70,7 +70,7 @@ public class HoneyPotServer extends DefaultApplication
 	}
 
 	@Override
-	public void onTick( int currentTick, float averageTick ) throws ApplicationException
+	protected void onTick( int currentTick, float averageTick ) throws ApplicationException
 	{
 		super.onTick( currentTick, averageTick );
 

@@ -170,7 +170,7 @@ public class Info
 		}
 		finally
 		{
-			LibIO.closeQuietly( is );
+			IO.closeQuietly( is );
 		}
 	}
 }

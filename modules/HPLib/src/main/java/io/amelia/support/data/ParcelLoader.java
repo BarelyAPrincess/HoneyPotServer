@@ -3,7 +3,7 @@ package io.amelia.support.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.amelia.support.LibEncrypt;
-import io.amelia.support.LibIO;
+import io.amelia.support.IO;
 import io.amelia.support.Maps;
 import io.amelia.support.data.yaml.YamlConstructor;
 import io.amelia.support.data.yaml.YamlRepresenter;
@@ -37,12 +37,12 @@ public class ParcelLoader
 
 	public static StackerWithValue<?, Object> decodeJson( File file ) throws IOException
 	{
-		return decodeJson( LibIO.readFileToString( file ) );
+		return decodeJson( IO.readFileToString( file ) );
 	}
 
 	public static StackerWithValue<?, Object> decodeJson( InputStream inputStream ) throws IOException
 	{
-		return decodeJson( LibIO.readStreamToString( inputStream ) );
+		return decodeJson( IO.readStreamToString( inputStream ) );
 	}
 
 	public static Map<String, Object> decodeJsonToMap( String jsonEncoded )
@@ -52,17 +52,17 @@ public class ParcelLoader
 
 	public static Map<String, Object> decodeJsonToMap( File file ) throws IOException
 	{
-		return Maps.builder().putAll( ( Map<?, ?> ) gson.fromJson( LibIO.readFileToString( file ), Map.class ) ).castTo( String.class, Object.class ).hashMap();
+		return Maps.builder().putAll( ( Map<?, ?> ) gson.fromJson( IO.readFileToString( file ), Map.class ) ).castTo( String.class, Object.class ).hashMap();
 	}
 
 	public static Map<String, Object> decodeJsonToMap( InputStream inputStream ) throws IOException
 	{
-		return Maps.builder().putAll( ( Map<?, ?> ) gson.fromJson( LibIO.readStreamToString( inputStream ), Map.class ) ).castTo( String.class, Object.class ).hashMap();
+		return Maps.builder().putAll( ( Map<?, ?> ) gson.fromJson( IO.readStreamToString( inputStream ), Map.class ) ).castTo( String.class, Object.class ).hashMap();
 	}
 
 	public static Map<String, Object> decodeListToMap( InputStream inputStream )
 	{
-		return decodeListToMap( LibIO.readStreamToLines( inputStream, "#" ) );
+		return decodeListToMap( IO.readStreamToLines( inputStream, "#" ) );
 	}
 
 	public static Map<String, Object> decodeListToMap( List<String> encodedList )
@@ -72,7 +72,7 @@ public class ParcelLoader
 
 	public static Map<String, Object> decodeListToMap( File file ) throws FileNotFoundException
 	{
-		return decodeListToMap( LibIO.readFileToLines( file, "#" ) );
+		return decodeListToMap( IO.readFileToLines( file, "#" ) );
 	}
 
 	public static StackerWithValue<?, Object> decodeMap( Map<String, Object> mapEncoded )
@@ -128,12 +128,12 @@ public class ParcelLoader
 
 	public static StackerWithValue<?, Object> decodeYaml( File file ) throws IOException
 	{
-		return decodeYaml( LibIO.readFileToString( file ) );
+		return decodeYaml( IO.readFileToString( file ) );
 	}
 
 	public static StackerWithValue<?, Object> decodeYaml( InputStream inputStream ) throws IOException
 	{
-		return decodeYaml( LibIO.readStreamToString( inputStream ) );
+		return decodeYaml( IO.readStreamToString( inputStream ) );
 	}
 
 	public static StackerWithValue<?, Object> decodeYaml( String yamlEncoded )
@@ -148,12 +148,12 @@ public class ParcelLoader
 
 	public static Map<String, Object> decodeYamlToMap( File file ) throws IOException
 	{
-		return Maps.builder().putAll( ( Map<?, ?> ) yaml.load( LibIO.readFileToString( file ) ) ).castTo( String.class, Object.class ).hashMap();
+		return Maps.builder().putAll( ( Map<?, ?> ) yaml.load( IO.readFileToString( file ) ) ).castTo( String.class, Object.class ).hashMap();
 	}
 
 	public static Map<String, Object> decodeYamlToMap( InputStream inputStream ) throws IOException
 	{
-		return Maps.builder().putAll( ( Map<?, ?> ) yaml.load( LibIO.readStreamToString( inputStream ) ) ).castTo( String.class, Object.class ).hashMap();
+		return Maps.builder().putAll( ( Map<?, ?> ) yaml.load( IO.readStreamToString( inputStream ) ) ).castTo( String.class, Object.class ).hashMap();
 	}
 
 	/* public static void encodeXml( StackerWithValue<?, Object> encoded )

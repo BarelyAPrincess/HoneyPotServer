@@ -16,7 +16,7 @@ import io.amelia.foundation.Kernel;
 import io.amelia.lang.EnumColor;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
-import io.amelia.support.LibIO;
+import io.amelia.support.IO;
 import io.amelia.logcompat.LogBuilder;
 import org.apache.commons.lang3.Validate;
 
@@ -51,11 +51,11 @@ public class Libraries implements LibrarySource
 
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
-		if ( !LibIO.setDirectoryAccess( LIBRARY_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + LibIO.relPath( LIBRARY_DIR ) + "\"!" );
+		if ( !IO.setDirectoryAccess( LIBRARY_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + IO.relPath( LIBRARY_DIR ) + "\"!" );
 
-		if ( !LibIO.setDirectoryAccess( INCLUDES_DIR ) )
-			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + LibIO.relPath( INCLUDES_DIR ) + "\"!" );
+		if ( !IO.setDirectoryAccess( INCLUDES_DIR ) )
+			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + IO.relPath( INCLUDES_DIR ) + "\"!" );
 
 		Arrays.stream( INCLUDES_DIR.listFiles() ).filter(  )
 

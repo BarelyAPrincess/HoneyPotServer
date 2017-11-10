@@ -448,6 +448,20 @@ public abstract class StackerBase<B extends StackerBase<B>>
 			throwExceptionIgnorable( getCurrentPath() + " has " + flag.name() + " flag." );
 	}
 
+	/**
+	 * Polls a child from this stacker. If it exists, it's removed from it's parent.
+	 *
+	 * @param key The child key
+	 * @return found instance or null if does not exist.
+	 */
+	public B pollChild( String key )
+	{
+		B child = getChild( key );
+		if ( child != null )
+			child.removeFromParent();
+		return child;
+	}
+
 	public final void removeAllListeners()
 	{
 		listeners.clear();

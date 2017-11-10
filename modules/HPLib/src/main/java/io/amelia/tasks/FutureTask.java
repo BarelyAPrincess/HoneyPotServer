@@ -20,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 
 class FutureTask<T> extends Task implements Future<T>
 {
-
 	private final Callable<T> callable;
 	private Exception exception = null;
 	private T value;

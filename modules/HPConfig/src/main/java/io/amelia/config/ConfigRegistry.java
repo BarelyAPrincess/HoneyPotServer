@@ -1,19 +1,6 @@
 package io.amelia.config;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.env.Env;
-import io.amelia.foundation.ApplicationInterface;
-import io.amelia.foundation.Kernel;
-import io.amelia.foundation.binding.AppBindings;
-import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ConfigException;
-import io.amelia.support.Arrs;
-import io.amelia.support.LibIO;
-import io.amelia.support.Lists;
-import io.amelia.support.Objs;
-import io.amelia.support.Strs;
-import io.amelia.support.data.ParcelLoader;
-import io.amelia.support.data.ValueTypesOutline;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,16 +8,28 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class ConfigRegistry implements ValueTypesOutline
+import io.amelia.env.Env;
+import io.amelia.foundation.ApplicationInterface;
+import io.amelia.foundation.Kernel;
+import io.amelia.foundation.binding.AppBindings;
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ConfigException;
+import io.amelia.support.Arrs;
+import io.amelia.support.IO;
+import io.amelia.support.Lists;
+import io.amelia.support.Objs;
+import io.amelia.support.Strs;
+import io.amelia.support.data.ParcelLoader;
+
+public class ConfigRegistry
 {
+	public static final ConfigMap config = new ConfigMap();
 	private static final Map<String, List<String>> appPaths = new ConcurrentHashMap<>();
-	private static File appPath = LibIO.buildFile( true );
+	private static File appPath = IO.buildFile( true );
 	private static File configFile = null;
-	private static ConfigMap node = new ConfigMap();
 
 	public static void clearCache( @NotNull File path, @NotNull long keepHistory )
 	{
@@ -72,12 +71,12 @@ public class ConfigRegistry implements ValueTypesOutline
 
 	public static ConfigMap getChild( String key )
 	{
-		return node.getChild( key );
+		return config.getChild( key );
 	}
 
 	public static ConfigMap getChildOrCreate( String key )
 	{
-		return node.getChildOrCreate( key );
+		return config.getChildOrCreate( key );
 	}
 
 	public static File getPath( @NotNull String slug )
@@ -148,7 +147,7 @@ public class ConfigRegistry implements ValueTypesOutline
 		else if ( !slugs[0].startsWith( "/" ) )
 			slugs = Arrs.prepend( slugs, getPath().toString() );
 
-		File path = LibIO.buildFile( true, slugs );
+		File path = IO.buildFile( true, slugs );
 
 		if ( createPath && !path.exists() )
 			if ( !path.mkdirs() )
@@ -164,7 +163,7 @@ public class ConfigRegistry implements ValueTypesOutline
 
 	public static void init( Env env ) throws ConfigException.Error
 	{
-		appPath = LibIO.buildFile( true, env.getString( "app-dir" ) );
+		appPath = IO.buildFile( true, env.getString( "app-dir" ) );
 		// for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
 		// setPath( key, Strs.split( env.getString( "dir-" + key ), "/" ).toArray( String[]::new ) );
 
@@ -172,7 +171,7 @@ public class ConfigRegistry implements ValueTypesOutline
 
 		loadConfig();
 
-		ConfigMap envNode = node.getChild( "env" );
+		ConfigMap envNode = config.getChild( "env" );
 		for ( Map.Entry<String, Object> entry : env.map().entrySet() )
 			envNode.setValue( entry.getKey(), entry.getValue() );
 		envNode.addFlag( ConfigMap.Flag.READ_ONLY, ConfigMap.Flag.NO_SAVE );
@@ -183,11 +182,11 @@ public class ConfigRegistry implements ValueTypesOutline
 	private static void loadConfig( @NotNull File configPath, @NotNull String nestingPrefix ) throws ConfigException.Error
 	{
 		if ( configPath == null || !configPath.isDirectory() )
-			throw new ConfigException.Error( node, "Provided configPath is not a directory." );
+			throw new ConfigException.Error( config, "Provided configPath is not a directory." );
 
 		for ( File file : configPath.listFiles() )
 		{
-			String nesting = Strs.join( new String[] {nestingPrefix, LibIO.dirname( file )}, "." );
+			String nesting = Strs.join( new String[] {nestingPrefix, IO.dirname( file )}, "." );
 
 			try
 			{
@@ -199,7 +198,7 @@ public class ConfigRegistry implements ValueTypesOutline
 			}
 			catch ( Exception e )
 			{
-				throw new ConfigException.Error( node, "Failed to load configuration file " + LibIO.relPath( file ), e );
+				throw new ConfigException.Error( config, "Failed to load configuration file " + IO.relPath( file ), e );
 			}
 		}
 	}
@@ -215,7 +214,7 @@ public class ConfigRegistry implements ValueTypesOutline
 			return;
 
 		Map<String, Object> map;
-		ConfigMap child = node.getChildOrCreate( nesting );
+		ConfigMap child = config.getChildOrCreate( nesting );
 		String name = file.getName().toLowerCase();
 
 		try
@@ -229,7 +228,7 @@ public class ConfigRegistry implements ValueTypesOutline
 			else if ( name.endsWith( ".properties" ) )
 				map = ParcelLoader.decodePropToMap( file );
 			else
-				throw new ConfigException.Ignorable( null, "Could not parse file " + LibIO.relPath( file ) );
+				throw new ConfigException.Ignorable( null, "Could not parse file " + IO.relPath( file ) );
 
 			// TODO Add more supported types, .e.g., `.groovy` using the ScriptingFactory.
 		}
@@ -249,9 +248,9 @@ public class ConfigRegistry implements ValueTypesOutline
 	public static void setObject( String key, Object value )
 	{
 		if ( value instanceof ConfigMap )
-			node.setChild( key, ( ConfigMap ) value, false );
+			config.setChild( key, ( ConfigMap ) value, false );
 		else
-			node.setValue( key, value );
+			config.setValue( key, value );
 	}
 
 	public static void setPath( @NotNull String pathKey, @NotNull String... paths )
@@ -277,31 +276,16 @@ public class ConfigRegistry implements ValueTypesOutline
 
 		File configPath = getPath( ApplicationInterface.PATH_CONFIG, true );
 
-		LibIO.extractResourceDirectory( "config", configPath, ConfigRegistry.class );
+		IO.extractResourceDirectory( "config", configPath, ConfigRegistry.class );
 	}
 
 	public static boolean warnOnOverload()
 	{
-		return node.isTrue( "general.warnOnOverload" );
+		return config.isTrue( "general.warnOnOverload" );
 	}
 
-	/**
-	 * Keep ConfigRegistry a pure static class
-	 */
 	private ConfigRegistry()
 	{
-
-	}
-
-	@Override
-	public Optional<?> getValue( String key )
-	{
-		return node.getValue( key );
-	}
-
-	@Override
-	public Optional<?> getValue()
-	{
-		return Optional.empty();
+		// Static Access
 	}
 }

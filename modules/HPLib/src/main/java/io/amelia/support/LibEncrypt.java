@@ -170,7 +170,7 @@ public class LibEncrypt
 
 	public static byte[] md5( InputStream is ) throws IOException
 	{
-		return getDigest( MD5 ).digest( LibIO.readStreamToBytes( is ) );
+		return getDigest( MD5 ).digest( IO.readStreamToBytes( is ) );
 	}
 
 	public static byte[] md5( final String str )
@@ -185,7 +185,7 @@ public class LibEncrypt
 
 	public static String md5Hex( InputStream is ) throws IOException
 	{
-		return md5Hex( LibIO.readStreamToString( is ) );
+		return md5Hex( IO.readStreamToString( is ) );
 	}
 
 	public static String md5Hex( String str )

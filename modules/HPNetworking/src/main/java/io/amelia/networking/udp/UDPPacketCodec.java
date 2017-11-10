@@ -3,7 +3,7 @@ package io.amelia.networking.udp;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.packets.RawPacket;
-import io.amelia.support.LibIO;
+import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Timings;
 import io.netty.buffer.ByteBuf;
@@ -30,7 +30,7 @@ public class UDPPacketCodec extends MessageToMessageCodec<DatagramPacket, RawPac
 		if ( payload == null )
 			throw new NetworkException( msg.getClass().getSimpleName() + " had no payload. Is this a bug?" );
 
-		byte[] bytes = LibIO.readByteBufferToBytes( payload.nioBuffer() );
+		byte[] bytes = IO.readByteBufferToBytes( payload.nioBuffer() );
 		out.add( new DatagramPacket( bytes, bytes.length, ( ( UDPHandler ) ctx.pipeline().get( "handler" ) ).getInetSocketAddress() ) );
 
 		msg.sentTime = Timings.epoch();
@@ -42,7 +42,7 @@ public class UDPPacketCodec extends MessageToMessageCodec<DatagramPacket, RawPac
 	{
 		ByteBuf buffer = Unpooled.wrappedBuffer( msg.getData() );
 
-		Class<? extends RawPacket> packetClass = NetworkLoader.getPacketClass( LibIO.readByteBufferToString( buffer.nioBuffer(), 32 ) ).orElse( null );
+		Class<? extends RawPacket> packetClass = NetworkLoader.getPacketClass( IO.readByteBufferToString( buffer.nioBuffer(), 32 ) ).orElse( null );
 		RawPacket packet = packetClass == null ? null : Objs.initClass( packetClass );
 
 		if ( packet == null )

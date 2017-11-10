@@ -28,10 +28,13 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MapCollisionException;
@@ -52,7 +55,7 @@ public class Maps
 		{{
 			for ( Map.Entry<String, T> entry : map.entrySet() )
 			{
-				if ( LibMath.isNumber( entry.getKey() ) )
+				if ( Maths.isNumber( entry.getKey() ) )
 					put( Integer.parseInt( entry.getKey() ), entry.getValue() );
 			}
 		}};
@@ -277,7 +280,46 @@ public class Maps
 		return oldSize != map.size();
 	}
 
-	public static <K, V> boolean retainAll( Map<K, V> map, Collection<?> collection )
+	/**
+	 * Removes all of the elements of map that satisfy the given predicate.
+	 * Errors or runtime exceptions thrown during iteration or by the predicate
+	 * are relayed to the caller.
+	 *
+	 * @param map    the map we try to remove from
+	 * @param filter a predicate which returns {@code true} for elements to be removed
+	 * @return {@code true} if any elements were removed
+	 * @throws NullPointerException          if the specified map or filter is null
+	 * @throws UnsupportedOperationException if elements cannot be removed from this collection.
+	 *                                       Implementations may throw this exception if a
+	 *                                       matching element cannot be removed or if, in general, removal is not
+	 *                                       supported.
+	 * @implSpec The default implementation traverses all elements of the collection using
+	 * its {@link Set#iterator} method. Each matching element is removed using
+	 * {@link Iterator#remove()}. If the collection's iterator does not
+	 * support removal then an {@code UnsupportedOperationException} will be
+	 * thrown on the first matching element.
+	 * @since 1.8
+	 */
+	public static <K, V> boolean removeIf( @Nonnull Map<K, V> map, @Nonnull BiPredicate<K, V> filter )
+	{
+		Objs.notNull( map );
+		Objs.notNull( filter );
+
+		boolean removed = false;
+		final Iterator<Map.Entry<K, V>> each = map.entrySet().iterator();
+		while ( each.hasNext() )
+		{
+			Map.Entry<K, V> next = each.next();
+			if ( filter.test( next.getKey(), next.getValue() ) )
+			{
+				each.remove();
+				removed = true;
+			}
+		}
+		return removed;
+	}
+
+	public static <K, V> boolean retainAll( @Nonnull Map<K, V> map, @Nonnull Collection<?> collection )
 	{
 		int oldSize = map.size();
 		Iterator<K> it = map.keySet().iterator();

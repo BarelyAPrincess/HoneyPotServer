@@ -1,5 +1,12 @@
 package io.amelia.foundation;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+
 import io.amelia.config.ConfigRegistry;
 import io.amelia.env.Env;
 import io.amelia.lang.ApplicationException;
@@ -8,20 +15,13 @@ import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
+import io.amelia.support.IO;
 import io.amelia.support.Info;
 import io.amelia.support.LibEncrypt;
-import io.amelia.support.LibIO;
 import io.amelia.support.Objs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
 
 public abstract class ApplicationInterface implements VendorRegistrar, ExceptionContext
 {
@@ -32,6 +32,8 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	public static final String PATH_PLUGINS = "__plugins";
 	public static final String PATH_UPDATES = "__updates";
 	public static final String PATH_STORAGE = "__storage";
+	// Main Looper runs on the main thread, i.e., the thread that started the Kernel
+	private final Looper mainLooper;
 	private final OptionParser optionParser = new OptionParser();
 	private Env env = null;
 	private OptionSet optionSet = null;
@@ -44,6 +46,8 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		ConfigRegistry.setPath( PATH_PLUGINS, PATH_APP, "plugins" );
 		ConfigRegistry.setPath( PATH_UPDATES, PATH_APP, "updates" );
 		ConfigRegistry.setPath( PATH_STORAGE, PATH_APP, "storage" );
+
+		mainLooper = new Looper( Looper.Flag.SYSTEM );
 
 		optionParser.acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
 		optionParser.acceptsAll( Arrays.asList( "v", "version" ), "Show the version" );
@@ -68,15 +72,25 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			throw new ApplicationException.Runtime( ReportingLevel.E_ERROR, "parse( String[] ) was never called." );
 	}
 
-	public String getId()
+	void dispose()
 	{
-		return env.getString( "applicationId" );
+
 	}
 
 	public Env getEnv()
 	{
 		checkOptionSet();
 		return env;
+	}
+
+	public String getId()
+	{
+		return env.getString( "applicationId" );
+	}
+
+	public Looper getMainLooper()
+	{
+		return mainLooper;
 	}
 
 	public OptionParser getOptionParser()
@@ -117,9 +131,12 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		return optionSet.hasArgument( arg );
 	}
 
-	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException;
+	public boolean isMainThread()
+	{
+		return mainLooper.isCurrentThread();
+	}
 
-	public abstract void onTick( int currentTick, float averageTick ) throws ApplicationException;
+	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException;
 
 	/**
 	 * Handles internal argument options and triggers, such as
@@ -152,7 +169,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		try
 		{
 			/* Load env file -- Can be set with arg `--env-file=.env` */
-			File envFile = LibIO.buildFile( true, ( String ) optionSet.valueOf( "env-file" ) );
+			File envFile = IO.buildFile( true, ( String ) optionSet.valueOf( "env-file" ) );
 			env = new Env( envFile );
 
 			/* Override defaults and env with command args */
@@ -174,6 +191,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		{
 			throw new StartupException( e );
 		}
+	}
+
+	void shutdown()
+	{
+		mainLooper.quitSafely();
 	}
 
 	public void throwStartupException( Exception e ) throws StartupException

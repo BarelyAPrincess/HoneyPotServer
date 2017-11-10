@@ -1,4 +1,4 @@
-package io.amelia.android;
+package io.amelia.foundation;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -14,29 +14,27 @@ import javax.annotation.Nonnull;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.Objs;
-import io.amelia.synchronize.LooperFactory;
-import io.amelia.synchronize.Message;
 
 public abstract class AsyncTask<Params, Progress, Result>
 {
 	private static final Logger L = LogBuilder.get( AsyncTask.class );
 	private static final int MESSAGE_POST_PROGRESS = 0x2;
 	private static final int MESSAGE_POST_RESULT = 0x1;
-	private static Handler sHandler;
+	private static LooperReceiver sHandler;
 
-	private static Handler getHandler()
+	private static LooperReceiver getHandler()
 	{
 		synchronized ( AsyncTask.class )
 		{
 			if ( sHandler == null )
-				sHandler = new Handler( LooperFactory.getMainLooper() )
+				sHandler = new LooperReceiver( Kernel.getApplication().getMainLooper() )
 				{
 					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override
-					public void handleMessage( Message msg )
+					public void handleMessage( InternalMessage msg )
 					{
-						AsyncTaskResult<?> result = ( AsyncTaskResult<?> ) msg.obj;
-						switch ( msg.what )
+						AsyncTaskResult<?> result = ( AsyncTaskResult<?> ) msg.getPayload();
+						switch ( msg.getCode() )
 						{
 							case MESSAGE_POST_RESULT:
 								// There is only one result
@@ -226,7 +224,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 */
 	public final AsyncTask<Params, Progress, Result> executeParallel( Params... params )
 	{
-		return execute( LooperFactory.getExecutorParallel(), params );
+		return execute( Kernel.getExecutorParallel(), params );
 	}
 
 	/**
@@ -244,7 +242,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 */
 	public final AsyncTask<Params, Progress, Result> executeSerial( Params... params )
 	{
-		return execute( LooperFactory.getExecutorSerial(), params );
+		return execute( Kernel.getExecutorSerial(), params );
 	}
 
 	private void finish( Result result )
@@ -389,7 +387,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private Result postResult( Result result )
 	{
 		@SuppressWarnings( "unchecked" )
-		Message message = getHandler().obtainMessage( MESSAGE_POST_RESULT, new AsyncTaskResult<Result>( this, result ) );
+		InternalMessage message = getHandler().obtainMessage( MESSAGE_POST_RESULT, new AsyncTaskResult<Result>( this, result ) );
 		message.sendToTarget();
 		return result;
 	}

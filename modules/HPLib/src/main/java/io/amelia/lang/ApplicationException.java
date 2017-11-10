@@ -56,6 +56,20 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		return new Error( ReportingLevel.E_NOTICE, message );
 	}
 
+	public static Runtime runtime( String message )
+	{
+		return new Runtime( ReportingLevel.E_USER_ERROR, message );
+	}
+
+	public static Runtime runtime( Throwable cause )
+	{
+		return new Runtime( ReportingLevel.E_USER_ERROR, cause );
+	}
+
+	public static Runtime runtime( String message, Throwable cause )
+	{
+		return new Runtime( ReportingLevel.E_USER_ERROR, message, cause );
+	}
 	protected final ReportingLevel level;
 
 	public ApplicationException( ReportingLevel level )

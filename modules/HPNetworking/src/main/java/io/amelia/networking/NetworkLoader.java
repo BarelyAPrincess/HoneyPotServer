@@ -1,14 +1,7 @@
 package io.amelia.networking;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.amelia.lang.NetworkException;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
-import io.amelia.networking.packets.RawPacket;
-import io.amelia.networking.udp.UDPWorker;
-import io.amelia.support.Objs;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Security;
@@ -20,6 +13,15 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
+
+import io.amelia.lang.NetworkException;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.logcompat.Logger;
+import io.amelia.networking.packets.RawPacket;
+import io.amelia.networking.udp.UDPWorker;
+import io.amelia.support.Objs;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 
 public class NetworkLoader
 {

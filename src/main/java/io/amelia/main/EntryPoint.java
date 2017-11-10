@@ -1,11 +1,10 @@
 package io.amelia.main;
 
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.application.RunlevelEvent;
-import io.amelia.foundation.ApplicationOptions;
 import io.amelia.HoneyPotServer;
+import io.amelia.events.EventDispatcher;
+import io.amelia.events.Events;
+import io.amelia.events.application.RunlevelEvent;
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.binding.BindingRegistry;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
@@ -20,9 +19,9 @@ public class EntryPoint
 		/* Prepare the environment by downloading and applying the builtin libraries required */
 		Kernel.prepare();
 
-		/* Specify and get the ApplicationInterface for this environment. */
-		Kernel.setApplicationInterface( HoneyPotServer.class );
-		HoneyPotServer app = Kernel.getApplication();
+		/* Specify the ApplicationInterface for this environment. */
+		HoneyPotServer app = new HoneyPotServer();
+		Kernel.setApplication( app );
 
 		try
 		{
@@ -39,8 +38,7 @@ public class EntryPoint
 		/* Load up Network UDP Driver */
 		final UDPWorker udp = NetworkLoader.UDP().get();
 
-		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) ->
-		{
+		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) -> {
 			/* Start the Networking */
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{

@@ -56,8 +56,8 @@ public class LibHttp
 		}
 		finally
 		{
-			LibIO.closeQuietly( rbc );
-			LibIO.closeQuietly( fos );
+			IO.closeQuietly( rbc );
+			IO.closeQuietly( fos );
 		}
 	}
 
@@ -136,7 +136,7 @@ public class LibHttp
 			if ( responseFamily == 2 )
 			{
 				stream = conn.getInputStream();
-				LibIO.closeQuietly( stream );
+				IO.closeQuietly( stream );
 				return true;
 			}
 			else
@@ -148,7 +148,7 @@ public class LibHttp
 		}
 		finally
 		{
-			LibIO.closeQuietly( stream );
+			IO.closeQuietly( stream );
 		}
 	}
 
@@ -183,7 +183,7 @@ public class LibHttp
 		}
 		finally
 		{
-			LibIO.closeQuietly( wr );
+			IO.closeQuietly( wr );
 		}
 
 		BufferedReader in = new BufferedReader( new InputStreamReader( con.getInputStream() ) );
@@ -198,7 +198,7 @@ public class LibHttp
 		}
 		finally
 		{
-			LibIO.closeQuietly( in );
+			IO.closeQuietly( in );
 		}
 
 		return response.toString();

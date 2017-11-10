@@ -1,6 +1,6 @@
 package io.amelia.support;
 
-public class LibMath
+public class Maths
 {
 	/**
 	 * Returns the sum of the two parameters, or throws an exception if the resulting sum would

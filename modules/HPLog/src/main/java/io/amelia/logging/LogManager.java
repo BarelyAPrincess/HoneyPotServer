@@ -22,21 +22,9 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class LogManager implements TaskRegistrar
 {
-	static class LogReference extends WeakReference<Object>
-	{
-		final String key;
-		final LogRecord record;
-
-		LogReference( String key, LogRecord record, Object garbage )
-		{
-			super( garbage, referenceQueue );
-			this.key = key;
-			this.record = record;
-		}
-	}
+	public static final LogManager INSTANCE = new LogManager();
+	private static final ConcurrentMap<String, LogReference> activeLogs = Maps.newConcurrentMap();
 	private static final ReferenceQueue<Object> referenceQueue = new ReferenceQueue<Object>();
-
-	private static final ConcurrentMap<String, LogReference> activeLogs = Maps.newConcurrentMap();	public static final LogManager INSTANCE = new LogManager();
 
 	public static void close( LogEvent log )
 	{
@@ -61,11 +49,11 @@ public class LogManager implements TaskRegistrar
 			@Override
 			public void run()
 			{
-				for ( ;; )
+				for ( ; ; )
 					try
 					{
 						LogReference ref = ( LogReference ) referenceQueue.remove();
-						for ( ;; )
+						for ( ; ; )
 						{
 							activeLogs.remove( ref.key );
 							ref.record.flush();
@@ -90,5 +78,18 @@ public class LogManager implements TaskRegistrar
 	public boolean isEnabled()
 	{
 		return true;
+	}
+
+	static class LogReference extends WeakReference<Object>
+	{
+		final String key;
+		final LogRecord record;
+
+		LogReference( String key, LogRecord record, Object garbage )
+		{
+			super( garbage, referenceQueue );
+			this.key = key;
+			this.record = record;
+		}
 	}
 }

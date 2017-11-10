@@ -12,7 +12,10 @@ package io.amelia.support;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.Kernel;
+
+import org.joda.time.Duration;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.awt.Color;
 import java.io.UnsupportedEncodingException;
@@ -42,6 +45,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.amelia.foundation.Kernel;
 
 public class Strs
 {
@@ -320,6 +325,13 @@ public class Strs
 		}
 
 		return var;
+	}
+
+	public static String formatDuration( long l )
+	{
+		Duration duration = new Duration( l );
+		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
+		return formatter.print( duration.toPeriod() );
 	}
 
 	public static boolean isCamelCase( String var )

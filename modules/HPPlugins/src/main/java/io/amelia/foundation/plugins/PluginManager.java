@@ -23,7 +23,7 @@ import io.amelia.lang.PluginNotFoundException;
 import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
-import io.amelia.support.LibIO;
+import io.amelia.support.IO;
 import io.amelia.tasks.TaskDispatcher;
 
 import java.io.File;
@@ -70,7 +70,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 			return;
 
 		File updateFile = new File( ConfigRegistry.getPath( ApplicationInterface.PATH_UPDATES ), file.getName() );
-		if ( updateFile.isFile() && LibIO.copy( updateFile, file ) )
+		if ( updateFile.isFile() && IO.copy( updateFile, file ) )
 			updateFile.delete();
 	}
 

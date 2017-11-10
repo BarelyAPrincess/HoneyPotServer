@@ -28,16 +28,12 @@ public enum Runlevel
 	 */
 	NETWORKING,
 	/**
-	 * Indicates the application had entered client mode.
+	 * Indicates the application has started.
 	 */
-	CLIENT,
-	/**
-	 * Indicates the application has entered daemon mode.
-	 */
-	DAEMON,
+	STARTED,
 	/**
 	 * Indicates the application is reloading.
-	 * TODO Not Implemented - Needs to disconnect from cluster, unload managers and dispatchers, then reload plugins.
+	 * TODO Not Implemented - Needs to disconnect from cluster, unload managers and dispatchers, then reload everything.
 	 */
 	RELOAD,
 	/**
@@ -72,12 +68,11 @@ public enum Runlevel
 				return currentRunlevel == STARTUP;
 			case NETWORKING:
 				return currentRunlevel == MAINLOOP;
-			case CLIENT:
-			case DAEMON:
+			case STARTED:
 				return currentRunlevel == NETWORKING;
 			case RELOAD:
 			case SHUTDOWN:
-				return currentRunlevel == DAEMON || currentRunlevel == CLIENT;
+				return currentRunlevel == STARTED;
 			case DISPOSED:
 				return currentRunlevel == SHUTDOWN;
 		}

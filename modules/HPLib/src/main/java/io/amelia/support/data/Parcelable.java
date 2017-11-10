@@ -10,41 +10,33 @@ package io.amelia.support.data;
  * <p>
  * <pre>
  * public class MyParcelable implements Parcelable {
- *     private int mData;
+ *    public static final Parcelable.Creator&lt;MyParcelable&gt; CREATOR = new Parcelable.Creator&lt;MyParcelable&gt;() {
+ *       &at;Override
+ *       public MyParcelable readFromParcel( Parcel in ) {
+ *          return new MyParcelable( in );
+ *       }
  *
- *     public int describeContents() {
- *         return 0;
- *     }
+ *       &at;Override
+ *       public MyParcelable[] newArray( int size ) {
+ *          return new MyParcelable[size];
+ *       }
  *
- *     public void writeToParcel(Parcel out, int flags) {
- *         out.writeInt(mData);
- *     }
+ *       &at;Override
+ *       public void writeToParcel( MyParcelable obj, Parcel out ) {
+ *          out.setValue( "mData", obj.mData );
+ *       }
+ *    };
  *
- *     public static final Parcelable.Creator&lt;MyParcelable&gt; CREATOR
- *             = new Parcelable.Creator&lt;MyParcelable&gt;() {
- *         public MyParcelable createFromParcel(Parcel in) {
- *             return new MyParcelable(in);
- *         }
+ *    private int mData;
  *
- *         public MyParcelable[] newArray(int size) {
- *             return new MyParcelable[size];
- *         }
- *     };
- *
- *     private MyParcelable(Parcel in) {
- *         mData = in.readInt();
- *     }
- * }</pre>
+ *    private MyParcelable( Parcel in ) {
+ *       mData = in.getInteger( "mData" ).orElseThrow( () -> ApplicationException.runtime( "Key 'mData' does not exist! Are you sure this Parcel was created from MyParcelable?" ) );
+ *    }
+ * }
+ * </pre>
  */
 public interface Parcelable
 {
-	/**
-	 * Flatten this object in to a Parcel.
-	 *
-	 * @param dest The Parcel in which the object should be written.
-	 */
-	void writeToParcel( Parcel dest );
-
 	/**
 	 * Specialization of {@link Creator} that allows you to receive the
 	 * ClassLoader the object is being created in.
@@ -54,14 +46,14 @@ public interface Parcelable
 		/**
 		 * Create a new instance of the Parcelable class, instantiating it
 		 * from the given Parcel whose data had previously been written by
-		 * {@link Parcelable#writeToParcel Parcelable.writeToParcel()} and
+		 * {@link Creator#writeToParcel Parcelable.writeToParcel()} and
 		 * using the given ClassLoader.
 		 *
-		 * @param source The Parcel to read the object's data from.
+		 * @param in     The Parcel to read the object's data from.
 		 * @param loader The ClassLoader that this object is being created in.
 		 * @return Returns a new instance of the Parcelable class.
 		 */
-		T createFromParcel( Parcel source, ClassLoader loader );
+		T readFromParcel( Parcel in, ClassLoader loader );
 	}
 
 	/**
@@ -71,16 +63,6 @@ public interface Parcelable
 	interface Creator<T>
 	{
 		/**
-		 * Create a new instance of the Parcelable class, instantiating it
-		 * from the given Parcel whose data had previously been written by
-		 * {@link Parcelable#writeToParcel Parcelable.writeToParcel()}.
-		 *
-		 * @param source The Parcel to read the object's data from.
-		 * @return Returns a new instance of the Parcelable class.
-		 */
-		T createFromParcel( Parcel source );
-
-		/**
 		 * Create a new array of the Parcelable class.
 		 *
 		 * @param size Size of the array.
@@ -88,5 +70,23 @@ public interface Parcelable
 		 * initialized to null.
 		 */
 		T[] newArray( int size );
+
+		/**
+		 * Create a new instance of the Parcelable class, instantiating it
+		 * from the given Parcel whose data had previously been written by
+		 * {@link Creator#writeToParcel Parcelable.writeToParcel()}.
+		 *
+		 * @param in The Parcel to read the object's data from.
+		 * @return Returns a new instance of the Parcelable class.
+		 */
+		T readFromParcel( Parcel in );
+
+		/**
+		 * Flatten the Parcelable object to a Parcel.
+		 *
+		 * @param obj The Parcelable object to be flattened.
+		 * @param out The Parcel in which the object should be written.
+		 */
+		void writeToParcel( T obj, Parcel out );
 	}
 }
