@@ -5,11 +5,12 @@
       <GradleProjectSettings>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/modules/HPConfig" />
+            <option value="$PROJECT_DIR$/modules/HPFoundation" />
             <option value="$PROJECT_DIR$/modules/HPLib" />
             <option value="$PROJECT_DIR$/modules/HPLog" />
             <option value="$PROJECT_DIR$/modules/HPNetworking" />

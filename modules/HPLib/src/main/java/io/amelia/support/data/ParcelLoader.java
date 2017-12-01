@@ -2,7 +2,7 @@ package io.amelia.support.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.amelia.support.LibEncrypt;
+import io.amelia.support.Encrypt;
 import io.amelia.support.IO;
 import io.amelia.support.Maps;
 import io.amelia.support.data.yaml.YamlConstructor;
@@ -194,7 +194,7 @@ public class ParcelLoader
 	public static String hashObject( Object obj )
 	{
 		// yaml.dump( obj ) OR gson.toJson( obj )?
-		return obj == null ? null : LibEncrypt.md5Hex( obj instanceof String ? ( String ) obj : gson.toJson( obj ) );
+		return obj == null ? null : Encrypt.md5Hex( obj instanceof String ? ( String ) obj : gson.toJson( obj ) );
 	}
 
 	private ParcelLoader()

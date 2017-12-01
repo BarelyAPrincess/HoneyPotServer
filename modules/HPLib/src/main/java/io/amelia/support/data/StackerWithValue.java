@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import io.amelia.foundation.Kernel;
 import io.amelia.support.Objs;
-import io.amelia.util.Pair;
+import io.amelia.support.Pair;
 
 @SuppressWarnings( "unchecked" )
 public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> extends StackerBase<B>

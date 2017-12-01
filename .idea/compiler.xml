@@ -10,6 +10,8 @@
       <module name="HPConfiguration_test" target="1.8" />
       <module name="HPEvent_main" target="1.8" />
       <module name="HPEvent_test" target="1.8" />
+      <module name="HPFoundation_main" target="1.8" />
+      <module name="HPFoundation_test" target="1.8" />
       <module name="HPLib_main" target="1.8" />
       <module name="HPLib_test" target="1.8" />
       <module name="HPLog_main" target="1.8" />

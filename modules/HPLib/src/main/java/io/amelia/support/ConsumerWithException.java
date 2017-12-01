@@ -27,8 +27,7 @@ public interface ConsumerWithException<T, E extends Exception>
 	default ConsumerWithException<T, E> andThen( ConsumerWithException<? super T, E> after )
 	{
 		Objects.requireNonNull( after );
-		return ( T t ) ->
-		{
+		return ( T t ) -> {
 			accept( t );
 			after.accept( t );
 		};

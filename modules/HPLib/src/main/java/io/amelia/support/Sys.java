@@ -9,8 +9,6 @@
  */
 package io.amelia.support;
 
-import io.amelia.foundation.Kernel;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +45,8 @@ public class Sys
 	{
 		try
 		{
-			File file = new File( URLDecoder.decode( Kernel.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
+			// TODO Will using this class cause the method to return the jar containing HPLib?
+			File file = new File( URLDecoder.decode( Sys.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8" ) );
 			if ( file.isDirectory() || !file.getAbsolutePath().endsWith( ".jar" ) )
 				return def;
 			return IO.getFileNameWithoutExtension( file.getAbsolutePath() );

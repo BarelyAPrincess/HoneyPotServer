@@ -9,8 +9,6 @@
  */
 package io.amelia.support;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.sun.istack.internal.NotNull;
 
 import org.joda.time.Duration;
@@ -22,9 +20,11 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -46,131 +46,129 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.amelia.foundation.Kernel;
-
 public class Strs
 {
 	public static final Map<String, String[]> CHARS_MAP;
 
 	static
 	{
-		ImmutableMap.Builder<String, String[]> builder = new ImmutableMap.Builder<>();
+		Map<String, String[]> chars = new HashMap<>();
 
-		builder.put( "0", new String[] {"°", "₀", "۰"} );
-		builder.put( "1", new String[] {"¹", "₁", "۱"} );
-		builder.put( "2", new String[] {"²", "₂", "۲"} );
-		builder.put( "3", new String[] {"³", "₃", "۳"} );
-		builder.put( "4", new String[] {"⁴", "₄", "۴", "٤"} );
-		builder.put( "5", new String[] {"⁵", "₅", "۵", "٥"} );
-		builder.put( "6", new String[] {"⁶", "₆", "۶", "٦"} );
-		builder.put( "7", new String[] {"⁷", "₇", "۷"} );
-		builder.put( "8", new String[] {"⁸", "₈", "۸"} );
-		builder.put( "9", new String[] {"⁹", "₉", "۹"} );
-		builder.put( "a", new String[] {"à", "á", "ả", "ã", "ạ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ā", "ą", "å", "α", "ά", "ἀ", "ἁ", "ἂ", "ἃ", "ἄ", "ἅ", "ἆ", "ἇ", "ᾀ", "ᾁ", "ᾂ", "ᾃ", "ᾄ", "ᾅ", "ᾆ", "ᾇ", "ὰ", "ά", "ᾰ", "ᾱ", "ᾲ", "ᾳ", "ᾴ", "ᾶ", "ᾷ", "а", "أ", "အ", "ာ", "ါ", "ǻ", "ǎ", "ª", "ა", "अ", "ا"} );
-		builder.put( "b", new String[] {"б", "β", "Ъ", "Ь", "ب", "ဗ", "ბ"} );
-		builder.put( "c", new String[] {"ç", "ć", "č", "ĉ", "ċ"} );
-		builder.put( "d", new String[] {"ď", "ð", "đ", "ƌ", "ȡ", "ɖ", "ɗ", "ᵭ", "ᶁ", "ᶑ", "д", "δ", "د", "ض", "ဍ", "ဒ", "დ"} );
-		builder.put( "e", new String[] {"é", "è", "ẻ", "ẽ", "ẹ", "ê", "ế", "ề", "ể", "ễ", "ệ", "ë", "ē", "ę", "ě", "ĕ", "ė", "ε", "έ", "ἐ", "ἑ", "ἒ", "ἓ", "ἔ", "ἕ", "ὲ", "έ", "е", "ё", "э", "є", "ə", "ဧ", "ေ", "ဲ", "ე", "ए", "إ", "ئ"} );
-		builder.put( "f", new String[] {"ф", "φ", "ف", "ƒ", "ფ"} );
-		builder.put( "g", new String[] {"ĝ", "ğ", "ġ", "ģ", "г", "ґ", "γ", "ဂ", "გ", "گ"} );
-		builder.put( "h", new String[] {"ĥ", "ħ", "η", "ή", "ح", "ه", "ဟ", "ှ", "ჰ"} );
-		builder.put( "i", new String[] {"í", "ì", "ỉ", "ĩ", "ị", "î", "ï", "ī", "ĭ", "į", "ı", "ι", "ί", "ϊ", "ΐ", "ἰ", "ἱ", "ἲ", "ἳ", "ἴ", "ἵ", "ἶ", "ἷ", "ὶ", "ί", "ῐ", "ῑ", "ῒ", "ΐ", "ῖ", "ῗ", "і", "ї", "и", "ဣ", "ိ", "ီ", "ည်", "ǐ", "ი", "इ"} );
-		builder.put( "j", new String[] {"ĵ", "ј", "Ј", "ჯ", "ج"} );
-		builder.put( "k", new String[] {"ķ", "ĸ", "к", "κ", "Ķ", "ق", "ك", "က", "კ", "ქ", "ک"} );
-		builder.put( "l", new String[] {"ł", "ľ", "ĺ", "ļ", "ŀ", "л", "λ", "ل", "လ", "ლ"} );
-		builder.put( "m", new String[] {"м", "μ", "م", "မ", "მ"} );
-		builder.put( "n", new String[] {"ñ", "ń", "ň", "ņ", "ŉ", "ŋ", "ν", "н", "ن", "န", "ნ"} );
-		builder.put( "o", new String[] {"ó", "ò", "ỏ", "õ", "ọ", "ô", "ố", "ồ", "ổ", "ỗ", "ộ", "ơ", "ớ", "ờ", "ở", "ỡ", "ợ", "ø", "ō", "ő", "ŏ", "ο", "ὀ", "ὁ", "ὂ", "ὃ", "ὄ", "ὅ", "ὸ", "ό", "о", "و", "θ", "'ို", "ǒ", "ǿ", "º", "ო", "ओ"} );
-		builder.put( "p", new String[] {"п", "π", "ပ", "პ", "پ"} );
-		builder.put( "q", new String[] {"ყ"} );
-		builder.put( "r", new String[] {"ŕ", "ř", "ŗ", "р", "ρ", "ر", "რ"} );
-		builder.put( "s", new String[] {"ś", "š", "ş", "с", "σ", "ș", "ς", "س", "ص", "စ", "ſ", "ს"} );
-		builder.put( "t", new String[] {"ť", "ţ", "т", "τ", "ț", "ت", "ط", "ဋ", "တ", "ŧ", "თ", "ტ"} );
-		builder.put( "u", new String[] {"ú", "ù", "ủ", "ũ", "ụ", "ư", "ứ", "ừ", "ử", "ữ", "ự", "û", "ū", "ů", "ű", "ŭ", "ų", "µ", "у", "ဉ", "ု", "ူ", "ǔ", "ǖ", "ǘ", "ǚ", "ǜ", "უ", "उ"} );
-		builder.put( "v", new String[] {"в", "ვ", "ϐ"} );
-		builder.put( "w", new String[] {"ŵ", "ω", "ώ", "ဝ", "ွ"} );
-		builder.put( "x", new String[] {"χ", "ξ"} );
-		builder.put( "y", new String[] {"ý", "ỳ", "ỷ", "ỹ", "ỵ", "ÿ", "ŷ", "й", "ы", "υ", "ϋ", "ύ", "ΰ", "ي", "ယ"} );
-		builder.put( "z", new String[] {"ź", "ž", "ż", "з", "ζ", "ز", "ဇ", "ზ"} );
-		builder.put( "aa", new String[] {"ع", "आ", "آ"} );
-		builder.put( "ae", new String[] {"ä", "æ", "ǽ"} );
-		builder.put( "ai", new String[] {"ऐ"} );
-		builder.put( "at", new String[] {"@"} );
-		builder.put( "ch", new String[] {"ч", "ჩ", "ჭ", "چ"} );
-		builder.put( "dj", new String[] {"ђ", "đ"} );
-		builder.put( "dz", new String[] {"џ", "ძ"} );
-		builder.put( "ei", new String[] {"ऍ"} );
-		builder.put( "gh", new String[] {"غ", "ღ"} );
-		builder.put( "ii", new String[] {"ई"} );
-		builder.put( "ij", new String[] {"ĳ"} );
-		builder.put( "kh", new String[] {"х", "خ", "ხ"} );
-		builder.put( "lj", new String[] {"љ"} );
-		builder.put( "nj", new String[] {"њ"} );
-		builder.put( "oe", new String[] {"ö", "œ", "ؤ"} );
-		builder.put( "oi", new String[] {"ऑ"} );
-		builder.put( "oii", new String[] {"ऒ"} );
-		builder.put( "ps", new String[] {"ψ"} );
-		builder.put( "sh", new String[] {"ш", "შ", "ش"} );
-		builder.put( "shch", new String[] {"щ"} );
-		builder.put( "ss", new String[] {"ß"} );
-		builder.put( "sx", new String[] {"ŝ"} );
-		builder.put( "th", new String[] {"þ", "ϑ", "ث", "ذ", "ظ"} );
-		builder.put( "ts", new String[] {"ц", "ც", "წ"} );
-		builder.put( "ue", new String[] {"ü"} );
-		builder.put( "uu", new String[] {"ऊ"} );
-		builder.put( "ya", new String[] {"я"} );
-		builder.put( "yu", new String[] {"ю"} );
-		builder.put( "zh", new String[] {"ж", "ჟ", "ژ"} );
-		builder.put( "(c)", new String[] {"©"} );
-		builder.put( "A", new String[] {"Á", "À", "Ả", "Ã", "Ạ", "Ă", "Ắ", "Ằ", "Ẳ", "Ẵ", "Ặ", "Â", "Ấ", "Ầ", "Ẩ", "Ẫ", "Ậ", "Å", "Ā", "Ą", "Α", "Ά", "Ἀ", "Ἁ", "Ἂ", "Ἃ", "Ἄ", "Ἅ", "Ἆ", "Ἇ", "ᾈ", "ᾉ", "ᾊ", "ᾋ", "ᾌ", "ᾍ", "ᾎ", "ᾏ", "Ᾰ", "Ᾱ", "Ὰ", "Ά", "ᾼ", "А", "Ǻ", "Ǎ"} );
-		builder.put( "B", new String[] {"Б", "Β", "ब"} );
-		builder.put( "C", new String[] {"Ç", "Ć", "Č", "Ĉ", "Ċ"} );
-		builder.put( "D", new String[] {"Ď", "Ð", "Đ", "Ɖ", "Ɗ", "Ƌ", "ᴅ", "ᴆ", "Д", "Δ"} );
-		builder.put( "E", new String[] {"É", "È", "Ẻ", "Ẽ", "Ẹ", "Ê", "Ế", "Ề", "Ể", "Ễ", "Ệ", "Ë", "Ē", "Ę", "Ě", "Ĕ", "Ė", "Ε", "Έ", "Ἐ", "Ἑ", "Ἒ", "Ἓ", "Ἔ", "Ἕ", "Έ", "Ὲ", "Е", "Ё", "Э", "Є", "Ə"} );
-		builder.put( "F", new String[] {"Ф", "Φ"} );
-		builder.put( "G", new String[] {"Ğ", "Ġ", "Ģ", "Г", "Ґ", "Γ"} );
-		builder.put( "H", new String[] {"Η", "Ή", "Ħ"} );
-		builder.put( "I", new String[] {"Í", "Ì", "Ỉ", "Ĩ", "Ị", "Î", "Ï", "Ī", "Ĭ", "Į", "İ", "Ι", "Ί", "Ϊ", "Ἰ", "Ἱ", "Ἳ", "Ἴ", "Ἵ", "Ἶ", "Ἷ", "Ῐ", "Ῑ", "Ὶ", "Ί", "И", "І", "Ї", "Ǐ", "ϒ"} );
-		builder.put( "K", new String[] {"К", "Κ"} );
-		builder.put( "L", new String[] {"Ĺ", "Ł", "Л", "Λ", "Ļ", "Ľ", "Ŀ", "ल"} );
-		builder.put( "M", new String[] {"М", "Μ"} );
-		builder.put( "N", new String[] {"Ń", "Ñ", "Ň", "Ņ", "Ŋ", "Н", "Ν"} );
-		builder.put( "O", new String[] {"Ó", "Ò", "Ỏ", "Õ", "Ọ", "Ô", "Ố", "Ồ", "Ổ", "Ỗ", "Ộ", "Ơ", "Ớ", "Ờ", "Ở", "Ỡ", "Ợ", "Ø", "Ō", "Ő", "Ŏ", "Ο", "Ό", "Ὀ", "Ὁ", "Ὂ", "Ὃ", "Ὄ", "Ὅ", "Ὸ", "Ό", "О", "Θ", "Ө", "Ǒ", "Ǿ"} );
-		builder.put( "P", new String[] {"П", "Π"} );
-		builder.put( "R", new String[] {"Ř", "Ŕ", "Р", "Ρ", "Ŗ"} );
-		builder.put( "S", new String[] {"Ş", "Ŝ", "Ș", "Š", "Ś", "С", "Σ"} );
-		builder.put( "T", new String[] {"Ť", "Ţ", "Ŧ", "Ț", "Т", "Τ"} );
-		builder.put( "U", new String[] {"Ú", "Ù", "Ủ", "Ũ", "Ụ", "Ư", "Ứ", "Ừ", "Ử", "Ữ", "Ự", "Û", "Ū", "Ů", "Ű", "Ŭ", "Ų", "У", "Ǔ", "Ǖ", "Ǘ", "Ǚ", "Ǜ"} );
-		builder.put( "V", new String[] {"В"} );
-		builder.put( "W", new String[] {"Ω", "Ώ", "Ŵ"} );
-		builder.put( "X", new String[] {"Χ", "Ξ"} );
-		builder.put( "Y", new String[] {"Ý", "Ỳ", "Ỷ", "Ỹ", "Ỵ", "Ÿ", "Ῠ", "Ῡ", "Ὺ", "Ύ", "Ы", "Й", "Υ", "Ϋ", "Ŷ"} );
-		builder.put( "Z", new String[] {"Ź", "Ž", "Ż", "З", "Ζ"} );
-		builder.put( "AE", new String[] {"Ä", "Æ", "Ǽ"} );
-		builder.put( "CH", new String[] {"Ч"} );
-		builder.put( "DJ", new String[] {"Ђ"} );
-		builder.put( "DZ", new String[] {"Џ"} );
-		builder.put( "GX", new String[] {"Ĝ"} );
-		builder.put( "HX", new String[] {"Ĥ"} );
-		builder.put( "IJ", new String[] {"Ĳ"} );
-		builder.put( "JX", new String[] {"Ĵ"} );
-		builder.put( "KH", new String[] {"Х"} );
-		builder.put( "LJ", new String[] {"Љ"} );
-		builder.put( "NJ", new String[] {"Њ"} );
-		builder.put( "OE", new String[] {"Ö", "Œ"} );
-		builder.put( "PS", new String[] {"Ψ"} );
-		builder.put( "SH", new String[] {"Ш"} );
-		builder.put( "SHCH", new String[] {"Щ"} );
-		builder.put( "SS", new String[] {"ẞ"} );
-		builder.put( "TH", new String[] {"Þ"} );
-		builder.put( "TS", new String[] {"Ц"} );
-		builder.put( "UE", new String[] {"Ü"} );
-		builder.put( "YA", new String[] {"Я"} );
-		builder.put( "YU", new String[] {"Ю"} );
-		builder.put( "ZH", new String[] {"Ж"} );
-		builder.put( " ", new String[] {"\\xC2\\xA0", "\\xE2\\x80\\x80", "\\xE2\\x80\\x81", "\\xE2\\x80\\x82", "\\xE2\\x80\\x83", "\\xE2\\x80\\x84", "\\xE2\\x80\\x85", "\\xE2\\x80\\x86", "\\xE2\\x80\\x87", "\\xE2\\x80\\x88", "\\xE2\\x80\\x89", "\\xE2\\x80\\x8A", "\\xE2\\x80\\xAF", "\\xE2\\x81\\x9F", "\\xE3\\x80\\x80"} );
+		chars.put( "0", new String[] {"°", "₀", "۰"} );
+		chars.put( "1", new String[] {"¹", "₁", "۱"} );
+		chars.put( "2", new String[] {"²", "₂", "۲"} );
+		chars.put( "3", new String[] {"³", "₃", "۳"} );
+		chars.put( "4", new String[] {"⁴", "₄", "۴", "٤"} );
+		chars.put( "5", new String[] {"⁵", "₅", "۵", "٥"} );
+		chars.put( "6", new String[] {"⁶", "₆", "۶", "٦"} );
+		chars.put( "7", new String[] {"⁷", "₇", "۷"} );
+		chars.put( "8", new String[] {"⁸", "₈", "۸"} );
+		chars.put( "9", new String[] {"⁹", "₉", "۹"} );
+		chars.put( "a", new String[] {"à", "á", "ả", "ã", "ạ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ā", "ą", "å", "α", "ά", "ἀ", "ἁ", "ἂ", "ἃ", "ἄ", "ἅ", "ἆ", "ἇ", "ᾀ", "ᾁ", "ᾂ", "ᾃ", "ᾄ", "ᾅ", "ᾆ", "ᾇ", "ὰ", "ά", "ᾰ", "ᾱ", "ᾲ", "ᾳ", "ᾴ", "ᾶ", "ᾷ", "а", "أ", "အ", "ာ", "ါ", "ǻ", "ǎ", "ª", "ა", "अ", "ا"} );
+		chars.put( "b", new String[] {"б", "β", "Ъ", "Ь", "ب", "ဗ", "ბ"} );
+		chars.put( "c", new String[] {"ç", "ć", "č", "ĉ", "ċ"} );
+		chars.put( "d", new String[] {"ď", "ð", "đ", "ƌ", "ȡ", "ɖ", "ɗ", "ᵭ", "ᶁ", "ᶑ", "д", "δ", "د", "ض", "ဍ", "ဒ", "დ"} );
+		chars.put( "e", new String[] {"é", "è", "ẻ", "ẽ", "ẹ", "ê", "ế", "ề", "ể", "ễ", "ệ", "ë", "ē", "ę", "ě", "ĕ", "ė", "ε", "έ", "ἐ", "ἑ", "ἒ", "ἓ", "ἔ", "ἕ", "ὲ", "έ", "е", "ё", "э", "є", "ə", "ဧ", "ေ", "ဲ", "ე", "ए", "إ", "ئ"} );
+		chars.put( "f", new String[] {"ф", "φ", "ف", "ƒ", "ფ"} );
+		chars.put( "g", new String[] {"ĝ", "ğ", "ġ", "ģ", "г", "ґ", "γ", "ဂ", "გ", "گ"} );
+		chars.put( "h", new String[] {"ĥ", "ħ", "η", "ή", "ح", "ه", "ဟ", "ှ", "ჰ"} );
+		chars.put( "i", new String[] {"í", "ì", "ỉ", "ĩ", "ị", "î", "ï", "ī", "ĭ", "į", "ı", "ι", "ί", "ϊ", "ΐ", "ἰ", "ἱ", "ἲ", "ἳ", "ἴ", "ἵ", "ἶ", "ἷ", "ὶ", "ί", "ῐ", "ῑ", "ῒ", "ΐ", "ῖ", "ῗ", "і", "ї", "и", "ဣ", "ိ", "ီ", "ည်", "ǐ", "ი", "इ"} );
+		chars.put( "j", new String[] {"ĵ", "ј", "Ј", "ჯ", "ج"} );
+		chars.put( "k", new String[] {"ķ", "ĸ", "к", "κ", "Ķ", "ق", "ك", "က", "კ", "ქ", "ک"} );
+		chars.put( "l", new String[] {"ł", "ľ", "ĺ", "ļ", "ŀ", "л", "λ", "ل", "လ", "ლ"} );
+		chars.put( "m", new String[] {"м", "μ", "م", "မ", "მ"} );
+		chars.put( "n", new String[] {"ñ", "ń", "ň", "ņ", "ŉ", "ŋ", "ν", "н", "ن", "န", "ნ"} );
+		chars.put( "o", new String[] {"ó", "ò", "ỏ", "õ", "ọ", "ô", "ố", "ồ", "ổ", "ỗ", "ộ", "ơ", "ớ", "ờ", "ở", "ỡ", "ợ", "ø", "ō", "ő", "ŏ", "ο", "ὀ", "ὁ", "ὂ", "ὃ", "ὄ", "ὅ", "ὸ", "ό", "о", "و", "θ", "'ို", "ǒ", "ǿ", "º", "ო", "ओ"} );
+		chars.put( "p", new String[] {"п", "π", "ပ", "პ", "پ"} );
+		chars.put( "q", new String[] {"ყ"} );
+		chars.put( "r", new String[] {"ŕ", "ř", "ŗ", "р", "ρ", "ر", "რ"} );
+		chars.put( "s", new String[] {"ś", "š", "ş", "с", "σ", "ș", "ς", "س", "ص", "စ", "ſ", "ს"} );
+		chars.put( "t", new String[] {"ť", "ţ", "т", "τ", "ț", "ت", "ط", "ဋ", "တ", "ŧ", "თ", "ტ"} );
+		chars.put( "u", new String[] {"ú", "ù", "ủ", "ũ", "ụ", "ư", "ứ", "ừ", "ử", "ữ", "ự", "û", "ū", "ů", "ű", "ŭ", "ų", "µ", "у", "ဉ", "ု", "ူ", "ǔ", "ǖ", "ǘ", "ǚ", "ǜ", "უ", "उ"} );
+		chars.put( "v", new String[] {"в", "ვ", "ϐ"} );
+		chars.put( "w", new String[] {"ŵ", "ω", "ώ", "ဝ", "ွ"} );
+		chars.put( "x", new String[] {"χ", "ξ"} );
+		chars.put( "y", new String[] {"ý", "ỳ", "ỷ", "ỹ", "ỵ", "ÿ", "ŷ", "й", "ы", "υ", "ϋ", "ύ", "ΰ", "ي", "ယ"} );
+		chars.put( "z", new String[] {"ź", "ž", "ż", "з", "ζ", "ز", "ဇ", "ზ"} );
+		chars.put( "aa", new String[] {"ع", "आ", "آ"} );
+		chars.put( "ae", new String[] {"ä", "æ", "ǽ"} );
+		chars.put( "ai", new String[] {"ऐ"} );
+		chars.put( "at", new String[] {"@"} );
+		chars.put( "ch", new String[] {"ч", "ჩ", "ჭ", "چ"} );
+		chars.put( "dj", new String[] {"ђ", "đ"} );
+		chars.put( "dz", new String[] {"џ", "ძ"} );
+		chars.put( "ei", new String[] {"ऍ"} );
+		chars.put( "gh", new String[] {"غ", "ღ"} );
+		chars.put( "ii", new String[] {"ई"} );
+		chars.put( "ij", new String[] {"ĳ"} );
+		chars.put( "kh", new String[] {"х", "خ", "ხ"} );
+		chars.put( "lj", new String[] {"љ"} );
+		chars.put( "nj", new String[] {"њ"} );
+		chars.put( "oe", new String[] {"ö", "œ", "ؤ"} );
+		chars.put( "oi", new String[] {"ऑ"} );
+		chars.put( "oii", new String[] {"ऒ"} );
+		chars.put( "ps", new String[] {"ψ"} );
+		chars.put( "sh", new String[] {"ш", "შ", "ش"} );
+		chars.put( "shch", new String[] {"щ"} );
+		chars.put( "ss", new String[] {"ß"} );
+		chars.put( "sx", new String[] {"ŝ"} );
+		chars.put( "th", new String[] {"þ", "ϑ", "ث", "ذ", "ظ"} );
+		chars.put( "ts", new String[] {"ц", "ც", "წ"} );
+		chars.put( "ue", new String[] {"ü"} );
+		chars.put( "uu", new String[] {"ऊ"} );
+		chars.put( "ya", new String[] {"я"} );
+		chars.put( "yu", new String[] {"ю"} );
+		chars.put( "zh", new String[] {"ж", "ჟ", "ژ"} );
+		chars.put( "(c)", new String[] {"©"} );
+		chars.put( "A", new String[] {"Á", "À", "Ả", "Ã", "Ạ", "Ă", "Ắ", "Ằ", "Ẳ", "Ẵ", "Ặ", "Â", "Ấ", "Ầ", "Ẩ", "Ẫ", "Ậ", "Å", "Ā", "Ą", "Α", "Ά", "Ἀ", "Ἁ", "Ἂ", "Ἃ", "Ἄ", "Ἅ", "Ἆ", "Ἇ", "ᾈ", "ᾉ", "ᾊ", "ᾋ", "ᾌ", "ᾍ", "ᾎ", "ᾏ", "Ᾰ", "Ᾱ", "Ὰ", "Ά", "ᾼ", "А", "Ǻ", "Ǎ"} );
+		chars.put( "B", new String[] {"Б", "Β", "ब"} );
+		chars.put( "C", new String[] {"Ç", "Ć", "Č", "Ĉ", "Ċ"} );
+		chars.put( "D", new String[] {"Ď", "Ð", "Đ", "Ɖ", "Ɗ", "Ƌ", "ᴅ", "ᴆ", "Д", "Δ"} );
+		chars.put( "E", new String[] {"É", "È", "Ẻ", "Ẽ", "Ẹ", "Ê", "Ế", "Ề", "Ể", "Ễ", "Ệ", "Ë", "Ē", "Ę", "Ě", "Ĕ", "Ė", "Ε", "Έ", "Ἐ", "Ἑ", "Ἒ", "Ἓ", "Ἔ", "Ἕ", "Έ", "Ὲ", "Е", "Ё", "Э", "Є", "Ə"} );
+		chars.put( "F", new String[] {"Ф", "Φ"} );
+		chars.put( "G", new String[] {"Ğ", "Ġ", "Ģ", "Г", "Ґ", "Γ"} );
+		chars.put( "H", new String[] {"Η", "Ή", "Ħ"} );
+		chars.put( "I", new String[] {"Í", "Ì", "Ỉ", "Ĩ", "Ị", "Î", "Ï", "Ī", "Ĭ", "Į", "İ", "Ι", "Ί", "Ϊ", "Ἰ", "Ἱ", "Ἳ", "Ἴ", "Ἵ", "Ἶ", "Ἷ", "Ῐ", "Ῑ", "Ὶ", "Ί", "И", "І", "Ї", "Ǐ", "ϒ"} );
+		chars.put( "K", new String[] {"К", "Κ"} );
+		chars.put( "L", new String[] {"Ĺ", "Ł", "Л", "Λ", "Ļ", "Ľ", "Ŀ", "ल"} );
+		chars.put( "M", new String[] {"М", "Μ"} );
+		chars.put( "N", new String[] {"Ń", "Ñ", "Ň", "Ņ", "Ŋ", "Н", "Ν"} );
+		chars.put( "O", new String[] {"Ó", "Ò", "Ỏ", "Õ", "Ọ", "Ô", "Ố", "Ồ", "Ổ", "Ỗ", "Ộ", "Ơ", "Ớ", "Ờ", "Ở", "Ỡ", "Ợ", "Ø", "Ō", "Ő", "Ŏ", "Ο", "Ό", "Ὀ", "Ὁ", "Ὂ", "Ὃ", "Ὄ", "Ὅ", "Ὸ", "Ό", "О", "Θ", "Ө", "Ǒ", "Ǿ"} );
+		chars.put( "P", new String[] {"П", "Π"} );
+		chars.put( "R", new String[] {"Ř", "Ŕ", "Р", "Ρ", "Ŗ"} );
+		chars.put( "S", new String[] {"Ş", "Ŝ", "Ș", "Š", "Ś", "С", "Σ"} );
+		chars.put( "T", new String[] {"Ť", "Ţ", "Ŧ", "Ț", "Т", "Τ"} );
+		chars.put( "U", new String[] {"Ú", "Ù", "Ủ", "Ũ", "Ụ", "Ư", "Ứ", "Ừ", "Ử", "Ữ", "Ự", "Û", "Ū", "Ů", "Ű", "Ŭ", "Ų", "У", "Ǔ", "Ǖ", "Ǘ", "Ǚ", "Ǜ"} );
+		chars.put( "V", new String[] {"В"} );
+		chars.put( "W", new String[] {"Ω", "Ώ", "Ŵ"} );
+		chars.put( "X", new String[] {"Χ", "Ξ"} );
+		chars.put( "Y", new String[] {"Ý", "Ỳ", "Ỷ", "Ỹ", "Ỵ", "Ÿ", "Ῠ", "Ῡ", "Ὺ", "Ύ", "Ы", "Й", "Υ", "Ϋ", "Ŷ"} );
+		chars.put( "Z", new String[] {"Ź", "Ž", "Ż", "З", "Ζ"} );
+		chars.put( "AE", new String[] {"Ä", "Æ", "Ǽ"} );
+		chars.put( "CH", new String[] {"Ч"} );
+		chars.put( "DJ", new String[] {"Ђ"} );
+		chars.put( "DZ", new String[] {"Џ"} );
+		chars.put( "GX", new String[] {"Ĝ"} );
+		chars.put( "HX", new String[] {"Ĥ"} );
+		chars.put( "IJ", new String[] {"Ĳ"} );
+		chars.put( "JX", new String[] {"Ĵ"} );
+		chars.put( "KH", new String[] {"Х"} );
+		chars.put( "LJ", new String[] {"Љ"} );
+		chars.put( "NJ", new String[] {"Њ"} );
+		chars.put( "OE", new String[] {"Ö", "Œ"} );
+		chars.put( "PS", new String[] {"Ψ"} );
+		chars.put( "SH", new String[] {"Ш"} );
+		chars.put( "SHCH", new String[] {"Щ"} );
+		chars.put( "SS", new String[] {"ẞ"} );
+		chars.put( "TH", new String[] {"Þ"} );
+		chars.put( "TS", new String[] {"Ц"} );
+		chars.put( "UE", new String[] {"Ü"} );
+		chars.put( "YA", new String[] {"Я"} );
+		chars.put( "YU", new String[] {"Ю"} );
+		chars.put( "ZH", new String[] {"Ж"} );
+		chars.put( " ", new String[] {"\\xC2\\xA0", "\\xE2\\x80\\x80", "\\xE2\\x80\\x81", "\\xE2\\x80\\x82", "\\xE2\\x80\\x83", "\\xE2\\x80\\x84", "\\xE2\\x80\\x85", "\\xE2\\x80\\x86", "\\xE2\\x80\\x87", "\\xE2\\x80\\x88", "\\xE2\\x80\\x89", "\\xE2\\x80\\x8A", "\\xE2\\x80\\xAF", "\\xE2\\x81\\x9F", "\\xE3\\x80\\x80"} );
 
-		CHARS_MAP = builder.build();
+		CHARS_MAP = Collections.unmodifiableMap( chars );
 	}
 
 	public static String ascii( String str )
@@ -182,12 +180,12 @@ public class Strs
 
 	public static String bytesToStringASCII( byte[] bytes )
 	{
-		return new String( bytes, Charsets.US_ASCII );
+		return new String( bytes, StandardCharsets.US_ASCII );
 	}
 
 	public static String bytesToStringUTF( byte[] bytes )
 	{
-		return new String( bytes, Charsets.UTF_8 );
+		return new String( bytes, StandardCharsets.UTF_8 );
 	}
 
 	public static String capitalizeWords( String str )
@@ -289,7 +287,7 @@ public class Strs
 
 	public static byte[] decodeUtf8( @NotNull String str )
 	{
-		return str.getBytes( Charsets.UTF_8 );
+		return str.getBytes( StandardCharsets.UTF_8 );
 	}
 
 	public static String encodeDefault( byte[] bytes )
@@ -299,7 +297,7 @@ public class Strs
 
 	public static String encodeUtf8( byte[] bytes )
 	{
-		return new String( bytes, Charsets.UTF_8 );
+		return new String( bytes, StandardCharsets.UTF_8 );
 	}
 
 	public static String escapeHtml( String str )
@@ -467,7 +465,7 @@ public class Strs
 			}
 			catch ( IllegalArgumentException e )
 			{
-				Kernel.L.warning( "Malformed URL exception was thrown, key: `" + pair[0] + "`, val: '" + pair[1] + "'" );
+				// Kernel.L.warning( "Malformed URL exception was thrown, key: `" + pair[0] + "`, val: '" + pair[1] + "'" );
 			}
 		}
 		return result;
@@ -649,7 +647,7 @@ public class Strs
 
 	public static byte[] stringToBytesASCII( String str )
 	{
-		return str == null ? null : str.getBytes( Charsets.US_ASCII );
+		return str == null ? null : str.getBytes( StandardCharsets.US_ASCII );
 
 		/*byte[] b = new byte[str.length()];
 		for ( int i = 0; i < b.length; i++ )
@@ -659,7 +657,7 @@ public class Strs
 
 	public static byte[] stringToBytesUTF( String str )
 	{
-		return str == null ? null : str.getBytes( Charsets.UTF_8 );
+		return str == null ? null : str.getBytes( StandardCharsets.UTF_8 );
 
 		/*byte[] b = new byte[str.length() << 1];
 		for ( int i = 0; i < str.length(); i++ )
@@ -776,11 +774,6 @@ public class Strs
 		while ( index < normalizedText.length() && normalizedText.charAt( index ) == character );
 
 		return normalizedText.substring( index ).trim();
-	}
-
-	public static String unescapeHtml( String str )
-	{
-		return EscapeTranslator.HTML_UNESCAPE().translate( str );
 	}
 
 	public static Map<String, String> wrap( Map<String, String> map )

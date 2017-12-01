@@ -7,7 +7,7 @@ import io.amelia.lang.ReportingLevel;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPHandler;
 import io.amelia.networking.udp.UDPPacketHandler;
-import io.amelia.support.LibEncrypt;
+import io.amelia.support.Encrypt;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 import io.netty.buffer.ByteBuf;
@@ -54,7 +54,7 @@ public abstract class RawPacket
 	public RawPacket()
 	{
 		NetworkLoader.registerPacket( this );
-		packetId = LibEncrypt.hash();
+		packetId = Encrypt.hash();
 	}
 
 	public boolean checkUDPState( UDPHandler.ClusterRole clusterRole )
@@ -97,7 +97,7 @@ public abstract class RawPacket
 	public String getClassId()
 	{
 		if ( classId == null )
-			classId = LibEncrypt.md5Hex( getClass().getName() );
+			classId = Encrypt.md5Hex( getClass().getName() );
 		return classId;
 	}
 

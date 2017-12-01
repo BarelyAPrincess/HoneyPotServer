@@ -30,7 +30,6 @@ import javax.annotation.Nonnull;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
-import io.amelia.util.Pair;
 
 public class Objs
 {
@@ -349,6 +348,8 @@ public class Objs
 			return Integer.toString( ( int ) value );
 		if ( value instanceof Double )
 			return Double.toString( ( double ) value );
+		if ( value instanceof Float )
+			return Float.toString( ( float ) value );
 		if ( value instanceof Boolean )
 			return ( boolean ) value ? "true" : "false";
 		if ( value instanceof BigDecimal )

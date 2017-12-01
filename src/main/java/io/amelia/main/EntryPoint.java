@@ -2,7 +2,6 @@ package io.amelia.main;
 
 import io.amelia.HoneyPotServer;
 import io.amelia.events.EventDispatcher;
-import io.amelia.events.Events;
 import io.amelia.events.application.RunlevelEvent;
 import io.amelia.foundation.Kernel;
 import io.amelia.lang.ApplicationException;

@@ -9,7 +9,7 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
+import com.google.common.base.Strings;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -52,21 +52,88 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.ApplicationInterface;
-import io.amelia.foundation.injection.Libraries;
-import io.amelia.lang.EnumColor;
+import javax.annotation.Nonnull;
+
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
+import io.netty.buffer.ByteBuf;
 
 public class IO
 {
-	public static final Logger L = LogBuilder.get( IO.class );
 	public static final String PATH_SEPERATOR = File.separator;
+	private static final char[] BYTE2CHAR = new char[256];
+	private static final String[] BYTE2HEX = new String[256];
+	private static final String[] BYTEPADDING = new String[16];
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+	private static final char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+	private static final char[] DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 	private static final int EOF = -1;
+	private static final String[] HEXDUMP_ROWPREFIXES = new String[65536 >>> 4];
+	private static final String[] HEXPADDING = new String[16];
+	private static final String NEWLINE = "\n";
+
+	static
+	{
+		int i;
+
+		// Generate the lookup table for byte-to-hex-dump conversion
+		for ( i = 0; i < BYTE2HEX.length; i++ )
+			BYTE2HEX[i] = String.format( " %02X", i );
+
+		// Generate the lookup table for hex dump paddings
+		for ( i = 0; i < HEXPADDING.length; i++ )
+		{
+			int padding = HEXPADDING.length - i;
+			StringBuilder buf = new StringBuilder( padding * 3 );
+			for ( int j = 0; j < padding; j++ )
+				buf.append( "   " );
+			HEXPADDING[i] = buf.toString();
+		}
+
+		// Generate the lookup table for byte dump paddings
+		for ( i = 0; i < BYTEPADDING.length; i++ )
+		{
+			int padding = BYTEPADDING.length - i;
+			StringBuilder buf = new StringBuilder( padding );
+			for ( int j = 0; j < padding; j++ )
+				buf.append( ' ' );
+			BYTEPADDING[i] = buf.toString();
+		}
+
+		// Generate the lookup table for byte-to-char conversion
+		for ( i = 0; i < BYTE2CHAR.length; i++ )
+			if ( i <= 0x1f || i >= 0x7f )
+				BYTE2CHAR[i] = '.';
+			else
+				BYTE2CHAR[i] = ( char ) i;
+
+		// Generate the lookup table for the start-offset header in each row (up to 64KiB).
+		for ( i = 0; i < HEXDUMP_ROWPREFIXES.length; i++ )
+		{
+			StringBuilder buf = new StringBuilder( 12 );
+			buf.append( NEWLINE );
+			buf.append( Long.toHexString( i << 4 & 0xFFFFFFFFL | 0x100000000L ) );
+			buf.setCharAt( buf.length() - 9, '|' );
+			buf.append( '|' );
+			HEXDUMP_ROWPREFIXES[i] = buf.toString();
+		}
+	}
+
+	/**
+	 * Appends the prefix of each hex dump row. Uses the look-up table for the buffer <= 64 KiB.
+	 */
+	private static void appendHexDumpRowPrefix( StringBuilder dump, int row, int rowStartIndex )
+	{
+		if ( row < HEXDUMP_ROWPREFIXES.length )
+			dump.append( HEXDUMP_ROWPREFIXES[row] );
+		else
+		{
+			dump.append( NEWLINE );
+			dump.append( Long.toHexString( rowStartIndex & 0xFFFFFFFFL | 0x100000000L ) );
+			dump.setCharAt( dump.length() - 9, '|' );
+			dump.append( '|' );
+		}
+	}
 
 	public static File buildFile( boolean absolute, String... args )
 	{
@@ -83,7 +150,7 @@ public class IO
 		return buildFile( false, args );
 	}
 
-	public static String buildPath( @NotNull String... paths )
+	public static String buildPath( @Nonnull String... paths )
 	{
 		return Arrays.stream( paths ).filter( n -> !Objs.isEmpty( n ) ).map( n -> Strs.trimAll( n, '/' ) ).collect( Collectors.joining( PATH_SEPERATOR ) );
 	}
@@ -110,7 +177,7 @@ public class IO
 		if ( expectedMd5 == null || file == null || !file.exists() )
 			return false;
 
-		String md5 = LibEncrypt.md5Hex( new FileInputStream( file ) );
+		String md5 = Encrypt.md5Hex( new FileInputStream( file ) );
 		return md5 != null && md5.equals( expectedMd5 );
 	}
 
@@ -220,7 +287,7 @@ public class IO
 		return dirname( path, 1 );
 	}
 
-	public static String dirname( @NotNull File path, @NotNull int levels )
+	public static String dirname( @Nonnull File path, @Nonnull int levels )
 	{
 		Objs.notNull( path );
 		Objs.notFalse( levels > 0 );
@@ -234,6 +301,58 @@ public class IO
 		}
 
 		return path.getName();
+	}
+
+	/**
+	 * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order.
+	 * The returned array will be double the length of the passed array, as it takes two characters to represent any
+	 * given byte.
+	 *
+	 * @param data a byte[] to convert to Hex characters
+	 * @return A char[] containing hexadecimal characters
+	 */
+	public static char[] encodeHex( final byte[] data )
+	{
+		char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+		final int l = data.length;
+		final char[] out = new char[l << 1];
+		// two characters form the hex value.
+		for ( int i = 0, j = 0; i < l; i++ )
+		{
+			out[j++] = chars[( 0xF0 & data[i] ) >>> 4];
+			out[j++] = chars[0x0F & data[i]];
+		}
+		return out;
+	}
+
+	public static String encodeHexPretty( final byte... data )
+	{
+		return Arrays.stream( encodeHexStringArray( data ) ).map( c -> "0x" + c ).collect( Collectors.joining( " " ) );
+	}
+
+	/**
+	 * Converts an array of bytes into a String representing the hexadecimal values of each byte in order. The returned
+	 * String will be double the length of the passed array, as it takes two characters to represent any given byte.
+	 *
+	 * @param data a byte[] to convert to Hex characters
+	 * @return A String containing hexadecimal characters
+	 */
+	public static String encodeHexString( final byte[] data )
+	{
+		return new String( encodeHex( data ) );
+	}
+
+	public static String[] encodeHexStringArray( final byte... data )
+	{
+		char[] chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+		final int l = data.length;
+		final String[] out = new String[l << 1];
+		// two characters form the hex value.
+		for ( int i = 0, j = 0; i < l; i++ )
+			out[j++] = chars[( 0xF0 & data[i] ) >>> 4] + "" + chars[0x0F & data[i]];
+		return out;
 	}
 
 	public static Set<String> entriesToSet( String archivePath, Enumeration<? extends ZipEntry> entries )
@@ -495,7 +614,7 @@ public class IO
 		extractResourceDirectory( path, dest, IO.class );
 	}
 
-	public static void extractResourceDirectory( @NotNull String path, @NotNull File dest, @NotNull Class<?> clazz ) throws IOException
+	public static void extractResourceDirectory( @Nonnull String path, @Nonnull File dest, @Nonnull Class<?> clazz ) throws IOException
 	{
 		Objs.notEmpty( path );
 		Objs.notNull( dest );
@@ -699,6 +818,116 @@ public class IO
 		gzos.close();
 	}
 
+	public static String hex2Readable( byte... elements )
+	{
+		if ( elements == null )
+			return "";
+
+		// TODO Char Dump
+		String result = "";
+		char[] chars = encodeHex( elements );
+		for ( int i = 0; i < chars.length; i = i + 2 )
+			result += " " + chars[i] + chars[i + 1];
+
+		if ( result.length() > 0 )
+			result = result.substring( 1 );
+
+		return result;
+	}
+
+	public static String hex2Readable( int... elements )
+	{
+		byte[] e2 = new byte[elements.length];
+		for ( int i = 0; i < elements.length; i++ )
+			e2[i] = ( byte ) elements[i];
+		return hex2Readable( e2 );
+	}
+
+	public static String hexDump( ByteBuf buf )
+	{
+		return hexDump( buf, buf.readerIndex() );
+	}
+
+	public static String hexDump( ByteBuf buf, int highlightIndex )
+	{
+		if ( buf == null )
+			return "Buffer: null!";
+
+		if ( buf.capacity() < 1 )
+			return "Buffer: 0B!";
+
+		StringBuilder dump = new StringBuilder();
+
+		final int startIndex = 0;
+		final int endIndex = buf.capacity();
+		final int length = endIndex - startIndex;
+		final int fullRows = length >>> 4;
+		final int remainder = length & 0xF;
+
+		int highlightRow = -1;
+
+		dump.append( NEWLINE + "         +-------------------------------------------------+" + NEWLINE + "         |  0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f |" + NEWLINE + "+--------+-------------------------------------------------+----------------+" );
+
+		if ( highlightIndex > 0 )
+		{
+			highlightRow = highlightIndex >>> 4;
+			highlightIndex = highlightIndex - ( 16 * highlightRow ) - 1;
+
+			dump.append( NEWLINE + "|        |" + Strings.repeat( "   ", highlightIndex ) + " $$" + Strings.repeat( "   ", 15 - highlightIndex ) );
+			dump.append( " |" + Strings.repeat( " ", highlightIndex ) + "$" + Strings.repeat( " ", 15 - highlightIndex ) + "|" );
+		}
+
+		// Dump the rows which have 16 bytes.
+		for ( int row = 0; row < fullRows; row++ )
+		{
+			int rowStartIndex = row << 4;
+
+			// Per-row prefix.
+			appendHexDumpRowPrefix( dump, row, rowStartIndex );
+
+			// Hex dump
+			int rowEndIndex = rowStartIndex + 16;
+			for ( int j = rowStartIndex; j < rowEndIndex; j++ )
+				dump.append( BYTE2HEX[buf.getUnsignedByte( j )] );
+			dump.append( " |" );
+
+			// ASCII dump
+			for ( int j = rowStartIndex; j < rowEndIndex; j++ )
+				dump.append( BYTE2CHAR[buf.getUnsignedByte( j )] );
+			dump.append( '|' );
+
+			if ( highlightIndex > 0 && highlightRow == row + 1 )
+				dump.append( " <--" );
+		}
+
+		// Dump the last row which has less than 16 bytes.
+		if ( remainder != 0 )
+		{
+			int rowStartIndex = fullRows << 4;
+			appendHexDumpRowPrefix( dump, fullRows, rowStartIndex );
+
+			// Hex dump
+			int rowEndIndex = rowStartIndex + remainder;
+			for ( int j = rowStartIndex; j < rowEndIndex; j++ )
+				dump.append( BYTE2HEX[buf.getUnsignedByte( j )] );
+			dump.append( HEXPADDING[remainder] );
+			dump.append( " |" );
+
+			// Ascii dump
+			for ( int j = rowStartIndex; j < rowEndIndex; j++ )
+				dump.append( BYTE2CHAR[buf.getUnsignedByte( j )] );
+			dump.append( BYTEPADDING[remainder] );
+			dump.append( '|' );
+
+			if ( highlightIndex > 0 && highlightRow > fullRows + 1 )
+				dump.append( " <--" );
+		}
+
+		dump.append( NEWLINE + "+--------+-------------------------------------------------+----------------+" );
+
+		return dump.toString();
+	}
+
 	public static boolean isAbsolute( String dir )
 	{
 		return dir.startsWith( "/" ) || dir.startsWith( ":\\", 1 );
@@ -754,17 +983,17 @@ public class IO
 		putResource( IO.class, resource, file );
 	}
 
-	public static List<String> readFileToLines( @NotNull File file, @NotNull String ignorePrefix ) throws FileNotFoundException
+	public static List<String> readFileToLines( @Nonnull File file, @Nonnull String ignorePrefix ) throws FileNotFoundException
 	{
 		return readFileToStream( file, ignorePrefix ).collect( Collectors.toList() );
 	}
 
-	public static List<String> readFileToLines( @NotNull File file ) throws FileNotFoundException
+	public static List<String> readFileToLines( @Nonnull File file ) throws FileNotFoundException
 	{
 		return readFileToStream( file ).collect( Collectors.toList() );
 	}
 
-	public static Stream<String> readFileToStream( @NotNull File file, @NotNull String ignorePrefix ) throws FileNotFoundException
+	public static Stream<String> readFileToStream( @Nonnull File file, @Nonnull String ignorePrefix ) throws FileNotFoundException
 	{
 		Objs.notNull( file );
 		Objs.notNull( ignorePrefix );
@@ -772,14 +1001,14 @@ public class IO
 		return new BufferedReader( new InputStreamReader( new FileInputStream( file ) ) ).lines().filter( s -> !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
 	}
 
-	public static Stream<String> readFileToStream( @NotNull File file ) throws FileNotFoundException
+	public static Stream<String> readFileToStream( @Nonnull File file ) throws FileNotFoundException
 	{
 		Objs.notNull( file );
 
 		return new BufferedReader( new InputStreamReader( new FileInputStream( file ) ) ).lines();
 	}
 
-	public static String readFileToString( @NotNull File file ) throws IOException
+	public static String readFileToString( @Nonnull File file ) throws IOException
 	{
 		InputStream in = null;
 		try
@@ -828,12 +1057,12 @@ public class IO
 		return readStreamToByteArray( is ).toByteArray();
 	}
 
-	public static List<String> readStreamToLines( @NotNull InputStream is, @NotNull String ignorePrefix )
+	public static List<String> readStreamToLines( @Nonnull InputStream is, @Nonnull String ignorePrefix )
 	{
 		return readStreamToStream( is, ignorePrefix ).collect( Collectors.toList() );
 	}
 
-	public static Stream<String> readStreamToStream( @NotNull InputStream is, @NotNull String ignorePrefix )
+	public static Stream<String> readStreamToStream( @Nonnull InputStream is, @Nonnull String ignorePrefix )
 	{
 		Objs.notNull( is );
 		Objs.notNull( ignorePrefix );
@@ -841,14 +1070,14 @@ public class IO
 		return new BufferedReader( new InputStreamReader( is ) ).lines().filter( s -> !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
 	}
 
-	public static Stream<String> readStreamToStream( @NotNull InputStream is ) throws FileNotFoundException
+	public static Stream<String> readStreamToStream( @Nonnull InputStream is ) throws FileNotFoundException
 	{
 		Objs.notNull( is );
 
 		return new BufferedReader( new InputStreamReader( is ) ).lines();
 	}
 
-	public static String readStreamToString( @NotNull InputStream is ) throws IOException
+	public static String readStreamToString( @Nonnull InputStream is ) throws IOException
 	{
 		return Strs.encodeDefault( readStreamToByteArray( is ).toByteArray() );
 	}

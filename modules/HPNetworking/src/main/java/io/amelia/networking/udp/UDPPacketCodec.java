@@ -3,9 +3,9 @@ package io.amelia.networking.udp;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.packets.RawPacket;
+import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
-import io.amelia.support.Timings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,7 +33,7 @@ public class UDPPacketCodec extends MessageToMessageCodec<DatagramPacket, RawPac
 		byte[] bytes = IO.readByteBufferToBytes( payload.nioBuffer() );
 		out.add( new DatagramPacket( bytes, bytes.length, ( ( UDPHandler ) ctx.pipeline().get( "handler" ) ).getInetSocketAddress() ) );
 
-		msg.sentTime = Timings.epoch();
+		msg.sentTime = DateAndTime.epoch();
 		msg.sent = true;
 	}
 

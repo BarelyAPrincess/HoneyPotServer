@@ -39,10 +39,10 @@ import io.amelia.lang.StartupException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.NetworkWorker;
 import io.amelia.networking.packets.PacketRequest;
+import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.NIO;
 import io.amelia.support.Sys;
-import io.amelia.support.Timings;
 import io.amelia.tasks.TaskDispatcher;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -155,7 +155,7 @@ public class UDPWorker implements NetworkWorker
 
 
 		channel.writeAndFlush( new DatagramPacket( packet.payload ) );
-		packet.sentTime = Timings.epoch();
+		packet.sentTime = DateAndTime.epoch();
 		packet.sent = true;
 	}
 
@@ -292,7 +292,7 @@ public class UDPWorker implements NetworkWorker
 
 		public boolean expired()
 		{
-			return Timings.epoch() - request.getSentTime() > request.getTimeout();
+			return DateAndTime.epoch() - request.getSentTime() > request.getTimeout();
 		}
 	}
 }

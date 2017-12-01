@@ -65,6 +65,24 @@ public class Arrs
 		return ~lo;  // value not present
 	}
 
+	public static Stream<Byte> byteStream( byte[] bytes )
+	{
+		return new ArrayList<Byte>()
+		{{
+			for ( byte b : bytes )
+				add( b );
+		}}.stream();
+	}
+
+	public static Stream<Character> charStream( char[] chars )
+	{
+		return new ArrayList<Character>()
+		{{
+			for ( char c : chars )
+				add( c );
+		}}.stream();
+	}
+
 	public static int compareTo( long[] left, long[] right )
 	{
 		if ( left == right )

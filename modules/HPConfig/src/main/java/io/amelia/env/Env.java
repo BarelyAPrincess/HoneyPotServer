@@ -2,7 +2,7 @@ package io.amelia.env;
 
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.Objs;
-import io.amelia.util.Pair;
+import io.amelia.support.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;

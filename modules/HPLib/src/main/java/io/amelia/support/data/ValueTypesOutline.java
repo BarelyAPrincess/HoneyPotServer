@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
-import io.amelia.util.OptionalBoolean;
+import io.amelia.support.OptionalBoolean;
 
 /**
  * Provides common methods for converting an unknown value to (and from) {@link Object} using the Java 8 {@link Optional} feature.

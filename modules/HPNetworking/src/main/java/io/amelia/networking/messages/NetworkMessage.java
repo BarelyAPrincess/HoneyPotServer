@@ -5,7 +5,7 @@ import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPWorker;
 import io.amelia.support.data.Parcel;
-import io.amelia.support.LibEncrypt;
+import io.amelia.support.Encrypt;
 import io.amelia.support.NIO;
 import io.amelia.support.data.StackerBase;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +35,7 @@ public abstract class NetworkMessage
 	 */
 	protected NetworkMessage()
 	{
-		messageId = LibEncrypt.hash();
+		messageId = Encrypt.hash();
 		originId = getManager().getId();
 
 		dataLastReceived = null;

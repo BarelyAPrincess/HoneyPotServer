@@ -1,8 +1,9 @@
-include ':HPNetworking', ':HPConfig', ':HPLib', ':HPLog', ':HPPlugins', ':HPScripting', ':HPPermissions'
-project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
-project( ':HPConfig' ).projectDir = new File( 'modules/HPConfig' )
+include ':HPFoundation', ':HPLib', ':HPLog', ':HPNetworking', ':HPConfig', ':HPPlugins', ':HPScripting', ':HPPermissions'
+project( ':HPFoundation' ).projectDir = new File( 'modules/HPFoundation' )
 project( ':HPLib' ).projectDir = new File( 'modules/HPLib' )
 project( ':HPLog' ).projectDir = new File( 'modules/HPLog' )
+project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
+project( ':HPConfig' ).projectDir = new File( 'modules/HPConfig' )
 project( ':HPPlugins' ).projectDir = new File( 'modules/HPPlugins' )
 project( ':HPScripting' ).projectDir = new File( 'modules/HPScripting' )
 project( ':HPPermissions' ).projectDir = new File( 'modules/HPPermissions' )

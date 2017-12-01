@@ -4,7 +4,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO Not Done!
+/**
+ * WORK IN PROGRESS!!!
+ *
+ * Do not use, API will likely change.
+ */
 public class Reflection
 {
 	private static final ThreadLocal<List<StackTraceElement>> methodCallEnforcements = new ThreadLocal<>();

@@ -8,7 +8,7 @@ import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.networking.NetworkLoader;
-import io.amelia.support.LibEncrypt;
+import io.amelia.support.Encrypt;
 
 import static io.amelia.lang.Runlevel.INITIALIZATION;
 import static io.amelia.lang.Runlevel.SHUTDOWN;
@@ -47,7 +47,7 @@ public class HoneyPotServer extends DefaultApplication
 
 				/* Check instance-id */
 				if ( !env.isValueSet( "instance-id" ) )
-					env.set( "instance-id", LibEncrypt.uuid(), true );
+					env.set( "instance-id", Encrypt.uuid(), true );
 
 				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ) ) );
 			}

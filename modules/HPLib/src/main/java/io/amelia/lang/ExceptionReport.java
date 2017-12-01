@@ -9,9 +9,6 @@
  */
 package io.amelia.lang;
 
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.support.Objs;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.support.Objs;
 
 /**
  * This class is used to analyze and report exceptions
@@ -205,7 +204,7 @@ public class ExceptionReport
 		 * Handle the remainder unhandled run of the mill exceptions
 		 * NullPointerException, ArrayIndexOutOfBoundsException, IOException, StackOverflowError, ClassFormatError
 		 */
-		LogBuilder.get().severe( String.format( "The exception %s went unhandled in the ScriptingFactory.", cause.getClass().getName() ), cause );
+		LogBuilder.get().severe( String.format( "The exception %s went unhandled.", cause.getClass().getName() ), cause );
 		addException( ReportingLevel.E_UNHANDLED, cause );
 		return true;
 	}

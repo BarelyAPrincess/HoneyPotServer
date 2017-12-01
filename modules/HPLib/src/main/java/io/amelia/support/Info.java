@@ -9,12 +9,12 @@
  */
 package io.amelia.support;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.Kernel;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.Kernel;
 
 public class Info
 {
