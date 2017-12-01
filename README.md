@@ -1,3 +1,5 @@
+![HPSLogo](http://penoaks.com/assets/external/HoneyPotServerLogo.png "Honey Pot Server Logo")
+
 # Introduction
 **Honey Pot Server** is a modular multi-protocol networking server allowing for both dynamic and static content via a powerful subsystem consisting of plugins and built-in Groovy scripting language. Features also include ORM, events, clustering, users, permissions, enforced access policies, and much more. Nearly everything was designed with an extendable concept in mind and can be extended using the provided API. HPS is intended to provide easy-access to the best of the best Java 8 features without the mess and time-constracts of traditional Java servers. We strive to make the code base as easy to understand as possible by leaving out needless interfaces and classes.
 
@@ -30,6 +32,7 @@ Because Winnie The Pooh loves honey!
 **Honey Pot Server** is licensed under the MIT License. If you decide to use our server or use any of our code (In part or whole), PLEASE, we would love to hear about it. We don't require this but it's generally cool to hear what others do with our stuff.
 
 Copyright (c) 2017 Amelia DeWitt <TheAmeliaDeWitt@gmail.com>
+
 Copyright (c) 2017 Penoaks Publishing LLC. <development@penoaks.com>
 
 All Rights Reserved.
