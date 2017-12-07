@@ -54,6 +54,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.App;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
 import io.netty.buffer.ByteBuf;
@@ -70,6 +71,7 @@ public class IO
 	private static final int EOF = -1;
 	private static final String[] HEXDUMP_ROWPREFIXES = new String[65536 >>> 4];
 	private static final String[] HEXPADDING = new String[16];
+	private static final App.Logger L = App.getLogger( IO.class );
 	private static final String NEWLINE = "\n";
 
 	static
@@ -573,7 +575,7 @@ public class IO
 							}
 
 							nativesExtracted.add( entry.getName() );
-							// L().severe( String.format( "We were unable to load the native lib '%s' for arch '%s' within plugin '%s' for an unknown reason.", lib, arch, libFile ) );
+							// L.severe( String.format( "We were unable to load the native lib '%s' for arch '%s' within plugin '%s' for an unknown reason.", lib, arch, libFile ) );
 						}
 					}
 					catch ( FileNotFoundException e )
@@ -678,7 +680,7 @@ public class IO
 
 	public static boolean extractResourceZip( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File cache = ConfigRegistry.getPath( ApplicationInterface.PATH_CACHE );
+		File cache = App.getPath( App.PATH_CACHE );
 		if ( !cache.exists() )
 			cache.mkdirs();
 		File temp = new File( cache, "temp.zip" );
@@ -1161,7 +1163,7 @@ public class IO
 	public static boolean setDirectoryAccess( File file )
 	{
 		if ( file.exists() && file.isDirectory() && file.canRead() && file.canWrite() )
-			LogBuilder.get().finest( "This application has read and write access to directory \"" + relPath( file ) + "\"!" );
+			L.finest( "This application has read and write access to directory \"" + relPath( file ) + "\"!" );
 		else
 			try
 			{
@@ -1171,11 +1173,11 @@ public class IO
 				Objs.notFalse( file.setWritable( true ), "failed to set directory writable!" );
 				Objs.notFalse( file.setReadable( true ), "failed to set directory readable!" );
 
-				LogBuilder.get().fine( "Setting read and write access for directory \"" + relPath( file ) + "\" was successful!" );
+				L.fine( "Setting read and write access for directory \"" + relPath( file ) + "\" was successful!" );
 			}
 			catch ( IllegalArgumentException e )
 			{
-				LogBuilder.get().severe( "Exception encountered while handling access to path '" + relPath( file ) + "' with message '" + e.getMessage() + "'" );
+				L.severe( "Exception encountered while handling access to path '" + relPath( file ) + "' with message '" + e.getMessage() + "'" );
 				return false;
 			}
 		return true;

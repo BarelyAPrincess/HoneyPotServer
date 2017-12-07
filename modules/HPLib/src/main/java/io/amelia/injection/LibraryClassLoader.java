@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.injection;
+package io.amelia.injection;
 
 import java.io.File;
 import java.io.IOException;

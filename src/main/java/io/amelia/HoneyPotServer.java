@@ -1,7 +1,6 @@
 package io.amelia;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.env.Env;
+import io.amelia.config.Env;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
@@ -25,9 +24,9 @@ public class HoneyPotServer extends DefaultApplication
 	public HoneyPotServer()
 	{
 		/* Register keyed directory paths with the ConfigRegistry */
-		ConfigRegistry.setPath( PATH_WEBROOT, PATH_APP, "webroot" );
-		ConfigRegistry.setPath( PATH_DATABASE, PATH_APP, "database" );
-		ConfigRegistry.setPath( PATH_SESSIONS, PATH_STORAGE, "sessions" );
+		App.setPath( PATH_WEBROOT, App.PATH_APP, "webroot" );
+		App.setPath( PATH_DATABASE, App.PATH_APP, "database" );
+		App.setPath( PATH_SESSIONS, App.PATH_STORAGE, "sessions" );
 
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );

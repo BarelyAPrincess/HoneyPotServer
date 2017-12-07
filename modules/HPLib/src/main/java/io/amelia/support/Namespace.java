@@ -35,7 +35,7 @@ public class Namespace extends NamespaceBase<Namespace>
 
 	public static boolean isTld( String domain )
 	{
-		domain = Net.normalize( domain );
+		domain = Web.normalize( domain );
 		for ( String tld : tldMaps )
 			if ( domain.matches( tld ) )
 				return true;
@@ -44,7 +44,7 @@ public class Namespace extends NamespaceBase<Namespace>
 
 	public static Domain parseDomain( String namespace )
 	{
-		namespace = Net.normalize( namespace );
+		namespace = Web.normalize( namespace );
 
 		if ( Objs.isEmpty( namespace ) )
 			return new Domain( new Namespace(), new Namespace() );

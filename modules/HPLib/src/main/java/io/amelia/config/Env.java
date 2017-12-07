@@ -1,4 +1,4 @@
-package io.amelia.env;
+package io.amelia.config;
 
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.Objs;

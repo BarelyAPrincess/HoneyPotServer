@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.injection;
+package io.amelia.injection;
 
 /**
  * Provides a context to the source of a library load

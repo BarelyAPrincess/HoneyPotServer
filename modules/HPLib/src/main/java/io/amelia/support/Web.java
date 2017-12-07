@@ -38,7 +38,7 @@ import javax.net.ssl.SSLContext;
 /**
  * Provides Network Utilities
  */
-public class Net
+public class Web
 {
 	private static final Pattern DNS_WILDCARD_PATTERN = Pattern.compile( "^\\*\\..*" );
 
@@ -291,7 +291,7 @@ public class Net
 		return out.toByteArray();
 	}
 
-	private Net()
+	private Web()
 	{
 
 	}

@@ -7,28 +7,24 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.injection;
-
-import com.chiorichan.utils.UtilHttp;
-import com.chiorichan.utils.UtilIO;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.foundation.Kernel;
-import io.amelia.lang.EnumColor;
-import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.UncaughtException;
-import io.amelia.support.IO;
-import io.amelia.logcompat.LogBuilder;
-import org.apache.commons.lang3.Validate;
+package io.amelia.injection;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.amelia.App;
+import io.amelia.lang.ReportingLevel;
+import io.amelia.lang.UncaughtException;
+import io.amelia.support.EnumColor;
+import io.amelia.support.IO;
+import io.amelia.support.Objs;
+import io.amelia.support.Web;
 
 /**
  * Used as a helper class for retrieving files from the central maven repository
@@ -37,17 +33,15 @@ public class Libraries implements LibrarySource
 {
 	public static final String BASE_MAVEN_URL = "http://jcenter.bintray.com/";
 	public static final String BASE_MAVEN_URL_ALT = "http://search.maven.org/remotecontent?filepath=";
-	public static final Path INCLUDES_DIR;
-	public static final Path LIBRARY_DIR;
+	public static final File INCLUDES_DIR;
+	public static final File LIBRARY_DIR;
 	public static final Libraries SELF = new Libraries();
-	private static final String LOGNAME = "Libs";
+	private static final App.Logger L = App.getLogger( Libraries.class );
 	public static Map<String, MavenReference> loadedLibraries = new HashMap<>();
 
 	static
 	{
-
-
-		LIBRARY_DIR = Kernel.isDeployment() ? new File( "libraries" ) : ConfigRegistry.i().getDirectory( "lib", "libraries" );
+		LIBRARY_DIR = Kernel.isDeployment() ? new File( "libraries" ) : App.getPath( App.PATH_LIBS );
 
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
@@ -57,7 +51,7 @@ public class Libraries implements LibrarySource
 		if ( !IO.setDirectoryAccess( INCLUDES_DIR ) )
 			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + IO.relPath( INCLUDES_DIR ) + "\"!" );
 
-		Arrays.stream( INCLUDES_DIR.listFiles() ).filter(  )
+		Arrays.stream( INCLUDES_DIR.listFiles() ).filter()
 
 		// Scans the 'libraries/local' directory for jar files that can be injected into the classpath
 		FilenameFilter ff = new FilenameFilter()
@@ -96,7 +90,7 @@ public class Libraries implements LibrarySource
 
 	public static MavenReference getReferenceByGroup( String group )
 	{
-		Validate.notNull( group );
+		Objs.notNull( group );
 		for ( MavenReference ref : loadedLibraries.values() )
 			if ( group.equalsIgnoreCase( ref.getGroup() ) )
 				return ref;
@@ -105,7 +99,7 @@ public class Libraries implements LibrarySource
 
 	public static MavenReference getReferenceByName( String name )
 	{
-		Validate.notNull( name );
+		Objs.notNull( name );
 		for ( MavenReference ref : loadedLibraries.values() )
 			if ( name.equalsIgnoreCase( ref.getName() ) )
 				return ref;
@@ -122,7 +116,7 @@ public class Libraries implements LibrarySource
 		if ( lib == null || !lib.exists() )
 			return false;
 
-		LogBuilder.get( LOGNAME ).info( ( LogBuilder.useColor() ? EnumColor.GRAY : "" ) + "Loading the library `" + lib.getName() + "`" );
+		L.info( EnumColor.GRAY + "Loading the library `" + lib.getName() + "`" );
 
 		try
 		{
@@ -136,11 +130,11 @@ public class Libraries implements LibrarySource
 
 		try
 		{
-			UtilIO.extractNatives( lib, lib.getParentFile() );
+			IO.extractNatives( lib, lib.getParentFile() );
 		}
 		catch ( IOException e )
 		{
-			LogBuilder.get( LOGNAME ).severe( "We had a problem trying to extract native libraries from jar file '" + lib.getAbsolutePath() + "'", e );
+			L.severe( "We had a problem trying to extract native libraries from jar file '" + lib.getAbsolutePath() + "'", e );
 		}
 
 		return true;
@@ -161,13 +155,13 @@ public class Libraries implements LibrarySource
 		{
 			if ( !mavenLocalPom.exists() || !mavenLocalJar.exists() )
 			{
-				LogBuilder.get( LOGNAME ).info( ( LogBuilder.useColor() ? EnumColor.GOLD : "" ) + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
+				L.info( EnumColor.GOLD + "Downloading the library `" + lib.toString() + "` from url `" + urlJar + "`... Please Wait!" );
 
 				// Try download from JCenter Bintray Maven Repository
 				try
 				{
-					UtilHttp.downloadFile( urlPom, mavenLocalPom );
-					UtilHttp.downloadFile( urlJar, mavenLocalJar );
+					Web.downloadFile( urlPom, mavenLocalPom );
+					Web.downloadFile( urlJar, mavenLocalJar );
 				}
 				catch ( IOException e )
 				{
@@ -175,22 +169,22 @@ public class Libraries implements LibrarySource
 					String urlJarAlt = lib.mavenUrlAlt( "jar" );
 					String urlPomAlt = lib.mavenUrlAlt( "pom" );
 
-					LogBuilder.get( LOGNAME ).warning( "Primary download location failed, trying secondary location `" + urlJarAlt + "`... Please Wait!" );
+					L.warning( "Primary download location failed, trying secondary location `" + urlJarAlt + "`... Please Wait!" );
 
 					try
 					{
-						UtilHttp.downloadFile( urlPomAlt, mavenLocalPom );
-						UtilHttp.downloadFile( urlJarAlt, mavenLocalJar );
+						Web.downloadFile( urlPomAlt, mavenLocalPom );
+						Web.downloadFile( urlJarAlt, mavenLocalJar );
 					}
 					catch ( IOException ee )
 					{
-						LogBuilder.get( LOGNAME ).severe( "Primary and secondary download location have FAILED!" );
+						L.severe( "Primary and secondary download location have FAILED!" );
 						return false;
 					}
 				}
 			}
 
-			LogBuilder.get( LOGNAME ).info( ( LogBuilder.useColor() ? EnumColor.DARK_GRAY : "" ) + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
+			L.info( ( EnumColor.DARK_GRAY + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
 
 			LibraryClassLoader.addPath( mavenLocalJar );
 		}
@@ -203,11 +197,11 @@ public class Libraries implements LibrarySource
 		loadedLibraries.put( lib.getKey(), lib );
 		try
 		{
-			UtilIO.extractNatives( lib.jarFile(), lib.baseDir() );
+			IO.extractNatives( lib.jarFile(), lib.baseDir() );
 		}
 		catch ( IOException e )
 		{
-			LogBuilder.get( LOGNAME ).severe( "We had a problem trying to extract native libraries from jar file '" + lib.jarFile() + "'", e );
+			L.severe( "We had a problem trying to extract native libraries from jar file '" + lib.jarFile() + "'", e );
 		}
 
 		return true;

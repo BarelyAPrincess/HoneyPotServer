@@ -10,7 +10,7 @@
 package io.amelia.logging;
 
 import com.google.common.collect.Lists;
-import io.amelia.lang.EnumColor;
+import io.amelia.support.EnumColor;
 import io.amelia.lang.IException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.support.Versioning;

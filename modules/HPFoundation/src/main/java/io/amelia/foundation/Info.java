@@ -7,14 +7,15 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.support;
+package io.amelia.foundation;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.Kernel;
+import io.amelia.support.IO;
+import io.amelia.support.Strs;
 
 public class Info
 {
@@ -106,7 +107,7 @@ public class Info
 	 */
 	public static String getProductSimple()
 	{
-		return metadata.getProperty( "project.name", "HoneyPot" ).replaceAll( " ", "" );
+		return Strs.stringChain( metadata.getProperty( "project.name", "HoneyPot" ) ).noWhitespace().noSpecial().get();
 	}
 
 	/**
@@ -136,7 +137,7 @@ public class Info
 	 */
 	public static boolean isDevelopment()
 	{
-		return "0".equals( getBuildNumber() ) || ConfigRegistry.getBoolean( "server.developmentMode" ).orElse( false );
+		return "0".equals( getBuildNumber() ) || ConfigRegistry.config.getBoolean( "server.developmentMode" ).orElse( false );
 	}
 
 	/**

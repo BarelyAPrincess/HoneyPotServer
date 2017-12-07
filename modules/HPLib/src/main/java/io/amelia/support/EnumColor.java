@@ -7,11 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.lang;
+package io.amelia.support;
 
-import com.chiorichan.utils.UtilObjects;
 import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.Ansi.Attribute;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -125,7 +123,7 @@ public enum EnumColor
 	private static final Map<Character, EnumColor> BY_CHAR = new HashMap<>();
 	private static final Map<Integer, EnumColor> BY_ID = new HashMap<>();
 	private static final Pattern STRIP_COLOR_PATTERN = Pattern.compile( "(?i)" + String.valueOf( COLOR_CHAR ) + "[0-9A-FK-OR]" );
-	private static Map<EnumColor, String> replacements = new EnumMap<EnumColor, String>( EnumColor.class );
+	private static Map<EnumColor, String> replacements = new EnumMap<>( EnumColor.class );
 
 	static
 	{
@@ -145,14 +143,14 @@ public enum EnumColor
 		replacements.put( EnumColor.LIGHT_PURPLE, Ansi.ansi().fg( Ansi.Color.MAGENTA ).bold().toString() );
 		replacements.put( EnumColor.YELLOW, Ansi.ansi().fg( Ansi.Color.YELLOW ).bold().toString() );
 		replacements.put( EnumColor.WHITE, Ansi.ansi().fg( Ansi.Color.WHITE ).bold().toString() );
-		replacements.put( EnumColor.MAGIC, Ansi.ansi().a( Attribute.BLINK_SLOW ).toString() );
-		replacements.put( EnumColor.BOLD, Ansi.ansi().a( Attribute.INTENSITY_BOLD ).toString() );
-		replacements.put( EnumColor.STRIKETHROUGH, Ansi.ansi().a( Attribute.STRIKETHROUGH_ON ).toString() );
-		replacements.put( EnumColor.UNDERLINE, Ansi.ansi().a( Attribute.UNDERLINE ).toString() );
-		replacements.put( EnumColor.ITALIC, Ansi.ansi().a( Attribute.ITALIC ).toString() );
-		replacements.put( EnumColor.FAINT, Ansi.ansi().a( Attribute.INTENSITY_FAINT ).toString() );
-		replacements.put( EnumColor.NEGATIVE, Ansi.ansi().a( Attribute.NEGATIVE_ON ).toString() );
-		replacements.put( EnumColor.RESET, Ansi.ansi().a( Attribute.RESET ).fg( Ansi.Color.DEFAULT ).toString() );
+		replacements.put( EnumColor.MAGIC, Ansi.ansi().a( Ansi.Attribute.BLINK_SLOW ).toString() );
+		replacements.put( EnumColor.BOLD, Ansi.ansi().a( Ansi.Attribute.INTENSITY_BOLD ).toString() );
+		replacements.put( EnumColor.STRIKETHROUGH, Ansi.ansi().a( Ansi.Attribute.STRIKETHROUGH_ON ).toString() );
+		replacements.put( EnumColor.UNDERLINE, Ansi.ansi().a( Ansi.Attribute.UNDERLINE ).toString() );
+		replacements.put( EnumColor.ITALIC, Ansi.ansi().a( Ansi.Attribute.ITALIC ).toString() );
+		replacements.put( EnumColor.FAINT, Ansi.ansi().a( Ansi.Attribute.INTENSITY_FAINT ).toString() );
+		replacements.put( EnumColor.NEGATIVE, Ansi.ansi().a( Ansi.Attribute.NEGATIVE_ON ).toString() );
+		replacements.put( EnumColor.RESET, Ansi.ansi().a( Ansi.Attribute.RESET ).fg( Ansi.Color.DEFAULT ).toString() );
 	}
 
 	static
@@ -199,10 +197,15 @@ public enum EnumColor
 	 */
 	public static EnumColor getByChar( String code )
 	{
-		UtilObjects.notNull( code, "Code cannot be null" );
-		UtilObjects.notFalse( code.length() > 0, "Code must have at least one char" );
+		Objs.notNull( code, "Code cannot be null" );
+		Objs.notNegative( code.length(), "Code must have at least one char" );
 
 		return BY_CHAR.get( code.charAt( 0 ) );
+	}
+
+	public static EnumColor getById( int id )
+	{
+		return BY_ID.get( id );
 	}
 
 	/**
@@ -293,6 +296,7 @@ public enum EnumColor
 			}
 		return new String( b );
 	}
+
 	private final char code;
 	private final int intCode;
 	private final boolean isFormat;

@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import io.amelia.logcompat.LogBuilder;
+import io.amelia.App;
 import io.amelia.support.Objs;
 
 /**
@@ -26,6 +26,7 @@ import io.amelia.support.Objs;
  */
 public class ExceptionReport
 {
+	private static final App.Logger L = App.getLogger( ExceptionReport.class );
 	private static final Map<Class<? extends Throwable>, ExceptionCallback> registered = new ConcurrentHashMap<>();
 
 	public static String printExceptions( IException... exceptions )
@@ -204,7 +205,7 @@ public class ExceptionReport
 		 * Handle the remainder unhandled run of the mill exceptions
 		 * NullPointerException, ArrayIndexOutOfBoundsException, IOException, StackOverflowError, ClassFormatError
 		 */
-		LogBuilder.get().severe( String.format( "The exception %s went unhandled.", cause.getClass().getName() ), cause );
+		L.severe( String.format( "The exception %s went unhandled.", cause.getClass().getName() ), cause );
 		addException( ReportingLevel.E_UNHANDLED, cause );
 		return true;
 	}

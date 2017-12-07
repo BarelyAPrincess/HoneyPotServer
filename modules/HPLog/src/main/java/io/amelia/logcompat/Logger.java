@@ -10,7 +10,7 @@
 package io.amelia.logcompat;
 
 import com.chiorichan.utils.Objs;
-import io.amelia.lang.EnumColor;
+import io.amelia.support.EnumColor;
 import io.amelia.support.Info;
 import io.amelia.support.Objs;
 

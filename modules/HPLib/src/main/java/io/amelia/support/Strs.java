@@ -46,6 +46,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 public class Strs
 {
 	public static final Map<String, String[]> CHARS_MAP;
@@ -401,7 +403,7 @@ public class Strs
 		return Arrays.stream( args ).collect( Collectors.joining( glue ) );
 	}
 
-	public static String lcfirst( String value )
+	public static String lcFirst( String value )
 	{
 		return value.substring( 0, 1 ).toLowerCase() + value.substring( 1 );
 	}
@@ -567,7 +569,7 @@ public class Strs
 
 	public static List<String> repeatToList( String chr, int length )
 	{
-		List<String> list = Lists.newArrayList();
+		List<String> list = new ArrayList<>();
 		for ( int i = 0; i < length; i++ )
 			list.add( chr );
 		return list;
@@ -645,6 +647,12 @@ public class Strs
 		return false;
 	}
 
+	public static StringChain stringChain( @Nonnull String str )
+	{
+		Objs.notNull( str );
+		return new StringChain( str );
+	}
+
 	public static byte[] stringToBytesASCII( String str )
 	{
 		return str == null ? null : str.getBytes( StandardCharsets.US_ASCII );
@@ -678,7 +686,7 @@ public class Strs
 	 */
 	public static String toCamelCase( String value )
 	{
-		return lcfirst( toStudlyCase( value ) );
+		return lcFirst( toStudlyCase( value ) );
 	}
 
 	/**
@@ -723,7 +731,6 @@ public class Strs
 	public static String trimAll( String text, char character )
 	{
 		String normalizedText = trimFront( text, character );
-
 		return trimEnd( normalizedText, character );
 	}
 
@@ -772,6 +779,24 @@ public class Strs
 		do
 			index++;
 		while ( index < normalizedText.length() && normalizedText.charAt( index ) == character );
+
+		return normalizedText.substring( index ).trim();
+	}
+
+	private static String trimRegex( String text, String regex )
+	{
+		String normalizedText;
+		int index;
+
+		if ( text == null || text.isEmpty() )
+			return text;
+
+		normalizedText = text.trim();
+		index = -1;
+
+		do
+			index++;
+		while ( index < normalizedText.length() && Pattern.matches( regex, normalizedText.substring( index, 1 ) ) );
 
 		return normalizedText.substring( index ).trim();
 	}
@@ -880,5 +905,183 @@ public class Strs
 	private Strs()
 	{
 
+	}
+
+	public static class StringChain
+	{
+		private String str;
+
+		private StringChain( String str )
+		{
+			this.str = str;
+		}
+
+		public StringChain capitalizeWords( char delimiter )
+		{
+			str = Strs.capitalizeWords( str, delimiter );
+			return this;
+		}
+
+		public StringChain capitalizeWords()
+		{
+			str = Strs.capitalizeWords( str );
+			return this;
+		}
+
+		public StringChain capitalizeWordsFully( char delimiter )
+		{
+			str = Strs.capitalizeWordsFully( str, delimiter );
+			return this;
+		}
+
+		public StringChain capitalizeWordsFully()
+		{
+			str = Strs.capitalizeWordsFully( str );
+			return this;
+		}
+
+		public StringChain escape()
+		{
+			for ( String s : new String[] {"\\", "+", ".", "?", "*", "[", "]", "^", "$", "(", ")", "{", "}", "=", "!", "<", ">", "|", ":", "-"} )
+				str = str.replace( s, "\\" + s );
+			return this;
+		}
+
+		public String get()
+		{
+			return str;
+		}
+
+		public StringChain lcFirst()
+		{
+			str = str.substring( 0, 1 ).toLowerCase() + str.substring( 1 );
+			return this;
+		}
+
+		public StringChain removeInvalidChars()
+		{
+			str = str.replaceAll( "[^a-zA-Z0-9!#$%&'*+-/=?^_`{|}~@\\. ]", "" );
+			return this;
+		}
+
+		public StringChain removeLetters()
+		{
+			str = str.replaceAll( "[a-zA-Z]", "" );
+			return this;
+		}
+
+		public StringChain removeLettersLower()
+		{
+			str = str.replaceAll( "[a-z]", "" );
+			return this;
+		}
+
+		public StringChain removeLettersUpper()
+		{
+			str = str.replaceAll( "[A-Z]", "" );
+			return this;
+		}
+
+		public StringChain removeNumbers()
+		{
+			str = str.replaceAll( "\\d", "" );
+			return this;
+		}
+
+		public StringChain removeSpecial()
+		{
+			str = str.replaceAll( "\\W", "" );
+			return this;
+		}
+
+		public StringChain removeWhitespace()
+		{
+			str = str.replaceAll( "\\s", "" );
+			return this;
+		}
+
+		public StringChain repeat( int cnt )
+		{
+			str = Strs.repeat( str, cnt );
+			return this;
+		}
+
+		public StringChain replace( String orig, String replace )
+		{
+			str = Pattern.compile( orig, Pattern.LITERAL ).matcher( str ).replaceAll( replace );
+			return this;
+		}
+
+		public StringChain replaceRegex( String orig, String replace )
+		{
+			str = str.replaceAll( orig, replace );
+			return this;
+		}
+
+		public StringChain slugify()
+		{
+			str = Strs.slugify( str );
+			return this;
+		}
+
+		public StringChain toCamelCase()
+		{
+			str = Strs.lcFirst( Strs.toStudlyCase( str ) );
+			return this;
+		}
+
+		public StringChain toLowercase()
+		{
+			str = str.toLowerCase();
+			return this;
+		}
+
+		public StringChain toStudlyCase()
+		{
+			str = Strs.capitalizeWordsFully( str.replaceAll( "-_", " " ) ).replaceAll( " ", "" );
+			return this;
+		}
+
+		public StringChain toUppercase()
+		{
+			str = str.toUpperCase();
+			return this;
+		}
+
+		public StringChain trimAll( char character )
+		{
+			String normalizedText = Strs.trimFront( str, character );
+			str = Strs.trimEnd( normalizedText, character );
+			return this;
+		}
+
+		public StringChain trimAll()
+		{
+			return trimRegex( "\\W" );
+		}
+
+		public StringChain trimEnd( char character )
+		{
+			str = Strs.trimEnd( str, character );
+			return this;
+		}
+
+		public StringChain trimFront( char character )
+		{
+			str = Strs.trimFront( str, character );
+			return this;
+		}
+
+		public StringChain trimRegex( String regex )
+		{
+			str = Strs.trimRegex( str, regex );
+			return this;
+		}
+
+		public StringChain wrap( char wrap )
+		{
+			str = String.format( "%s%s%s", wrap, str, wrap );
+			return this;
+		}
 	}
 }

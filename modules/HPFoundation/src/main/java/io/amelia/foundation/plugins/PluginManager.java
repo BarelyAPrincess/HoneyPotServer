@@ -9,9 +9,9 @@
  */
 package io.amelia.foundation.plugins;
 
+import io.amelia.App;
 import io.amelia.config.ConfigRegistry;
 import io.amelia.events.EventHandlers;
-import io.amelia.foundation.ApplicationInterface;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.plugins.loader.Plugin;
 import io.amelia.foundation.plugins.loader.PluginLoader;
@@ -66,10 +66,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	private void checkUpdate( File file )
 	{
-		if ( !ConfigRegistry.getPath( ApplicationInterface.PATH_UPDATES ).isDirectory() )
+		if ( !App.getPath( App.PATH_UPDATES ).isDirectory() )
 			return;
 
-		File updateFile = new File( ConfigRegistry.getPath( ApplicationInterface.PATH_UPDATES ), file.getName() );
+		File updateFile = new File( App.getPath( App.PATH_UPDATES ), file.getName() );
 		if ( updateFile.isFile() && IO.copy( updateFile, file ) )
 			updateFile.delete();
 	}

@@ -1,9 +1,9 @@
 package io.amelia.config;
 
 import io.amelia.lang.ConfigException;
-import io.amelia.support.data.ValueTypesOutline;
 import io.amelia.support.data.ParcelLoader;
 import io.amelia.support.data.StackerWithValue;
+import io.amelia.support.data.ValueTypesOutline;
 
 public final class ConfigMap extends StackerWithValue<ConfigMap, Object> implements ValueTypesOutline
 {

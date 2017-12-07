@@ -13,7 +13,7 @@ import io.amelia.config.ConfigLoader;
 import io.amelia.config.ConfigMap;
 import io.amelia.foundation.MetaMap;
 import io.amelia.foundation.VendorMeta;
-import io.amelia.foundation.injection.MavenReference;
+import io.amelia.injection.MavenReference;
 import io.amelia.lang.PluginMetaException;
 import io.amelia.lang.Runlevel;
 import io.amelia.support.Lists;

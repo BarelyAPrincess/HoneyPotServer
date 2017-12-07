@@ -10,7 +10,7 @@
 package io.amelia.logcompat;
 
 import io.amelia.config.ConfigRegistry;
-import io.amelia.lang.EnumColor;
+import io.amelia.support.EnumColor;
 import io.amelia.support.Strs;
 
 import java.io.PrintWriter;

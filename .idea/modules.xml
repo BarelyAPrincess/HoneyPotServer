@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig.iml" group="HPConfig" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_main.iml" group="HPConfig" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPConfig/HPConfig_test.iml" group="HPConfig" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" group="HPFoundation" />

@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import io.amelia.App;
 import io.amelia.config.ConfigRegistry;
-import io.amelia.env.Env;
+import io.amelia.config.Env;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
-import io.amelia.support.IO;
-import io.amelia.support.Info;
 import io.amelia.support.Encrypt;
+import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -25,13 +25,6 @@ import joptsimple.OptionSpec;
 
 public abstract class ApplicationInterface implements VendorRegistrar, ExceptionContext
 {
-	public static final String PATH_APP = "__app";
-	public static final String PATH_CACHE = "__cache";
-	public static final String PATH_LOGS = "__logs";
-	public static final String PATH_CONFIG = "__config";
-	public static final String PATH_PLUGINS = "__plugins";
-	public static final String PATH_UPDATES = "__updates";
-	public static final String PATH_STORAGE = "__storage";
 	// Main Looper runs on the main thread, i.e., the thread that started the Kernel
 	private final Looper mainLooper;
 	private final OptionParser optionParser = new OptionParser();
@@ -40,13 +33,6 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public ApplicationInterface()
 	{
-		ConfigRegistry.setPath( PATH_CACHE, PATH_STORAGE, "cache" );
-		ConfigRegistry.setPath( PATH_LOGS, PATH_STORAGE, "logs" );
-		ConfigRegistry.setPath( PATH_CONFIG, PATH_APP, "config" );
-		ConfigRegistry.setPath( PATH_PLUGINS, PATH_APP, "plugins" );
-		ConfigRegistry.setPath( PATH_UPDATES, PATH_APP, "updates" );
-		ConfigRegistry.setPath( PATH_STORAGE, PATH_APP, "storage" );
-
 		mainLooper = new Looper( Looper.Flag.SYSTEM );
 
 		optionParser.acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
@@ -178,7 +164,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 					if ( !Objs.isNull( optionSpec.value( optionSet ) ) )
 					{
 						if ( optionKey.startsWith( "dir-" ) )
-							ConfigRegistry.setPath( optionKey.substring( 4 ), ( String ) optionSpec.value( optionSet ) );
+							App.setPath( optionKey.substring( 4 ), ( String ) optionSpec.value( optionSet ) );
 						else if ( env.isValueSet( optionKey ) )
 							env.set( optionKey, optionSpec.value( optionSet ), false );
 					}
