@@ -10,15 +10,13 @@
 package io.amelia.injection;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.amelia.App;
+import io.amelia.foundation.App;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.EnumColor;
@@ -41,7 +39,7 @@ public class Libraries implements LibrarySource
 
 	static
 	{
-		LIBRARY_DIR = Kernel.isDeployment() ? new File( "libraries" ) : App.getPath( App.PATH_LIBS );
+		LIBRARY_DIR = App.getPath( App.PATH_LIBS );
 
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 
@@ -51,20 +49,8 @@ public class Libraries implements LibrarySource
 		if ( !IO.setDirectoryAccess( INCLUDES_DIR ) )
 			throw new UncaughtException( ReportingLevel.E_ERROR, "This application experienced a problem setting read and write access to directory \"" + IO.relPath( INCLUDES_DIR ) + "\"!" );
 
-		Arrays.stream( INCLUDES_DIR.listFiles() ).filter()
-
 		// Scans the 'libraries/local' directory for jar files that can be injected into the classpath
-		FilenameFilter ff = new FilenameFilter()
-		{
-			@Override
-			public boolean accept( File dir, String name )
-			{
-				return true;
-				// return name != null && name.toLowerCase().endsWith( "jar" );
-			}
-		};
-		for ( File f : INCLUDES_DIR.listFiles( ff ) )
-			loadLibrary( f );
+		IO.listFiles( INCLUDES_DIR ).filter( file -> file.getName().toLowerCase().endsWith( ".jar" ) ).forEach( Libraries::loadLibrary );
 	}
 
 	public static File getLibraryDir()
@@ -184,7 +170,7 @@ public class Libraries implements LibrarySource
 				}
 			}
 
-			L.info( ( EnumColor.DARK_GRAY + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
+			L.info( EnumColor.DARK_GRAY + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
 
 			LibraryClassLoader.addPath( mavenLocalJar );
 		}

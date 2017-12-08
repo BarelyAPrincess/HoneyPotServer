@@ -6,7 +6,7 @@
 You can find our official documentation at https://hps-docs.penoaks.com/. It contains tutorials and great advanced details on how to utilize the server the possible from the developers themselves.
 
 # How To Build
-HPS is easily built using Gradle. If you are new to Gradle, just execute the `./gradlew build` (or `grandle.bat build` for Windows) from and as long as there are no compilition errors, you will find a fresh build in the `build/dest` directory.
+HPS is easily built using Gradle. If you are new to Gradle, just execute the `./gradlew build` (or `grandle.bat build` for Windows) script and you should find a fresh build in the `build/dest` directory. Keep in mind that you might have compilition errors if building from the bleeding-edge (`master-dev`) branch.
 
 # Coding
 Our Gradle Build environment uses the CodeStyle plugin to check coding standards, as follows:
@@ -35,4 +35,4 @@ Copyright (c) 2017 Amelia DeWitt <TheAmeliaDeWitt@gmail.com>
 
 Copyright (c) 2017 Penoaks Publishing LLC. <development@penoaks.com>
 
-All Rights Reserved.
+ll Rights Reserved.

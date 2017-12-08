@@ -9,7 +9,7 @@
  */
 package io.amelia.logcompat;
 
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Strs;
 

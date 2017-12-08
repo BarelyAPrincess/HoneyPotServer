@@ -105,7 +105,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 	public String getMessage()
 	{
 		return super.getMessage();
-		// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
+		// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getProductName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
 	}
 
 	public boolean hasCause()

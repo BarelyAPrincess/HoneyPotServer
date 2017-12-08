@@ -1,4 +1,4 @@
-package io.amelia.config;
+package io.amelia.foundation;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.App;
 import io.amelia.lang.ConfigException;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
@@ -16,6 +15,14 @@ import io.amelia.support.data.ParcelLoader;
 public class ConfigRegistry
 {
 	public static final ConfigMap config = new ConfigMap();
+
+	/*
+	 * We set default config values here for end-user reference, they're then saved to the config file upon load (if unset).
+	 */
+	static
+	{
+		config.setValue( "app.developmentMode", false );
+	}
 
 	public static void clearCache( @Nonnull File path, @Nonnull long keepHistory )
 	{

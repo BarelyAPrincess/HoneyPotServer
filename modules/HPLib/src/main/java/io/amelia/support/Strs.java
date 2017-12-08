@@ -960,44 +960,37 @@ public class Strs
 
 		public StringChain removeInvalidChars()
 		{
-			str = str.replaceAll( "[^a-zA-Z0-9!#$%&'*+-/=?^_`{|}~@\\. ]", "" );
-			return this;
+			return replaceInvalidChars( "" );
 		}
 
 		public StringChain removeLetters()
 		{
-			str = str.replaceAll( "[a-zA-Z]", "" );
-			return this;
+			return replaceLetters( "" );
 		}
 
 		public StringChain removeLettersLower()
 		{
-			str = str.replaceAll( "[a-z]", "" );
-			return this;
+			return replaceLettersLower( "" );
 		}
 
 		public StringChain removeLettersUpper()
 		{
-			str = str.replaceAll( "[A-Z]", "" );
-			return this;
+			return replaceLettersUpper( "" );
 		}
 
 		public StringChain removeNumbers()
 		{
-			str = str.replaceAll( "\\d", "" );
-			return this;
+			return replaceNumbers( "" );
 		}
 
 		public StringChain removeSpecial()
 		{
-			str = str.replaceAll( "\\W", "" );
-			return this;
+			return replaceSpecial( "" );
 		}
 
 		public StringChain removeWhitespace()
 		{
-			str = str.replaceAll( "\\s", "" );
-			return this;
+			return replaceWhitespace( "" );
 		}
 
 		public StringChain repeat( int cnt )
@@ -1012,9 +1005,51 @@ public class Strs
 			return this;
 		}
 
+		public StringChain replaceInvalidChars( String replace )
+		{
+			str = str.replaceAll( "[^a-zA-Z0-9!#$%&'*+-/=?^_`{|}~@\\. ]", replace );
+			return this;
+		}
+
+		public StringChain replaceLetters( String replace )
+		{
+			str = str.replaceAll( "[a-zA-Z]", replace );
+			return this;
+		}
+
+		public StringChain replaceLettersLower( String replace )
+		{
+			str = str.replaceAll( "[a-z]", replace );
+			return this;
+		}
+
+		public StringChain replaceLettersUpper( String replace )
+		{
+			str = str.replaceAll( "[A-Z]", replace );
+			return this;
+		}
+
+		public StringChain replaceNumbers( String replace )
+		{
+			str = str.replaceAll( "\\d", replace );
+			return this;
+		}
+
 		public StringChain replaceRegex( String orig, String replace )
 		{
 			str = str.replaceAll( orig, replace );
+			return this;
+		}
+
+		public StringChain replaceSpecial( String replace )
+		{
+			str = str.replaceAll( "\\W", replace );
+			return this;
+		}
+
+		public StringChain replaceWhitespace( String replace )
+		{
+			str = str.replaceAll( "\\s", replace );
 			return this;
 		}
 
@@ -1057,7 +1092,7 @@ public class Strs
 
 		public StringChain trimAll()
 		{
-			return trimRegex( "\\W" );
+			return trimRegex( "\\s" );
 		}
 
 		public StringChain trimEnd( char character )

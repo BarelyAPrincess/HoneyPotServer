@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import io.amelia.config.ConfigRegistry;
-import io.amelia.foundation.Kernel;
+import io.amelia.foundation.App;
+import io.amelia.foundation.ConfigRegistry;
 
 public class Namespace extends NamespaceBase<Namespace>
 {
@@ -29,7 +29,7 @@ public class Namespace extends NamespaceBase<Namespace>
 		}
 		catch ( Exception e )
 		{
-			Kernel.L.severe( "Could not read TLD configuration. Check if config list `conf.tlds` exists.", e );
+			App.L.severe( "Could not read TLD configuration. Check if config list `conf.tlds` exists.", e );
 		}
 	}
 

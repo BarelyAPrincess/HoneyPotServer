@@ -21,7 +21,6 @@ import io.amelia.events.application.RunlevelEvent;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
 import io.amelia.lang.ApplicationException;
-import io.amelia.support.EnumColor;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.IException;
 import io.amelia.lang.Runlevel;
@@ -29,6 +28,7 @@ import io.amelia.lang.StartupException;
 import io.amelia.lang.UncaughtException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
+import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.Lists;
 import io.amelia.support.Objs;
@@ -415,7 +415,7 @@ public final class Kernel
 		// Call to make sure the INITIALIZATION Runlevel is acknowledged by the application.
 		onRunlevelChange();
 
-		L.info( "Starting " + Info.getProduct() + " (" + Info.getVersion() + ")" );
+		L.info( "Starting " + ImplDevMeta.getProductName() + " (" + ImplDevMeta.getVersionDescribe() + ")" );
 
 		/*
 		 * STARTUP

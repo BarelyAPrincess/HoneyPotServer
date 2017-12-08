@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
-import io.amelia.config.ConfigMap;
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.Looper;
 import io.amelia.lang.NetworkException;

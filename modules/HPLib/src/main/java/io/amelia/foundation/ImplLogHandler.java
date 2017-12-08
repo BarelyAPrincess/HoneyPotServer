@@ -1,4 +1,4 @@
-package io.amelia;
+package io.amelia.foundation;
 
 public interface ImplLogHandler
 {

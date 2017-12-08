@@ -1,8 +1,8 @@
 package io.amelia.foundation.binding;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.config.ConfigMap;
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventDispatcher;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.facades.FacadePriority;

@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import io.amelia.App;
-import io.amelia.config.ConfigRegistry;
-import io.amelia.config.Env;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.ReportingLevel;
@@ -40,6 +37,9 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 		optionParser.accepts( "env-file", "The env file" ).withRequiredArg().ofType( String.class ).defaultsTo( ".env" );
 		optionParser.accepts( "env", "Overrides env values" ).withRequiredArg().ofType( String.class );
+
+		for ( String pathKey : App.getPathSlugs() )
+			optionParser.accepts( "dir-" + pathKey, "Sets the " + pathKey + " directory." ).withRequiredArg().ofType( String.class );
 	}
 
 	public void addArgument( String arg, String desc )
@@ -104,11 +104,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		return new VendorMeta( new HashMap<String, String>()
 		{{
-			put( VendorMeta.NAME, Info.getProduct() );
-			put( VendorMeta.DESCRIPTION, "Honey Pot Server is a modular multi-protocol networking server offering groovy scripting, plugins, ssl, events, orm, clustering, and more." );
-			put( VendorMeta.AUTHORS, "Amelia DeWitt" );
-			put( VendorMeta.GITHUB_BASE_URL, "https://github.com/TheAmeliaDeWitt/HoneyPotServer" );
-			put( VendorMeta.VERSION, Info.getVersion() );
+			put( VendorMeta.NAME, App.getDevMeta().getProductName() );
+			put( VendorMeta.DESCRIPTION, App.getDevMeta().getProductDescription() );
+			put( VendorMeta.AUTHORS, App.getDevMeta().getDeveloperName() );
+			put( VendorMeta.GITHUB_BASE_URL, App.getDevMeta().getGitRepoUrl() );
+			put( VendorMeta.VERSION, App.getDevMeta().getVersionDescribe() );
 		}} );
 	}
 
@@ -148,7 +148,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 		if ( optionSet.has( "version" ) )
 		{
-			Kernel.L.info( Info.getProductDescribe() );
+			Kernel.L.info( App.getDevMeta().getProductDescribed() );
 			throw new StartupInterruptException();
 		}
 

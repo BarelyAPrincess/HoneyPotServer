@@ -9,7 +9,7 @@
  */
 package io.amelia.permission.commands;
 
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.lang.EnumColor;
 import io.amelia.permission.PermissibleEntity;
 import io.amelia.permission.PermissibleGroup;

@@ -16,12 +16,10 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.foundation.Kernel;
 import io.amelia.lang.StackerException;
 import io.amelia.support.Maps;
 import io.amelia.support.Namespace;
 import io.amelia.support.Objs;
-import io.amelia.tasks.TaskDispatcher;
 
 @SuppressWarnings( "unchecked" )
 public abstract class StackerBase<B extends StackerBase<B>>

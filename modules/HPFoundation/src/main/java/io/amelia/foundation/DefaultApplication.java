@@ -1,6 +1,5 @@
 package io.amelia.foundation;
 
-import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;

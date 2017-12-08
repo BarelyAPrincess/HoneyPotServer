@@ -9,7 +9,7 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.config.ConfigMap;
+import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;

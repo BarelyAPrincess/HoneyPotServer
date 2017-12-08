@@ -1,8 +1,8 @@
-package io.amelia;
+package io.amelia.foundation;
 
-import java.awt.image.Kernel;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,18 +29,36 @@ public class App
 	public static final String PATH_UPDATES = "__updates";
 	public static final String PATH_STORAGE = "__storage";
 
-	private static final Map<String, List<String>> appPaths = new ConcurrentHashMap<>();
+	public static final Logger L = getLogger( App.class );
+
+	private static final Map<String, List<String>> APP_PATHS = new ConcurrentHashMap<>();
 	private static File appPath;
+	private static ImplDevMeta devMeta;
 	private static ImplLogHandler log;
 
 	static
 	{
 		setPath( PATH_CACHE, PATH_STORAGE, "cache" );
 		setPath( PATH_LOGS, PATH_STORAGE, "logs" );
+		setPath( PATH_LIBS, PATH_APP, "libs" );
 		setPath( PATH_CONFIG, PATH_APP, "config" );
 		setPath( PATH_PLUGINS, PATH_APP, "plugins" );
 		setPath( PATH_UPDATES, PATH_APP, "updates" );
 		setPath( PATH_STORAGE, PATH_APP, "storage" );
+	}
+
+	public static ImplDevMeta getDevMeta()
+	{
+		if ( devMeta == null )
+			devMeta = new NoDevMeta();
+		return devMeta;
+	}
+
+	public static void setDevMeta( ImplDevMeta devMeta )
+	{
+		if ( devMeta != null && !( devMeta instanceof NoDevMeta ) )
+			throw new IllegalStateException( "DevMeta has already been set, are you setting it too late?" );
+		App.devMeta = devMeta;
 	}
 
 	public static Logger getLogger( Class<?> source )
@@ -106,8 +124,8 @@ public class App
 			String key = slugs[0].substring( 2 );
 			if ( key.equals( "app" ) )
 				slugs[0] = getPath().toString();
-			else if ( App.appPaths.containsKey( key ) )
-				slugs = ( String[] ) Stream.concat( App.appPaths.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray();
+			else if ( App.APP_PATHS.containsKey( key ) )
+				slugs = ( String[] ) Stream.concat( App.APP_PATHS.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray();
 			else
 				throw ApplicationException.ignorable( "Path " + key + " is not set!" );
 
@@ -131,7 +149,22 @@ public class App
 		return appPath;
 	}
 
-	public static void setAppPath( @Nonnull File appPath )
+	public static List<String> getPathSlugs()
+	{
+		return new ArrayList<>( APP_PATHS.keySet() );
+	}
+
+	/**
+	 * Indicates if we are running a development build of the server
+	 *
+	 * @return True is we are running in development mode
+	 */
+	public static boolean isDevelopment()
+	{
+		return devMeta != null && "0".equals( devMeta.getBuildNumber() ) || ConfigRegistry.config.getBoolean( "app.developmentMode" ).orElse( false );
+	}
+
+	protected static void setAppPath( @Nonnull File appPath )
 	{
 		Objs.notNull( appPath );
 		App.appPath = appPath;
@@ -154,9 +187,7 @@ public class App
 			throw new IllegalArgumentException( "App path is set using the setAppPath() method." );
 		if ( !Paths.get( paths[0] ).isAbsolute() && !paths[0].startsWith( "__" ) )
 			throw new IllegalArgumentException( "App paths must be absolute or reference another app path, i.e., __app. Paths: [" + Strs.join( paths ) + "]" );
-		App.appPaths.put( key, Lists.newArrayList( paths ) );
-
-		Kernel.getApplication().addStringArgument( "dir-" + pathKey, "Sets the " + pathKey + " directory." );
+		App.APP_PATHS.put( key, Lists.newArrayList( paths ) );
 	}
 
 	private App()
@@ -213,6 +244,44 @@ public class App
 		public void warning( String message, Object... args )
 		{
 			log.warning( source, message, args );
+		}
+	}
+
+	private static class NoDevMeta implements ImplDevMeta
+	{
+		@Override
+		public String getProperty( String key )
+		{
+			switch ( key )
+			{
+				case KEY_PRODUCT_NAME:
+					return "(Unset Name)";
+				case KEY_PRODUCT_COPYRIGHT:
+					return "(Unset Copyright)";
+				case KEY_VERSION_MAJOR:
+					return "0";
+				case KEY_VERSION_MINOR:
+					return "0";
+				case KEY_VERSION_REVISION:
+					return "0";
+				case KEY_BUILD_NUMBER:
+					return "0";
+				case KEY_CODENAME:
+					return "(Unset Codename)";
+				case KEY_GIT_REPO:
+					return "(Unset Repo)";
+				case KEY_GIT_REPO_URL:
+					return "(Unset Repo URL)";
+				case KEY_GIT_BRANCH:
+					return "master";
+				case KEY_DEV_NAME:
+					return "(Unset Dev Name)";
+				case KEY_DEV_EMAIL:
+					return "(Unset Dev Email)";
+				case KEY_DEV_LICENSE:
+					return "(Unset License)";
+			}
+			return null;
 		}
 	}
 }

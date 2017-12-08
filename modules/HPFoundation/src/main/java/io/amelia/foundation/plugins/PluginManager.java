@@ -9,8 +9,8 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.App;
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.App;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventHandlers;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.plugins.loader.Plugin;
@@ -650,7 +650,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 				 * }
 				 * catch ( Exception ex1 )
 				 * {
-				 * throw new IllegalArgumentException( String.format( "Unexpected exception %s while attempting to construct a new instance of %s", ex.getClass().getName(), loader.getName() ), ex1 );
+				 * throw new IllegalArgumentException( String.format( "Unexpected exception %s while attempting to construct a new instance of %s", ex.getClass().getProductName(), loader.getProductName() ), ex1 );
 				 * }
 				 */
 			}

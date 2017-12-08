@@ -1,6 +1,5 @@
 package io.amelia.foundation;
 
-import io.amelia.config.ConfigMap;
 import io.amelia.support.Maps;
 
 import java.io.File;

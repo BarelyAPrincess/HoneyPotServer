@@ -54,7 +54,8 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.App;
+import io.amelia.foundation.App;
+import io.amelia.injection.Libraries;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
 import io.netty.buffer.ByteBuf;
@@ -946,6 +947,12 @@ public class IO
 		return false;
 	}
 
+	public static Stream<File> listFiles( File dir )
+	{
+		File[] files = dir.listFiles();
+		return files == null ? Stream.empty() : Arrays.stream( files );
+	}
+
 	public static Map<String, List<File>> mapExtensions( File[] files )
 	{
 		Map<String, List<File>> result = new TreeMap<>();
@@ -1131,7 +1138,7 @@ public class IO
 	 */
 	public static String relPath( File file )
 	{
-		return relPath( file, ConfigRegistry.getPath() );
+		return relPath( file, App.getPath() );
 	}
 
 	public static String relPath( File file, File relTo )

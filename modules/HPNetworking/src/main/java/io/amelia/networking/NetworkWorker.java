@@ -1,7 +1,7 @@
 package io.amelia.networking;
 
-import io.amelia.config.ConfigMap;
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.lang.NetworkException;
 
 public interface NetworkWorker<T>

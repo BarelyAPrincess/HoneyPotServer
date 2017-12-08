@@ -1,6 +1,6 @@
 package io.amelia.lang;
 
-import io.amelia.config.ConfigMap;
+import io.amelia.foundation.ConfigMap;
 
 public class ConfigException
 {

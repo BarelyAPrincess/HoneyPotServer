@@ -1,4 +1,4 @@
-package io.amelia.config;
+package io.amelia.foundation;
 
 import io.amelia.lang.ConfigException;
 import io.amelia.support.data.ParcelLoader;

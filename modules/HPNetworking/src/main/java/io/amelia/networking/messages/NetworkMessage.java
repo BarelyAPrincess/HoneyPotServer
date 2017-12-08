@@ -1,6 +1,6 @@
 package io.amelia.networking.messages;
 
-import io.amelia.config.ConfigLoader;
+import io.amelia.foundation.ConfigLoader;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPWorker;

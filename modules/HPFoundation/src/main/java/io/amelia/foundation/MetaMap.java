@@ -1,6 +1,5 @@
 package io.amelia.foundation;
 
-import io.amelia.config.ConfigMap;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.support.Lists;

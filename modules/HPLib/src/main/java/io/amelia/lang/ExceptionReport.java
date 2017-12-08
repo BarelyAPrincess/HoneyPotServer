@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import io.amelia.App;
+import io.amelia.foundation.App;
 import io.amelia.support.Objs;
 
 /**

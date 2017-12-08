@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.amelia.config.ConfigRegistry;
 import io.amelia.lang.ApplicationException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;

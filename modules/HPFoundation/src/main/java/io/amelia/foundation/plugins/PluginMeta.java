@@ -9,8 +9,8 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.config.ConfigLoader;
-import io.amelia.config.ConfigMap;
+import io.amelia.foundation.ConfigLoader;
+import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.MetaMap;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.injection.MavenReference;

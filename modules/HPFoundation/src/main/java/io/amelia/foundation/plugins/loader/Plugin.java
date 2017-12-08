@@ -9,8 +9,8 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import io.amelia.config.ConfigMap;
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.PluginBase;
 import io.amelia.foundation.plugins.PluginManager;

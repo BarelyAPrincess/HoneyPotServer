@@ -9,7 +9,7 @@
  */
 package io.amelia.permission;
 
-import io.amelia.config.ConfigRegistry;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventDispatcher;
 import io.amelia.events.EventHandler;
 import io.amelia.events.EventPriority;
