@@ -40,13 +40,13 @@ public class Lists
 
 	public static <T> List<T> copy( List<?> list )
 	{
-		List<T> newList = emptyCopy( list );
-		for( Object o : list )
+		List<T> newList = copyEmpty( list );
+		for ( Object o : list )
 			newList.add( ( T ) o );
 		return newList;
 	}
 
-	public static <V> List<V> emptyCopy( List<?> list )
+	public static <V> List<V> copyEmpty( List<?> list )
 	{
 		if ( list instanceof CopyOnWriteArrayList )
 			return new CopyOnWriteArrayList<>();

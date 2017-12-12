@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.lang.StackerException;
+import io.amelia.lang.BaseException;
 import io.amelia.support.Maps;
 import io.amelia.support.Namespace;
 import io.amelia.support.Objs;
@@ -130,7 +130,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return getChildOrCreate( key );
 	}
 
-	protected final void disposeCheck() throws StackerException.Ignorable
+	protected final void disposeCheck() throws BaseException.Ignorable
 	{
 		if ( hasFlag( Flag.DISPOSED ) )
 			throwExceptionIgnorable( getCurrentPath() + " has been disposed." );
@@ -556,9 +556,9 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return keyChild == null ? -1 : keyChild.size();
 	}
 
-	protected abstract void throwExceptionError( String message ) throws StackerException.Error;
+	protected abstract void throwExceptionError( String message ) throws BaseException.Error;
 
-	protected abstract void throwExceptionIgnorable( String message ) throws StackerException.Ignorable;
+	protected abstract void throwExceptionIgnorable( String message ) throws BaseException.Ignorable;
 
 	public enum Flag
 	{

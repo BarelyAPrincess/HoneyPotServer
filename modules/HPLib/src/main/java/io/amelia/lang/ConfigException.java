@@ -9,7 +9,7 @@ public class ConfigException
 
 	}
 
-	public static class Error extends StackerException.Error
+	public static class Error extends ParcelableException.Error
 	{
 		public Error( ConfigMap node )
 		{
@@ -37,7 +37,7 @@ public class ConfigException
 		}
 	}
 
-	public static class Ignorable extends StackerException.Ignorable
+	public static class Ignorable extends ParcelableException.Ignorable
 	{
 		public Ignorable( ConfigMap node )
 		{

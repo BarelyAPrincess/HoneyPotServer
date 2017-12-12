@@ -16,6 +16,12 @@ public class GlobalReference<ValueType>
 		this.value = value;
 	}
 
+	/**
+	 * Attempts to acquire the lock for the value and returns what was the state.
+	 * Returns immediately as it won't block.
+	 *
+	 * @return The result of attempting to lock value.
+	 */
 	private LockState acquireLock()
 	{
 		boolean result = lock.tryLock();
@@ -274,9 +280,21 @@ public class GlobalReference<ValueType>
 
 	public enum LockState
 	{
+		/**
+		 * Locked, so lock wasn't acquired.
+		 */
 		IS_LOCKED,
+		/**
+		 * Lock already acquired.
+		 */
 		LOCAL_THREAD_LOCKED,
+		/**
+		 * Locked to another thread, lock wasn't acquired.
+		 */
 		THREAD_LOCKED,
+		/**
+		 * Lock wasn't currently present, so lock was acquired.
+		 */
 		NOT_LOCKED
 	}
 }

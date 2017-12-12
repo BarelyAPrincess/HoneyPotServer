@@ -11,6 +11,7 @@ package io.amelia.support;
 
 import com.sun.istack.internal.NotNull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -36,8 +37,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.MapCollisionException;
+import io.amelia.lang.BaseException;
 import javafx.util.Pair;
 
 public class Maps
@@ -104,7 +104,7 @@ public class Maps
 		return true;
 	}
 
-	public static <K, V, M extends Map<K, V>> M emptyCopy( M map )
+	public static <K, V, M extends Map<K, V>> M copyEmpty( M map )
 	{
 		try
 		{
@@ -209,6 +209,15 @@ public class Maps
 		return list.stream().filter( Objects::nonNull ).map( l -> new Pair<>( Integer.toString( inx.getAndIncrement() ), l ) ).collect( Collectors.toMap( Pair::getKey, Pair::getValue ) );
 	}
 
+	@SafeVarargs
+	public static <Key, Value> Map<Key, Value> joinMaps( Map<Key, Value>... maps ) throws BaseException.Error
+	{
+		if ( Objs.isEmpty( maps ) )
+			return new HashMap<>();
+
+		return Arrays.stream( maps ).flatMap( m -> m.entrySet().stream() ).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue ) );
+	}
+
 	public static <K, V> K keyOf( Map<K, V> map, @NotNull V val )
 	{
 		if ( map == null )
@@ -236,34 +245,6 @@ public class Maps
 		if ( map.size() == 0 )
 			return null;
 		return ( T ) map.values().toArray()[inx];
-	}
-
-	@SafeVarargs
-	public static <T extends Object> void mergeMaps( Map<String, T> desc, Map<String, T>... maps ) throws Exception
-	{
-		if ( maps == null || maps.length == 0 )
-			return;
-
-		// It's important to note that each of these maps will overwrite the current map. If it's rewriteMap contains a key that exists in getMap, the ladder will be overwritten.
-
-		for ( Map<String, T> map : maps )
-		{
-			boolean hadConflicts = false;
-
-			for ( Map.Entry<String, T> entry : map.entrySet() )
-			{
-				if ( desc.containsKey( entry.getKey() ) )
-					hadConflicts = true;
-				desc.put( entry.getKey(), entry.getValue() );
-			}
-
-			if ( hadConflicts )
-			{
-				MapCollisionException e = new MapCollisionException();
-				ExceptionReport.throwExceptions( e );
-				// log.exceptions( e );
-			}
-		}
 	}
 
 	public static <T> Map<Integer, List<T>> paginate( List<T> list, int perPage )

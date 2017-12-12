@@ -17,10 +17,4 @@ public class MinimalApplication extends ApplicationInterface
 	{
 
 	}
-
-	@Override
-	public void onTick( int currentTick, float averageTick ) throws ApplicationException
-	{
-
-	}
 }

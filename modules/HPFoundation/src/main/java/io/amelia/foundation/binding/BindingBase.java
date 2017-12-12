@@ -1,6 +1,6 @@
 package io.amelia.foundation.binding;
 
-import io.amelia.lang.StackerException;
+import io.amelia.lang.ParcelableException;
 import io.amelia.support.Lists;
 import io.amelia.support.data.StackerBase;
 
@@ -85,7 +85,7 @@ public final class BindingBase extends StackerBase<BindingBase>
 	}
 
 	@Override
-	protected void throwExceptionIgnorable( String message ) throws StackerException.Ignorable
+	protected void throwExceptionIgnorable( String message ) throws ParcelableException.Ignorable
 	{
 		throw new BindingException.Ignorable( this, message );
 	}

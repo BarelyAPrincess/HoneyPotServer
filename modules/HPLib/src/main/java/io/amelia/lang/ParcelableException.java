@@ -2,14 +2,14 @@ package io.amelia.lang;
 
 import io.amelia.support.data.StackerBase;
 
-public class StackerException
+public class ParcelableException
 {
-	private StackerException()
+	private ParcelableException()
 	{
 
 	}
 
-	public static class Error extends UtilException.Error
+	public static class Error extends BaseException.Error
 	{
 		protected final StackerBase node;
 
@@ -38,7 +38,7 @@ public class StackerException
 		}
 	}
 
-	public static class Ignorable extends UtilException.Ignorable
+	public static class Ignorable extends BaseException.Ignorable
 	{
 		protected final StackerBase node;
 

@@ -1,10 +1,9 @@
 package io.amelia.foundation;
 
 import java.util.NavigableSet;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 
-import io.amelia.lang.BadParcelableException;
+import io.amelia.lang.ParcelableException;
 import io.amelia.support.GlobalReference;
 import io.amelia.support.data.Parcel;
 import io.amelia.support.data.Parcelable;
@@ -13,20 +12,24 @@ public class InternalMessage implements Parcelable
 {
 	private static final GlobalReference<NavigableSet<InternalMessage>> unusedPool = new GlobalReference<>();
 
-	private static volatile NavigableSet<InternalMessage> unusedPool = new TreeSet<>();
-
-	public static final Parcelable.Creator<InternalMessage> CREATOR = new Parcelable.Creator<InternalMessage>()
+	public static final Serializer<InternalMessage> SERIALIZER = new Serializer<InternalMessage>()
 	{
 		public InternalMessage[] newArray( int size )
 		{
 			return new InternalMessage[size];
 		}
 
-		public InternalMessage readFromParcel( Parcel source )
+		public InternalMessage readFromParcel( Parcel source ) throws ParcelableException.Error
 		{
 			InternalMessage msg = InternalMessage.obtain();
 			msg.readFromParcel( source );
 			return msg;
+		}
+
+		@Override
+		public void writeToParcel( InternalMessage obj, Parcel out ) throws ParcelableException.Error
+		{
+
 		}
 	};
 
@@ -37,7 +40,7 @@ public class InternalMessage implements Parcelable
 	{
 		synchronized ( unusedPool )
 		{
-			InternalMessage msg = unusedPool.pollFirst();
+			InternalMessage msg = unusedPool.get().pollFirst();
 			if ( msg == null )
 				msg = new InternalMessage();
 			return msg;
@@ -60,6 +63,7 @@ public class InternalMessage implements Parcelable
 
 		return newQueueEntry;
 	}
+
 	/**
 	 * The message code
 	 */
@@ -173,9 +177,9 @@ public class InternalMessage implements Parcelable
 		this.isInUse = isInUse;
 	}
 
-	public void readFromParcel( Parcel src ) throws BadParcelableException
+	public void readFromParcel( Parcel src ) throws ParcelableException.Error
 	{
-		Supplier<BadParcelableException> exp = () -> new BadParcelableException( "Failure to readFromParcel(). Was the Parcel constructed from a Message?" );
+		Supplier<ParcelableException.Error> exp = () -> new ParcelableException.Error( src, "Failure to readFromParcel(). Was the Parcel constructed from a Message?" );
 
 		when = src.getLong().orElseThrow( exp );
 

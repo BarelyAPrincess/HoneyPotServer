@@ -4,15 +4,14 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.amelia.lang.BadParcelableException;
-import io.amelia.lang.StackerException;
+import io.amelia.lang.ParcelableException;
 
 /**
  * TODO Add value filter method?
  */
 public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTypesOutline
 {
-	private static final Map<ClassLoader, HashMap<String, Parcelable.Creator>> mCreators = new HashMap<>();
+	private static final Map<ClassLoader, HashMap<String, Parcelable.Serializer>> mCreators = new HashMap<>();
 
 	public Parcel()
 	{
@@ -34,7 +33,7 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 		super( Parcel::new, parent, key, value );
 	}
 
-	public final <T extends Parcelable> T getCreator( Parcelable.Creator<T> creator, ClassLoader loader )
+	public final <T extends Parcelable> T getCreator( Parcelable.Serializer<T> creator, ClassLoader loader )
 	{
 		if ( creator instanceof Parcelable.ClassLoaderCreator<?> )
 			return ( ( Parcelable.ClassLoaderCreator<T> ) creator ).readFromParcel( this, loader );
@@ -43,7 +42,7 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 
 	public final <T extends Parcelable> T getParcelable( String key, ClassLoader loader )
 	{
-		Parcelable.Creator<T> creator = getParcelableCreator( key, loader );
+		Parcelable.Serializer<T> creator = getParcelableCreator( key, loader );
 		if ( creator == null )
 			return null;
 		if ( creator instanceof Parcelable.ClassLoaderCreator<?> )
@@ -51,20 +50,25 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 		return creator.readFromParcel( this );
 	}
 
-	public final <T extends Parcelable> Parcelable.Creator<T> getParcelableCreator( String key, ClassLoader loader )
+	public final <T extends Parcelable> Parcelable.Serializer<T> getParcelableCreator( String key, ClassLoader loader )
 	{
 		String name = getString( key ).orElse( null );
+
 		if ( name == null )
 			return null;
-		Parcelable.Creator<T> creator;
+
+		Parcelable.Serializer<T> creator;
+
 		synchronized ( mCreators )
 		{
-			HashMap<String, Parcelable.Creator> map = mCreators.get( loader );
+			HashMap<String, Parcelable.Serializer> map = mCreators.get( loader );
+
 			if ( map == null )
 			{
 				map = new HashMap<>();
 				mCreators.put( loader, map );
 			}
+
 			creator = map.get( name );
 			if ( creator == null )
 			{
@@ -72,28 +76,27 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 				{
 					Class c = loader == null ? Class.forName( name ) : Class.forName( name, true, loader );
 					Field f = c.getField( "CREATOR" );
-					creator = ( Parcelable.Creator ) f.get( null );
+					creator = ( Parcelable.Serializer ) f.get( null );
 				}
 				catch ( IllegalAccessException e )
 				{
-					throw new BadParcelableException( "IllegalAccessException when unmarshalling: " + name );
+					throwExceptionIgnorable( "IllegalAccessException when unmarshalling: " + name );
 				}
 				catch ( ClassNotFoundException e )
 				{
-					throw new BadParcelableException( "ClassNotFoundException when unmarshalling: " + name );
+					throwExceptionIgnorable( "ClassNotFoundException when unmarshalling: " + name );
 				}
 				catch ( ClassCastException | NoSuchFieldException e )
 				{
-					throw new BadParcelableException( "Parcelable protocol requires a Parcelable.Creator object called CREATOR on class " + name );
+					throwExceptionIgnorable( "Parcelable protocol requires a Parcelable.Creator object called CREATOR on class " + name );
 				}
 				catch ( NullPointerException e )
 				{
-					throw new BadParcelableException( "Parcelable protocol requires the CREATOR object to be static on class " + name );
+					throwExceptionIgnorable( "Parcelable protocol requires the CREATOR object to be static on class " + name );
 				}
+
 				if ( creator == null )
-				{
-					throw new BadParcelableException( "Parcelable protocol requires a Parcelable.Creator object called CREATOR on class " + name );
-				}
+					throwExceptionIgnorable( "Parcelable protocol requires a Parcelable.Creator object called CREATOR on class " + name );
 
 				map.put( name, creator );
 			}
@@ -103,14 +106,14 @@ public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTyp
 	}
 
 	@Override
-	public void throwExceptionError( String message ) throws StackerException.Error
+	public void throwExceptionError( String message ) throws ParcelableException.Error
 	{
-		throw new StackerException.Error( this, message );
+		throw new ParcelableException.Error( this, message );
 	}
 
 	@Override
-	public void throwExceptionIgnorable( String message ) throws StackerException.Ignorable
+	public void throwExceptionIgnorable( String message ) throws ParcelableException.Ignorable
 	{
-		throw new StackerException.Ignorable( this, message );
+		throw new ParcelableException.Ignorable( this, message );
 	}
 }

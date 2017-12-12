@@ -37,7 +37,7 @@ public class Objs
 	{
 		Objs.notNull( list );
 
-		List<V> newList = Lists.emptyCopy( list );
+		List<V> newList = Lists.copyEmpty( list );
 
 		for ( Object e : list )
 		{
@@ -53,7 +53,7 @@ public class Objs
 	{
 		Objs.notNull( map );
 
-		Map<K, V> newMap = Maps.emptyCopy( map );
+		Map<K, V> newMap = Maps.copyEmpty( map );
 
 		for ( Map.Entry<?, ?> e : map.entrySet() )
 		{

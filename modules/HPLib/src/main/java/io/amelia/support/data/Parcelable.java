@@ -1,10 +1,12 @@
 package io.amelia.support.data;
 
+import io.amelia.lang.ParcelableException;
+
 /**
  * Interface for classes whose instances can be written to
  * and restored from a {@link Parcel}.  Classes implementing the Parcelable
  * interface must also have a non-null static field called <code>CREATOR</code>
- * of a type that implements the {@link Parcelable.Creator} interface.
+ * of a type that implements the {@link Serializer} interface.
  * <p>
  * <p>A typical implementation of Parcelable is:</p>
  * <p>
@@ -38,15 +40,15 @@ package io.amelia.support.data;
 public interface Parcelable
 {
 	/**
-	 * Specialization of {@link Creator} that allows you to receive the
+	 * Specialization of {@link Serializer} that allows you to receive the
 	 * ClassLoader the object is being created in.
 	 */
-	interface ClassLoaderCreator<T> extends Creator<T>
+	interface ClassLoaderCreator<T> extends Serializer<T>
 	{
 		/**
 		 * Create a new instance of the Parcelable class, instantiating it
 		 * from the given Parcel whose data had previously been written by
-		 * {@link Creator#writeToParcel Parcelable.writeToParcel()} and
+		 * {@link Serializer#writeToParcel Parcelable.writeToParcel()} and
 		 * using the given ClassLoader.
 		 *
 		 * @param in     The Parcel to read the object's data from.
@@ -60,7 +62,7 @@ public interface Parcelable
 	 * Interface that must be implemented and provided as a public CREATOR
 	 * field that generates instances of your Parcelable class from a Parcel.
 	 */
-	interface Creator<T>
+	interface Serializer<T>
 	{
 		/**
 		 * Create a new array of the Parcelable class.
@@ -74,12 +76,12 @@ public interface Parcelable
 		/**
 		 * Create a new instance of the Parcelable class, instantiating it
 		 * from the given Parcel whose data had previously been written by
-		 * {@link Creator#writeToParcel Parcelable.writeToParcel()}.
+		 * {@link Serializer#writeToParcel Parcelable.writeToParcel()}.
 		 *
 		 * @param in The Parcel to read the object's data from.
 		 * @return Returns a new instance of the Parcelable class.
 		 */
-		T readFromParcel( Parcel in );
+		T readFromParcel( Parcel in ) throws ParcelableException.Error;
 
 		/**
 		 * Flatten the Parcelable object to a Parcel.
@@ -87,6 +89,6 @@ public interface Parcelable
 		 * @param obj The Parcelable object to be flattened.
 		 * @param out The Parcel in which the object should be written.
 		 */
-		void writeToParcel( T obj, Parcel out );
+		void writeToParcel( T obj, Parcel out ) throws ParcelableException.Error;
 	}
 }

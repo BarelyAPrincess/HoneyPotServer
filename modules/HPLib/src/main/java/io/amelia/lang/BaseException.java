@@ -1,8 +1,8 @@
 package io.amelia.lang;
 
-public class UtilException
+public class BaseException
 {
-	private UtilException()
+	private BaseException()
 	{
 
 	}
