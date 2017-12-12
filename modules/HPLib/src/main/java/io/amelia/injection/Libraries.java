@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Kernel;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.EnumColor;
@@ -34,12 +34,12 @@ public class Libraries implements LibrarySource
 	public static final File INCLUDES_DIR;
 	public static final File LIBRARY_DIR;
 	public static final Libraries SELF = new Libraries();
-	private static final App.Logger L = App.getLogger( Libraries.class );
+	private static final Kernel.Logger L = Kernel.getLogger( Libraries.class );
 	public static Map<String, MavenReference> loadedLibraries = new HashMap<>();
 
 	static
 	{
-		LIBRARY_DIR = App.getPath( App.PATH_LIBS );
+		LIBRARY_DIR = Kernel.getPath( Kernel.PATH_LIBS );
 
 		INCLUDES_DIR = new File( LIBRARY_DIR, "local" );
 

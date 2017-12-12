@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.foundation.Kernel;
 import io.amelia.lang.StackerException;
 import io.amelia.support.Maps;
 import io.amelia.support.Namespace;
@@ -198,7 +199,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 				if ( entry.getValue().flags.contains( StackerListener.Flags.FIRE_ONCE ) )
 					listeners.remove( entry.getKey() );
 				if ( first || !entry.getValue().flags.contains( StackerListener.Flags.NO_RECURSIVE ) )
-					TaskDispatcher.runTaskAsynchronously( Kernel.getApplication(), () -> entry.getValue().call( objs ) );
+					Kernel.getExecutorParallel().execute( () -> entry.getValue().call( objs ) );
 			}
 	}
 

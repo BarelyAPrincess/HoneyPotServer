@@ -27,7 +27,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 		synchronized ( AsyncTask.class )
 		{
 			if ( sHandler == null )
-				sHandler = new LooperReceiver( Kernel.getApplication().getMainLooper() )
+				sHandler = new LooperReceiver( App.getApplication().getMainLooper() )
 				{
 					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override

@@ -254,7 +254,7 @@ public class Looper
 					/* Prevent negative numbers and warn */
 					if ( lastPolledMillis < 0L )
 					{
-						Kernel.L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
+						App.L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
 						lastPolledMillis = 0L;
 					}
 
@@ -266,7 +266,7 @@ public class Looper
 					{
 						if ( loopStartMillis - lastWarningMillis >= 15000L && ConfigRegistry.warnOnOverload() )
 						{
-							Kernel.L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
+							App.L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
 							lastWarningMillis = loopStartMillis;
 						}
 						isOverloaded = true;
@@ -319,7 +319,7 @@ public class Looper
 
 	void quit( boolean removePendingMessages )
 	{
-		if ( type == LooperType.SYSTEM && !Kernel.isPrimaryThread() )
+		if ( type == LooperType.SYSTEM && !App.isPrimaryThread() )
 			throw new IllegalStateException( "SYSTEM queues are not allowed to quit." );
 		if ( isQuitting )
 			return;

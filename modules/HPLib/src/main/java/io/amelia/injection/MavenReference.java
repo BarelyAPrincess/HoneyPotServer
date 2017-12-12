@@ -112,7 +112,10 @@ public class MavenReference
 		if ( "builtin".equals( source ) )
 			return Libraries.SELF;
 
-		return PluginManager.instance().getPluginByNameWithoutException( source );
+		// TODO Implement new source of LibrarySource
+		// return PluginManager.instance().getPluginByNameWithoutException( source );
+
+		return null;
 	}
 
 	/**

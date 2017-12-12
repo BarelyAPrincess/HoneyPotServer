@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Kernel;
 import io.amelia.support.Objs;
 import io.amelia.support.Pair;
 
@@ -84,7 +84,7 @@ public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> exte
 
 				if ( child == null )
 				{
-					App.L.warning( "Could not assign field " + field.getName() + " with type " + field.getType() + " within class " + cls.getSimpleName() + "." );
+					Kernel.L.warning( "Could not assign field " + field.getName() + " with type " + field.getType() + " within class " + cls.getSimpleName() + "." );
 					continue;
 				}
 
@@ -118,7 +118,7 @@ public abstract class StackerWithValue<B extends StackerWithValue<B, T>, T> exte
 				{
 					Object o = child.asObject( field.getType() );
 					if ( o == null )
-						App.L.severe( "Could not cast field " + field.getName() + " with type " + field.getType() + " with value " + value.getClass().getSimpleName() + " within class" + cls.getSimpleName() + "." );
+						Kernel.L.severe( "Could not cast field " + field.getName() + " with type " + field.getType() + " with value " + value.getClass().getSimpleName() + " within class" + cls.getSimpleName() + "." );
 					else
 						field.set( instance, o );
 				}

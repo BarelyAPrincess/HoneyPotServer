@@ -41,7 +41,7 @@ public class ConfigRegistry
 
 	public static void clearCache( @Nonnull long keepHistory )
 	{
-		clearCache( App.getPath( App.PATH_CACHE ), keepHistory );
+		clearCache( Kernel.getPath( Kernel.PATH_CACHE ), keepHistory );
 	}
 
 	private static void decodeMap( Map<String, Object> mapEncoded, ConfigMap root )
@@ -74,11 +74,11 @@ public class ConfigRegistry
 
 	public static void init( Env env ) throws ConfigException.Error
 	{
-		App.setAppPath( IO.buildFile( true, env.getString( "app-dir" ) ) );
+		Kernel.setAppPath( IO.buildFile( true, env.getString( "app-dir" ) ) );
 		// for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
 		// setPath( key, Strs.split( env.getString( "dir-" + key ), "/" ).toArray( String[]::new ) );
 
-		env.getStringsMap().filter( e -> e.getKey().startsWith( "dir-" ) ).forEach( e -> App.setPath( e.getKey().substring( 4 ), Strs.split( e.getValue(), "/" ).toArray( String[]::new ) ) );
+		env.getStringsMap().filter( e -> e.getKey().startsWith( "dir-" ) ).forEach( e -> Kernel.setPath( e.getKey().substring( 4 ), Strs.split( e.getValue(), "/" ).toArray( String[]::new ) ) );
 
 		loadConfig();
 
@@ -114,7 +114,7 @@ public class ConfigRegistry
 
 	private static void loadConfig() throws ConfigException.Error
 	{
-		loadConfig( App.getPath( App.PATH_CONFIG, true ), "" );
+		loadConfig( Kernel.getPath( Kernel.PATH_CONFIG, true ), "" );
 	}
 
 	private static void parseConfig( @Nonnull String nesting, @Nonnull File file ) throws ConfigException.Error
@@ -166,7 +166,7 @@ public class ConfigRegistry
 	{
 		// WIP Copies config from resources and plugins to config directories.
 
-		File configPath = App.getPath( App.PATH_CONFIG, true );
+		File configPath = Kernel.getPath( Kernel.PATH_CONFIG, true );
 
 		IO.extractResourceDirectory( "config", configPath, ConfigRegistry.class );
 	}

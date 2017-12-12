@@ -26,7 +26,7 @@ public class PropDevMeta implements ImplDevMeta
 
 	public PropDevMeta( String fileName ) throws ApplicationException
 	{
-		this( App.class, fileName );
+		this( Kernel.class, fileName );
 	}
 
 	public PropDevMeta( Class<?> cls, String fileName ) throws ApplicationException

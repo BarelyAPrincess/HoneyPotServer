@@ -614,7 +614,7 @@ public class LooperReceiver
 		if ( queue == null )
 		{
 			RuntimeException e = new RuntimeException( this + " sendInternalMessageAtTime() called with no looper.queue" );
-			Kernel.L.warning( e.getInternalMessage(), e );
+			App.L.warning( e.getInternalMessage(), e );
 			return false;
 		}
 		return enqueueInternalMessage( queue, msg, 0 );

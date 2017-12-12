@@ -148,7 +148,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 		if ( optionSet.has( "version" ) )
 		{
-			Kernel.L.info( App.getDevMeta().getProductDescribed() );
+			App.L.info( App.getDevMeta().getProductDescribed() );
 			throw new StartupInterruptException();
 		}
 

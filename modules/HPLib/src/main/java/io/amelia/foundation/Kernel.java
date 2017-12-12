@@ -1,24 +1,38 @@
 package io.amelia.foundation;
 
+import com.sun.istack.internal.NotNull;
+
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ExceptionContext;
+import io.amelia.lang.ExceptionReport;
+import io.amelia.lang.IException;
+import io.amelia.lang.UncaughtException;
 import io.amelia.support.Arrs;
 import io.amelia.support.IO;
 import io.amelia.support.Lists;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 
-public class App
+public class Kernel
 {
 	public static final String PATH_APP = "__app";
 	public static final String PATH_CACHE = "__cache";
@@ -29,15 +43,81 @@ public class App
 	public static final String PATH_UPDATES = "__updates";
 	public static final String PATH_STORAGE = "__storage";
 
-	public static final Logger L = getLogger( App.class );
-
+	public static final Logger L = getLogger( Kernel.class );
+	/**
+	 * An {@link Executor} that can be used to execute tasks in parallel.
+	 */
+	static final Executor EXECUTOR_PARALLEL;
+	/**
+	 * An {@link Executor} that executes tasks one at a time in serial
+	 * order.  This serialization is global to a particular process.
+	 */
+	static final Executor EXECUTOR_SERIAL;
+	static final int KEEP_ALIVE_SECONDS = 30;
 	private static final Map<String, List<String>> APP_PATHS = new ConcurrentHashMap<>();
+	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+	static final int THREAD_ROOL_SIZE_MAXIMUM = CPU_COUNT * 2 + 1;
+	// We want at least 2 threads and at most 4 threads in the core pool,
+	// preferring to have 1 less than the CPU count to avoid saturating
+	// the CPU with background work
+	static final int THREAD_POOL_SIZE_CORE = Math.max( 4, Math.min( CPU_COUNT - 1, 1 ) );
+	public static long startTime = System.currentTimeMillis();
 	private static File appPath;
 	private static ImplDevMeta devMeta;
+	private static ExceptionContext exceptionContext = null;
+	static final ThreadFactory threadFactory = new ThreadFactory()
+	{
+		private final AtomicInteger mCount = new AtomicInteger( 1 );
+
+		@Override
+		public Thread newThread( Runnable r )
+		{
+			Thread newThread = new Thread( r, "HPS Thread #" + String.format( "%d04", mCount.getAndIncrement() ) );
+			newThread.setUncaughtExceptionHandler( ( thread, exp ) -> handleExceptions( new UncaughtException( "Uncaught exception thrown on thread " + thread.getName(), exp ) ) );
+
+			return newThread;
+		}
+	};
 	private static ImplLogHandler log;
 
 	static
 	{
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor( THREAD_POOL_SIZE_CORE, THREAD_ROOL_SIZE_MAXIMUM, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), threadFactory );
+		threadPoolExecutor.allowCoreThreadTimeOut( true );
+		EXECUTOR_PARALLEL = threadPoolExecutor;
+
+		EXECUTOR_SERIAL = new Executor()
+		{
+			final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
+			Runnable mActive;
+
+			public synchronized void execute( final Runnable r )
+			{
+				mTasks.offer( () -> {
+					try
+					{
+						r.run();
+					}
+					finally
+					{
+						scheduleNext();
+					}
+				} );
+				if ( mActive == null )
+				{
+					scheduleNext();
+				}
+			}
+
+			protected synchronized void scheduleNext()
+			{
+				if ( ( mActive = mTasks.poll() ) != null )
+				{
+					EXECUTOR_PARALLEL.execute( mActive );
+				}
+			}
+		};
+
 		setPath( PATH_CACHE, PATH_STORAGE, "cache" );
 		setPath( PATH_LOGS, PATH_STORAGE, "logs" );
 		setPath( PATH_LIBS, PATH_APP, "libs" );
@@ -58,7 +138,17 @@ public class App
 	{
 		if ( devMeta != null && !( devMeta instanceof NoDevMeta ) )
 			throw new IllegalStateException( "DevMeta has already been set, are you setting it too late?" );
-		App.devMeta = devMeta;
+		Kernel.devMeta = devMeta;
+	}
+
+	public static Executor getExecutorParallel()
+	{
+		return EXECUTOR_PARALLEL;
+	}
+
+	public static Executor getExecutorSerial()
+	{
+		return EXECUTOR_SERIAL;
 	}
 
 	public static Logger getLogger( Class<?> source )
@@ -124,8 +214,8 @@ public class App
 			String key = slugs[0].substring( 2 );
 			if ( key.equals( "app" ) )
 				slugs[0] = getPath().toString();
-			else if ( App.APP_PATHS.containsKey( key ) )
-				slugs = ( String[] ) Stream.concat( App.APP_PATHS.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray();
+			else if ( Kernel.APP_PATHS.containsKey( key ) )
+				slugs = ( String[] ) Stream.concat( Kernel.APP_PATHS.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray();
 			else
 				throw ApplicationException.ignorable( "Path " + key + " is not set!" );
 
@@ -154,6 +244,67 @@ public class App
 		return new ArrayList<>( APP_PATHS.keySet() );
 	}
 
+	public static void handleExceptions( @NotNull Throwable throwable )
+	{
+		handleExceptions( Lists.newArrayList( throwable ) );
+	}
+
+	public static void handleExceptions( @NotNull List<? extends Throwable> throwables )
+	{
+		handleExceptions( throwables, true );
+	}
+
+	public static void handleExceptions( @NotNull Throwable throwable, boolean crashOnError )
+	{
+		handleExceptions( Lists.newArrayList( throwable ), crashOnError );
+	}
+
+	public static void handleExceptions( @NotNull List<? extends Throwable> throwables, boolean crashOnError )
+	{
+		ExceptionReport report = new ExceptionReport();
+		boolean hasErrored = false;
+
+		for ( Throwable t : throwables )
+		{
+			t.printStackTrace();
+			if ( report.handleException( t, exceptionContext ) )
+				hasErrored = true;
+		}
+
+		/* Non-Ignorable Exceptions */
+
+		Supplier<Stream<IException>> errorStream = report::getNotIgnorableExceptions;
+
+		L.severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
+
+		errorStream.get().forEach( cause -> {
+			if ( cause instanceof Throwable )
+				L.severe( ( Throwable ) cause );
+			else
+				L.severe( cause.getClass() + ": " + cause.getMessage() );
+		} );
+
+		/* Ignorable Exceptions */
+
+		Supplier<Stream<IException>> debugStream = report::getIgnorableExceptions;
+
+		if ( debugStream.get().count() > 0 )
+		{
+			L.severe( "We Encountered " + debugStream.get().count() + " Ignorable Exception(s):" );
+
+			debugStream.get().forEach( e -> {
+				if ( e instanceof Throwable )
+					L.warning( ( Throwable ) e );
+				else
+					L.warning( e.getClass() + ": " + e.getMessage() );
+			} );
+		}
+
+		// Pass crash information for examination
+		if ( hasErrored && exceptionContext != null )
+			exceptionContext.fatalError( report, crashOnError );
+	}
+
 	/**
 	 * Indicates if we are running a development build of the server
 	 *
@@ -167,12 +318,17 @@ public class App
 	protected static void setAppPath( @Nonnull File appPath )
 	{
 		Objs.notNull( appPath );
-		App.appPath = appPath;
+		Kernel.appPath = appPath;
+	}
+
+	public static void setExceptionContext( ExceptionContext exceptionContext )
+	{
+		Kernel.exceptionContext = exceptionContext;
 	}
 
 	public static void setLogHandler( ImplLogHandler log )
 	{
-		App.log = log;
+		Kernel.log = log;
 	}
 
 	public static void setPath( @Nonnull String pathKey, @Nonnull String... paths )
@@ -187,10 +343,20 @@ public class App
 			throw new IllegalArgumentException( "App path is set using the setAppPath() method." );
 		if ( !Paths.get( paths[0] ).isAbsolute() && !paths[0].startsWith( "__" ) )
 			throw new IllegalArgumentException( "App paths must be absolute or reference another app path, i.e., __app. Paths: [" + Strs.join( paths ) + "]" );
-		App.APP_PATHS.put( key, Lists.newArrayList( paths ) );
+		Kernel.APP_PATHS.put( key, Lists.newArrayList( paths ) );
 	}
 
-	private App()
+	public static long uptime()
+	{
+		return System.currentTimeMillis() - startTime;
+	}
+
+	public static String uptimeDescribe()
+	{
+		return Strs.formatDuration( System.currentTimeMillis() - startTime );
+	}
+
+	private Kernel()
 	{
 
 	}
@@ -226,6 +392,11 @@ public class App
 			log.info( message, args );
 		}
 
+		public void severe( Throwable cause )
+		{
+			log.severe( source, cause );
+		}
+
 		public void severe( String message, Object... args )
 		{
 			log.severe( source, message, args );
@@ -234,6 +405,11 @@ public class App
 		public void severe( String message, Throwable cause, Object... args )
 		{
 			log.severe( source, message, cause, args );
+		}
+
+		public void warning( Throwable cause )
+		{
+			log.warning( source, cause );
 		}
 
 		public void warning( String message, Throwable cause, Object... args )

@@ -11,5 +11,5 @@ package io.amelia.lang;
 
 public interface ExceptionContext
 {
-
+	void fatalError( ExceptionReport report, boolean crashOnError );
 }

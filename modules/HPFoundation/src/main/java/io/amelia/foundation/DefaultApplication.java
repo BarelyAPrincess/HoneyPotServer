@@ -30,13 +30,13 @@ public abstract class DefaultApplication extends ApplicationInterface
 
 			try
 			{
-				Kernel.L.info( "Clearing Excess Cache..." );
+				App.L.info( "Clearing Excess Cache..." );
 				long keepHistory = ConfigRegistry.config.getLong( "advanced.execute.keepHistory" ).orElse( 30L );
 				ConfigRegistry.clearCache( keepHistory );
 			}
 			catch ( IllegalArgumentException e )
 			{
-				Kernel.L.warning( "Cache directory is invalid!" );
+				App.L.warning( "Cache directory is invalid!" );
 			}
 		}
 	}

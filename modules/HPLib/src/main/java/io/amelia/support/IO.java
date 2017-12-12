@@ -54,7 +54,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Kernel;
 import io.amelia.injection.Libraries;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UncaughtException;
@@ -72,7 +72,7 @@ public class IO
 	private static final int EOF = -1;
 	private static final String[] HEXDUMP_ROWPREFIXES = new String[65536 >>> 4];
 	private static final String[] HEXPADDING = new String[16];
-	private static final App.Logger L = App.getLogger( IO.class );
+	private static final Kernel.Logger L = Kernel.getLogger( IO.class );
 	private static final String NEWLINE = "\n";
 
 	static
@@ -681,7 +681,7 @@ public class IO
 
 	public static boolean extractResourceZip( String path, File dest, Class<?> clz ) throws IOException
 	{
-		File cache = App.getPath( App.PATH_CACHE );
+		File cache = Kernel.getPath( Kernel.PATH_CACHE );
 		if ( !cache.exists() )
 			cache.mkdirs();
 		File temp = new File( cache, "temp.zip" );
@@ -1138,7 +1138,7 @@ public class IO
 	 */
 	public static String relPath( File file )
 	{
-		return relPath( file, App.getPath() );
+		return relPath( file, Kernel.getPath() );
 	}
 
 	public static String relPath( File file, File relTo )

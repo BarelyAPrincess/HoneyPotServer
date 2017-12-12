@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
+import io.amelia.foundation.Kernel;
+
 /**
  * Provides Network Utilities
  */
@@ -63,7 +65,7 @@ public class Web
 
 	public static String getUserAgent()
 	{
-		return Info.getProductSimple() + "/" + Info.getVersion() + "/" + Sys.getJavaVersion();
+		return Kernel.getDevMeta().getProductName() + "/" + Kernel.getDevMeta().getVersion() + "/" + Sys.getJavaVersion();
 	}
 
 	public static boolean matches( String strTemplate, String str )

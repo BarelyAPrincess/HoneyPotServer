@@ -8,7 +8,6 @@ import io.amelia.lang.BadParcelableException;
 import io.amelia.lang.StackerException;
 
 /**
- *
  * TODO Add value filter method?
  */
 public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTypesOutline

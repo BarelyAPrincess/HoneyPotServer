@@ -12,7 +12,6 @@ package io.amelia.foundation.plugins;
 import io.amelia.foundation.App;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventHandlers;
-import io.amelia.foundation.Kernel;
 import io.amelia.foundation.plugins.loader.Plugin;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginDependencyUnknownException;
@@ -46,12 +45,12 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	public static PluginManager instance()
 	{
-		return Kernel.getProviderManager( PluginManager.class ).instance();
+		return App.getProviderManager( PluginManager.class ).instance();
 	}
 
 	public static PluginManager instanceWithoutException()
 	{
-		return Kernel.getProviderManager( PluginManager.class ).instanceWithoutException();
+		return App.getProviderManager( PluginManager.class ).instanceWithoutException();
 	}
 
 	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();

@@ -1,7 +1,7 @@
 package io.amelia.events;
 
 import io.amelia.events.application.ApplicationEvent;
-import io.amelia.foundation.Kernel;
+import io.amelia.foundation.App;
 import io.amelia.foundation.RegistrarBase;
 
 public class Events
@@ -15,7 +15,7 @@ public class Events
 	{
 		// TODO Implement
 
-		EventDispatcher.listen( Kernel.getApplication(), ApplicationEvent.class, ( e ) ->
+		EventDispatcher.listen( App.getApplication(), ApplicationEvent.class, ( e ) ->
 		{
 
 		} );

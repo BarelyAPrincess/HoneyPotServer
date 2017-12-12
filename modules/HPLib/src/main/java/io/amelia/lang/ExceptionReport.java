@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Kernel;
 import io.amelia.support.Objs;
 
 /**
@@ -26,7 +26,7 @@ import io.amelia.support.Objs;
  */
 public class ExceptionReport
 {
-	private static final App.Logger L = App.getLogger( ExceptionReport.class );
+	private static final Kernel.Logger L = Kernel.getLogger( ExceptionReport.class );
 	private static final Map<Class<? extends Throwable>, ExceptionCallback> registered = new ConcurrentHashMap<>();
 
 	public static String printExceptions( IException... exceptions )

@@ -3,8 +3,10 @@ package io.amelia;
 import io.amelia.foundation.App;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
+import io.amelia.foundation.Kernel;
 import io.amelia.foundation.PropDevMeta;
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
@@ -26,15 +28,22 @@ public class HoneyPotServer extends DefaultApplication
 	public HoneyPotServer() throws ApplicationException
 	{
 		/* Register keyed directory paths with the ConfigRegistry */
-		App.setPath( PATH_WEBROOT, App.PATH_APP, "webroot" );
-		App.setPath( PATH_DATABASE, App.PATH_APP, "database" );
-		App.setPath( PATH_SESSIONS, App.PATH_STORAGE, "sessions" );
+		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_APP, "webroot" );
+		Kernel.setPath( PATH_DATABASE, Kernel.PATH_APP, "database" );
+		Kernel.setPath( PATH_SESSIONS, Kernel.PATH_STORAGE, "sessions" );
 
-		App.setDevMeta( new PropDevMeta( HoneyPotServer.class, "build.properties" ) );
+		Kernel.setDevMeta( new PropDevMeta( HoneyPotServer.class, "build.properties" ) );
 
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
+	}
+
+	@Override
+	public void fatalError( ExceptionReport report, boolean crashOnError )
+	{
+		if ( crashOnError )
+			App.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
 	}
 
 	@Override

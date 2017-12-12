@@ -1,18 +1,6 @@
 package io.amelia.foundation;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -21,18 +9,13 @@ import io.amelia.events.application.RunlevelEvent;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.IException;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
-import io.amelia.lang.UncaughtException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
-import io.amelia.support.Lists;
 import io.amelia.support.Objs;
-import io.amelia.support.Strs;
 import io.amelia.support.Timing;
 
 /**
@@ -49,88 +32,20 @@ import io.amelia.support.Timing;
  * ...
  * </code>
  */
-public final class Kernel
+public final class App
 {
 	public static final Logger L = LogBuilder.get();
 	/**
 	 * Set to the thread that first accessed the Kernel.
 	 */
 	public static final Thread PRIMARY_THREAD = Thread.currentThread();
-	/**
-	 * An {@link Executor} that can be used to execute tasks in parallel.
-	 */
-	static final Executor EXECUTOR_PARALLEL;
-	/**
-	 * An {@link Executor} that executes tasks one at a time in serial
-	 * order.  This serialization is global to a particular process.
-	 */
-	static final Executor EXECUTOR_SERIAL;
-	static final int KEEP_ALIVE_SECONDS = 30;
-	static final ThreadFactory threadFactory = new ThreadFactory()
-	{
-		private final AtomicInteger mCount = new AtomicInteger( 1 );
 
-		@Override
-		public Thread newThread( Runnable r )
-		{
-			Thread newThread = new Thread( r, "HPS Thread #" + String.format( "%d04", mCount.getAndIncrement() ) );
-			newThread.setUncaughtExceptionHandler( ( thread, exp ) -> Kernel.handleExceptions( new UncaughtException( "Uncaught exception thrown on thread " + thread.getName(), exp ) ) );
-
-			return newThread;
-		}
-	};
-	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-	static final int THREAD_ROOL_SIZE_MAXIMUM = CPU_COUNT * 2 + 1;
-	// We want at least 2 threads and at most 4 threads in the core pool,
-	// preferring to have 1 less than the CPU count to avoid saturating
-	// the CPU with background work
-	static final int THREAD_POOL_SIZE_CORE = Math.max( 4, Math.min( CPU_COUNT - 1, 1 ) );
-	public static long startTime = System.currentTimeMillis();
 	private static ApplicationInterface app = null;
-	private static Class<? extends ApplicationInterface> applicationInterface = null;
+	// private static Class<? extends ApplicationInterface> applicationInterface = null;
 	private static Runlevel currentRunlevel = Runlevel.INITIALIZATION;
 	private static String currentRunlevelReason = null;
 	private static Object currentRunlevelTimingObject = new Object();
 	private static Runlevel previousRunlevel;
-
-	static
-	{
-		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor( Kernel.THREAD_POOL_SIZE_CORE, Kernel.THREAD_ROOL_SIZE_MAXIMUM, Kernel.KEEP_ALIVE_SECONDS, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), threadFactory );
-		threadPoolExecutor.allowCoreThreadTimeOut( true );
-		EXECUTOR_PARALLEL = threadPoolExecutor;
-
-		EXECUTOR_SERIAL = new Executor()
-		{
-			final ArrayDeque<Runnable> mTasks = new ArrayDeque<>();
-			Runnable mActive;
-
-			public synchronized void execute( final Runnable r )
-			{
-				mTasks.offer( () -> {
-					try
-					{
-						r.run();
-					}
-					finally
-					{
-						scheduleNext();
-					}
-				} );
-				if ( mActive == null )
-				{
-					scheduleNext();
-				}
-			}
-
-			protected synchronized void scheduleNext()
-			{
-				if ( ( mActive = mTasks.poll() ) != null )
-				{
-					EXECUTOR_PARALLEL.execute( mActive );
-				}
-			}
-		};
-	}
 
 	public static <T extends ApplicationInterface> T getApplication()
 	{
@@ -150,24 +65,15 @@ public final class Kernel
 
 		if ( isRunlevel( Runlevel.DISPOSED ) )
 			throw ApplicationException.fatal( "The application has been DISPOSED!" );
-		if ( Kernel.app != null )
+		if ( App.app != null )
 			throw ApplicationException.fatal( "The application instance has already been set!" );
-		Kernel.app = app;
+		Kernel.setExceptionContext( app );
+		App.app = app;
 	}
 
 	public static String getCurrentRunlevelReason()
 	{
 		return currentRunlevelReason;
-	}
-
-	public static Executor getExecutorParallel()
-	{
-		return EXECUTOR_PARALLEL;
-	}
-
-	public static Executor getExecutorSerial()
-	{
-		return EXECUTOR_SERIAL;
 	}
 
 	public static Runlevel getLastRunlevel()
@@ -183,67 +89,6 @@ public final class Kernel
 	public static void setRunlevel( Runlevel level )
 	{
 		setRunlevel( level, null );
-	}
-
-	public static void handleExceptions( @NotNull Throwable throwable )
-	{
-		handleExceptions( Lists.newArrayList( throwable ) );
-	}
-
-	public static void handleExceptions( @NotNull List<? extends Throwable> throwables )
-	{
-		handleExceptions( throwables, true );
-	}
-
-	public static void handleExceptions( @NotNull Throwable throwable, boolean crashOnError )
-	{
-		handleExceptions( Lists.newArrayList( throwable ), crashOnError );
-	}
-
-	public static void handleExceptions( @NotNull List<? extends Throwable> throwables, boolean crashOnError )
-	{
-		ExceptionReport report = new ExceptionReport();
-		boolean hasErrored = false;
-
-		for ( Throwable t : throwables )
-		{
-			t.printStackTrace();
-			if ( report.handleException( t, getApplication() ) )
-				hasErrored = true;
-		}
-
-		/* Non-Ignorable Exceptions */
-
-		Supplier<Stream<IException>> errorStream = report::getNotIgnorableExceptions;
-
-		LogBuilder.get().severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
-
-		errorStream.get().forEach( e -> {
-			if ( e instanceof Throwable )
-				LogBuilder.get().severe( ( Throwable ) e );
-			else
-				LogBuilder.get().severe( e.getClass() + ": " + e.getMessage() );
-		} );
-
-		/* Ignorable Exceptions */
-
-		Supplier<Stream<IException>> debugStream = report::getIgnorableExceptions;
-
-		if ( debugStream.get().count() > 0 )
-		{
-			LogBuilder.get().severe( "We Encountered " + debugStream.get().count() + " Ignorable Exception(s):" );
-
-			debugStream.get().forEach( e -> {
-				if ( e instanceof Throwable )
-					LogBuilder.get().warning( ( Throwable ) e );
-				else
-					LogBuilder.get().warning( e.getClass() + ": " + e.getMessage() );
-			} );
-		}
-
-		// Pass crash information for examination
-		if ( hasErrored && crashOnError )
-			setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
 	}
 
 	public static boolean isPrimaryThread()
@@ -280,7 +125,7 @@ public final class Kernel
 		/* Indicates the application is now started */
 		if ( currentRunlevel == Runlevel.STARTED )
 		{
-			Kernel.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Now Running! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
+			App.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Now Running! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
 		}
 
 		if ( currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.SHUTDOWN )
@@ -291,14 +136,14 @@ public final class Kernel
 		}
 
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
-			Kernel.setRunlevel( Runlevel.DISPOSED );
+			App.setRunlevel( Runlevel.DISPOSED );
 
 		if ( currentRunlevel == Runlevel.DISPOSED )
 		{
 			app.dispose();
 			app = null;
 
-			Kernel.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
+			App.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
 
 			System.exit( 0 );
 		}
@@ -392,7 +237,7 @@ public final class Kernel
 		}
 		catch ( ApplicationException e )
 		{
-			handleExceptions( e );
+			Kernel.handleExceptions( e );
 		}
 	}
 
@@ -415,7 +260,7 @@ public final class Kernel
 		// Call to make sure the INITIALIZATION Runlevel is acknowledged by the application.
 		onRunlevelChange();
 
-		L.info( "Starting " + ImplDevMeta.getProductName() + " (" + ImplDevMeta.getVersionDescribe() + ")" );
+		L.info( "Starting " + Kernel.getDevMeta().getProductName() + " (" + Kernel.getDevMeta().getVersionDescribe() + ")" );
 
 		/*
 		 * STARTUP
@@ -434,17 +279,7 @@ public final class Kernel
 		mainLoop.joinLoop();
 	}
 
-	public static long uptime()
-	{
-		return System.currentTimeMillis() - Kernel.startTime;
-	}
-
-	public static String uptimeDescribe()
-	{
-		return Strs.formatDuration( System.currentTimeMillis() - Kernel.startTime );
-	}
-
-	private Kernel()
+	private App()
 	{
 		// Static Access
 	}
