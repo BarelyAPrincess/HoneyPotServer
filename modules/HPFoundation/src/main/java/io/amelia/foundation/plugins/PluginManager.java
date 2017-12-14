@@ -9,7 +9,7 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventHandlers;
 import io.amelia.foundation.plugins.loader.Plugin;
@@ -45,12 +45,12 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	public static PluginManager instance()
 	{
-		return App.getProviderManager( PluginManager.class ).instance();
+		return Foundation.getProviderManager( PluginManager.class ).instance();
 	}
 
 	public static PluginManager instanceWithoutException()
 	{
-		return App.getProviderManager( PluginManager.class ).instanceWithoutException();
+		return Foundation.getProviderManager( PluginManager.class ).instanceWithoutException();
 	}
 
 	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
@@ -65,10 +65,10 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 
 	private void checkUpdate( File file )
 	{
-		if ( !App.getPath( App.PATH_UPDATES ).isDirectory() )
+		if ( !Foundation.getPath( Foundation.PATH_UPDATES ).isDirectory() )
 			return;
 
-		File updateFile = new File( App.getPath( App.PATH_UPDATES ), file.getName() );
+		File updateFile = new File( Foundation.getPath( Foundation.PATH_UPDATES ), file.getName() );
 		if ( updateFile.isFile() && IO.copy( updateFile, file ) )
 			updateFile.delete();
 	}

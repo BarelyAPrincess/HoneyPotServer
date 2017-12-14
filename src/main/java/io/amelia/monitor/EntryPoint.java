@@ -2,7 +2,7 @@ package io.amelia.monitor;
 
 import io.amelia.events.EventDispatcher;
 import io.amelia.events.application.RunlevelEvent;
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.MinimalApplication;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
@@ -17,11 +17,11 @@ public class EntryPoint
 	public static void main( String... args ) throws Exception
 	{
 		/* Prepare the environment by downloading and applying the builtin libraries required */
-		App.prepare();
+		Foundation.prepare();
 
 		/* Specify the ApplicationInterface for this environment. */
 		MinimalApplication app = new MinimalApplication();
-		App.setApplication( app );
+		Foundation.setApplication( app );
 
 		app.addArgument( "start", "Starts the daemon" );
 		app.addArgument( "stop", "Stops the daemon" );
@@ -51,17 +51,17 @@ public class EntryPoint
 			{
 				if ( app.hasArgument( "status" ) )
 				{
-					App.L.info( "Waiting..." );
+					Foundation.L.info( "Waiting..." );
 					IPC.status();
 				}
 				else if ( app.hasArgument( "stop" ) )
 				{
-					App.L.info( "Stopping..." );
+					Foundation.L.info( "Stopping..." );
 					IPC.stop( instanceId );
 				}
 				else if ( app.hasArgument( "start" ) )
 				{
-					App.L.info( "Starting..." );
+					Foundation.L.info( "Starting..." );
 					IPC.start();
 				}
 
@@ -78,6 +78,6 @@ public class EntryPoint
 			return;
 		}
 
-		App.start();
+		Foundation.start();
 	}
 }

@@ -9,7 +9,7 @@
  */
 package io.amelia.tasks;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
@@ -321,7 +321,7 @@ public class TaskDispatcher
 	 */
 	public static void heartbeat( final int currentTick )
 	{
-		if ( !App.isPrimaryThread() )
+		if ( !Foundation.isPrimaryThread() )
 			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
 
 		TaskDispatcher.currentTick = currentTick;

@@ -1,6 +1,6 @@
 package io.amelia;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
@@ -43,7 +43,7 @@ public class HoneyPotServer extends DefaultApplication
 	public void fatalError( ExceptionReport report, boolean crashOnError )
 	{
 		if ( crashOnError )
-			App.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
+			Foundation.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
 	}
 
 	@Override

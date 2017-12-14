@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -27,11 +29,13 @@ import io.amelia.support.Objs;
  */
 public class Looper
 {
-	private static final Logger LOG = LogBuilder.get( Looper.class );
+	public static final Logger L = LogBuilder.get( Looper.class );
+
 	/**
-	 * Used to globally increment internally unique numbers
+	 * Used to increment globally used unique numbers
 	 */
 	private static volatile AtomicLong UNIQUE = new AtomicLong( 0L );
+
 	/**
 	 * Stores the Loopers
 	 */
@@ -40,12 +44,14 @@ public class Looper
 	public static long getGloballyUniqueId()
 	{
 		long id = UNIQUE.getAndIncrement();
+
 		/*
 		 * Just as a safety check in case the app is running for like a millennia.
 		 * Should probably also check that we don't encounter in use numbers but that's probably even more rare.
 		 */
 		if ( Long.MAX_VALUE - id == 0 )
 			UNIQUE.set( 0L );
+
 		return id;
 	}
 
@@ -54,26 +60,30 @@ public class Looper
 	 */
 	final LooperQueue queue = new LooperQueue( this );
 	/**
-	 * Used to synchronize certain methods with the loop, so to avoid concurrent calls
-	 */
-	private final Object lock = new Object();
-	/**
 	 * List of threads that were spawned by this Looper.
 	 * Used to obtain() this Looper from a async thread.
 	 */
-	private List<WeakReference<Thread>> aliasThreads = new ArrayList<>();
+	private final List<WeakReference<Thread>> aliasThreads = new ArrayList<>();
+	/**
+	 * The Looper Flags
+	 */
+	private final EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
+	/**
+	 * Idle Handlers that run when the queue is empty
+	 */
+	private final Map<Long, Predicate<Looper>> idleHandlers = new HashMap<>();
+	/**
+	 * Used to synchronize certain methods with the loop, so to avoid concurrent and/or race issues
+	 */
+	private final ReentrantLock lock = new ReentrantLock();
+	/**
+	 * The Looper state
+	 */
+	private final EnumSet<State> states = EnumSet.noneOf( State.class );
 	/**
 	 * States the average millis between iterations.
 	 */
 	private long averagePolledMillis = 0L;
-	/**
-	 * The Looper Flags
-	 */
-	private EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
-	/**
-	 * Idle Handlers that run when the queue is empty
-	 */
-	private Map<Long, Predicate<Looper>> idleHandlers = new HashMap<>();
 	/**
 	 * Indicates the Looper is overloaded.
 	 */
@@ -82,10 +92,6 @@ public class Looper
 	 * Stores the amount of time that has past between iterations.
 	 */
 	private long lastPolledMillis = 0L;
-	/**
-	 * The Looper state
-	 */
-	private EnumSet<State> states = EnumSet.noneOf( State.class );
 	/**
 	 * Reference to the thread running this Looper.
 	 * Remains null until {@link #joinLoop()} is called.
@@ -215,118 +221,105 @@ public class Looper
 	{
 		thread = Thread.currentThread();
 
-		if ( !isCurrentThread() )
-			throw ApplicationException.runtime( "LogisticsFactory#joinLoop() must be called from the thread that created it." );
+		// Attempt to acquire the lock on the Looper, as to force outside calls to only process while Looper is asleep.
+		lock.lock();
 
 		try
 		{
-			/* Synchronize the Looper so that outside access are only processed while the Looper is waiting between iterations. */
-			synchronized ( lock )
+			// Stores the last time the overload warning was displayed as to not flood the console.
+			long lastWarningMillis = 0L;
+
+			// Stores the last time the overload wait was called as to not delay the system all the more.
+			long lastOverloadMillis = 0;
+
+			for ( ; ; )
 			{
-				/* Stores the last time the overload warning was displayed as to not flood the console. */
-				long lastWarningMillis = 0L;
-				/* Stores the last time the overload wait was called as to not delay the system all the more. */
-				long lastOverloadMillis = 0;
+				// Stores when the loop started.
+				long loopStartMillis = System.currentTimeMillis();
 
-				for ( ; ; )
+				// Call the actual loop logic.
+				LooperQueue.ActiveState result = queue.next( loopStartMillis );
+
+				if ( result.resultCode == LooperQueue.RESULT_OK )
 				{
-					/* Stores when the loop started. */
-					long loopStartMillis = System.currentTimeMillis();
+					result.entry.markFinalized();
 
-					/* Call the actual loop logic */
-					LooperQueue.Result result = queue.next( loopStartMillis );
-
-					if ( result.resultCode == LooperQueue.RESULT_OK )
-					{
-						result.entry.markFinalized();
-
-						if ( result.entry.isAsync() )
-							runAsync( result.entry.getRunnable() );
-						else
-							result.entry.getRunnable().run();
-
-						result.entry.recycle();
-					}
-
-					/* Update the time taken during this iteration. */
-					lastPolledMillis = System.currentTimeMillis() - loopStartMillis;
-
-					/* Prevent negative numbers and warn */
-					if ( lastPolledMillis < 0L )
-					{
-						App.L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
-						lastPolledMillis = 0L;
-					}
-
-					/* Update the average millis once we know the lastPolledMillis from this last iteration */
-					averagePolledMillis = ( Math.min( lastPolledMillis, averagePolledMillis ) - Math.max( lastPolledMillis, averagePolledMillis ) ) / 2;
-
-					/* Are we on average taking more than 100ms per iteration and has it been more than 5 seconds since last overload warning? */
-					if ( averagePolledMillis > 100L )
-					{
-						if ( loopStartMillis - lastWarningMillis >= 15000L && ConfigRegistry.warnOnOverload() )
-						{
-							App.L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
-							lastWarningMillis = loopStartMillis;
-						}
-						isOverloaded = true;
-					}
+					if ( result.entry.isAsync() )
+						runAsync( result.entry.getRunnable() );
 					else
-						isOverloaded = false;
+						result.entry.getRunnable().run();
 
-					/* Delay was under the 50 millis cap, so we wait with timeout so the Looper can breath */
-					if ( lastPolledMillis < 50L )
-						wait( 50L - lastPolledMillis );
-
-					/* Are we overloaded and it has been more than 1 second since the last time we forced a call on wait() */
-					if ( isOverloaded && loopStartMillis - lastOverloadMillis > 1000L )
-					{
-						wait( 20L );
-						lastOverloadMillis = loopStartMillis;
-					}
-
-					/* Process the quit message now that all pending messages have been handled. */
-					if ( isQuitting() ) // TODO
-						break;
-
-					/* Otherwise the delay was longer, so we need to go immediately to the next iteration */
+					result.entry.recycle();
 				}
+
+				// Update the time taken during this iteration.
+				lastPolledMillis = System.currentTimeMillis() - loopStartMillis;
+
+				// Prevent negative numbers and warn
+				if ( lastPolledMillis < 0L )
+				{
+					L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
+					lastPolledMillis = 0L;
+				}
+
+				// Update the average millis once we know the lastPolledMillis from this last iteration
+				averagePolledMillis = ( Math.min( lastPolledMillis, averagePolledMillis ) - Math.max( lastPolledMillis, averagePolledMillis ) ) / 2;
+
+				// Are we on average taking more than 100ms per iteration and has it been more than 5 seconds since last overload warning?
+				if ( averagePolledMillis > 100L )
+				{
+					if ( loopStartMillis - lastWarningMillis >= 15000L && ConfigRegistry.config.isTrue( ConfigRegistry.ConfigKeys.WARN_ON_OVERLOAD ) )
+					{
+						L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
+						lastWarningMillis = loopStartMillis;
+					}
+					isOverloaded = true;
+				}
+				else
+					isOverloaded = false;
+
+				// Delay was under the 50 millis cap, so we wait with timeout so the Looper can breath
+				if ( lastPolledMillis < 50L )
+					lock.newCondition().await( 50 - lastPolledMillis, TimeUnit.MILLISECONDS );
+
+				// Are we overloaded and it has been more than 1 second since the last time we forced a call on wait()
+				if ( isOverloaded && loopStartMillis - lastOverloadMillis > 1000L )
+				{
+					lock.newCondition().await( 20, TimeUnit.MILLISECONDS );
+					lastOverloadMillis = loopStartMillis;
+				}
+
+				// Process the quit message now that all pending messages have been handled.
+				if ( isQuitting() ) // TODO
+					break;
+
+				// Otherwise the delay was longer, so we need to go immediately to the next iteration
 			}
 		}
 		catch ( Throwable t )
 		{
 			Kernel.handleExceptions( t );
 		}
-
-		thread = null;
-	}
-
-	/**
-	 * Quits the looper.
-	 * <p>
-	 * Causes the {@link #joinLoop()} method to terminate without processing any more messages in the queue.
-	 * <p>
-	 * Using this method may be unsafe because some messages may not be delivered
-	 * before the looper terminates.  Consider using {@link #quitSafely} instead to ensure
-	 * that all pending work is completed in an orderly manner.
-	 *
-	 * @see #quitSafely
-	 */
-	public void quit()
-	{
-		queue.quit( false );
+		finally
+		{
+			lock.unlock();
+			thread = null;
+		}
 	}
 
 	void quit( boolean removePendingMessages )
 	{
-		if ( type == LooperType.SYSTEM && !App.isPrimaryThread() )
+		// TODO
+
+		if ( hasFlag( Flag.SYSTEM ) && !Foundation.isPrimaryThread() )
 			throw new IllegalStateException( "SYSTEM queues are not allowed to quit." );
-		if ( isQuitting )
+		if ( isQuitting() )
 			return;
 
-		synchronized ( this )
+		lock.lock();
+		try
 		{
-			isQuitting = true;
+			addState( State.QUITTING );
 
 			final long now = Kernel.uptime();
 			synchronized ( messages )
@@ -344,18 +337,40 @@ public class Looper
 
 			// TODO Wake Queue
 		}
+		finally
+		{
+			lock.unlock();
+		}
 	}
 
+	/**
+	 * Quits the looper.
+	 * <p>
+	 * Causes the {@link #joinLoop()} method to terminate without processing any more messages in the queue.
+	 * <p>
+	 * Using this method may be unsafe because some messages may not be delivered
+	 * before the looper terminates.  Consider using {@link #quitSafely} instead to ensure
+	 * that all pending work is completed in an orderly manner.
+	 *
+	 * @see #quitSafely
+	 */
 	void quitAndDestroy()
 	{
+		quit( true );
+
 		// TODO
-		synchronized ( lock )
+		lock.lock();
+		try
 		{
 			if ( thread != null )
 				throw ApplicationException.ignorable( "Looper can't be destroyed while running." );
 
 			addState( State.QUITTING );
 			loopers.remove( this );
+		}
+		finally
+		{
+			lock.unlock();
 		}
 	}
 
@@ -369,7 +384,7 @@ public class Looper
 	 */
 	public void quitSafely()
 	{
-		queue.quit( true );
+		quit( false );
 	}
 
 	void removeChildThread( Thread thread )
@@ -420,16 +435,19 @@ public class Looper
 	@Override
 	public String toString()
 	{
-		return "Looper (" + thread.getName() + ", tid " + thread.getId() + ") {" + Integer.toHexString( System.identityHashCode( this ) ) + "}";
-	}
-
-	void wake()
-	{
-		lock.notifyAll();
+		return "Looper (" + thread.getName() + ", threadId " + thread.getId() + ") {" + Integer.toHexString( System.identityHashCode( this ) ) + "}";
 	}
 
 	/**
-	 * Specifies flags for each Looper
+	 * Wakes the Looper to resume task checking.
+	 */
+	void wake()
+	{
+		lock.newCondition().signalAll();
+	}
+
+	/**
+	 * Looper Property Flags
 	 */
 	public enum Flag
 	{
@@ -438,7 +456,7 @@ public class Looper
 		 */
 		ASYNC,
 		/**
-		 * Indicates the {@link LooperQueue#next()} can and will block while the queue is empty.
+		 * Indicates the {@link LooperQueue#next(long)} can and will block while the queue is empty.
 		 * This flag is default on any non-system Looper as to save CPU time.
 		 */
 		BLOCKING,
@@ -459,56 +477,110 @@ public class Looper
 	}
 
 	/**
-	 * Indicates if certain Looper states are true
+	 * Looper States
 	 */
 	enum State
 	{
 		/**
-		 * Indicates the Looper is current trying to poll for new tasks
+		 * Indicates the Looper is actively trying to poll for new tasks.
 		 */
 		POLLING,
 		/**
-		 * Indicates the Looper has gone to sleep until new tasks show
+		 * Indicates the Looper has gone to sleep.
 		 */
 		STALLED,
 		/**
-		 * Indicates the Looper is waiting to quit.
+		 * Indicates the Looper is waiting to quit, which will happen as soon as the queue is empty.
 		 */
 		QUITTING
 	}
 
 	public static final class Factory
 	{
-		public static void destroy()
+		/**
+		 * Destroys the Looper associated with the calling Thread.
+		 *
+		 * @return Was a Looper found and successfully destroyed.
+		 */
+		public static boolean destroy()
 		{
 			Looper looper = peek();
 			if ( looper != null )
+			{
 				looper.quitAndDestroy();
+				return true;
+			}
+			else
+				return false;
 		}
 
+		/**
+		 * Returns the Looper associated with the Thread calling this method and that has passed the predicate provided.
+		 *
+		 * @param supplier  The Supplier used for initiating a new instance of Looper if none was found or it fails the Predicate.
+		 * @param predicate The predicate used to evaluate the associated Looper.
+		 *
+		 * @return The associated Looper that also passed the provided Predicate, otherwise a new instance returned by the Supplier if none was found or it failed the predicate.
+		 */
 		static Looper obtain( @Nonnull Supplier<Looper> supplier, @Nullable Predicate<Looper> predicate )
 		{
 			Objs.notNull( supplier );
 
 			Looper looper = peek();
-			if ( looper == null || ( predicate != null && predicate.test( looper ) ) )
+			if ( looper == null )
 			{
+				looper = supplier.get();
+				loopers.add( looper );
+			}
+			else if ( predicate != null && !predicate.test( looper ) )
+			{
+				// Looper failed the predicate, so it needs to be replaced.
+				loopers.remove( looper );
 				looper = supplier.get();
 				loopers.add( looper );
 			}
 			return looper;
 		}
 
+		/**
+		 * Returns the Looper associated with the Thread calling this method and that has passed the predicate provided.
+		 *
+		 * @param predicate The predicate used to evaluate the associated Looper.
+		 *
+		 * @return The associated Looper that also passed the provided Predicate, otherwise new if none was found or it failed the predicate.
+		 */
+		static Looper obtain( @Nullable Predicate<Looper> predicate )
+		{
+			return obtain( Looper::new, predicate );
+		}
+
+		/**
+		 * Returns the Looper associated with the Thread calling this method.
+		 *
+		 * @return The associated Looper, otherwise a new Looper if none was found.
+		 */
 		public static Looper obtain()
 		{
 			return obtain( Looper::new, null );
 		}
 
-		static Stream<Looper> peek( Predicate<Looper> predicate )
+		/**
+		 * Filter all current loopers using the predicate provided.
+		 *
+		 * @param predicate The predicate used to evaluate each Looper. Looper may or may not be in use elsewhere.
+		 *
+		 * @return Returns a stream of loopers that matched the predicate provided.
+		 */
+		static Stream<Looper> peek( @Nonnull Predicate<Looper> predicate )
 		{
 			return loopers.stream().filter( predicate );
 		}
 
+		/**
+		 * Returns the Looper associated with the Thread calling this method.
+		 *
+		 * @return The associated Looper, otherwise {@code null} if none was found.
+		 */
 		static Looper peek()
 		{
 			return peek( Looper::isCurrentThread ).findFirst().orElse( null );

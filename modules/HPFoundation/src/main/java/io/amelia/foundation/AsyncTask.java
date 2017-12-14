@@ -27,7 +27,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 		synchronized ( AsyncTask.class )
 		{
 			if ( sHandler == null )
-				sHandler = new LooperReceiver( App.getApplication().getMainLooper() )
+				sHandler = new LooperReceiver( Foundation.getApplication().getMainLooper() )
 				{
 					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override
@@ -37,7 +37,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 						switch ( msg.getCode() )
 						{
 							case MESSAGE_POST_RESULT:
-								// There is only one result
+								// There is only one activeState
 								result.mTask.finish( result.mData[0] );
 								break;
 							case MESSAGE_POST_PROGRESS:
@@ -122,7 +122,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * whether the thread executing this task should be interrupted in
 	 * an attempt to stop the task.</p>
 	 * <p>
-	 * <p>Calling this method will result in {@link #onCancelled(Object)} being
+	 * <p>Calling this method will activeState in {@link #onCancelled(Object)} being
 	 * invoked on the UI thread after {@link #doInBackground(Object[])}
 	 * returns. Calling this method guarantees that {@link #onPostExecute(Object)}
 	 * is never invoked. After invoking this method, you should check the
@@ -154,7 +154,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * on the UI thread.
 	 *
 	 * @param params The parameters of the task.
-	 * @return A result, defined by the subclass of this task.
+	 * @return A activeState, defined by the subclass of this task.
 	 * @see #onPreExecute()
 	 * @see #onPostExecute
 	 * @see #publishProgress
@@ -256,9 +256,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 
 	/**
 	 * Waits if necessary for the computation to complete, and then
-	 * retrieves its result.
+	 * retrieves its activeState.
 	 *
-	 * @return The computed result.
+	 * @return The computed activeState.
 	 * @throws CancellationException If the computation was cancelled.
 	 * @throws ExecutionException    If the computation threw an exception.
 	 * @throws InterruptedException  If the current thread was interrupted while waiting.
@@ -270,11 +270,11 @@ public abstract class AsyncTask<Params, Progress, Result>
 
 	/**
 	 * Waits if necessary for at most the given time for the computation
-	 * to complete, and then retrieves its result.
+	 * to complete, and then retrieves its activeState.
 	 *
 	 * @param timeout Time to wait before cancelling the operation.
 	 * @param unit    The time unit for the timeout.
-	 * @return The computed result.
+	 * @return The computed activeState.
 	 * @throws CancellationException If the computation was cancelled.
 	 * @throws ExecutionException    If the computation threw an exception.
 	 * @throws InterruptedException  If the current thread was interrupted
@@ -315,10 +315,10 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * {@link #doInBackground(Object[])} has finished.</p>
 	 * <p>
 	 * <p>The default implementation simply invokes {@link #onCancelled()} and
-	 * ignores the result. If you write your own implementation, do not call
-	 * <code>super.onCancelled(result)</code>.</p>
+	 * ignores the activeState. If you write your own implementation, do not call
+	 * <code>super.onCancelled(activeState)</code>.</p>
 	 *
-	 * @param result The result, if any, computed in
+	 * @param result The activeState, if any, computed in
 	 *               {@link #doInBackground(Object[])}, can be null
 	 * @see #cancel(boolean)
 	 * @see #isCancelled()
@@ -347,11 +347,11 @@ public abstract class AsyncTask<Params, Progress, Result>
 
 	/**
 	 * <p>Runs on the UI thread after {@link #doInBackground}. The
-	 * specified result is the value returned by {@link #doInBackground}.</p>
+	 * specified activeState is the value returned by {@link #doInBackground}.</p>
 	 * <p>
 	 * <p>This method won't be invoked if the task was cancelled.</p>
 	 *
-	 * @param result The result of the operation computed by {@link #doInBackground}.
+	 * @param result The activeState of the operation computed by {@link #doInBackground}.
 	 * @see #onPreExecute
 	 * @see #doInBackground
 	 * @see #onCancelled(Object)

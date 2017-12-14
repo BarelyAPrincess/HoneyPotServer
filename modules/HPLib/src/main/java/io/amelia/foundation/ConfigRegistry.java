@@ -171,13 +171,18 @@ public class ConfigRegistry
 		IO.extractResourceDirectory( "config", configPath, ConfigRegistry.class );
 	}
 
-	public static boolean warnOnOverload()
-	{
-		return config.isTrue( "general.warnOnOverload" );
-	}
-
 	private ConfigRegistry()
 	{
 		// Static Access
+	}
+
+	public static class ConfigKeys
+	{
+		public static final String WARN_ON_OVERLOAD = "general.warnOnOverload";
+
+		private ConfigKeys()
+		{
+			// Static Access
+		}
 	}
 }

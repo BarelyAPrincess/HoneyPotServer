@@ -3,7 +3,7 @@ package io.amelia.main;
 import io.amelia.HoneyPotServer;
 import io.amelia.events.EventDispatcher;
 import io.amelia.events.application.RunlevelEvent;
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
@@ -16,11 +16,11 @@ public class EntryPoint
 	public static void main( String... args ) throws Exception
 	{
 		/* Prepare the environment by downloading and applying the builtin libraries required */
-		App.prepare();
+		Foundation.prepare();
 
 		/* Specify the ApplicationInterface for this environment. */
 		HoneyPotServer app = new HoneyPotServer();
-		App.setApplication( app );
+		Foundation.setApplication( app );
 
 		try
 		{
@@ -61,6 +61,6 @@ public class EntryPoint
 		} );
 
 		/* Tell the Kernel the start the startup sequence */
-		App.start();
+		Foundation.start();
 	}
 }

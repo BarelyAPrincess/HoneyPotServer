@@ -2,8 +2,6 @@ package io.amelia.foundation;
 
 import java.util.function.Consumer;
 
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
 import io.amelia.support.DateAndTime;
 
 /**
@@ -39,8 +37,6 @@ import io.amelia.support.DateAndTime;
  */
 public class LooperReceiver
 {
-	public static final Logger LOG = LogBuilder.get( LooperReceiver.class );
-
 	final boolean async;
 	final Consumer<InternalMessage> callback;
 	final Looper looper;
@@ -384,7 +380,7 @@ public class LooperReceiver
 	 * @return Returns true if the Runnable was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.  Note that a
-	 * result of true does not mean the Runnable will be processed -- if
+	 * activeState of true does not mean the Runnable will be processed -- if
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */
@@ -406,7 +402,7 @@ public class LooperReceiver
 	 * @return Returns true if the Runnable was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.  Note that a
-	 * result of true does not mean the Runnable will be processed -- if
+	 * activeState of true does not mean the Runnable will be processed -- if
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 * @see Kernel#uptime()
@@ -430,7 +426,7 @@ public class LooperReceiver
 	 * @return Returns true if the Runnable was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.  Note that a
-	 * result of true does not mean the Runnable will be processed --
+	 * activeState of true does not mean the Runnable will be processed --
 	 * if the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */
@@ -493,7 +489,7 @@ public class LooperReceiver
 	 * runs immediately without being enqueued.  Otherwise, posts the runnable
 	 * to the handler and waits for it to complete before returning.
 	 * <p>
-	 * This method is dangerous!  Improper use can result in deadlocks.
+	 * This method is dangerous!  Improper use can activeState in deadlocks.
 	 * Never call this method while any locks are held or use it in a
 	 * possibly re-entrant manner.
 	 * <p>
@@ -614,7 +610,7 @@ public class LooperReceiver
 		if ( queue == null )
 		{
 			RuntimeException e = new RuntimeException( this + " sendInternalMessageAtTime() called with no looper.queue" );
-			App.L.warning( e.getInternalMessage(), e );
+			Foundation.L.warning( e.getInternalMessage(), e );
 			return false;
 		}
 		return enqueueInternalMessage( queue, msg, 0 );
@@ -634,7 +630,7 @@ public class LooperReceiver
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.  Note that a
-	 * result of true does not mean the message will be processed -- if
+	 * activeState of true does not mean the message will be processed -- if
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */
@@ -644,7 +640,7 @@ public class LooperReceiver
 		if ( queue == null )
 		{
 			RuntimeException e = new RuntimeException( this + " sendInternalMessageAtTime() called with no looper.queue" );
-			LOG.warning( "Looper", e );
+			Looper.L.warning( "Looper", e );
 			return false;
 		}
 		return enqueueInternalMessage( queue, msg, uptimeMillis );
@@ -658,7 +654,7 @@ public class LooperReceiver
 	 * @return Returns true if the message was successfully placed in to the
 	 * message queue.  Returns false on failure, usually because the
 	 * looper processing the message queue is exiting.  Note that a
-	 * result of true does not mean the message will be processed -- if
+	 * activeState of true does not mean the message will be processed -- if
 	 * the looper is quit before the delivery time of the message
 	 * occurs then the message will be dropped.
 	 */

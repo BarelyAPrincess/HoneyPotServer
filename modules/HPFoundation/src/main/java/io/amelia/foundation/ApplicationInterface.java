@@ -38,7 +38,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		optionParser.accepts( "env-file", "The env file" ).withRequiredArg().ofType( String.class ).defaultsTo( ".env" );
 		optionParser.accepts( "env", "Overrides env values" ).withRequiredArg().ofType( String.class );
 
-		for ( String pathKey : App.getPathSlugs() )
+		for ( String pathKey : Kernel.getPathSlugs() )
 			optionParser.accepts( "dir-" + pathKey, "Sets the " + pathKey + " directory." ).withRequiredArg().ofType( String.class );
 	}
 
@@ -104,11 +104,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		return new VendorMeta( new HashMap<String, String>()
 		{{
-			put( VendorMeta.NAME, App.getDevMeta().getProductName() );
-			put( VendorMeta.DESCRIPTION, App.getDevMeta().getProductDescription() );
-			put( VendorMeta.AUTHORS, App.getDevMeta().getDeveloperName() );
-			put( VendorMeta.GITHUB_BASE_URL, App.getDevMeta().getGitRepoUrl() );
-			put( VendorMeta.VERSION, App.getDevMeta().getVersionDescribe() );
+			put( VendorMeta.NAME, Kernel.getDevMeta().getProductName() );
+			put( VendorMeta.DESCRIPTION, Kernel.getDevMeta().getProductDescription() );
+			put( VendorMeta.AUTHORS, Kernel.getDevMeta().getDeveloperName() );
+			put( VendorMeta.GITHUB_BASE_URL, Kernel.getDevMeta().getGitRepoUrl() );
+			put( VendorMeta.VERSION, Kernel.getDevMeta().getVersionDescribe() );
 		}} );
 	}
 
@@ -148,7 +148,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 		if ( optionSet.has( "version" ) )
 		{
-			App.L.info( App.getDevMeta().getProductDescribed() );
+			Foundation.L.info( Kernel.getDevMeta().getProductDescribed() );
 			throw new StartupInterruptException();
 		}
 
@@ -164,7 +164,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 					if ( !Objs.isNull( optionSpec.value( optionSet ) ) )
 					{
 						if ( optionKey.startsWith( "dir-" ) )
-							App.setPath( optionKey.substring( 4 ), ( String ) optionSpec.value( optionSet ) );
+							Kernel.setPath( optionKey.substring( 4 ), ( String ) optionSpec.value( optionSet ) );
 						else if ( env.isValueSet( optionKey ) )
 							env.set( optionKey, optionSpec.value( optionSet ), false );
 					}

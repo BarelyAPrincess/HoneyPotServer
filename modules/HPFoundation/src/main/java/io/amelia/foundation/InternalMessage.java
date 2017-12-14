@@ -27,9 +27,9 @@ public class InternalMessage implements Parcelable
 		}
 
 		@Override
-		public void writeToParcel( InternalMessage obj, Parcel out ) throws ParcelableException.Error
+		public void writeToParcel( InternalMessage msg, Parcel out ) throws ParcelableException.Error
 		{
-
+			msg.writeToParcel( out );
 		}
 	};
 

@@ -9,7 +9,7 @@
  */
 package io.amelia.events;
 
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.annotation.DeprecatedDetail;
@@ -68,7 +68,7 @@ public class EventDispatcher
 		{
 			if ( Thread.holdsLock( lock ) )
 				throw new IllegalStateException( event.getEventName() + " cannot be triggered asynchronously from inside synchronized code." );
-			if ( App.isPrimaryThread() )
+			if ( Foundation.isPrimaryThread() )
 				throw new IllegalStateException( event.getEventName() + " cannot be triggered asynchronously from primary server thread." );
 			fireEvent( event );
 		}

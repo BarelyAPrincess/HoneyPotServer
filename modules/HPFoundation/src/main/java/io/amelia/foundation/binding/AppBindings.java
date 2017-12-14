@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.events.EventDispatcher;
-import io.amelia.foundation.App;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.facades.FacadePriority;
 import io.amelia.foundation.facades.events.FacadeRegisterEvent;
 import io.amelia.foundation.facades.interfaces.FacadeService;
@@ -144,7 +144,7 @@ public class AppBindings
 				registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
 			}
 			else
-				App.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
+				Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
 		} );
 	}
 

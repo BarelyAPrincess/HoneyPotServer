@@ -19,38 +19,42 @@ import io.amelia.support.Objs;
 import io.amelia.support.Timing;
 
 /**
- * The application Kernel used for accessing majority of the API.
- * The first call to of this class MUST be the thread intended to run the main loop.
+ * Used for accessing majority of the HP Foundation API.<br />
+ * The first call to of this class MUST be the thread that will initiate the main loop.
  * <p>
  * <p>
  * Your main() should look like this:
  * <code>
- * Kernel.prepare();
- * <p>
- * ImplementedApplication app = new ImplementedApplication();
- * Kernel.setApplication( app );
+ * App.prepare();
  * ...
+ * ImplementedApplication app = new ImplementedApplication();
+ * App.setApplication( app );
+ * ...
+ * App.start();
  * </code>
  */
-public final class App
+public final class Foundation
 {
 	public static final Logger L = LogBuilder.get();
+
 	/**
-	 * Set to the thread that first accessed the Kernel.
+	 * Set to the thread that first accessed this class.
+	 * Thread MUST also be the thread used to join the Main Looper
 	 */
 	public static final Thread PRIMARY_THREAD = Thread.currentThread();
 
 	private static ApplicationInterface app = null;
-	// private static Class<? extends ApplicationInterface> applicationInterface = null;
 	private static Runlevel currentRunlevel = Runlevel.INITIALIZATION;
 	private static String currentRunlevelReason = null;
-	private static Object currentRunlevelTimingObject = new Object();
 	private static Runlevel previousRunlevel;
+	private static Object runlevelTimingObject = new Object();
 
 	public static <T extends ApplicationInterface> T getApplication()
 	{
-		if ( app == null )
+		if ( isRunlevel( Runlevel.DISPOSED ) )
 			throw ApplicationException.runtime( "The application has been DISPOSED!" );
+		if ( app == null )
+			throw ApplicationException.runtime( "The application instance has never been set!" );
 		return ( T ) app;
 	}
 
@@ -65,10 +69,10 @@ public final class App
 
 		if ( isRunlevel( Runlevel.DISPOSED ) )
 			throw ApplicationException.fatal( "The application has been DISPOSED!" );
-		if ( App.app != null )
+		if ( Foundation.app != null )
 			throw ApplicationException.fatal( "The application instance has already been set!" );
 		Kernel.setExceptionContext( app );
-		App.app = app;
+		Foundation.app = app;
 	}
 
 	public static String getCurrentRunlevelReason()
@@ -102,7 +106,7 @@ public final class App
 	}
 
 	/**
-	 * Handles post runlevel change events. Should almost always be the very last method called when the runlevel changes.
+	 * Handles post runlevel change events. Should almost always be the very last method call when the runlevel changes.
 	 */
 	private static void onRunlevelChange() throws ApplicationException
 	{
@@ -112,21 +116,15 @@ public final class App
 
 		/* Indicates the application has begun the main loop */
 		if ( currentRunlevel == Runlevel.MAINLOOP )
-		{
 			setRunlevel( Runlevel.NETWORKING );
-		}
 
 		/* Indicates the application has started all and any networking */
 		if ( currentRunlevel == Runlevel.NETWORKING )
-		{
 			setRunlevel( Runlevel.STARTED );
-		}
 
 		/* Indicates the application is now started */
 		if ( currentRunlevel == Runlevel.STARTED )
-		{
-			App.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Now Running! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
-		}
+			Foundation.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Now Running! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 
 		if ( currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.SHUTDOWN )
 		{
@@ -136,14 +134,14 @@ public final class App
 		}
 
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
-			App.setRunlevel( Runlevel.DISPOSED );
+			Foundation.setRunlevel( Runlevel.DISPOSED );
 
 		if ( currentRunlevel == Runlevel.DISPOSED )
 		{
 			app.dispose();
 			app = null;
 
-			App.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
+			Foundation.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 
 			System.exit( 0 );
 		}
@@ -228,12 +226,12 @@ public final class App
 			currentRunlevelReason = reason;
 			previousRunlevel = currentRunlevel = level;
 
-			Timing.start( currentRunlevelTimingObject );
+			Timing.start( runlevelTimingObject );
 
 			onRunlevelChange();
 
 			if ( level != Runlevel.DISPOSED && level != Runlevel.STARTED )
-				L.info( "Application Runlevel has been changed to " + level.name() + "! It took " + Timing.finish( currentRunlevelTimingObject ) + "ms!" );
+				L.info( "Application Runlevel has been changed to " + level.name() + "! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 		}
 		catch ( ApplicationException e )
 		{
@@ -260,26 +258,22 @@ public final class App
 		// Call to make sure the INITIALIZATION Runlevel is acknowledged by the application.
 		onRunlevelChange();
 
-		L.info( "Starting " + Kernel.getDevMeta().getProductName() + " (" + Kernel.getDevMeta().getVersionDescribe() + ")" );
+		L.info( "Starting " + Kernel.getDevMeta().getProductName() + " version " + Kernel.getDevMeta().getVersionDescribe() );
 
-		/*
-		 * STARTUP
-		 * Indicates the application has begun startup procedures
-		 */
+		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
 
-		/* This ensures the next set of runlevels are handled in sequence after the main looper is started */
+		// This ensures the next set of runlevels are handled in sequence after the main looper is started.
+		Looper mainLooper = getApplication().getMainLooper();
 
-		Looper mainLoop = getApplication().getMainLooper();
+		// As soon as the main Looper gets a kick in it's pants, the first runlevel is initiated.
+		mainLooper.getQueue().postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );
 
-		/* As soon as the main Looper gets a kick in it's pants, the first runlevel is initiated. */
-		mainLoop.getQueue().postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );
-
-		/* Join this thread to the main looper. */
-		mainLoop.joinLoop();
+		// Join this thread to the main looper.
+		mainLooper.joinLoop();
 	}
 
-	private App()
+	private Foundation()
 	{
 		// Static Access
 	}
