@@ -1,33 +1,39 @@
 package io.amelia.foundation;
 
 import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import io.amelia.lang.ParcelableException;
-import io.amelia.support.GlobalReference;
 import io.amelia.support.data.Parcel;
 import io.amelia.support.data.Parcelable;
 
-public class InternalMessage implements Parcelable
+/**
+ * Defines a carrier containing an data object that can be sent to a {@link ParcelHandler}.
+ *
+ * <p class="note">The best way to get one of these is to call {@link #obtain Message.obtain()}
+ * method, which will pull from a pool of recycled objects.</p>
+ */
+public class ParcelCarrier implements Parcelable
 {
-	private static final GlobalReference<NavigableSet<InternalMessage>> unusedPool = new GlobalReference<>();
+	private static final NavigableSet<ParcelCarrier> unusedPool = new TreeSet<>();
 
-	public static final Serializer<InternalMessage> SERIALIZER = new Serializer<InternalMessage>()
+	public static final Serializer<ParcelCarrier> SERIALIZER = new Serializer<ParcelCarrier>()
 	{
-		public InternalMessage[] newArray( int size )
+		public ParcelCarrier[] newArray( int size )
 		{
-			return new InternalMessage[size];
+			return new ParcelCarrier[size];
 		}
 
-		public InternalMessage readFromParcel( Parcel source ) throws ParcelableException.Error
+		public ParcelCarrier readFromParcel( Parcel source ) throws ParcelableException.Error
 		{
-			InternalMessage msg = InternalMessage.obtain();
+			ParcelCarrier msg = ParcelCarrier.obtain();
 			msg.readFromParcel( source );
 			return msg;
 		}
 
 		@Override
-		public void writeToParcel( InternalMessage msg, Parcel out ) throws ParcelableException.Error
+		public void writeToParcel( ParcelCarrier msg, Parcel out ) throws ParcelableException.Error
 		{
 			msg.writeToParcel( out );
 		}
@@ -36,13 +42,13 @@ public class InternalMessage implements Parcelable
 	/**
 	 * Return an instance from the global unused pool. Allows us to avoid allocating new objects in many cases.
 	 */
-	public static InternalMessage obtain()
+	public static ParcelCarrier obtain()
 	{
 		synchronized ( unusedPool )
 		{
-			InternalMessage msg = unusedPool.get().pollFirst();
+			ParcelCarrier msg = unusedPool.pollFirst();
 			if ( msg == null )
-				msg = new InternalMessage();
+				msg = new ParcelCarrier();
 			return msg;
 		}
 	}
@@ -52,11 +58,12 @@ public class InternalMessage implements Parcelable
 	 * message into the new one.
 	 *
 	 * @param orig Original message to copy.
+	 *
 	 * @return A Message object from the global pool.
 	 */
-	public static InternalMessage obtain( InternalMessage orig )
+	public static ParcelCarrier obtain( ParcelCarrier orig )
 	{
-		InternalMessage newQueueEntry = obtain();
+		ParcelCarrier newQueueEntry = obtain();
 		newQueueEntry.replyTo = orig.replyTo;
 		newQueueEntry.payload = orig.payload;
 		newQueueEntry.receiver = orig.receiver;
@@ -84,7 +91,7 @@ public class InternalMessage implements Parcelable
 	/**
 	 * Receivers have the ability to process queued incoming messages.
 	 */
-	private LooperReceiver receiver;
+	private ParcelHandler receiver;
 	/**
 	 * Indicates the location of the PostalSender. This will either be local or remote over a network connection.
 	 */
@@ -94,14 +101,9 @@ public class InternalMessage implements Parcelable
 	 */
 	private PostalSender sender;
 
-	InternalMessage()
+	ParcelCarrier()
 	{
 		payload = new Parcel();
-	}
-
-	private NavigableSet<InternalMessage> get()
-	{
-		return unusedPool.get();
 	}
 
 	public MessageCode getCode()
@@ -143,9 +145,9 @@ public class InternalMessage implements Parcelable
 	}
 
 	/**
-	 * Retrieve the a {@link LooperReceiver} implementation that
+	 * Retrieve the a {@link ParcelHandler} implementation that
 	 * will receive this message. The object must implement
-	 * {@link LooperReceiver#handleMessage(Message)}.
+	 * {@link ParcelHandler#handleMessage(Message)}.
 	 * Each Handler has its own name-space for
 	 * message codes, so you do not need to
 	 * worry about yours conflicting with other handlers.
@@ -202,10 +204,13 @@ public class InternalMessage implements Parcelable
 
 	void recycleUnchecked()
 	{
-		isInUse = false;
-		payload = null;
+		synchronized ( unusedPool )
+		{
+			isInUse = false;
+			payload = null;
 
-		unusedPool.add( this );
+			unusedPool.add( this );
+		}
 	}
 
 	/**
@@ -217,7 +222,6 @@ public class InternalMessage implements Parcelable
 		receiver.sendMessage( this );
 	}
 
-	@Override
 	public void writeToParcel( Parcel dest )
 	{
 		if ( payload instanceof Parcel )

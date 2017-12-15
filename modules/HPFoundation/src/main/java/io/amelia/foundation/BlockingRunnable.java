@@ -1,5 +1,8 @@
 package io.amelia.foundation;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import io.amelia.support.Objs;
 
 /**
@@ -11,7 +14,7 @@ public final class BlockingRunnable implements Runnable
 	private final Runnable mTask;
 	private boolean mDone;
 
-	public BlockingRunnable( Runnable task )
+	public BlockingRunnable( @Nonnull Runnable task )
 	{
 		mTask = task;
 	}
@@ -21,7 +24,7 @@ public final class BlockingRunnable implements Runnable
 		return postAndWait( 0L );
 	}
 
-	public boolean postAndWait( long timeout )
+	public boolean postAndWait( @Nonnegative long timeout )
 	{
 		Objs.notNegative( timeout );
 
@@ -43,6 +46,7 @@ public final class BlockingRunnable implements Runnable
 					}
 					catch ( InterruptedException ex )
 					{
+						// Ignore
 					}
 				}
 			}
@@ -56,6 +60,7 @@ public final class BlockingRunnable implements Runnable
 					}
 					catch ( InterruptedException ex )
 					{
+						// Ignore
 					}
 				}
 			}

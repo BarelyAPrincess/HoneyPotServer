@@ -193,7 +193,7 @@ public final class Foundation
 	public static void setRunlevel( Runlevel level, String reason )
 	{
 		Looper mainLooper = getApplication().getMainLooper();
-		if ( mainLooper.isCurrentThread() )
+		if ( mainLooper.isThreadJoined() )
 			setRunlevel0( level, reason );
 		else
 			mainLooper.getQueue().postTask( () -> setRunlevel0( level, reason ) );

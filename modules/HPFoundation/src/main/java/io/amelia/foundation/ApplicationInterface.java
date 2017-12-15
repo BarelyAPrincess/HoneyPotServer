@@ -60,7 +60,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void dispose()
 	{
-
+		mainLooper.quitAndDestroy();
 	}
 
 	public Env getEnv()
@@ -119,7 +119,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public boolean isMainThread()
 	{
-		return mainLooper.isCurrentThread();
+		return mainLooper.isThreadJoined();
 	}
 
 	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException;

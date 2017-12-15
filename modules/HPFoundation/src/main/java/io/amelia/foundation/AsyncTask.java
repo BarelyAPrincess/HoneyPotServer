@@ -20,18 +20,18 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private static final Logger L = LogBuilder.get( AsyncTask.class );
 	private static final int MESSAGE_POST_PROGRESS = 0x2;
 	private static final int MESSAGE_POST_RESULT = 0x1;
-	private static LooperReceiver sHandler;
+	private static ParcelHandler sHandler;
 
-	private static LooperReceiver getHandler()
+	private static ParcelHandler getHandler()
 	{
 		synchronized ( AsyncTask.class )
 		{
 			if ( sHandler == null )
-				sHandler = new LooperReceiver( Foundation.getApplication().getMainLooper() )
+				sHandler = new ParcelHandler( Foundation.getApplication().getMainLooper() )
 				{
 					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override
-					public void handleMessage( InternalMessage msg )
+					public void handleMessage( ParcelCarrier msg )
 					{
 						AsyncTaskResult<?> result = ( AsyncTaskResult<?> ) msg.getPayload();
 						switch ( msg.getCode() )
@@ -387,7 +387,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private Result postResult( Result result )
 	{
 		@SuppressWarnings( "unchecked" )
-		InternalMessage message = getHandler().obtainMessage( MESSAGE_POST_RESULT, new AsyncTaskResult<Result>( this, result ) );
+		ParcelCarrier message = getHandler().obtainMessage( MESSAGE_POST_RESULT, new AsyncTaskResult<Result>( this, result ) );
 		message.sendToTarget();
 		return result;
 	}

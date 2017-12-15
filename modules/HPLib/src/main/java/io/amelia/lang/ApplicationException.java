@@ -70,6 +70,7 @@ public abstract class ApplicationException extends Exception implements IExcepti
 	{
 		return new Runtime( ReportingLevel.E_USER_ERROR, message, cause );
 	}
+
 	protected final ReportingLevel level;
 
 	public ApplicationException( ReportingLevel level )

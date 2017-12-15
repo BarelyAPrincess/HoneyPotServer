@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.Objs;
@@ -77,10 +78,6 @@ public class Looper
 	 */
 	private final ReentrantLock lock = new ReentrantLock();
 	/**
-	 * The Looper state
-	 */
-	private final EnumSet<State> states = EnumSet.noneOf( State.class );
-	/**
 	 * States the average millis between iterations.
 	 */
 	private long averagePolledMillis = 0L;
@@ -88,6 +85,10 @@ public class Looper
 	 * Indicates the Looper is overloaded.
 	 */
 	private boolean isOverloaded = false;
+	/**
+	 * Indicates the Looper is preparing to quit.
+	 */
+	private boolean isQuitting = false;
 	/**
 	 * Stores the amount of time that has past between iterations.
 	 */
@@ -112,7 +113,7 @@ public class Looper
 					aliasThreads.remove( reference );
 
 			aliasThreads.add( new WeakReference<>( thread ) );
-			thread.setName( getThread().getName() + "-" + aliasThreads.size() );
+			thread.setName( getJoinedThread().getName() + "-" + aliasThreads.size() );
 		}
 	}
 
@@ -128,14 +129,17 @@ public class Looper
 		flags.add( flag );
 	}
 
-	void addState( State state )
-	{
-		states.add( state );
-	}
-
 	public long getAveragePolledMillis()
 	{
 		return averagePolledMillis;
+	}
+
+	/**
+	 * Gets the Thread running this Looper.
+	 */
+	public Thread getJoinedThread()
+	{
+		return thread;
 	}
 
 	public long getLastPolledMillis()
@@ -145,7 +149,7 @@ public class Looper
 
 	public String getName()
 	{
-		return "Looper " + getThread().getName();
+		return "Looper " + getJoinedThread().getName();
 	}
 
 	/**
@@ -156,23 +160,53 @@ public class Looper
 		return queue;
 	}
 
-	/**
-	 * Gets the Thread running this Looper.
-	 */
-	public Thread getThread()
-	{
-		return thread;
-	}
-
 	public boolean hasFlag( Flag flag )
 	{
 		return flags.contains( flag );
 	}
 
+	public boolean isDisposed()
+	{
+		return !loopers.contains( this );
+	}
+
+	boolean isHeldByCurrentThread()
+	{
+		return lock.isHeldByCurrentThread();
+	}
+
 	/**
-	 * Returns true if this Looper belongs to this thread.
+	 * Returns true if this Looper has an average millis of over 100ms with each iteration.
 	 */
-	public boolean isCurrentThread()
+	public boolean isOverloaded()
+	{
+		return isOverloaded;
+	}
+
+	/**
+	 * Returns true if this Looper is currently working on quitting.
+	 * No more tasks will be accepted.
+	 */
+	public boolean isQuitting()
+	{
+		return isQuitting;
+	}
+
+	/**
+	 * Returns true if this Looper is currently running, i.e., a thread is actively calling the {@link #joinLoop()} method.
+	 */
+	public boolean isRunning()
+	{
+		return thread != null;
+	}
+
+	/**
+	 * Returns true if this Looper belongs to this the current thread.
+	 * Will also check child threads and return true as well.
+	 *
+	 * @return True if the current thread is the same as the one used in {@link #joinLoop()}
+	 */
+	public boolean isThreadJoined()
 	{
 		if ( thread == null )
 			return false;
@@ -188,30 +222,6 @@ public class Looper
 					return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Returns true if this Looper has an average millis of over 100ms with each iteration.
-	 */
-	public boolean isOverloaded()
-	{
-		return isOverloaded;
-	}
-
-	/**
-	 * Returns true if this Looper is currently working on quitting. No more tasks will be accepted by the Queue.
-	 */
-	public boolean isQuitting()
-	{
-		return states.contains( State.QUITTING );
-	}
-
-	/**
-	 * Returns true if this Looper is currently running, i.e., a thread is actively calling the {@link #joinLoop()} method.
-	 */
-	public boolean isRunning()
-	{
-		return thread != null;
 	}
 
 	/**
@@ -235,19 +245,17 @@ public class Looper
 			for ( ; ; )
 			{
 				// Stores when the loop started.
-				long loopStartMillis = System.currentTimeMillis();
+				final long loopStartMillis = System.currentTimeMillis();
 
 				// Call the actual loop logic.
 				LooperQueue.ActiveState result = queue.next( loopStartMillis );
 
-				if ( result.resultCode == LooperQueue.RESULT_OK )
+				if ( result.result == LooperQueue.Result.SUCCESS )
 				{
 					result.entry.markFinalized();
 
-					if ( result.entry.isAsync() )
-						runAsync( result.entry.getRunnable() );
-					else
-						result.entry.getRunnable().run();
+					if ( result.entry instanceof LooperQueue.RunnableEntry )
+						( ( LooperQueue.RunnableEntry ) result.entry ).run();
 
 					result.entry.recycle();
 				}
@@ -278,11 +286,11 @@ public class Looper
 				else
 					isOverloaded = false;
 
-				// Delay was under the 50 millis cap, so we wait with timeout so the Looper can breath
+				// Cycle time was under the 50 millis minimum, so we wait the remainder of time. This also gives the Looper a chance to process awaiting calls.
 				if ( lastPolledMillis < 50L )
 					lock.newCondition().await( 50 - lastPolledMillis, TimeUnit.MILLISECONDS );
 
-				// Are we overloaded and it has been more than 1 second since the last time we forced a call on wait()
+				// If we are overloaded and the last time we processed calls was over 1 second ago, a force the Looper to momentarily sleep for 20 millis.
 				if ( isOverloaded && loopStartMillis - lastOverloadMillis > 1000L )
 				{
 					lock.newCondition().await( 20, TimeUnit.MILLISECONDS );
@@ -290,10 +298,13 @@ public class Looper
 				}
 
 				// Process the quit message now that all pending messages have been handled.
-				if ( isQuitting() ) // TODO
+				if ( isQuitting() )
+				{
+					quitFinal();
 					break;
+				}
 
-				// Otherwise the delay was longer, so we need to go immediately to the next iteration
+				// Otherwise we go immediately to the next iteration.
 			}
 		}
 		catch ( Throwable t )
@@ -302,40 +313,32 @@ public class Looper
 		}
 		finally
 		{
+			queue.clearState();
 			lock.unlock();
 			thread = null;
 		}
 	}
 
-	void quit( boolean removePendingMessages )
+	private void quit( boolean removePendingMessages )
 	{
-		// TODO
-
-		if ( hasFlag( Flag.SYSTEM ) && !Foundation.isPrimaryThread() )
-			throw new IllegalStateException( "SYSTEM queues are not allowed to quit." );
-		if ( isQuitting() )
+		// SYSTEM Loopers are meant to run perpetually and can only quit during the DISPOSED runlevel.
+		if ( hasFlag( Flag.SYSTEM ) && Foundation.getRunlevel() != Runlevel.DISPOSED )
+			throw ApplicationException.runtime( "SYSTEM Looper is not permitted to quit." );
+		// If we're already quitting or have been disposed, return immediately.
+		if ( isQuitting() || isDisposed() )
 			return;
 
 		lock.lock();
 		try
 		{
-			addState( State.QUITTING );
+			isQuitting = true;
 
-			final long now = Kernel.uptime();
-			synchronized ( messages )
-			{
-				messages.removeIf( message -> {
-					if ( removePendingMessages || message.getWhen() > now )
-					{
-						message.recycle();
-						return true;
-					}
-					else
-						return false;
-				} );
-			}
+			queue.quit( removePendingMessages );
 
-			// TODO Wake Queue
+			if ( isRunning() && queue.isStalled() )
+				wake();
+			if ( !isRunning() )
+				quitFinal();
 		}
 		finally
 		{
@@ -357,21 +360,14 @@ public class Looper
 	void quitAndDestroy()
 	{
 		quit( true );
+	}
 
-		// TODO
-		lock.lock();
-		try
-		{
-			if ( thread != null )
-				throw ApplicationException.ignorable( "Looper can't be destroyed while running." );
-
-			addState( State.QUITTING );
-			loopers.remove( this );
-		}
-		finally
-		{
-			lock.unlock();
-		}
+	/**
+	 * Does some final tasks before the Looper is permanently disposed of.
+	 */
+	private void quitFinal()
+	{
+		loopers.remove( this );
 	}
 
 	/**
@@ -407,11 +403,6 @@ public class Looper
 			throw ApplicationException.runtime( "Plugin Loopers are the domain of the PluginManager." );
 
 		flags.remove( flag );
-	}
-
-	void removeState( State state )
-	{
-		states.remove( state );
 	}
 
 	/**
@@ -474,25 +465,6 @@ public class Looper
 		 * Indicates the Looper will auto-quit once the queue is empty.
 		 */
 		AUTO_QUIT
-	}
-
-	/**
-	 * Looper States
-	 */
-	enum State
-	{
-		/**
-		 * Indicates the Looper is actively trying to poll for new tasks.
-		 */
-		POLLING,
-		/**
-		 * Indicates the Looper has gone to sleep.
-		 */
-		STALLED,
-		/**
-		 * Indicates the Looper is waiting to quit, which will happen as soon as the queue is empty.
-		 */
-		QUITTING
 	}
 
 	public static final class Factory
@@ -583,7 +555,7 @@ public class Looper
 		 */
 		static Looper peek()
 		{
-			return peek( Looper::isCurrentThread ).findFirst().orElse( null );
+			return peek( Looper::isThreadJoined ).findFirst().orElse( null );
 		}
 
 		private Factory()

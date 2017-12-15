@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ApplicationException;
@@ -14,39 +15,21 @@ import io.amelia.support.Objs;
 
 public class LooperQueue
 {
-	/**
-	 * Indicates an empty queue.
-	 */
-	static final int RESULT_EMPTY = 0x1;
-	/**
-	 * Indicates the queue is new or something has changed since the last time next() was called.
-	 */
-	static final int RESULT_NONE = 0x0;
-	/**
-	 * Indicates the next enqueued task has been returned by next().
-	 */
-	static final int RESULT_OK = 0x3;
-	/**
-	 * Indicates the queue has encountered a stall barrier, we are waiting for it removal.
-	 */
-	static final int RESULT_STALLED = 0x2;
-	/**
-	 * Indicates the next enqueued task is still in the future, so we wait.
-	 */
-	static final int RESULT_WAITING = 0x4;
-
-	private final NavigableSet<LooperEntry> entries = new TreeSet<>();
+	private final NavigableSet<AbstractEntry> entries = new TreeSet<>();
 	private final Looper looper;
 	ActiveState activeState = new ActiveState();
-	private boolean polling = false;
+	private boolean isPolling = false;
 
 	public LooperQueue( Looper looper )
 	{
 		this.looper = looper;
 	}
 
-	<T extends LooperEntry> T addQueueTask( T queueTask )
+	<T extends AbstractEntry> T addQueueTask( T queueTask )
 	{
+		if ( looper.isQuitting() )
+			throw new IllegalStateException( "The LooperQueue is quitting!" );
+
 		synchronized ( entries )
 		{
 			entries.add( queueTask );
@@ -58,10 +41,10 @@ public class LooperQueue
 	{
 		synchronized ( entries )
 		{
-			Iterator<LooperEntry> queueIterator = entries.iterator();
+			Iterator<AbstractEntry> queueIterator = entries.iterator();
 			while ( queueIterator.hasNext() )
 			{
-				LooperEntry entry = queueIterator.next();
+				AbstractEntry entry = queueIterator.next();
 				if ( entry.getId() == id )
 				{
 					queueIterator.remove();
@@ -93,7 +76,8 @@ public class LooperQueue
 	/**
 	 * Removes a synchronization barrier.
 	 *
-	 * @param id The synchronization barrier id that was returned by {@link #postTaskBarrier}.
+	 * @param id The synchronization barrier id that was returned by {@link #postBarrier}.
+	 *
 	 * @throws IllegalStateException if the barrier was not found.
 	 */
 	public void cancelBarrier( long id )
@@ -112,10 +96,10 @@ public class LooperQueue
 			}
 
 			/* Iterate over the pending entries. */
-			Iterator<LooperEntry> queueIterator = entries.iterator();
+			Iterator<AbstractEntry> queueIterator = entries.iterator();
 			while ( queueIterator.hasNext() )
 			{
-				LooperEntry entry = queueIterator.next();
+				AbstractEntry entry = queueIterator.next();
 				if ( entry instanceof BarrierEntry && entry.getId() == id )
 				{
 					queueIterator.remove();
@@ -127,7 +111,12 @@ public class LooperQueue
 		}
 	}
 
-	boolean enqueueMessage( @Nonnull InternalMessage msg, long when )
+	void clearState()
+	{
+		activeState.result = Result.NONE;
+	}
+
+	boolean enqueueMessage( @Nonnull ParcelCarrier msg, long when )
 	{
 		Objs.notNull( msg );
 		Objs.notNegative( when );
@@ -135,11 +124,11 @@ public class LooperQueue
 		if ( msg.isInUse() )
 			throw new IllegalStateException( "Message is already in use." );
 
-		synchronized ( this )
+		synchronized ( entries )
 		{
-			if ( isQuitting )
+			if ( looper.isQuitting() )
 			{
-				Looper.L.warning( "LooperQueue is quiting." );
+				Looper.L.warning( "Looper is quiting." );
 				msg.recycle();
 				return false;
 			}
@@ -166,29 +155,30 @@ public class LooperQueue
 			if ( needWake )
 				notify();
 		}
+
 		return true;
 	}
 
-	public LooperEntry getActiveEntry()
+	public AbstractEntry getActiveEntry()
 	{
 		return activeState == null ? null : activeState.entry;
 	}
 
 	public long getEarliest()
 	{
-		LooperEntry first = entries.first();
+		AbstractEntry first = entries.first();
 		return first == null ? 0L : first.getWhen();
+	}
+
+	public Result getLastResult()
+	{
+		return activeState.result;
 	}
 
 	public long getLatest()
 	{
-		LooperEntry last = entries.last();
+		AbstractEntry last = entries.last();
 		return last == null ? Long.MAX_VALUE : last.getWhen();
-	}
-
-	public int getResultCode()
-	{
-		return activeState.resultCode;
 	}
 
 	public boolean hasEntries()
@@ -198,7 +188,7 @@ public class LooperQueue
 
 	public boolean isEmpty()
 	{
-		return activeState.resultCode == RESULT_EMPTY;
+		return activeState.result == Result.EMPTY;
 	}
 
 	/**
@@ -210,7 +200,7 @@ public class LooperQueue
 	 */
 	public boolean isIdle()
 	{
-		return activeState.resultCode == RESULT_EMPTY || activeState.resultCode == RESULT_WAITING;
+		return activeState.result == Result.EMPTY || activeState.result == Result.WAITING;
 	}
 
 	/**
@@ -222,116 +212,84 @@ public class LooperQueue
 	 */
 	public boolean isPolling()
 	{
-		return !looper.isQuitting() && polling;
+		return !looper.isQuitting() && isPolling;
 	}
 
 	public boolean isStalled()
 	{
-		return activeState.resultCode == RESULT_STALLED;
+		return activeState.result == Result.STALLED;
 	}
 
 	public boolean isWaiting()
 	{
-		return activeState.resultCode == RESULT_WAITING;
+		return activeState.result == Result.WAITING;
 	}
 
 	ActiveState next( long now )
 	{
-		polling = true;
-		for ( ; ; )
+		isPolling = false;
+		try
 		{
-			synchronized ( entries )
+			for ( ; ; )
 			{
-				/* If the current entry is null, poll for the first entry. */
-				if ( activeState.entry == null )
-					activeState.entry = entries.pollFirst();
-				/* If it is still null, assume we have no more entries to get. */
-				if ( activeState.entry == null )
-					activeState.resultCode = RESULT_EMPTY;
-				else if ( activeState.entry instanceof CheckpointEntry )
+				synchronized ( entries )
 				{
-					/*
-					 * We filter out the remaining entries looking for anything besides just more CheckpointEntry instances.
-					 * This allows for all remaining CheckpointEntry instance that may be in a row to receive the same answer.
-					 */
-					boolean hasMoreEntries = entries.stream().filter( e -> !( e instanceof CheckpointEntry ) ).count() > 0;
-					/* Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled. */
-					( ( CheckpointEntry ) activeState.entry ).run( hasMoreEntries );
+					// If the current entry is null, poll for the next upcoming entry.
+					if ( activeState.entry == null )
+						activeState.entry = entries.pollFirst();
 
-					/* Clear out the entry and go again. */
-					activeState.entry = null;
-					continue;
-				}
-				else if ( activeState.entry instanceof BarrierEntry )
-				{
-					/* Executes the inner Predicate contained in the barrier, removing it on False. */
-					activeState.entry.getRunnable().run();
-					activeState.resultCode = RESULT_STALLED;
-				}
-				else if ( activeState.entry instanceof TaskEntry )
-				{
-					if ( now < activeState.entry.getWhen() )
-						activeState.resultCode = RESULT_WAITING;
+					// If it is still null assume the queue is effectively empty.
+					if ( activeState.entry == null )
+						activeState.result = Result.EMPTY;
+					else if ( activeState.entry instanceof CheckpointEntry )
+					{
+						// We filter out the remaining entries looking for anything besides just more CheckpointEntry instances.
+						// This allows for all remaining CheckpointEntry instances that may be in a row to receive the same answer.
+						boolean hasMoreEntries = entries.stream().filter( e -> !( e instanceof CheckpointEntry ) ).count() > 0;
+
+						BiPredicate<Looper, Boolean> predicate = ( ( CheckpointEntry ) activeState.entry ).predicate;
+
+						// Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled for a later time.
+						if ( predicate.test( looper, hasMoreEntries ) )
+							postCheckpoint( predicate );
+
+						// Reset the entry and go again.
+						activeState.entry = null;
+						continue;
+					}
+					else if ( activeState.entry instanceof BarrierEntry )
+					{
+						// Executes the inner Predicate contained in the barrier, removing it on False.
+						( ( BarrierEntry ) activeState.entry ).run();
+						activeState.result = Result.STALLED;
+					}
+					else if ( activeState.entry instanceof ParcelEntry )
+					{
+						if ( now < activeState.entry.getWhen() )
+							activeState.result = Result.WAITING;
+						else
+							activeState.result = Result.SUCCESS;
+					}
 					else
-						activeState.resultCode = RESULT_OK;
-				}
-				else
-				{
-					polling = false;
-					throw new IllegalStateException( "BUG? Unimplemented QueueEntry subclass " + activeState.entry.getClass().getSimpleName() );
-				}
+						throw new IllegalStateException( "BUG? Unimplemented QueueEntry subclass " + activeState.entry.getClass().getSimpleName() );
 
-				polling = false;
-				/* Return the activeState */
-				return activeState;
+					// Return the activeState.
+					return activeState;
+				}
 			}
+		}
+		finally
+		{
+			isPolling = true;
 		}
 	}
 
-	/**
-	 * Adds a checkpoint to this queue.
-	 * <p>
-	 * The checkpoint is removed automatically for you by returning false from the
-	 * {@link BiPredicate#test(Object, Object)} when it is invoked, or explicitly
-	 * removing it with {@link #cancel}.
-	 *
-	 * @param predicate The Predicate that is tested if the checkpoint should be
-	 *                  removed from the queue. Predicate will be provided an
-	 *                  instance of Looper and if there are more enqueued tasks
-	 *                  that follow the checkpoint.
-	 * @return The instance of QueueTask for easy tracking.
-	 */
-	public LooperEntry postCheckpoint( BiPredicate<Looper, Boolean> predicate )
+	private BarrierEntry postBarrier( long when )
 	{
-		return addQueueTask( new CheckpointEntry( predicate ) );
+		return postBarrier( when, null );
 	}
 
-	public LooperEntry postTask( Runnable task )
-	{
-		return addQueueTask( new RunnableQueueTask( task ) );
-	}
-
-	public LooperEntry postTaskAsync( Runnable task )
-	{
-		return addQueueTask( new RunnableQueueTask( task, true ) );
-	}
-
-	public LooperEntry postTaskAt( Runnable task, long when )
-	{
-		return addQueueTask( new RunnableQueueTask( task, when ) );
-	}
-
-	public LooperEntry postTaskAtAsync( Runnable task, long when )
-	{
-		return addQueueTask( new RunnableQueueTask( task, when, true ) );
-	}
-
-	private LooperEntry postTaskBarrier( long when )
-	{
-		return postTaskBarrier( when, null );
-	}
-
-	private LooperEntry postTaskBarrier( long when, Predicate<Looper> predicate )
+	private BarrierEntry postBarrier( long when, Predicate<Looper> predicate )
 	{
 		/* Enqueue a new barrier. We don't need to wake the queue because the purpose of a barrier is to stall it. */
 		synchronized ( this )
@@ -353,123 +311,232 @@ public class LooperQueue
 	 * <p>
 	 * This method is used to immediately postpone execution of all subsequently posted
 	 * synchronous messages until a condition is met that releases the barrier.
-	 * Asynchronous messages (see {@link LooperEntry#isAsync} are exempt from the barrier
+	 * Asynchronous messages (see {@link AbstractEntry#isAsync} are exempt from the barrier
 	 * and continue to be processed as usual.
 	 * <p>
 	 * This call must be always matched by a call to {@link #cancelBarrier} with
 	 * the same token to ensure that the message queue resumes normal operation.
 	 * Otherwise the application will probably hang!
 	 *
-	 * @return The instance of QueueTask which can be used to cancel the barrier.
+	 * @return The instance of the {@link BarrierEntry} which can be used to cancel the barrier.
 	 */
-	public LooperEntry postTaskBarrier()
+	public BarrierEntry postBarrier()
 	{
-		return postTaskBarrier( null );
+		return postBarrier( null );
 	}
 
-	public LooperEntry postTaskBarrier( Predicate<Looper> predicate )
+	public BarrierEntry postBarrier( Predicate<Looper> predicate )
 	{
-		return postTaskBarrier( DateAndTime.epoch(), predicate );
+		return postBarrier( DateAndTime.epoch(), predicate );
 	}
 
-	public LooperEntry postTaskLater( Runnable task, long delay )
+	/**
+	 * Adds a checkpoint to this queue.
+	 * <p>
+	 * The checkpoint is removed automatically for you by returning false from the
+	 * {@link BiPredicate#test(Object, Object)} when it is invoked, or explicitly
+	 * removing it with {@link #cancel}.
+	 *
+	 * @param predicate The Predicate that is tested if the checkpoint should be
+	 *                  removed from the queue. Predicate will be provided an
+	 *                  instance of Looper and if there are more enqueued tasks
+	 *                  that follow the checkpoint.
+	 *
+	 * @return The instance of QueueTask for easy tracking.
+	 */
+	public CheckpointEntry postCheckpoint( BiPredicate<Looper, Boolean> predicate )
 	{
-		return addQueueTask( new RunnableQueueTask( task, System.currentTimeMillis() + delay ) );
+		return addQueueTask( new CheckpointEntry( predicate ) );
 	}
 
-	public LooperEntry postTaskLaterAsync( Runnable task, long delay )
+	/**
+	 * Causes the Runnable task to be added to the {@link LooperQueue}.
+	 * The runnable will be run on the thread to which this queue is attached.
+	 *
+	 * @param task The Runnable that will be executed.
+	 *
+	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
+	 */
+	public TaskEntry postTask( Runnable task )
 	{
-		return addQueueTask( new RunnableQueueTask( task, System.currentTimeMillis() + delay, true ) );
+		return addQueueTask( new TaskEntry( task ) );
 	}
 
-	class ActiveState
+	public TaskEntry postTaskAsync( Runnable task )
 	{
-		LooperEntry entry = null;
-		int resultCode = RESULT_NONE;
+		return addQueueTask( new TaskEntry( task, true ) );
 	}
 
-	private class BarrierEntry extends LooperEntry
+	/**
+	 * Causes the Runnable task to be added to the queue, to be run
+	 * at a specific time given by <var>System.currentTimeMillis()</var>.
+	 *
+	 * @param task The Runnable that will be executed.
+	 * @param when The absolute time at which the callback should run.
+	 *
+	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
+	 *
+	 * @see #postTaskAtAsync(Runnable, long)
+	 */
+	public TaskEntry postTaskAt( Runnable task, long when )
 	{
-		private long id = Looper.getGloballyUniqueId();
-		private Predicate<Looper> predicate;
-		private long when;
+		return addQueueTask( new TaskEntry( task, when ) );
+	}
 
-		public BarrierEntry( long when, @Nonnull Predicate<Looper> predicate )
+	/**
+	 * @see #postTaskAt(Runnable, long)
+	 */
+	public TaskEntry postTaskAtAsync( Runnable task, long when )
+	{
+		return addQueueTask( new TaskEntry( task, when, true ) );
+	}
+
+	/**
+	 * Causes the Runnable r to be added to the queue, to be run
+	 * after the specified amount of time elapses.
+	 * The runnable will be run on the thread to which this handler is attached.
+	 *
+	 * @param task  The Runnable that will be executed.
+	 * @param delay The amount of time to the current time.
+	 *
+	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
+	 *
+	 * @see #postTaskLaterAsync(Runnable, long)
+	 */
+	public TaskEntry postTaskLater( Runnable task, long delay )
+	{
+		return addQueueTask( new TaskEntry( task, System.currentTimeMillis() + delay ) );
+	}
+
+	/**
+	 * @see #postTaskLater(Runnable, long)
+	 */
+	public TaskEntry postTaskLaterAsync( Runnable task, long delay )
+	{
+		return addQueueTask( new TaskEntry( task, System.currentTimeMillis() + delay, true ) );
+	}
+
+	/**
+	 * Posts an object to this queue that implements Runnable.
+	 * Causes the Runnable task to executed on the next iteration through the
+	 * queue. The runnable will be run on the thread to which this handler is attached.
+	 *
+	 * This method is only for use in very special circumstances -- it
+	 * can easily starve the message queue, cause ordering problems, or have
+	 * other unexpected side-effects.
+	 *
+	 * @param task The Runnable that will be executed.
+	 *
+	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
+	 *
+	 * @see #postTaskAsync(Runnable)
+	 */
+	public TaskEntry postTaskNext( Runnable task )
+	{
+		return addQueueTask( new TaskEntry( task, getEarliest() + 1L ) );
+	}
+
+	/**
+	 * @see #postTaskNext(Runnable)
+	 */
+	public TaskEntry postTaskNextAsync( Runnable task )
+	{
+		return addQueueTask( new TaskEntry( task, getEarliest() + 1L, true ) );
+	}
+
+	/**
+	 * Runs the specified task synchronously.
+	 * <p>
+	 * If the current thread is the same as the handler thread, then the runnable
+	 * runs immediately without being enqueued.  Otherwise, posts the runnable
+	 * to the handler and waits for it to complete before returning.
+	 * <p>
+	 * This method is dangerous!  Improper use can result in deadlocks.
+	 * Never call this method while any locks are held or use it in a
+	 * possibly re-entrant manner.
+	 * <p>
+	 * This method is occasionally useful in situations where a background thread
+	 * must synchronously await completion of a task that must run on the
+	 * handler's thread.  However, this problem is often a symptom of bad design.
+	 * Consider improving the design (if possible) before resorting to this method.
+	 * <p>
+	 * One example of where you might want to use this method is when you just
+	 * set up a Handler thread and need to perform some initialization steps on
+	 * it before continuing execution.
+	 * <p>
+	 * If timeout occurs then this method returns <code>false</code> but the runnable
+	 * will remain posted on the handler and may already be in progress or
+	 * complete at a later time.
+	 *
+	 * @param task    The Runnable that will be executed synchronously.
+	 * @param timeout The timeout in milliseconds, or 0 to wait indefinitely (makes this dangerous method, even more dangerous).
+	 *
+	 * @return Returns true if the Runnable was successfully executed.
+	 * Returns false on failure, usually because the
+	 * looper processing the message queue is exiting.
+	 */
+	public boolean postTaskUnsafe( @Nonnull Runnable task, @Nonnegative long timeout )
+	{
+		if ( looper.isThreadJoined() )
 		{
-			this.when = when;
-			this.predicate = predicate;
+			task.run();
+			return true;
 		}
 
-		public long getId()
-		{
-			return id;
-		}
+		BlockingRunnable blockingRunnable = new BlockingRunnable( task );
+		looper.getQueue().postTask( blockingRunnable );
+		return blockingRunnable.postAndWait( timeout );
+	}
 
-		@Override
-		Runnable getRunnable()
-		{
-			return () -> {
-				if ( !predicate.test( looper ) )
-					cancel();
-			};
-		}
+	void quit( boolean removePendingMessages )
+	{
+		// Currently, there is nothing to do when we quitSafely.
+		if ( !removePendingMessages )
+			return;
 
-		@Override
-		public long getWhen()
-		{
-			return when;
-		}
+		if ( !looper.isHeldByCurrentThread() )
+			throw ApplicationException.runtime( "Looper must be locked by this thread to quit the LooperQueue." );
 
-		@Override
-		public void markInUse( boolean isInUse )
+		final long now = System.currentTimeMillis();
+		synchronized ( entries )
 		{
-			// Ignored
-		}
-
-		@Override
-		public void recycle()
-		{
-			// Do Nothing
+			entries.removeIf( entry -> {
+				if ( entry.removesSafely() && entry.getWhen() > now )
+				{
+					entry.recycle();
+					return true;
+				}
+				else
+					return false;
+			} );
 		}
 	}
 
-	private class CheckpointEntry extends LooperEntry
+	public enum Result
 	{
-		BiPredicate<Looper, Boolean> predicate;
-		long when;
-
-		CheckpointEntry( BiPredicate<Looper, Boolean> predicate )
-		{
-			this.predicate = predicate;
-			when = getLatest() + 1L;
-		}
-
-		@Override
-		Runnable getRunnable()
-		{
-			return null;
-		}
-
-		@Override
-		public long getWhen()
-		{
-			return when;
-		}
-
-		@Override
-		void recycle()
-		{
-			// Still Does Nothing
-		}
-
-		public void run( boolean hasMoreEntries )
-		{
-			if ( predicate.test( looper, hasMoreEntries ) )
-				postCheckpoint( predicate );
-		}
+		/**
+		 * Indicates the queue is new or something has changed since the last time next() was called.
+		 */
+		NONE,
+		/**
+		 * Indicates an empty queue.
+		 */
+		EMPTY,
+		/**
+		 * Indicates the queue has encountered a stall barrier, we are waiting for it removal.
+		 */
+		STALLED,
+		/**
+		 * Indicates the next enqueued task has been returned by next().
+		 */
+		SUCCESS,
+		/**
+		 * Indicates the next enqueued task is still in the future, so we wait.
+		 */
+		WAITING
 	}
 
-	public abstract class LooperEntry
+	public abstract class AbstractEntry
 	{
 		private final boolean async;
 
@@ -485,12 +552,12 @@ public class LooperQueue
 		 */
 		private boolean finalized;
 
-		LooperEntry()
+		AbstractEntry()
 		{
 			this.async = false;
 		}
 
-		LooperEntry( boolean async )
+		AbstractEntry( boolean async )
 		{
 			this.async = async;
 		}
@@ -501,7 +568,7 @@ public class LooperQueue
 			{
 				if ( activeState.entry == this )
 				{
-					activeState.resultCode = RESULT_NONE;
+					activeState.result = Result.NONE;
 					activeState.entry = null;
 					looper.wake();
 				}
@@ -520,7 +587,7 @@ public class LooperQueue
 			synchronized ( entries )
 			{
 				int pos = 0;
-				for ( LooperEntry queueTask : entries )
+				for ( AbstractEntry queueTask : entries )
 					if ( queueTask == this )
 						return pos;
 					else
@@ -529,8 +596,6 @@ public class LooperQueue
 				return -1;
 			}
 		}
-
-		abstract Runnable getRunnable();
 
 		/**
 		 * Used for sorting, indicates when the entry is scheduled for processing.
@@ -569,21 +634,169 @@ public class LooperQueue
 		{
 			finalized = false;
 		}
+
+		/**
+		 * Determines that the entry can be removed from the queue with any bugs to the Application.
+		 *
+		 * @return True if removal is permitted and this task doesn't have to run.
+		 */
+		public abstract boolean removesSafely();
 	}
 
-	private class RunnableQueueTask extends LooperEntry
+	class ActiveState
+	{
+		AbstractEntry entry = null;
+		Result result = Result.NONE;
+	}
+
+	public class BarrierEntry extends RunnableEntry
+	{
+		private long id = Looper.getGloballyUniqueId();
+		private Predicate<Looper> predicate;
+		private long when;
+
+		BarrierEntry( @Nonnegative long when, @Nonnull Predicate<Looper> predicate )
+		{
+			this.when = when;
+			this.predicate = predicate;
+		}
+
+		public long getId()
+		{
+			return id;
+		}
+
+		@Override
+		public long getWhen()
+		{
+			return when;
+		}
+
+		@Override
+		public void recycle()
+		{
+			// Do Nothing
+		}
+
+		@Override
+		public boolean removesSafely()
+		{
+			return true;
+		}
+
+		@Override
+		void run0()
+		{
+			if ( !predicate.test( looper ) )
+				cancel();
+		}
+	}
+
+	public class CheckpointEntry extends AbstractEntry
+	{
+		BiPredicate<Looper, Boolean> predicate;
+		long when;
+
+		CheckpointEntry( @Nonnull BiPredicate<Looper, Boolean> predicate )
+		{
+			this.predicate = predicate;
+			when = getLatest() + 1L;
+		}
+
+		@Override
+		public long getWhen()
+		{
+			return when;
+		}
+
+		@Override
+		void recycle()
+		{
+			// Still Does Nothing
+		}
+
+		@Override
+		public boolean removesSafely()
+		{
+			return true;
+		}
+	}
+
+	public class ParcelEntry extends RunnableEntry
+	{
+		ParcelCarrier message;
+		long when;
+
+		ParcelEntry( @Nonnull ParcelCarrier message, @Nonnegative long when )
+		{
+			this.message = message;
+			this.when = when;
+		}
+
+		@Override
+		public long getWhen()
+		{
+			return when;
+		}
+
+		@Override
+		void recycle()
+		{
+			message.recycle();
+		}
+
+		@Override
+		public boolean removesSafely()
+		{
+			return true;
+		}
+
+		@Override
+		void run0()
+		{
+			// TODO
+		}
+	}
+
+	public abstract class RunnableEntry extends AbstractEntry implements Runnable
+	{
+		RunnableEntry()
+		{
+			super();
+		}
+
+		RunnableEntry( boolean async )
+		{
+			super( async );
+		}
+
+		@Override
+		public void run()
+		{
+			if ( isAsync() || looper.hasFlag( Looper.Flag.ASYNC ) )
+				looper.runAsync( this::run0 );
+			else
+				run0();
+		}
+
+		abstract void run0();
+	}
+
+	public class TaskEntry extends RunnableEntry
 	{
 		private final Runnable task;
 		private final long when;
 
-		RunnableQueueTask( Runnable task, long when )
+		TaskEntry( @Nonnull Runnable task, long when )
 		{
 			this( task, when, false );
 		}
 
-		RunnableQueueTask( Runnable task, long when, boolean async )
+		TaskEntry( @Nonnull Runnable task, long when, boolean async )
 		{
 			super( async );
+
+			Objs.notNull( task );
 
 			this.task = task;
 			if ( when < 0 ) // Now
@@ -594,23 +807,17 @@ public class LooperQueue
 				this.when = when;
 		}
 
-		RunnableQueueTask( Runnable task, boolean async )
+		TaskEntry( @Nonnull Runnable task, boolean async )
 		{
 			this( task, -1, async );
 		}
 
-		RunnableQueueTask( Runnable task )
+		TaskEntry( @Nonnull Runnable task )
 		{
 			this( task, -1 );
 		}
 
 		@Override
-		Runnable getRunnable()
-		{
-			return task;
-		}
-
-		@Override
 		public long getWhen()
 		{
 			return when;
@@ -621,35 +828,18 @@ public class LooperQueue
 		{
 
 		}
-	}
 
-	private class TaskEntry extends LooperEntry
-	{
-		InternalMessage message;
-		long when;
-
-		TaskEntry( InternalMessage message, long when )
+		@Override
+		public boolean removesSafely()
 		{
-			this.message = message;
-			this.when = when;
+			// ParcelHandler uses the TaskEntry to unblock after runUnsafe is called.
+			return !( task instanceof BlockingRunnable );
 		}
 
 		@Override
-		Runnable getRunnable()
+		void run0()
 		{
-			return msg;
-		}
-
-		@Override
-		public long getWhen()
-		{
-			return when;
-		}
-
-		@Override
-		void recycle()
-		{
-			msg.recycle;
+			task.run();
 		}
 	}
 }
