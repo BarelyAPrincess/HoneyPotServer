@@ -13,19 +13,28 @@ import io.amelia.lang.ApplicationException;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.Objs;
 
-public class LooperQueue
+/**
+ * Low-level class holding the list of {@link ParcelCarrier} messages and {@link Runnable} tasks.
+ * Tasks are posted directly to the queue, while messages are through the {@link ParcelRouter} associated with the {@link Looper}.
+ * <p>
+ * You can retrieve the looper for the current thread with {@link Looper.Factory#obtain()}
+ * You can retrieve the queue for the looper from {@link Looper#getQueue()}
+ */
+public class ParcelQueue
 {
-	private final NavigableSet<AbstractEntry> entries = new TreeSet<>();
+	private final NavigableSet<BaseEntry> entries = new TreeSet<>();
 	private final Looper looper;
-	ActiveState activeState = new ActiveState();
+	private boolean isBlocking = false;
 	private boolean isPolling = false;
+	private BaseEntry lastEntry = null;
+	private Result lastResult = Result.NONE;
 
-	public LooperQueue( Looper looper )
+	public ParcelQueue( Looper looper )
 	{
 		this.looper = looper;
 	}
 
-	<T extends AbstractEntry> T addQueueTask( T queueTask )
+	<T extends BaseEntry> T addQueueTask( T queueTask )
 	{
 		if ( looper.isQuitting() )
 			throw new IllegalStateException( "The LooperQueue is quitting!" );
@@ -41,10 +50,10 @@ public class LooperQueue
 	{
 		synchronized ( entries )
 		{
-			Iterator<AbstractEntry> queueIterator = entries.iterator();
+			Iterator<BaseEntry> queueIterator = entries.iterator();
 			while ( queueIterator.hasNext() )
 			{
-				AbstractEntry entry = queueIterator.next();
+				BaseEntry entry = queueIterator.next();
 				if ( entry.getId() == id )
 				{
 					queueIterator.remove();
@@ -61,11 +70,11 @@ public class LooperQueue
 		synchronized ( entries )
 		{
 			/* If a barrier is actively blocking the queue, wake the Looper. */
-			if ( activeState.entry != null && activeState.entry instanceof BarrierEntry )
+			if ( lastEntry != null && lastEntry instanceof BarrierEntry )
 			{
-				activeState.entry = null;
+				lastEntry = null;
 				if ( !looper.isQuitting() )
-					looper.wake();
+					wake();
 			}
 
 			/* Iterate over the pending entries. */
@@ -87,19 +96,19 @@ public class LooperQueue
 		synchronized ( entries )
 		{
 			/* The barrier is actively blocking the queue, so wake the Looper. */
-			if ( activeState.entry != null && activeState.entry instanceof BarrierEntry && activeState.entry.getId() == id )
+			if ( lastEntry != null && lastEntry instanceof BarrierEntry && lastEntry.getId() == id )
 			{
-				activeState.entry = null;
+				lastEntry = null;
 				if ( !looper.isQuitting() )
-					looper.wake();
+					wake();
 				return;
 			}
 
 			/* Iterate over the pending entries. */
-			Iterator<AbstractEntry> queueIterator = entries.iterator();
+			Iterator<BaseEntry> queueIterator = entries.iterator();
 			while ( queueIterator.hasNext() )
 			{
-				AbstractEntry entry = queueIterator.next();
+				BaseEntry entry = queueIterator.next();
 				if ( entry instanceof BarrierEntry && entry.getId() == id )
 				{
 					queueIterator.remove();
@@ -113,10 +122,11 @@ public class LooperQueue
 
 	void clearState()
 	{
-		activeState.result = Result.NONE;
+		lastResult = Result.NONE;
+		lastEntry = null;
 	}
 
-	boolean enqueueMessage( @Nonnull ParcelCarrier msg, long when )
+	boolean enqueueMessage( @Nonnull ParcelCarrier msg, @Nonnegative long when )
 	{
 		Objs.notNull( msg );
 		Objs.notNegative( when );
@@ -135,49 +145,37 @@ public class LooperQueue
 
 			msg.markInUse( true );
 
-			messages.add( msg );
-			boolean needWake;
+			// TODO
+			boolean needWake = lastResult == Result.EMPTY || when == 0 || when < getEarliest();
 
-			if ( activeQueueMessage == null || when == 0 || when < activeQueueMessage.getWhen() )
-			{
-				// New head, wake up the event queue if blocked.
-				activeQueueMessage = msg;
-				needWake = isNextBlocked;
-			}
-			else
-			{
-				// Inserted within the middle of the queue.  Usually we don't have to wake
-				// up the event queue unless there is a barrier at the head of the queue
-				// and the message is the earliest asynchronous message in the queue.
-				needWake = isNextBlocked && queueState == Looper.State.STALLED && msg instanceof AsyncQueueMessage;
-			}
+			entries.add( new ParcelEntry( msg, when ) );
 
 			if ( needWake )
-				notify();
+				wake();
 		}
 
 		return true;
 	}
 
-	public AbstractEntry getActiveEntry()
-	{
-		return activeState == null ? null : activeState.entry;
-	}
-
 	public long getEarliest()
 	{
-		AbstractEntry first = entries.first();
+		BaseEntry first = entries.first();
 		return first == null ? 0L : first.getWhen();
 	}
 
-	public Result getLastResult()
+	BaseEntry getLastEntry()
 	{
-		return activeState.result;
+		return lastEntry;
+	}
+
+	Result getLastResult()
+	{
+		return lastResult;
 	}
 
 	public long getLatest()
 	{
-		AbstractEntry last = entries.last();
+		BaseEntry last = entries.last();
 		return last == null ? Long.MAX_VALUE : last.getWhen();
 	}
 
@@ -186,9 +184,14 @@ public class LooperQueue
 		return entries.size() > 0;
 	}
 
+	public boolean isBlocking()
+	{
+		return isBlocking;
+	}
+
 	public boolean isEmpty()
 	{
-		return activeState.result == Result.EMPTY;
+		return lastResult == Result.EMPTY;
 	}
 
 	/**
@@ -200,7 +203,7 @@ public class LooperQueue
 	 */
 	public boolean isIdle()
 	{
-		return activeState.result == Result.EMPTY || activeState.result == Result.WAITING;
+		return lastResult == Result.EMPTY || lastResult == Result.WAITING;
 	}
 
 	/**
@@ -217,17 +220,17 @@ public class LooperQueue
 
 	public boolean isStalled()
 	{
-		return activeState.result == Result.STALLED;
+		return lastResult == Result.STALLED;
 	}
 
 	public boolean isWaiting()
 	{
-		return activeState.result == Result.WAITING;
+		return lastResult == Result.WAITING;
 	}
 
-	ActiveState next( long now )
+	Result next( long now )
 	{
-		isPolling = false;
+		isPolling = true;
 		try
 		{
 			for ( ; ; )
@@ -235,52 +238,68 @@ public class LooperQueue
 				synchronized ( entries )
 				{
 					// If the current entry is null, poll for the next upcoming entry.
-					if ( activeState.entry == null )
-						activeState.entry = entries.pollFirst();
+					if ( lastEntry == null )
+						lastEntry = entries.pollFirst();
 
 					// If it is still null assume the queue is effectively empty.
-					if ( activeState.entry == null )
-						activeState.result = Result.EMPTY;
-					else if ( activeState.entry instanceof CheckpointEntry )
+					if ( lastEntry == null )
+					{
+						lastResult = Result.EMPTY;
+
+						if ( looper.hasFlag( Looper.Flag.BLOCKING ) )
+						{
+							isBlocking = true;
+							try
+							{
+								entries.wait();
+							}
+							catch ( InterruptedException ignore )
+							{
+								// Ignore
+							}
+							return next( now );
+						}
+					}
+					else if ( lastEntry instanceof CheckpointEntry )
 					{
 						// We filter out the remaining entries looking for anything besides just more CheckpointEntry instances.
 						// This allows for all remaining CheckpointEntry instances that may be in a row to receive the same answer.
 						boolean hasMoreEntries = entries.stream().filter( e -> !( e instanceof CheckpointEntry ) ).count() > 0;
 
-						BiPredicate<Looper, Boolean> predicate = ( ( CheckpointEntry ) activeState.entry ).predicate;
+						BiPredicate<Looper, Boolean> predicate = ( ( CheckpointEntry ) lastEntry ).predicate;
 
 						// Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled for a later time.
 						if ( predicate.test( looper, hasMoreEntries ) )
 							postCheckpoint( predicate );
 
 						// Reset the entry and go again.
-						activeState.entry = null;
+						lastEntry = null;
 						continue;
 					}
-					else if ( activeState.entry instanceof BarrierEntry )
+					else if ( lastEntry instanceof BarrierEntry )
 					{
 						// Executes the inner Predicate contained in the barrier, removing it on False.
-						( ( BarrierEntry ) activeState.entry ).run();
-						activeState.result = Result.STALLED;
+						( ( BarrierEntry ) lastEntry ).run();
+						lastResult = Result.STALLED;
 					}
-					else if ( activeState.entry instanceof ParcelEntry )
+					else if ( lastEntry instanceof ParcelEntry || lastEntry instanceof TaskEntry )
 					{
-						if ( now < activeState.entry.getWhen() )
-							activeState.result = Result.WAITING;
+						if ( now < lastEntry.getWhen() )
+							lastResult = Result.WAITING;
 						else
-							activeState.result = Result.SUCCESS;
+							lastResult = Result.SUCCESS;
 					}
 					else
-						throw new IllegalStateException( "BUG? Unimplemented QueueEntry subclass " + activeState.entry.getClass().getSimpleName() );
+						throw new IllegalStateException( "BUG? Unimplemented QueueEntry subclass " + lastEntry.getClass().getSimpleName() );
 
-					// Return the activeState.
-					return activeState;
+					return lastResult;
 				}
 			}
 		}
 		finally
 		{
-			isPolling = true;
+			isBlocking = false;
+			isPolling = false;
 		}
 	}
 
@@ -294,7 +313,7 @@ public class LooperQueue
 		/* Enqueue a new barrier. We don't need to wake the queue because the purpose of a barrier is to stall it. */
 		synchronized ( this )
 		{
-			BarrierEntry barrier = new BarrierEntry( when, predicate );
+			BarrierEntry barrier = new BarrierEntry( predicate, when );
 			entries.add( barrier );
 			return barrier;
 		}
@@ -311,7 +330,7 @@ public class LooperQueue
 	 * <p>
 	 * This method is used to immediately postpone execution of all subsequently posted
 	 * synchronous messages until a condition is met that releases the barrier.
-	 * Asynchronous messages (see {@link AbstractEntry#isAsync} are exempt from the barrier
+	 * Asynchronous messages (see {@link BaseEntry#isAsync} are exempt from the barrier
 	 * and continue to be processed as usual.
 	 * <p>
 	 * This call must be always matched by a call to {@link #cancelBarrier} with
@@ -350,7 +369,7 @@ public class LooperQueue
 	}
 
 	/**
-	 * Causes the Runnable task to be added to the {@link LooperQueue}.
+	 * Causes the Runnable task to be added to the {@link ParcelQueue}.
 	 * The runnable will be run on the thread to which this queue is attached.
 	 *
 	 * @param task The Runnable that will be executed.
@@ -512,6 +531,11 @@ public class LooperQueue
 		}
 	}
 
+	public void wake()
+	{
+		entries.notifyAll();
+	}
+
 	public enum Result
 	{
 		/**
@@ -536,129 +560,16 @@ public class LooperQueue
 		WAITING
 	}
 
-	public abstract class AbstractEntry
-	{
-		private final boolean async;
-
-		private final long id = Looper.getGloballyUniqueId();
-		/**
-		 * Indicates when the entry has been processed by the queue
-		 * <p>
-		 * This boolean is set when the message is enqueued and remains set while it
-		 * is delivered and afterwards when it is recycled. The flag is only cleared
-		 * once {@link #recycle()} is called and it's contents are zeroed.
-		 * <p>
-		 * It is an error to attempt to enqueue or recycle a message that is already finalized.
-		 */
-		private boolean finalized;
-
-		AbstractEntry()
-		{
-			this.async = false;
-		}
-
-		AbstractEntry( boolean async )
-		{
-			this.async = async;
-		}
-
-		public void cancel()
-		{
-			synchronized ( entries )
-			{
-				if ( activeState.entry == this )
-				{
-					activeState.result = Result.NONE;
-					activeState.entry = null;
-					looper.wake();
-				}
-				else
-					entries.remove( this );
-			}
-		}
-
-		public long getId()
-		{
-			return id;
-		}
-
-		public int getPositionInQueue()
-		{
-			synchronized ( entries )
-			{
-				int pos = 0;
-				for ( AbstractEntry queueTask : entries )
-					if ( queueTask == this )
-						return pos;
-					else
-						pos++;
-
-				return -1;
-			}
-		}
-
-		/**
-		 * Used for sorting, indicates when the entry is scheduled for processing.
-		 */
-		public abstract long getWhen();
-
-		public boolean isActive()
-		{
-			return activeState.entry == this;
-		}
-
-		public boolean isAsync()
-		{
-			return async;
-		}
-
-		public boolean isEnqueued()
-		{
-			synchronized ( entries )
-			{
-				return entries.contains( this );
-			}
-		}
-
-		public boolean isFinalized()
-		{
-			return finalized;
-		}
-
-		void markFinalized()
-		{
-			finalized = true;
-		}
-
-		void recycle()
-		{
-			finalized = false;
-		}
-
-		/**
-		 * Determines that the entry can be removed from the queue with any bugs to the Application.
-		 *
-		 * @return True if removal is permitted and this task doesn't have to run.
-		 */
-		public abstract boolean removesSafely();
-	}
-
-	class ActiveState
-	{
-		AbstractEntry entry = null;
-		Result result = Result.NONE;
-	}
-
 	public class BarrierEntry extends RunnableEntry
 	{
 		private long id = Looper.getGloballyUniqueId();
 		private Predicate<Looper> predicate;
 		private long when;
 
-		BarrierEntry( @Nonnegative long when, @Nonnull Predicate<Looper> predicate )
+		BarrierEntry( @Nonnull Predicate<Looper> predicate, @Nonnegative long when )
 		{
-			this.when = when;
 			this.predicate = predicate;
+			this.when = when;
 		}
 
 		public long getId()
@@ -692,7 +603,114 @@ public class LooperQueue
 		}
 	}
 
-	public class CheckpointEntry extends AbstractEntry
+	public abstract class BaseEntry
+	{
+		private final boolean async;
+
+		private final long id = Looper.getGloballyUniqueId();
+		/**
+		 * Indicates when the entry has been processed by the queue
+		 * <p>
+		 * This boolean is set when the message is enqueued and remains set while it
+		 * is delivered and afterwards when it is recycled. The flag is only cleared
+		 * once {@link #recycle()} is called and it's contents are zeroed.
+		 * <p>
+		 * It is an error to attempt to enqueue or recycle a message that is already finalized.
+		 */
+		private boolean finalized;
+
+		BaseEntry()
+		{
+			this.async = false;
+		}
+
+		BaseEntry( boolean async )
+		{
+			this.async = async;
+		}
+
+		public void cancel()
+		{
+			synchronized ( entries )
+			{
+				if ( lastEntry == this )
+				{
+					clearState();
+					wake();
+				}
+				else
+					entries.remove( this );
+			}
+		}
+
+		public long getId()
+		{
+			return id;
+		}
+
+		public int getPositionInQueue()
+		{
+			synchronized ( entries )
+			{
+				int pos = 0;
+				for ( BaseEntry queueTask : entries )
+					if ( queueTask == this )
+						return pos;
+					else
+						pos++;
+
+				return -1;
+			}
+		}
+
+		/**
+		 * Used for sorting, indicates when the entry is scheduled for processing.
+		 */
+		public abstract long getWhen();
+
+		public boolean isActive()
+		{
+			return lastEntry == this;
+		}
+
+		public boolean isAsync()
+		{
+			return async;
+		}
+
+		public boolean isEnqueued()
+		{
+			synchronized ( entries )
+			{
+				return entries.contains( this );
+			}
+		}
+
+		public boolean isFinalized()
+		{
+			return finalized;
+		}
+
+		void markFinalized()
+		{
+			finalized = true;
+		}
+
+		void recycle()
+		{
+			cancel();
+			finalized = false;
+		}
+
+		/**
+		 * Determines that the entry can be removed from the queue with any bugs to the Application.
+		 *
+		 * @return True if removal is permitted and this task doesn't have to run.
+		 */
+		public abstract boolean removesSafely();
+	}
+
+	public class CheckpointEntry extends BaseEntry
 	{
 		BiPredicate<Looper, Boolean> predicate;
 		long when;
@@ -758,7 +776,7 @@ public class LooperQueue
 		}
 	}
 
-	public abstract class RunnableEntry extends AbstractEntry implements Runnable
+	public abstract class RunnableEntry extends BaseEntry implements Runnable
 	{
 		RunnableEntry()
 		{
@@ -771,8 +789,11 @@ public class LooperQueue
 		}
 
 		@Override
-		public void run()
+		public synchronized void run()
 		{
+			if ( lastEntry != this )
+				throw ApplicationException.runtime( "Entry must only be ran while it's the active entry for the parcel queue!" );
+
 			if ( isAsync() || looper.hasFlag( Looper.Flag.ASYNC ) )
 				looper.runAsync( this::run0 );
 			else

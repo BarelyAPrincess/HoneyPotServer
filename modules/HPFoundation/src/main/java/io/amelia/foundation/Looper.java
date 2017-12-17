@@ -59,7 +59,7 @@ public class Looper
 	/**
 	 * The Looper Queue
 	 */
-	final LooperQueue queue = new LooperQueue( this );
+	final ParcelQueue queue = new ParcelQueue( this );
 	/**
 	 * List of threads that were spawned by this Looper.
 	 * Used to obtain() this Looper from a async thread.
@@ -155,7 +155,7 @@ public class Looper
 	/**
 	 * Get the TaskQueue associated with this Looper
 	 */
-	public LooperQueue getQueue()
+	public ParcelQueue getQueue()
 	{
 		return queue;
 	}
@@ -248,16 +248,22 @@ public class Looper
 				final long loopStartMillis = System.currentTimeMillis();
 
 				// Call the actual loop logic.
-				LooperQueue.ActiveState result = queue.next( loopStartMillis );
+				ParcelQueue.Result result = queue.next( loopStartMillis );
 
-				if ( result.result == LooperQueue.Result.SUCCESS )
+				// A queue entry was successful returned and can now be ran then recycled.
+				if ( result == ParcelQueue.Result.SUCCESS )
 				{
-					result.entry.markFinalized();
+					// As of now, the only entry returned on the SUCCESS result is the RunnableEntry (or more so TaskEntry and ParcelEntry).
+					ParcelQueue.RunnableEntry entry = ( ParcelQueue.RunnableEntry ) queue.getLastEntry();
 
-					if ( result.entry instanceof LooperQueue.RunnableEntry )
-						( ( LooperQueue.RunnableEntry ) result.entry ).run();
-
-					result.entry.recycle();
+					entry.markFinalized();
+					entry.run();
+					entry.recycle();
+				}
+				// The queue is empty and this looper quits in such cases.
+				else if ( result == ParcelQueue.Result.EMPTY && hasFlag( Flag.AUTO_QUIT ) && !isQuitting() )
+				{
+					quitSafely();
 				}
 
 				// Update the time taken during this iteration.
@@ -324,6 +330,7 @@ public class Looper
 		// SYSTEM Loopers are meant to run perpetually and can only quit during the DISPOSED runlevel.
 		if ( hasFlag( Flag.SYSTEM ) && Foundation.getRunlevel() != Runlevel.DISPOSED )
 			throw ApplicationException.runtime( "SYSTEM Looper is not permitted to quit." );
+
 		// If we're already quitting or have been disposed, return immediately.
 		if ( isQuitting() || isDisposed() )
 			return;
@@ -335,8 +342,8 @@ public class Looper
 
 			queue.quit( removePendingMessages );
 
-			if ( isRunning() && queue.isStalled() )
-				wake();
+			if ( isRunning() && queue.isBlocking() )
+				queue.wake();
 			if ( !isRunning() )
 				quitFinal();
 		}
@@ -430,14 +437,6 @@ public class Looper
 	}
 
 	/**
-	 * Wakes the Looper to resume task checking.
-	 */
-	void wake()
-	{
-		lock.newCondition().signalAll();
-	}
-
-	/**
 	 * Looper Property Flags
 	 */
 	public enum Flag
@@ -447,7 +446,7 @@ public class Looper
 		 */
 		ASYNC,
 		/**
-		 * Indicates the {@link LooperQueue#next(long)} can and will block while the queue is empty.
+		 * Indicates the {@link ParcelQueue#next(long)} can and will block while the queue is empty.
 		 * This flag is default on any non-system Looper as to save CPU time.
 		 */
 		BLOCKING,
@@ -533,7 +532,7 @@ public class Looper
 		 */
 		public static Looper obtain()
 		{
-			return obtain( Looper::new, null );
+			return obtain( null );
 		}
 
 		/**

@@ -4,40 +4,23 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
+
 import io.amelia.lang.ParcelableException;
 import io.amelia.support.data.Parcel;
+import io.amelia.support.data.ParcelSerializer;
 import io.amelia.support.data.Parcelable;
 
 /**
- * Defines a carrier containing an data object that can be sent to a {@link ParcelHandler}.
+ * Defines a carrier containing an data object that can be sent to a {@link ParcelRouter}.
  *
  * <p class="note">The best way to get one of these is to call {@link #obtain Message.obtain()}
  * method, which will pull from a pool of recycled objects.</p>
  */
-public class ParcelCarrier implements Parcelable
+@Parcelable( ParcelCarrier.Serializer.class )
+public class ParcelCarrier
 {
 	private static final NavigableSet<ParcelCarrier> unusedPool = new TreeSet<>();
-
-	public static final Serializer<ParcelCarrier> SERIALIZER = new Serializer<ParcelCarrier>()
-	{
-		public ParcelCarrier[] newArray( int size )
-		{
-			return new ParcelCarrier[size];
-		}
-
-		public ParcelCarrier readFromParcel( Parcel source ) throws ParcelableException.Error
-		{
-			ParcelCarrier msg = ParcelCarrier.obtain();
-			msg.readFromParcel( source );
-			return msg;
-		}
-
-		@Override
-		public void writeToParcel( ParcelCarrier msg, Parcel out ) throws ParcelableException.Error
-		{
-			msg.writeToParcel( out );
-		}
-	};
 
 	/**
 	 * Return an instance from the global unused pool. Allows us to avoid allocating new objects in many cases.
@@ -76,10 +59,6 @@ public class ParcelCarrier implements Parcelable
 	 */
 	private MessageCode code = MessageCode.DEFAULT;
 	/**
-	 * Indicates the payload is infact a Parcel instance. If this is true, getParcel will construct a new Parcel.
-	 */
-	private boolean isPayloadParcel = true;
-	/**
 	 * Indicates if the Message was received from over a remote connection. (e.g., Network)
 	 */
 	private boolean isRemote;
@@ -87,19 +66,15 @@ public class ParcelCarrier implements Parcelable
 	 * The message payload to be delivered to the PostalReceiver.
 	 * If the target receiver is NOT local, the payload must be a parcel or parcelable.
 	 */
-	private Object payload;
+	private Parcel payload;
 	/**
 	 * Receivers have the ability to process queued incoming messages.
 	 */
-	private ParcelHandler receiver;
+	private ParcelRouter target;
 	/**
 	 * Indicates the location of the PostalSender. This will either be local or remote over a network connection.
 	 */
-	private PostOffice replyTo;
-	/**
-	 * Senders indicate the source of the incoming message. These might be Receivers themselves or any other data producing object, check responsibly.
-	 */
-	private PostalSender sender;
+	private ParcelRouter source;
 
 	ParcelCarrier()
 	{
@@ -114,40 +89,14 @@ public class ParcelCarrier implements Parcelable
 	public Parcel getParcel()
 	{
 		if ( payload == null )
-			if ( isPayloadParcel )
-				payload = new Parcel();
-			else
-				return null;
-
-		if ( payload instanceof Parcelable )
-		{
-			Parcel parcel = new Parcel();
-			( ( Parcelable ) payload ).writeToParcel( parcel );
-			return parcel;
-		}
-
-		if ( !( payload instanceof Parcel ) )
-			throw new IllegalStateException( "Payload type is not a Parcel" );
-
-		return ( Parcel ) payload;
-	}
-
-	public Object getPayload()
-	{
+			payload = new Parcel();
 		return payload;
 	}
 
-	public void setPayload( Object payload )
-	{
-		if ( isPayloadParcel && !( payload instanceof Parcel ) && !( payload instanceof Parcelable ) )
-			throw new IllegalArgumentException( "Payload must be a Parcel or Parcelable" );
-		this.payload = payload;
-	}
-
 	/**
-	 * Retrieve the a {@link ParcelHandler} implementation that
+	 * Retrieve the a {@link ParcelRouter} implementation that
 	 * will receive this message. The object must implement
-	 * {@link ParcelHandler#handleMessage(Message)}.
+	 * {@link ParcelRouter#handleParcel(ParcelCarrier)}.
 	 * Each Handler has its own name-space for
 	 * message codes, so you do not need to
 	 * worry about yours conflicting with other handlers.
@@ -188,7 +137,7 @@ public class ParcelCarrier implements Parcelable
 		if ( src.hasChild( "parcel" ) )
 			payload = src.getChild( "parcel" );
 		else if ( src.hasChild( "parcelable" ) )
-			payload = src.getParcelable( "parcelable", null ); // TODO loader
+			payload = src.getParcelable( "parcelable" );
 		else
 			payload = src.getValue( "payload" ).orElse( null );
 	}
@@ -222,13 +171,32 @@ public class ParcelCarrier implements Parcelable
 		receiver.sendMessage( this );
 	}
 
-	public void writeToParcel( Parcel dest )
+	public void setPayload( @Nonnull Object payload ) throws ParcelableException.Error
 	{
-		if ( payload instanceof Parcel )
-			dest.setChild( "parcel", ( Parcel ) payload );
-		else if ( payload instanceof Parcelable )
-			( ( Parcelable ) payload ).writeToParcel( dest.getChildOrCreate( "parcelable" ) );
-		else
-			dest.setValue( "payload", payload );
+		if ( !Parcel.Factory.isSerializable( payload ) )
+			throw new IllegalArgumentException( "Payload object must be serializable." );
+		this.payload = Parcel.Factory.serialize( payload );
+	}
+
+	public void setPayload( @Nonnull Parcel payload )
+	{
+		this.payload = payload;
+	}
+
+	public static class Serializer implements ParcelSerializer<ParcelCarrier>
+	{
+		@Override
+		public ParcelCarrier readFromParcel( Parcel src ) throws ParcelableException.Error
+		{
+			ParcelCarrier parcelCarrier = ParcelCarrier.obtain();
+			parcelCarrier.readFromParcel( src );
+			return parcelCarrier;
+		}
+
+		@Override
+		public void writeToParcel( ParcelCarrier parcelCarrier, Parcel dest ) throws ParcelableException.Error
+		{
+			dest.setValue( "payload", parcelCarrier.payload );
+		}
 	}
 }

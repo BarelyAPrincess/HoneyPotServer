@@ -1,5 +1,6 @@
 package io.amelia.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,11 @@ public class Reflection
 		}
 	}
 
+	public static boolean hasAnnotation( Class<?> classToCheck, Class<? extends Annotation> annotation )
+	{
+		return classToCheck.getAnnotation( annotation ) != null;
+	}
+
 	/**
 	 * Used to signal method calls and record a max count of 10.
 	 *
@@ -67,6 +73,11 @@ public class Reflection
 		callHistory.add( stackTrace[2] );
 	}
 
+	public static void wasSuperCalled( Method method )
+	{
+		wasSuperCalled( method, 1 );
+	}
+
 	public static void wasSuperCalled( Method method, int maxDepth )
 	{
 		Objs.notNegative( maxDepth );
@@ -78,11 +89,6 @@ public class Reflection
 			return;
 
 		// callHistory.stream().limit( maxDepth ).forEach( s -> s. );
-	}
-
-	public static void wasSuperCalled( Method method )
-	{
-		wasSuperCalled( method, 1 );
 	}
 
 	public static void wasSuperCalledAny( Method method )
