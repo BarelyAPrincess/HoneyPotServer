@@ -68,9 +68,9 @@ public final class Foundation
 		Objs.notNull( app );
 
 		if ( isRunlevel( Runlevel.DISPOSED ) )
-			throw ApplicationException.fatal( "The application has been DISPOSED!" );
+			throw ApplicationException.error( "The application has been DISPOSED!" );
 		if ( Foundation.app != null )
-			throw ApplicationException.fatal( "The application instance has already been set!" );
+			throw ApplicationException.error( "The application instance has already been set!" );
 		Kernel.setExceptionContext( app );
 		Foundation.app = app;
 	}
@@ -192,7 +192,7 @@ public final class Foundation
 
 	public static void setRunlevel( Runlevel level, String reason )
 	{
-		Looper mainLooper = getApplication().getMainLooper();
+		ApplicationLooper mainLooper = getApplication().getRouter();
 		if ( mainLooper.isThreadJoined() )
 			setRunlevel0( level, reason );
 		else
@@ -205,9 +205,9 @@ public final class Foundation
 		{
 			requirePrimaryThread( "Runlevel can only be set from the Primary Thread." );
 			if ( currentRunlevel == level )
-				throw ApplicationException.fatal( "Runlevel is already set to " + level.name() + "." );
+				throw ApplicationException.error( "Runlevel is already set to " + level.name() + "." );
 			if ( !level.checkRunlevelOrder( currentRunlevel ) )
-				throw ApplicationException.fatal( "RunLevel " + level.name() + " was called out of order." );
+				throw ApplicationException.error( "RunLevel " + level.name() + " was called out of order." );
 
 			if ( Objs.isEmpty( reason ) )
 			{
@@ -264,7 +264,7 @@ public final class Foundation
 		setRunlevel( Runlevel.STARTUP );
 
 		// This ensures the next set of runlevels are handled in sequence after the main looper is started.
-		Looper mainLooper = getApplication().getMainLooper();
+		ApplicationLooper mainLooper = getApplication().getRouter();
 
 		// As soon as the main Looper gets a kick in it's pants, the first runlevel is initiated.
 		mainLooper.getQueue().postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );

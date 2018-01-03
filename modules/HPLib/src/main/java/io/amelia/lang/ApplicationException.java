@@ -9,51 +9,53 @@
  */
 package io.amelia.lang;
 
-public abstract class ApplicationException extends Exception implements IException
+import javax.annotation.Nonnull;
+
+public final class ApplicationException
 {
-	public static ApplicationException fatal( String message )
+	public static Error error( String message )
 	{
 		return new Error( ReportingLevel.E_ERROR, message );
 	}
 
-	public static ApplicationException fatal( String message, Throwable cause )
+	public static Error error( String message, Throwable cause )
 	{
 		return new Error( ReportingLevel.E_ERROR, message, cause );
 	}
 
-	public static ApplicationException fatal( Throwable cause )
+	public static Error error( Throwable cause )
 	{
 		return new Error( ReportingLevel.E_ERROR, cause );
 	}
 
 	public static Ignorable ignorable( String message )
 	{
-		return new Ignorable( ReportingLevel.E_IGNORABLE, message );
+		return new Ignorable( message );
 	}
 
 	public static Ignorable ignorable( Throwable cause )
 	{
-		return new Ignorable( ReportingLevel.E_IGNORABLE, cause );
+		return new Ignorable( cause );
 	}
 
 	public static Ignorable ignorable( String message, Throwable cause )
 	{
-		return new Ignorable( ReportingLevel.E_IGNORABLE, message, cause );
+		return new Ignorable( message, cause );
 	}
 
-	public static ApplicationException notice( String message, Throwable cause )
+	public static Notice notice( String message, Throwable cause )
 	{
-		return new Error( ReportingLevel.E_NOTICE, message, cause );
+		return new Notice( message, cause );
 	}
 
-	public static ApplicationException notice( Throwable cause )
+	public static Notice notice( Throwable cause )
 	{
-		return new Error( ReportingLevel.E_NOTICE, cause );
+		return new Notice( cause );
 	}
 
-	public static ApplicationException notice( String message )
+	public static Notice notice( String message )
 	{
-		return new Error( ReportingLevel.E_NOTICE, message );
+		return new Notice( message );
 	}
 
 	public static Runtime runtime( String message )
@@ -71,121 +73,93 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		return new Runtime( ReportingLevel.E_USER_ERROR, message, cause );
 	}
 
-	protected final ReportingLevel level;
-
-	public ApplicationException( ReportingLevel level )
+	private ApplicationException()
 	{
-		this.level = level;
+		// Static Wrapper Class
 	}
 
-	public ApplicationException( ReportingLevel level, String message )
+	public static class Error extends Exception implements ExceptionContext
 	{
-		super( message );
-		this.level = level;
-	}
+		protected final ReportingLevel level;
 
-	public ApplicationException( ReportingLevel level, String message, Throwable cause )
-	{
-		super( message, cause );
-		this.level = level;
+		public Error()
+		{
+			this( ReportingLevel.E_ERROR );
+		}
 
-		if ( cause.getClass().isAssignableFrom( getClass() ) )
-			throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
-	}
+		public Error( String message )
+		{
+			this( ReportingLevel.E_ERROR, message );
+		}
 
-	public ApplicationException( ReportingLevel level, Throwable cause )
-	{
-		super( cause );
-		this.level = level;
+		public Error( String message, Throwable cause )
+		{
+			this( ReportingLevel.E_ERROR, message, cause );
+		}
 
-		if ( cause.getClass().isAssignableFrom( getClass() ) )
-			throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
-	}
+		public Error( Throwable cause )
+		{
+			this( ReportingLevel.E_ERROR, cause );
+		}
 
-	@Override
-	public String getMessage()
-	{
-		return super.getMessage();
-		// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getProductName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
-	}
-
-	public boolean hasCause()
-	{
-		return getCause() != null;
-	}
-
-	@Override
-	public boolean isIgnorable()
-	{
-		return level.isIgnorable();
-	}
-
-	@Override
-	public ReportingLevel reportingLevel()
-	{
-		return level;
-	}
-
-	public static class Error extends ApplicationException
-	{
 		public Error( ReportingLevel level )
-		{
-			super( level );
-		}
-
-		public Error( ReportingLevel level, String message )
-		{
-			super( level, message );
-		}
-
-		public Error( ReportingLevel level, String message, Throwable cause )
-		{
-			super( level, message, cause );
-		}
-
-		public Error( ReportingLevel level, Throwable cause )
-		{
-			super( level, cause );
-		}
-
-		@Override
-		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
-		{
-			return null;
-		}
-	}
-
-	public static class Ignorable extends RuntimeException implements IException
-	{
-		private ReportingLevel level;
-
-		public Ignorable( ReportingLevel level )
 		{
 			this.level = level;
 		}
 
-		public Ignorable( ReportingLevel level, String message )
+		public Error( ReportingLevel level, String message )
 		{
 			super( message );
 			this.level = level;
 		}
 
-		public Ignorable( ReportingLevel level, String message, Throwable cause )
+		public Error( ReportingLevel level, String message, Throwable cause )
 		{
 			super( message, cause );
 			this.level = level;
+
+			if ( cause.getClass().isAssignableFrom( getClass() ) )
+				throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
 		}
 
-		public Ignorable( ReportingLevel level, Throwable cause )
+		public Error( ReportingLevel level, Throwable cause )
 		{
 			super( cause );
 			this.level = level;
+
+			if ( cause.getClass().isAssignableFrom( getClass() ) )
+				throw new IllegalArgumentException( "The cause argument can't be same class. {cause: " + cause.getClass() + ", this: " + getClass() + "}" );
 		}
 
 		@Override
-		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+		public String getMessage()
+		{
+			return super.getMessage();
+			// return String.format( "Exception %s thrown in file '%s' at line %s: '%s'", getClass().getProductName(), getStackTrace()[0].getFileName(), getStackTrace()[0].getLineNumber(), super.getMessage() );
+		}
+
+		@Override
+		public ReportingLevel getReportingLevel()
+		{
+			return level;
+		}
+
+		@Nonnull
+		@Override
+		public Throwable getThrowable()
+		{
+			return this;
+		}
+
+		@Override
+		public ReportingLevel handle( ExceptionReport report, ExceptionRegistrar registrar )
 		{
 			return null;
+		}
+
+		public boolean hasCause()
+		{
+			return getCause() != null;
 		}
 
 		@Override
@@ -193,17 +167,77 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		{
 			return level.isIgnorable();
 		}
+	}
 
-		@Override
-		public ReportingLevel reportingLevel()
+	public static class Ignorable extends Runtime
+	{
+		public Ignorable()
 		{
-			return level;
+			super( ReportingLevel.E_IGNORABLE );
+		}
+
+		public Ignorable( String message )
+		{
+			super( ReportingLevel.E_IGNORABLE, message );
+		}
+
+		public Ignorable( String message, Throwable cause )
+		{
+			super( ReportingLevel.E_IGNORABLE, message, cause );
+		}
+
+		public Ignorable( Throwable cause )
+		{
+			super( ReportingLevel.E_IGNORABLE, cause );
 		}
 	}
 
-	public static class Runtime extends RuntimeException implements IException
+	public static class Notice extends Error
+	{
+		public Notice()
+		{
+			super( ReportingLevel.E_NOTICE );
+		}
+
+		public Notice( String message )
+		{
+			super( ReportingLevel.E_NOTICE, message );
+		}
+
+		public Notice( String message, Throwable cause )
+		{
+			super( ReportingLevel.E_NOTICE, message, cause );
+		}
+
+		public Notice( Throwable cause )
+		{
+			super( ReportingLevel.E_NOTICE, cause );
+		}
+	}
+
+	public static class Runtime extends RuntimeException implements ExceptionContext
 	{
 		protected final ReportingLevel level;
+
+		public Runtime()
+		{
+			this( ReportingLevel.E_USER_ERROR );
+		}
+
+		public Runtime( String message )
+		{
+			this( ReportingLevel.E_USER_ERROR, message );
+		}
+
+		public Runtime( String message, Throwable cause )
+		{
+			this( ReportingLevel.E_USER_ERROR, message, cause );
+		}
+
+		public Runtime( Throwable cause )
+		{
+			this( ReportingLevel.E_USER_ERROR, cause );
+		}
 
 		public Runtime( ReportingLevel level )
 		{
@@ -229,21 +263,33 @@ public abstract class ApplicationException extends Exception implements IExcepti
 		}
 
 		@Override
-		public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+		public ReportingLevel getReportingLevel()
 		{
 			return null;
+		}
+
+		@Nonnull
+		@Override
+		public Throwable getThrowable()
+		{
+			return this;
+		}
+
+		@Override
+		public ReportingLevel handle( ExceptionReport report, ExceptionRegistrar registrar )
+		{
+			return null;
+		}
+
+		public boolean hasCause()
+		{
+			return getCause() != null;
 		}
 
 		@Override
 		public boolean isIgnorable()
 		{
 			return level.isIgnorable();
-		}
-
-		@Override
-		public ReportingLevel reportingLevel()
-		{
-			return null;
 		}
 	}
 }

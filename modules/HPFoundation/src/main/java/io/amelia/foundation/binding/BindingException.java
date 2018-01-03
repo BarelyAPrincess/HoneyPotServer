@@ -1,7 +1,7 @@
 package io.amelia.foundation.binding;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.IException;
+import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.ParcelableException;
 import io.amelia.lang.ReportingLevel;
 
@@ -68,7 +68,7 @@ public class BindingException
 		}
 	}
 
-	public static class Internal extends ApplicationException.Runtime implements IException
+	public static class Internal extends ApplicationException.Runtime implements ExceptionContext
 	{
 		public Internal( String message )
 		{

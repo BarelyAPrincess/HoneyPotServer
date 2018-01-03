@@ -1,65 +1,39 @@
-package io.amelia.foundation;
+package io.amelia.looper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Kernel;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.Runlevel;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
-import io.amelia.support.Objs;
+import io.amelia.looper.queue.AbstractQueue;
 
 /**
  * The Looper is intended to be interfaced by the thread that intends to execute tasks or oversee the process.
  */
-public class Looper
+public abstract class AbstractLooper<Q extends AbstractQueue>
 {
-	public static final Logger L = LogBuilder.get( Looper.class );
-
 	/**
-	 * Used to increment globally used unique numbers
+	 * Used to increment an unique global number.
 	 */
 	private static volatile AtomicLong UNIQUE = new AtomicLong( 0L );
 
-	/**
-	 * Stores the Loopers
-	 */
-	private static volatile NavigableSet<Looper> loopers = new TreeSet<>();
-
 	public static long getGloballyUniqueId()
 	{
-		long id = UNIQUE.getAndIncrement();
-
-		/*
-		 * Just as a safety check in case the app is running for like a millennia.
-		 * Should probably also check that we don't encounter in use numbers but that's probably even more rare.
-		 */
-		if ( Long.MAX_VALUE - id == 0 )
-			UNIQUE.set( 0L );
-
-		return id;
+		return UNIQUE.getAndIncrement();
 	}
 
 	/**
 	 * The Looper Queue
 	 */
-	final ParcelQueue queue = new ParcelQueue( this );
+	final Q queue;
 	/**
 	 * List of threads that were spawned by this Looper.
 	 * Used to obtain() this Looper from a async thread.
@@ -69,10 +43,6 @@ public class Looper
 	 * The Looper Flags
 	 */
 	private final EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
-	/**
-	 * Idle Handlers that run when the queue is empty
-	 */
-	private final Map<Long, Predicate<Looper>> idleHandlers = new HashMap<>();
 	/**
 	 * Used to synchronize certain methods with the loop, so to avoid concurrent and/or race issues
 	 */
@@ -99,8 +69,12 @@ public class Looper
 	 */
 	private Thread thread = null;
 
-	Looper( Flag... flags )
+	/**
+	 * @hide
+	 */
+	public AbstractLooper( Q queue, Flag... flags )
 	{
+		this.queue = queue;
 		this.flags.addAll( Arrays.asList( flags ) );
 	}
 
@@ -121,10 +95,8 @@ public class Looper
 	{
 		if ( isRunning() )
 			throw ApplicationException.ignorable( "You can't modify Looper flags while it's running." );
-		if ( flag == Flag.SYSTEM )
-			throw ApplicationException.runtime( "System Loopers are the domain of the application Kernel." );
-		if ( flag == Flag.PLUGIN )
-			throw ApplicationException.runtime( "Plugin Loopers are the domain of the PluginManager." );
+		if ( flag == Flag.SYSTEM || flag == Flag.PLUGIN )
+			throw ApplicationException.runtime( "Loopers must be instigated as SYSTEM or PLUGIN loopers." );
 
 		flags.add( flag );
 	}
@@ -153,9 +125,9 @@ public class Looper
 	}
 
 	/**
-	 * Get the TaskQueue associated with this Looper
+	 * Get the {@link AbstractQueue} associated with this {@link AbstractLooper}
 	 */
-	public ParcelQueue getQueue()
+	public Q getQueue()
 	{
 		return queue;
 	}
@@ -170,7 +142,7 @@ public class Looper
 		return !loopers.contains( this );
 	}
 
-	boolean isHeldByCurrentThread()
+	public boolean isHeldByCurrentThread()
 	{
 		return lock.isHeldByCurrentThread();
 	}
@@ -240,31 +212,14 @@ public class Looper
 			long lastWarningMillis = 0L;
 
 			// Stores the last time the overload wait was called as to not delay the system all the more.
-			long lastOverloadMillis = 0;
+			long lastOverloadMillis = 0L;
 
 			for ( ; ; )
 			{
 				// Stores when the loop started.
 				final long loopStartMillis = System.currentTimeMillis();
 
-				// Call the actual loop logic.
-				ParcelQueue.Result result = queue.next( loopStartMillis );
-
-				// A queue entry was successful returned and can now be ran then recycled.
-				if ( result == ParcelQueue.Result.SUCCESS )
-				{
-					// As of now, the only entry returned on the SUCCESS result is the RunnableEntry (or more so TaskEntry and ParcelEntry).
-					ParcelQueue.RunnableEntry entry = ( ParcelQueue.RunnableEntry ) queue.getLastEntry();
-
-					entry.markFinalized();
-					entry.run();
-					entry.recycle();
-				}
-				// The queue is empty and this looper quits in such cases.
-				else if ( result == ParcelQueue.Result.EMPTY && hasFlag( Flag.AUTO_QUIT ) && !isQuitting() )
-				{
-					quitSafely();
-				}
+				tick( loopStartMillis );
 
 				// Update the time taken during this iteration.
 				lastPolledMillis = System.currentTimeMillis() - loopStartMillis;
@@ -319,6 +274,7 @@ public class Looper
 		}
 		finally
 		{
+			tickShutdown();
 			queue.clearState();
 			lock.unlock();
 			thread = null;
@@ -362,9 +318,10 @@ public class Looper
 	 * before the looper terminates.  Consider using {@link #quitSafely} instead to ensure
 	 * that all pending work is completed in an orderly manner.
 	 *
+	 * @hide
 	 * @see #quitSafely
 	 */
-	void quitAndDestroy()
+	public void quitAndDestroy()
 	{
 		quit( true );
 	}
@@ -416,7 +373,7 @@ public class Looper
 	 * Executes {@link Runnable} on a new thread, i.e., async.
 	 * <p>
 	 * We also add the new thread to the aliases, such that calls to
-	 * the {@link Looper.Factory#obtain()} returns this {@link Looper}.
+	 * the {@link AbstractLooper.Factory#obtain()} returns this {@link AbstractLooper}.
 	 * <p>
 	 * This also prevents a async task from creating a new Looper by accident.
 	 */
@@ -430,6 +387,10 @@ public class Looper
 		} );
 	}
 
+	protected abstract void tick( long loopStartMillis );
+
+	protected abstract void tickShutdown();
+
 	@Override
 	public String toString()
 	{
@@ -441,15 +402,6 @@ public class Looper
 	 */
 	public enum Flag
 	{
-		/**
-		 * Forces the Looper the spawn each enqueued task on a new thread, regardless of if it's ASYNC or not.
-		 */
-		ASYNC,
-		/**
-		 * Indicates the {@link ParcelQueue#next(long)} can and will block while the queue is empty.
-		 * This flag is default on any non-system Looper as to save CPU time.
-		 */
-		BLOCKING,
 		/**
 		 * Indicates the Looper is used for internal system tasks only, which includes but not limited to,
 		 * the Main Loop, User Logins, Permissions, Log Subsystem, Networking, and more.
@@ -464,102 +416,5 @@ public class Looper
 		 * Indicates the Looper will auto-quit once the queue is empty.
 		 */
 		AUTO_QUIT
-	}
-
-	public static final class Factory
-	{
-		/**
-		 * Destroys the Looper associated with the calling Thread.
-		 *
-		 * @return Was a Looper found and successfully destroyed.
-		 */
-		public static boolean destroy()
-		{
-			Looper looper = peek();
-			if ( looper != null )
-			{
-				looper.quitAndDestroy();
-				return true;
-			}
-			else
-				return false;
-		}
-
-		/**
-		 * Returns the Looper associated with the Thread calling this method and that has passed the predicate provided.
-		 *
-		 * @param supplier  The Supplier used for initiating a new instance of Looper if none was found or it fails the Predicate.
-		 * @param predicate The predicate used to evaluate the associated Looper.
-		 *
-		 * @return The associated Looper that also passed the provided Predicate, otherwise a new instance returned by the Supplier if none was found or it failed the predicate.
-		 */
-		static Looper obtain( @Nonnull Supplier<Looper> supplier, @Nullable Predicate<Looper> predicate )
-		{
-			Objs.notNull( supplier );
-
-			Looper looper = peek();
-			if ( looper == null )
-			{
-				looper = supplier.get();
-				loopers.add( looper );
-			}
-			else if ( predicate != null && !predicate.test( looper ) )
-			{
-				// Looper failed the predicate, so it needs to be replaced.
-				loopers.remove( looper );
-				looper = supplier.get();
-				loopers.add( looper );
-			}
-			return looper;
-		}
-
-		/**
-		 * Returns the Looper associated with the Thread calling this method and that has passed the predicate provided.
-		 *
-		 * @param predicate The predicate used to evaluate the associated Looper.
-		 *
-		 * @return The associated Looper that also passed the provided Predicate, otherwise new if none was found or it failed the predicate.
-		 */
-		static Looper obtain( @Nullable Predicate<Looper> predicate )
-		{
-			return obtain( Looper::new, predicate );
-		}
-
-		/**
-		 * Returns the Looper associated with the Thread calling this method.
-		 *
-		 * @return The associated Looper, otherwise a new Looper if none was found.
-		 */
-		public static Looper obtain()
-		{
-			return obtain( null );
-		}
-
-		/**
-		 * Filter all current loopers using the predicate provided.
-		 *
-		 * @param predicate The predicate used to evaluate each Looper. Looper may or may not be in use elsewhere.
-		 *
-		 * @return Returns a stream of loopers that matched the predicate provided.
-		 */
-		static Stream<Looper> peek( @Nonnull Predicate<Looper> predicate )
-		{
-			return loopers.stream().filter( predicate );
-		}
-
-		/**
-		 * Returns the Looper associated with the Thread calling this method.
-		 *
-		 * @return The associated Looper, otherwise {@code null} if none was found.
-		 */
-		static Looper peek()
-		{
-			return peek( Looper::isThreadJoined ).findFirst().orElse( null );
-		}
-
-		private Factory()
-		{
-			// Static Access
-		}
 	}
 }

@@ -29,12 +29,12 @@ public class ExceptionReport
 	private static final Kernel.Logger L = Kernel.getLogger( ExceptionReport.class );
 	private static final Map<Class<? extends Throwable>, ExceptionCallback> registered = new ConcurrentHashMap<>();
 
-	public static String printExceptions( IException... exceptions )
+	public static String printExceptions( ExceptionContext... exceptions )
 	{
 		return printExceptions( Arrays.stream( exceptions ) );
 	}
 
-	public static String printExceptions( Stream<IException> exceptions )
+	public static String printExceptions( Stream<ExceptionContext> exceptions )
 	{
 		// Might need some better handling for this!
 		StringBuilder sb = new StringBuilder();
@@ -55,14 +55,13 @@ public class ExceptionReport
 			registered.put( clz, callback );
 	}
 
-	public static void throwExceptions( IException... exceptions ) throws Exception
+	public static void throwExceptions( ExceptionContext... exceptions ) throws Exception
 	{
-		List<IException> exps = new ArrayList<>();
+		List<ExceptionContext> exps = new ArrayList<>();
 
-		for ( IException e : exceptions )
+		for ( ExceptionContext e : exceptions )
 		{
-			IException.check( e );
-			if ( !e.reportingLevel().isIgnorable() )
+			if ( !e.getReportingLevel().isIgnorable() )
 				exps.add( e );
 		}
 
@@ -75,13 +74,12 @@ public class ExceptionReport
 			throw new MultipleException( exps );
 	}
 
-	protected final List<IException> caughtExceptions = new ArrayList<>();
+	protected final List<ExceptionContext> contexts = new ArrayList<>();
 
-	public ExceptionReport addException( IException exception )
+	public ExceptionReport addException( ExceptionContext exception )
 	{
-		IException.check( exception );
 		if ( exception != null )
-			caughtExceptions.add( exception );
+			contexts.add( exception );
 		return this;
 	}
 
@@ -91,10 +89,10 @@ public class ExceptionReport
 			if ( throwable instanceof UncaughtException )
 			{
 				( ( UncaughtException ) throwable ).setReportingLevel( level );
-				caughtExceptions.add( ( IException ) throwable );
+				contexts.add( ( ExceptionContext ) throwable );
 			}
 			else
-				caughtExceptions.add( new UncaughtException( level, msg, throwable ) );
+				contexts.add( new UncaughtException( level, msg, throwable ) );
 		return this;
 	}
 
@@ -104,21 +102,21 @@ public class ExceptionReport
 			if ( throwable instanceof UncaughtException )
 			{
 				( ( UncaughtException ) throwable ).setReportingLevel( level );
-				caughtExceptions.add( ( IException ) throwable );
+				contexts.add( ( ExceptionContext ) throwable );
 			}
 			else
-				caughtExceptions.add( new UncaughtException( level, throwable ) );
+				contexts.add( new UncaughtException( level, throwable ) );
 		return this;
 	}
 
-	public Stream<IException> getIgnorableExceptions()
+	public Stream<ExceptionContext> getIgnorableExceptions()
 	{
-		return caughtExceptions.stream().filter( e -> e.reportingLevel().isIgnorable() );
+		return contexts.stream().filter( e -> e.getReportingLevel().isIgnorable() );
 	}
 
-	public Stream<IException> getNotIgnorableExceptions()
+	public Stream<ExceptionContext> getNotIgnorableExceptions()
 	{
-		return caughtExceptions.stream().filter( e -> !e.reportingLevel().isIgnorable() );
+		return contexts.stream().filter( e -> !e.getReportingLevel().isIgnorable() );
 	}
 
 	/**
@@ -126,18 +124,19 @@ public class ExceptionReport
 	 *
 	 * @param cause   The exception thrown
 	 * @param context The EvalContext associated with the eval request
+	 *
 	 * @return True if we should abort any further execution of code
 	 */
-	public final boolean handleException( Throwable cause, ExceptionContext context )
+	public final boolean handleException( Throwable cause, ExceptionRegistrar context )
 	{
 		if ( Objs.isNull( cause ) )
 			return false;
 
 		/* Give an IException a chance to self-handle the exception report */
-		if ( cause instanceof IException )
+		if ( cause instanceof ExceptionContext )
 		{
 			// TODO Might not be desirable if a handle method was to return severe but not provide any exception or debug information to the ExceptionReport
-			ReportingLevel reportingLevel = ( ( IException ) cause ).handle( this, context );
+			ReportingLevel reportingLevel = ( ( ExceptionContext ) cause ).handle( this, context );
 			if ( reportingLevel != null )
 				return !reportingLevel.isIgnorable();
 		}
@@ -146,9 +145,8 @@ public class ExceptionReport
 		if ( cause instanceof MultipleException )
 		{
 			boolean abort = false;
-			for ( IException e : ( ( MultipleException ) cause ).getExceptions() )
+			for ( ExceptionContext e : ( ( MultipleException ) cause ).getExceptions() )
 			{
-				IException.check( e );
 				if ( handleException( ( Throwable ) e, context ) )
 					abort = true;
 			}
@@ -214,18 +212,21 @@ public class ExceptionReport
 	 * Checks if exception is present by class name
 	 *
 	 * @param clz The exception to check for
+	 *
 	 * @return Is it present
 	 */
 	public boolean hasException( Class<? extends Throwable> clz )
 	{
 		Objs.notNull( clz );
 
-		for ( IException e : caughtExceptions )
+		for ( ExceptionContext context : contexts )
 		{
-			if ( e.getCause() != null && clz.isAssignableFrom( e.getCause().getClass() ) )
+			Throwable throwable = context.getThrowable();
+
+			if ( throwable.getCause() != null && clz.isAssignableFrom( context.getCause().getClass() ) )
 				return true;
 
-			if ( clz.isAssignableFrom( e.getClass() ) )
+			if ( clz.isAssignableFrom( throwable.getClass() ) )
 				return true;
 		}
 
@@ -234,21 +235,21 @@ public class ExceptionReport
 
 	public boolean hasExceptions()
 	{
-		return !caughtExceptions.isEmpty();
+		return !contexts.isEmpty();
 	}
 
 	public boolean hasIgnorableExceptions()
 	{
-		for ( IException e : caughtExceptions )
-			if ( e.reportingLevel().isIgnorable() )
+		for ( ExceptionContext e : contexts )
+			if ( e.getReportingLevel().isIgnorable() )
 				return true;
 		return false;
 	}
 
 	public boolean hasNonIgnorableExceptions()
 	{
-		for ( IException e : caughtExceptions )
-			if ( !e.reportingLevel().isIgnorable() )
+		for ( ExceptionContext e : contexts )
+			if ( !e.getReportingLevel().isIgnorable() )
 				return true;
 		return false;
 	}

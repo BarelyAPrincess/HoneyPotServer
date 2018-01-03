@@ -11,7 +11,7 @@ package io.amelia.logging;
 
 import com.google.common.collect.Lists;
 import io.amelia.support.EnumColor;
-import io.amelia.lang.IException;
+import io.amelia.lang.ExceptionContext;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.support.Versioning;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -51,9 +51,9 @@ class LogRecord implements ILogEvent
 	{
 		for ( Throwable t : throwables )
 		{
-			if ( t instanceof IException )
+			if ( t instanceof ExceptionContext )
 			{
-				if ( ( ( IException ) t ).reportingLevel().isEnabled() )
+				if ( ( ( ExceptionContext ) t ).getReportingLevel().isEnabled() )
 					log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getClass().getSimpleName() + ": " + t.getMessage() );
 			}
 			else

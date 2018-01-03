@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.lang.BaseException;
 import javafx.util.Pair;
 
 public class Maps
@@ -47,6 +46,7 @@ public class Maps
 	 *
 	 * @param map The map to sort
 	 * @param <T> The value type
+	 *
 	 * @return The sorted map as a TreeMap
 	 */
 	public static <T> Map<Integer, T> asNumericallySortedMap( final Map<String, T> map )
@@ -210,7 +210,7 @@ public class Maps
 	}
 
 	@SafeVarargs
-	public static <Key, Value> Map<Key, Value> joinMaps( Map<Key, Value>... maps ) throws BaseException.Error
+	public static <Key, Value> Map<Key, Value> joinMaps( Map<Key, Value>... maps )
 	{
 		if ( Objs.isEmpty( maps ) )
 			return new HashMap<>();
@@ -268,7 +268,9 @@ public class Maps
 	 *
 	 * @param map    the map we try to remove from
 	 * @param filter a predicate which returns {@code true} for elements to be removed
+	 *
 	 * @return {@code true} if any elements were removed
+	 *
 	 * @throws NullPointerException          if the specified map or filter is null
 	 * @throws UnsupportedOperationException if elements cannot be removed from this collection.
 	 *                                       Implementations may throw this exception if a

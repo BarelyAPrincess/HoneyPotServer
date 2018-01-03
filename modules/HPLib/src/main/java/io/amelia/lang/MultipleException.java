@@ -20,18 +20,18 @@ public class MultipleException extends Exception
 {
 	private static final long serialVersionUID = -659541886519281396L;
 
-	private final List<IException> exceptions = new ArrayList<>();
+	private final List<ExceptionContext> exceptions = new ArrayList<>();
 
-	public MultipleException( List<IException> exceptions )
+	public MultipleException( List<ExceptionContext> exceptions )
 	{
-		for ( IException e : exceptions )
+		for ( ExceptionContext e : exceptions )
 			if ( ! ( e instanceof Throwable ) )
 				throw new IllegalArgumentException( "IException must be implemented on Throwables only, this is a serious programming bug!" );
 
 		this.exceptions.addAll( exceptions );
 	}
 
-	public List<IException> getExceptions()
+	public List<ExceptionContext> getExceptions()
 	{
 		return Collections.unmodifiableList( exceptions );
 	}

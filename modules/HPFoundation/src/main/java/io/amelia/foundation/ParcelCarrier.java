@@ -12,7 +12,7 @@ import io.amelia.support.data.ParcelSerializer;
 import io.amelia.support.data.Parcelable;
 
 /**
- * Defines a carrier containing an data object that can be sent to a {@link ParcelRouter}.
+ * Defines a carrier containing an data object that can be sent to a {@link ApplicationRouter}.
  *
  * <p class="note">The best way to get one of these is to call {@link #obtain Message.obtain()}
  * method, which will pull from a pool of recycled objects.</p>
@@ -70,11 +70,11 @@ public class ParcelCarrier
 	/**
 	 * Receivers have the ability to process queued incoming messages.
 	 */
-	private ParcelRouter target;
+	private ApplicationRouter target;
 	/**
 	 * Indicates the location of the PostalSender. This will either be local or remote over a network connection.
 	 */
-	private ParcelRouter source;
+	private ApplicationRouter source;
 
 	ParcelCarrier()
 	{
@@ -94,9 +94,9 @@ public class ParcelCarrier
 	}
 
 	/**
-	 * Retrieve the a {@link ParcelRouter} implementation that
+	 * Retrieve the a {@link ApplicationRouter} implementation that
 	 * will receive this message. The object must implement
-	 * {@link ParcelRouter#handleParcel(ParcelCarrier)}.
+	 * {@link ApplicationRouter#handleParcel(ParcelCarrier)}.
 	 * Each Handler has its own name-space for
 	 * message codes, so you do not need to
 	 * worry about yours conflicting with other handlers.

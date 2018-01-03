@@ -8,7 +8,7 @@ You can find our official documentation at https://hps-docs.penoaks.com/. It con
 # How To Build
 HPS is easily built using Gradle. If you are new to Gradle, just execute the `./gradlew build` (or `grandle.bat build` for Windows) script and you should find a fresh build in the `build/dest` directory. Keep in mind that you might have compilition errors if building from the bleeding-edge (`master-dev`) branch.
 
-# Coding````
+# Coding
 Our Gradle Build environment uses the CodeStyle plugin to check coding standards, as follows:
 
 * Please attempt at making your code as easily understandable as possible. Use varibles with human-readable names, like `mergeWithParent` instead of `var2`. We also recommend when possible to use human-readable names for both lambda expressions and generics.

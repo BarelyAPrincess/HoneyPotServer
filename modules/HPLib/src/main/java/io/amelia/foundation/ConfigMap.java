@@ -3,9 +3,9 @@ package io.amelia.foundation;
 import io.amelia.lang.ConfigException;
 import io.amelia.support.data.ParcelLoader;
 import io.amelia.support.data.StackerWithValue;
-import io.amelia.support.data.ValueTypesOutline;
+import io.amelia.support.data.ValueTypesTrait;
 
-public final class ConfigMap extends StackerWithValue<ConfigMap, Object> implements ValueTypesOutline
+public final class ConfigMap extends StackerWithValue<ConfigMap, Object> implements ValueTypesTrait
 {
 	private String loadedValueHash = null;
 

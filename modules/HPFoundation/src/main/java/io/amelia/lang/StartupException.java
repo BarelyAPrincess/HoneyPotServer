@@ -29,7 +29,7 @@ public class StartupException extends UncaughtException
 	}
 
 	@Override
-	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+	public ReportingLevel handle( ExceptionReport report, ExceptionRegistrar registrar )
 	{
 		report.addException( ReportingLevel.E_ERROR, this );
 		return ReportingLevel.E_ERROR;

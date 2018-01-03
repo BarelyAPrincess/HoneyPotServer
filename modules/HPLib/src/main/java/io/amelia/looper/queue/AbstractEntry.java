@@ -1,0 +1,120 @@
+package io.amelia.looper.queue;
+
+import javax.annotation.Nonnull;
+
+import io.amelia.looper.AbstractLooper;
+
+public abstract class AbstractEntry
+{
+	protected final DefaultQueue queue;
+	private final boolean async;
+	private final long id = AbstractLooper.getGloballyUniqueId();
+	/**
+	 * Indicates when the entry has been processed by the queue
+	 * <p>
+	 * This boolean is set when the message is enqueued and remains set while it
+	 * is delivered and afterwards when it is recycled. The flag is only cleared
+	 * once {@link #recycle()} is called and it's contents are zeroed.
+	 * <p>
+	 * It is an error to attempt to enqueue or recycle a message that is already finalized.
+	 */
+	private boolean finalized;
+
+	AbstractEntry( @Nonnull DefaultQueue queue )
+	{
+		this.queue = queue;
+		this.async = false;
+	}
+
+	AbstractEntry( @Nonnull DefaultQueue queue, boolean async )
+	{
+		this.queue = queue;
+		this.async = async;
+	}
+
+	public void cancel()
+	{
+		synchronized ( queue.entries )
+		{
+			if ( queue.lastEntry == this )
+			{
+				queue.clearState();
+				queue.wake();
+			}
+			else
+				queue.entries.remove( this );
+		}
+	}
+
+	public long getId()
+	{
+		return id;
+	}
+
+	public int getPositionInQueue()
+	{
+		synchronized ( queue.entries )
+		{
+			int pos = 0;
+			for ( AbstractEntry queueTask : queue.entries )
+				if ( queueTask == this )
+					return pos;
+				else
+					pos++;
+
+			return -1;
+		}
+	}
+
+	/**
+	 * Used for sorting, indicates when the entry is scheduled for processing.
+	 */
+	public abstract long getWhen();
+
+	public boolean isActive()
+	{
+		return queue.lastEntry == this;
+	}
+
+	public boolean isAsync()
+	{
+		return async;
+	}
+
+	public boolean isEnqueued()
+	{
+		synchronized ( queue.entries )
+		{
+			return queue.entries.contains( this );
+		}
+	}
+
+	public boolean isFinalized()
+	{
+		return finalized;
+	}
+
+	/**
+	 * @hide
+	 */
+	public void markFinalized()
+	{
+		finalized = true;
+	}
+
+	/**
+	 * @hide
+	 */
+	public void recycle()
+	{
+		cancel();
+		finalized = false;
+	}
+
+	/**
+	 * Determines that the entry can be removed from the queue with any bugs to the Application.
+	 *
+	 * @return True if removal is permitted and this task doesn't have to run.
+	 */
+	public abstract boolean removesSafely();
+}

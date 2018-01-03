@@ -1,12 +1,10 @@
 package io.amelia;
 
-import io.amelia.foundation.Foundation;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.PropDevMeta;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
@@ -37,13 +35,6 @@ public class HoneyPotServer extends DefaultApplication
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
-	}
-
-	@Override
-	public void fatalError( ExceptionReport report, boolean crashOnError )
-	{
-		if ( crashOnError )
-			Foundation.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
 	}
 
 	@Override

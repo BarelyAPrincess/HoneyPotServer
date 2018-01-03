@@ -591,7 +591,7 @@ public class Objs
 			// Ignore
 		}
 
-		Method methodIsEmpty = getMethodSafe( obj, "isEmpty" );
+		Method methodIsEmpty = getMethodSafe( obj, "hasPendingEntries" );
 		Method methodLength = getMethodSafe( obj, "length" );
 		Method methodSize = getMethodSafe( obj, "size" );
 
@@ -626,7 +626,7 @@ public class Objs
 		if ( obj == null )
 			throw new NullPointerException( String.format( message, values ) );
 
-		Method methodIsEmpty = getMethodSafe( obj, "isEmpty" );
+		Method methodIsEmpty = getMethodSafe( obj, "hasPendingEntries" );
 		Method methodLength = getMethodSafe( obj, "length" );
 		Method methodSize = getMethodSafe( obj, "size" );
 

@@ -31,7 +31,7 @@ import io.amelia.support.OptionalBoolean;
  * List
  * Class
  */
-public interface ValueTypesOutline
+public interface ValueTypesTrait
 {
 	default OptionalBoolean getBoolean( String key )
 	{

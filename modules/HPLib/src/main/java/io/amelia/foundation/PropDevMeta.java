@@ -42,7 +42,7 @@ public class PropDevMeta implements ImplDevMeta
 		}
 		catch ( IOException e )
 		{
-			throw ApplicationException.fatal( e );
+			throw ApplicationException.error( e );
 		}
 		finally
 		{

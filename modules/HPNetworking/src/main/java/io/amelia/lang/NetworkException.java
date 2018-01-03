@@ -9,30 +9,22 @@
  */
 package io.amelia.lang;
 
-import com.sun.istack.internal.NotNull;
-
-public class NetworkException extends ApplicationException
+public class NetworkException extends ApplicationException.Error
 {
 	private static final long serialVersionUID = 5522301956671473324L;
 
-	public NetworkException( @NotNull String message )
+	public NetworkException( String message )
 	{
-		super( ReportingLevel.E_ERROR, message );
+		super( message );
 	}
 
-	public NetworkException( @NotNull String message, @NotNull Throwable cause )
+	public NetworkException( String message, Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, message, cause );
+		super( message, cause );
 	}
 
-	public NetworkException( @NotNull Throwable cause )
+	public NetworkException( Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, cause );
-	}
-
-	@Override
-	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
-	{
-		return null;
+		super( cause );
 	}
 }

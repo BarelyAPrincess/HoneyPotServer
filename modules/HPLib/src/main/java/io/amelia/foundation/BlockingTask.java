@@ -3,25 +3,38 @@ package io.amelia.foundation;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
+import io.amelia.looper.LooperTask;
 import io.amelia.support.Objs;
 
 /**
  * Provides a runnable that blocks until the wrapped runnable is executed.
  * Be sure to pass this Runnable to the executor before calling {@link #postAndWait(long)} or else it will hang.
  */
-public final class BlockingRunnable implements Runnable
+public final class BlockingTask<E extends Exception> implements LooperTask<E>
 {
-	private final Runnable mTask;
+	private final LooperTask<E> mTask;
 	private boolean mDone;
 
-	public BlockingRunnable( @Nonnull Runnable task )
+	public BlockingTask( @Nonnull LooperTask<E> task )
 	{
 		mTask = task;
 	}
 
-	public boolean postAndWait()
+	@Override
+	public void execute() throws E
 	{
-		return postAndWait( 0L );
+		try
+		{
+			mTask.execute();
+		}
+		finally
+		{
+			synchronized ( this )
+			{
+				mDone = true;
+				notifyAll();
+			}
+		}
 	}
 
 	public boolean postAndWait( @Nonnegative long timeout )
@@ -68,20 +81,8 @@ public final class BlockingRunnable implements Runnable
 		return true;
 	}
 
-	@Override
-	public void run()
+	public boolean postAndWait()
 	{
-		try
-		{
-			mTask.run();
-		}
-		finally
-		{
-			synchronized ( this )
-			{
-				mDone = true;
-				notifyAll();
-			}
-		}
+		return postAndWait( 0L );
 	}
 }

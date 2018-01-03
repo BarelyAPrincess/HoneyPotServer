@@ -10,11 +10,8 @@
 package io.amelia.events;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ExceptionContext;
-import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.ReportingLevel;
 
-public class EventException extends ApplicationException
+public class EventException extends ApplicationException.Error
 {
 	private static final long serialVersionUID = 3532808232324183999L;
 
@@ -23,47 +20,37 @@ public class EventException extends ApplicationException
 	 */
 	public EventException()
 	{
-		super( ReportingLevel.E_ERROR );
+		super();
 	}
 
 	/**
 	 * Constructs a new EventException with the given message
 	 *
-	 * @param message
-	 *             The message
+	 * @param message The message
 	 */
 	public EventException( String message )
 	{
-		super( ReportingLevel.E_ERROR, message );
+		super( message );
 	}
 
 	/**
 	 * Constructs a new EventException with the given message
 	 *
-	 * @param cause
-	 *             The exception that caused this
-	 * @param message
-	 *             The message
+	 * @param cause   The exception that caused this
+	 * @param message The message
 	 */
 	public EventException( String message, Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, message, cause );
+		super( message, cause );
 	}
 
 	/**
 	 * Constructs a new EventException based on the given Exception
 	 *
-	 * @param cause
-	 *             Exception that triggered this Exception
+	 * @param cause Exception that triggered this Exception
 	 */
 	public EventException( Throwable cause )
 	{
-		super( ReportingLevel.E_ERROR, cause );
-	}
-
-	@Override
-	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
-	{
-		return null;
+		super( cause );
 	}
 }

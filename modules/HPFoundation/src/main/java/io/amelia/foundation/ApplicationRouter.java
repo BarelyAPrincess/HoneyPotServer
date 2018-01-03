@@ -2,9 +2,11 @@ package io.amelia.foundation;
 
 import java.util.function.Consumer;
 
+import io.amelia.looper.LooperFactory;
+
 /**
- * A {@link ParcelRouter} allows you to send and receive objects through
- * a thread's {@link Looper}. There is only one per {@link Looper}.
+ * A {@link ApplicationRouter} allows you to send and receive objects through
+ * a thread's {@link ApplicationLooper}. There is only one per {@link ApplicationLooper}.
  * <p>
  * The main use for this class is to enqueue an action to be performed on a different thread.
  * <p>
@@ -27,26 +29,26 @@ import java.util.function.Consumer;
  * application tasks and messages.  You can create your own threads,
  * and communicate back with the main application thread through a Handler.
  */
-public class ParcelRouter
+public class ApplicationRouter
 {
 	final boolean async;
 	final Consumer<ParcelCarrier> callback;
-	final Looper looper;
+	final ApplicationLooper looper;
 
 	/**
-	 * Default constructor associates this handler with the {@link Looper} for the
+	 * Default constructor associates this handler with the {@link ApplicationLooper} for the
 	 * current thread.
 	 * <p>
 	 * If this thread does not have a looper, this handler won't be able to receive messages
 	 * so an exception is thrown.
 	 */
-	public ParcelRouter()
+	public ApplicationRouter()
 	{
 		this( null, false );
 	}
 
 	/**
-	 * Constructor associates this handler with the {@link Looper} for the
+	 * Constructor associates this handler with the {@link ApplicationLooper} for the
 	 * current thread and takes a callback interface in which you can handle
 	 * messages.
 	 * <p>
@@ -55,35 +57,35 @@ public class ParcelRouter
 	 *
 	 * @param callback The callback interface in which to handle messages, or null.
 	 */
-	public ParcelRouter( Consumer<ParcelCarrier> callback )
+	public ApplicationRouter( Consumer<ParcelCarrier> callback )
 	{
 		this( callback, false );
 	}
 
 	/**
-	 * Use the provided {@link Looper} instead of the default one.
+	 * Use the provided {@link ApplicationLooper} instead of the default one.
 	 *
 	 * @param looper The looper, must not be null.
 	 */
-	public ParcelRouter( Looper looper )
+	public ApplicationRouter( ApplicationLooper looper )
 	{
 		this( looper, null, false );
 	}
 
 	/**
-	 * Use the provided {@link Looper} instead of the default one and take a callback
+	 * Use the provided {@link ApplicationLooper} instead of the default one and take a callback
 	 * interface in which to handle messages.
 	 *
 	 * @param looper   The looper, must not be null.
 	 * @param callback The callback interface in which to handle messages, or null.
 	 */
-	public ParcelRouter( Looper looper, Consumer<ParcelCarrier> callback )
+	public ApplicationRouter( ApplicationLooper looper, Consumer<ParcelCarrier> callback )
 	{
 		this( looper, callback, false );
 	}
 
 	/**
-	 * Use the {@link Looper} for the current thread
+	 * Use the {@link ApplicationLooper} for the current thread
 	 * and set whether the handler should be asynchronous.
 	 * <p>
 	 * Handlers are synchronous by default unless this constructor is used to make
@@ -91,20 +93,20 @@ public class ParcelRouter
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link ParcelQueue#postTaskBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
 	 * @param async If true, the handler calls {@link ParcelCarrier#setAsync(boolean)} for
 	 *              each {@link ParcelCarrier} that is sent to it or {@link Runnable} that is posted to it.
 	 *
 	 * @hide
 	 */
-	public ParcelRouter( boolean async )
+	public ApplicationRouter( boolean async )
 	{
 		this( null, async );
 	}
 
 	/**
-	 * Use the {@link Looper} for the current thread with the specified callback interface
+	 * Use the {@link ApplicationLooper} for the current thread with the specified callback interface
 	 * and set whether the handler should be asynchronous.
 	 * <p>
 	 * Handlers are synchronous by default unless this constructor is used to make
@@ -112,7 +114,7 @@ public class ParcelRouter
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link ParcelQueue#postTaskBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
 	 * @param callback The callback interface in which to handle messages, or null.
 	 * @param async    If true, the handler calls {@link ParcelCarrier#setAsync(boolean)} for
@@ -120,9 +122,9 @@ public class ParcelRouter
 	 *
 	 * @hide
 	 */
-	public ParcelRouter( Consumer<ParcelCarrier> callback, boolean async )
+	public ApplicationRouter( Consumer<ParcelCarrier> callback, boolean async )
 	{
-		looper = Looper.Factory.obtain();
+		looper = LooperFactory.obtain();
 		if ( looper == null )
 			throw new RuntimeException( "Can't create handler inside thread that has not called Looper.prepare()" );
 		looper.queue = looper.getQueue();
@@ -131,7 +133,7 @@ public class ParcelRouter
 	}
 
 	/**
-	 * Use the provided {@link Looper} instead of the default one and take a callback
+	 * Use the provided {@link ApplicationLooper} instead of the default one and take a callback
 	 * interface in which to handle messages.  Also set whether the handler
 	 * should be asynchronous.
 	 * <p>
@@ -140,7 +142,7 @@ public class ParcelRouter
 	 * <p>
 	 * Asynchronous messages represent interrupts or events that do not require global ordering
 	 * with respect to synchronous messages.  Asynchronous messages are not subject to
-	 * the synchronization barriers introduced by {@link ParcelQueue#postTaskBarrier(long)}.
+	 * the synchronization barriers introduced by {@link LooperQueue#postTaskBarrier(long)}.
 	 *
 	 * @param looper   The looper, must not be null.
 	 * @param callback The callback interface in which to handle messages, or null.
@@ -149,7 +151,7 @@ public class ParcelRouter
 	 *
 	 * @hide
 	 */
-	public ParcelRouter( Looper looper, Consumer<ParcelCarrier> callback, boolean async )
+	public ApplicationRouter( ApplicationLooper looper, Consumer<ParcelCarrier> callback, boolean async )
 	{
 		this.looper = looper;
 		looper.queue = looper.getQueue();
@@ -179,7 +181,7 @@ public class ParcelRouter
 		}
 	}
 
-	private boolean enqueueMessage( ParcelQueue queue, ParcelCarrier msg, long uptimeMillis )
+	private boolean enqueueMessage( LooperQueue queue, ParcelCarrier msg, long uptimeMillis )
 	{
 		msg.target = this;
 		if ( async )
@@ -189,7 +191,7 @@ public class ParcelRouter
 
 	// if we can get rid of this method, the handler need not remember its loop
 	// we could instead export a getLooperQueue() method...
-	public final Looper getLooper()
+	public final ApplicationLooper getLooper()
 	{
 		return looper;
 	}
@@ -321,7 +323,7 @@ public class ParcelRouter
 	 */
 	public final boolean sendMessageAtFrontOfQueue( ParcelCarrier msg )
 	{
-		ParcelQueue queue = looper.queue;
+		LooperQueue queue = looper.queue;
 		if ( queue == null )
 		{
 			RuntimeException e = new RuntimeException( this + " sendMessageAtTime() called with no looper.queue" );
@@ -352,11 +354,11 @@ public class ParcelRouter
 	 */
 	public boolean sendMessageAtTime( ParcelCarrier msg, long uptimeMillis )
 	{
-		ParcelQueue queue = looper.queue;
+		LooperQueue queue = looper.queue;
 		if ( queue == null )
 		{
 			RuntimeException e = new RuntimeException( this + " sendMessageAtTime() called with no looper.queue" );
-			Looper.L.warning( "Looper", e );
+			ApplicationLooper.L.warning( "Looper", e );
 			return false;
 		}
 		return enqueueMessage( queue, msg, uptimeMillis );

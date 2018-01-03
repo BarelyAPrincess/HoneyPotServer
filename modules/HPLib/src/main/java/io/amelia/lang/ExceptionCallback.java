@@ -12,6 +12,7 @@ package io.amelia.lang;
 /**
  * Provides a callback to when a registered exception is thrown
  */
+@FunctionalInterface
 public interface ExceptionCallback
 {
 	/**
@@ -21,5 +22,5 @@ public interface ExceptionCallback
 	 * @param context The thrown context
 	 * @return The resulting ErrorReporting level. Returning NULL will, if possible, try the next best matching EvalCallback
 	 */
-	ReportingLevel callback( Throwable cause, ExceptionReport report, ExceptionContext context );
+	ReportingLevel callback( Throwable cause, ExceptionReport report, ExceptionRegistrar context );
 }

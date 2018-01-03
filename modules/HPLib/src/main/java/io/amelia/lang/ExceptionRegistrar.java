@@ -9,10 +9,7 @@
  */
 package io.amelia.lang;
 
-/**
- * TODO This needs implementing!
- */
-public class ApplicationCrashReport
+public interface ExceptionRegistrar
 {
-
+	void fatalError( ExceptionReport report, boolean crashOnError );
 }

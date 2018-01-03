@@ -22,9 +22,9 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ExceptionContext;
+import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.IException;
+import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.Arrs;
 import io.amelia.support.IO;
@@ -64,7 +64,7 @@ public class Kernel
 	public static long startTime = System.currentTimeMillis();
 	private static File appPath;
 	private static ImplDevMeta devMeta;
-	private static ExceptionContext exceptionContext = null;
+	private static ExceptionRegistrar exceptionContext = null;
 	static final ThreadFactory threadFactory = new ThreadFactory()
 	{
 		private final AtomicInteger mCount = new AtomicInteger( 1 );
@@ -199,7 +199,9 @@ public class Kernel
 	 *
 	 * @param slugs      The path slugs
 	 * @param createPath Should we try creating the directory if it doesn't exist?
+	 *
 	 * @return The absolute File
+	 *
 	 * @throws ApplicationException.Ignorable
 	 */
 	public static File getPath( @Nonnull String[] slugs, boolean createPath )
@@ -273,7 +275,7 @@ public class Kernel
 
 		/* Non-Ignorable Exceptions */
 
-		Supplier<Stream<IException>> errorStream = report::getNotIgnorableExceptions;
+		Supplier<Stream<ExceptionContext>> errorStream = report::getNotIgnorableExceptions;
 
 		L.severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
 
@@ -286,7 +288,7 @@ public class Kernel
 
 		/* Ignorable Exceptions */
 
-		Supplier<Stream<IException>> debugStream = report::getIgnorableExceptions;
+		Supplier<Stream<ExceptionContext>> debugStream = report::getIgnorableExceptions;
 
 		if ( debugStream.get().count() > 0 )
 		{
@@ -321,7 +323,7 @@ public class Kernel
 		Kernel.appPath = appPath;
 	}
 
-	public static void setExceptionContext( ExceptionContext exceptionContext )
+	public static void setExceptionContext( ExceptionRegistrar exceptionContext )
 	{
 		Kernel.exceptionContext = exceptionContext;
 	}

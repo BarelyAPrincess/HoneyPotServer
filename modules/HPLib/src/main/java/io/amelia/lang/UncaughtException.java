@@ -9,7 +9,7 @@
  */
 package io.amelia.lang;
 
-public class UncaughtException extends RuntimeException implements IException
+public class UncaughtException extends RuntimeException implements ExceptionContext
 {
 	private static final long serialVersionUID = 6854413013575591783L;
 
@@ -85,13 +85,13 @@ public class UncaughtException extends RuntimeException implements IException
 	}
 
 	@Override
-	public ReportingLevel reportingLevel()
+	public ReportingLevel getReportingLevel()
 	{
 		return level;
 	}
 
 	@Override
-	public ReportingLevel handle( ExceptionReport report, ExceptionContext context )
+	public ReportingLevel handle( ExceptionReport report, ExceptionRegistrar registrar )
 	{
 		return ReportingLevel.E_UNHANDLED;
 	}

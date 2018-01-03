@@ -12,7 +12,7 @@ import io.amelia.support.Reflection;
 /**
  * TODO Add value filter method?
  */
-public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTypesOutline
+public class Parcel extends StackerWithValue<Parcel, Object> implements ValueTypesTrait
 {
 	public Parcel()
 	{

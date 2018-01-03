@@ -16,29 +16,29 @@ public class PluginException
 {
 	private PluginException()
 	{
-		// Container Class
+		// Private Wrapper Class
 	}
 
 	public static class Error extends ApplicationException.Error
 	{
 		public Error()
 		{
-			super( ReportingLevel.E_ERROR );
+			super();
 		}
 
 		public Error( String message )
 		{
-			super( ReportingLevel.E_ERROR, message );
+			super( message );
 		}
 
 		public Error( String message, Throwable cause )
 		{
-			super( ReportingLevel.E_ERROR, message, cause );
+			super( message, cause );
 		}
 
 		public Error( Throwable cause )
 		{
-			super( ReportingLevel.E_ERROR, cause );
+			super( cause );
 		}
 	}
 
@@ -46,45 +46,45 @@ public class PluginException
 	{
 		public Ignorable()
 		{
-			super( ReportingLevel.E_IGNORABLE );
+			super();
 		}
 
 		public Ignorable( String message )
 		{
-			super( ReportingLevel.E_IGNORABLE, message );
+			super( message );
 		}
 
 		public Ignorable( String message, Throwable cause )
 		{
-			super( ReportingLevel.E_IGNORABLE, message, cause );
+			super( message, cause );
 		}
 
 		public Ignorable( Throwable cause )
 		{
-			super( ReportingLevel.E_IGNORABLE, cause );
+			super( cause );
 		}
 	}
 
-	public static class Internal extends ApplicationException.Runtime implements IException
+	public static class Internal extends ApplicationException.Runtime
 	{
 		public Internal()
 		{
-			super( ReportingLevel.E_ERROR );
+			super();
 		}
 
 		public Internal( String message )
 		{
-			super( ReportingLevel.E_ERROR, message );
+			super( message );
 		}
 
 		public Internal( String message, Throwable cause )
 		{
-			super( ReportingLevel.E_ERROR, message, cause );
+			super( message, cause );
 		}
 
 		public Internal( Throwable cause )
 		{
-			super( ReportingLevel.E_ERROR, cause );
+			super( cause );
 		}
 	}
 }

@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.ExceptionContext;
+import io.amelia.lang.ExceptionRegistrar;
+import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
@@ -20,17 +21,16 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-public abstract class ApplicationInterface implements VendorRegistrar, ExceptionContext
+public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar
 {
-	// Main Looper runs on the main thread, i.e., the thread that started the Kernel
-	private final Looper mainLooper;
 	private final OptionParser optionParser = new OptionParser();
+	private final ApplicationRouter router;
 	private Env env = null;
 	private OptionSet optionSet = null;
 
 	public ApplicationInterface()
 	{
-		mainLooper = new Looper( Looper.Flag.SYSTEM );
+		router = new ApplicationRouter();
 
 		optionParser.acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
 		optionParser.acceptsAll( Arrays.asList( "v", "version" ), "Show the version" );
@@ -60,7 +60,14 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void dispose()
 	{
-		mainLooper.quitAndDestroy();
+		router.quitAndDestroy();
+	}
+
+	@Override
+	public void fatalError( ExceptionReport report, boolean crashOnError )
+	{
+		if ( crashOnError )
+			Foundation.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
 	}
 
 	public Env getEnv()
@@ -74,11 +81,6 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		return env.getString( "applicationId" );
 	}
 
-	public Looper getMainLooper()
-	{
-		return mainLooper;
-	}
-
 	public OptionParser getOptionParser()
 	{
 		return optionParser;
@@ -88,6 +90,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		checkOptionSet();
 		return optionSet;
+	}
+
+	public ApplicationRouter getRouter()
+	{
+		return router;
 	}
 
 	public Optional<String> getStringArgument( String arg )
@@ -119,7 +126,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public boolean isMainThread()
 	{
-		return mainLooper.isThreadJoined();
+		return router.isThreadJoined();
 	}
 
 	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException;
@@ -181,7 +188,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void shutdown()
 	{
-		mainLooper.quitSafely();
+		router.quitSafely();
 	}
 
 	public void throwStartupException( Exception e ) throws StartupException

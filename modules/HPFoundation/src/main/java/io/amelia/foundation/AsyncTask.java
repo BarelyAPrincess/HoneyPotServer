@@ -20,14 +20,14 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private static final Logger L = LogBuilder.get( AsyncTask.class );
 	private static final int MESSAGE_POST_PROGRESS = 0x2;
 	private static final int MESSAGE_POST_RESULT = 0x1;
-	private static ParcelRouter sHandler;
+	private static ApplicationRouter sHandler;
 
-	private static ParcelRouter getHandler()
+	private static ApplicationRouter getHandler()
 	{
 		synchronized ( AsyncTask.class )
 		{
 			if ( sHandler == null )
-				sHandler = new ParcelRouter( Foundation.getApplication().getMainLooper() )
+				sHandler = new ApplicationRouter( Foundation.getApplication().getRouter() )
 				{
 					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override

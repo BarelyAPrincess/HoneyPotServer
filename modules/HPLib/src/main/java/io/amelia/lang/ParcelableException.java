@@ -9,7 +9,7 @@ public class ParcelableException
 
 	}
 
-	public static class Error extends BaseException.Error
+	public static class Error extends ApplicationException.Error
 	{
 		protected final StackerBase node;
 
@@ -38,7 +38,7 @@ public class ParcelableException
 		}
 	}
 
-	public static class Ignorable extends BaseException.Ignorable
+	public static class Ignorable extends ApplicationException.Ignorable
 	{
 		protected final StackerBase node;
 
