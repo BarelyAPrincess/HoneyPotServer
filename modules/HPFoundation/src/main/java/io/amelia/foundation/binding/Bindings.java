@@ -1,16 +1,6 @@
 package io.amelia.foundation.binding;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.ConfigMap;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.events.EventDispatcher;
-import io.amelia.foundation.Foundation;
-import io.amelia.foundation.facades.FacadePriority;
-import io.amelia.foundation.facades.events.FacadeRegisterEvent;
-import io.amelia.foundation.facades.interfaces.FacadeService;
-import io.amelia.lang.ApplicationException;
-import io.amelia.support.Namespace;
-import io.amelia.support.Objs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,10 +14,21 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.amelia.events.EventDispatcher;
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Foundation;
+import io.amelia.foundation.facades.FacadePriority;
+import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.facades.events.FacadeRegisterEvent;
+import io.amelia.lang.ApplicationException;
+import io.amelia.support.Namespace;
+import io.amelia.support.Objs;
+
 public class AppBindings
 {
+	private static final BindingBase bindings = new BindingBase( "" );
 	private static final Map<Class<? extends FacadeService>, List<RegisteredFacade<? extends FacadeService>>> providers = new HashMap<>();
-	private static BindingBase bindings = new BindingBase( "" );
 
 	protected static BindingBase getBinding( String path )
 	{
@@ -44,6 +45,7 @@ public class AppBindings
 	 *
 	 * @param <T>    The facade interface
 	 * @param facade The facade interface
+	 *
 	 * @return provider registration or null
 	 */
 	@SuppressWarnings( "unchecked" )
@@ -60,6 +62,7 @@ public class AppBindings
 	 *
 	 * @param <T>    The facade
 	 * @param facade The facade class
+	 *
 	 * @return a stream of registrations
 	 */
 	@SuppressWarnings( "unchecked" )
@@ -103,6 +106,7 @@ public class AppBindings
 	 * @param prefix          The path prefix, used to create jailed namespaces.
 	 * @param path            The path to amend to the jailed namespace.
 	 * @param <T>             The subclass extending our BindingReference.
+	 *
 	 * @return Instance of the BindingReference
 	 */
 	public static <T extends BindingReference> T getReference( Supplier<T> bindingSupplier, String prefix, String path )
@@ -130,18 +134,21 @@ public class AppBindings
 	public static void init()
 	{
 		// Load Builtin Facades First
+		registerFacade( FacadeService.class, FacadePriority.STRICT, FacadeService::new );
 
 		// Load Facades from Config
+		ConfigMap facades = ConfigRegistry.getChild( Foundation.ConfigKeys.BINDINGS_FACADES );
 
-		ConfigMap facades = ConfigRegistry.getChild( "bindings.facades" );
-		facades.getChildren().forEach( c ->
-		{
-			if ( c.hasChild( "class" ) && c.hasChild( "priority" ) )
+		facades.getChildren().forEach( c -> {
+			if ( c.hasChild( "class" ) )
 			{
-				Class<FacadeService> facadeClass = c.getStringAsClass( "class", FacadeService.class );
-				FacadePriority priority = c.getEnum( "priority", FacadePriority.class );
+				Class<FacadeService> facadeClass = c.getStringAsClass( "class", FacadeService.class ).orElse( null );
+				FacadePriority priority = c.getEnum( "priority", FacadePriority.class ).orElse( FacadePriority.NORMAL );
 
-				registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
+				if ( facadeClass != null )
+					registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
+				else
+					Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
 			}
 			else
 				Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
@@ -153,6 +160,7 @@ public class AppBindings
 	 *
 	 * @param <T>     facade
 	 * @param service facade to check
+	 *
 	 * @return true if and only if the facade is registered
 	 */
 	public static <T> boolean isFacadeRegistered( @NotNull Class<T> service )

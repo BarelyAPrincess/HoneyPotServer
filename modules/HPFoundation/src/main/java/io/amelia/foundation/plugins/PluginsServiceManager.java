@@ -9,22 +9,6 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.foundation.Foundation;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.events.EventHandlers;
-import io.amelia.foundation.plugins.loader.Plugin;
-import io.amelia.foundation.plugins.loader.PluginLoader;
-import io.amelia.lang.PluginDependencyUnknownException;
-import io.amelia.lang.PluginException;
-import io.amelia.lang.PluginInvalidException;
-import io.amelia.lang.PluginMetaException;
-import io.amelia.lang.PluginNotFoundException;
-import io.amelia.lang.Runlevel;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
-import io.amelia.support.IO;
-import io.amelia.tasks.TaskDispatcher;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,26 +23,40 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PluginManager implements Listener, ServiceManager, EventRegistrar, TaskRegistrar
+import io.amelia.events.EventHandlers;
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Foundation;
+import io.amelia.foundation.binding.Bindings;
+import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.plugins.loader.Plugin;
+import io.amelia.foundation.plugins.loader.PluginLoader;
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.PluginDependencyUnknownException;
+import io.amelia.lang.PluginException;
+import io.amelia.lang.PluginInvalidException;
+import io.amelia.lang.PluginMetaException;
+import io.amelia.lang.PluginNotFoundException;
+import io.amelia.lang.Runlevel;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.logcompat.Logger;
+import io.amelia.support.IO;
+import io.amelia.tasks.TaskDispatcher;
+
+public class PluginServiceManager implements FacadeService// Listener, ServiceManager, EventRegistrar, TaskRegistrar
 {
-	public static final Logger L = LogBuilder.get( PluginManager.class );
+	public static final Logger L = LogBuilder.get( PluginServiceManager.class );
 
-	public static PluginManager instance()
+	public static PluginServiceManager i()
 	{
-		return Foundation.getProviderManager( PluginManager.class ).instance();
+		return Bindings.getSystemNamespace().getFacade( "plugin.manager", PluginServiceManager.class );
 	}
 
-	public static PluginManager instanceWithoutException()
-	{
-		return Foundation.getProviderManager( PluginManager.class ).instanceWithoutException();
-	}
+	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
+	private final Map<String, Plugin> lookupNames = new HashMap<>();
+	private final List<Plugin> plugins = new ArrayList<>();
+	private Set<String> loadedPlugins = new HashSet<>();
 
-	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
-	private final Map<String, Plugin> lookupNames = new HashMap<String, Plugin>();
-	private final List<Plugin> plugins = new ArrayList<Plugin>();
-	private Set<String> loadedPlugins = new HashSet<String>();
-
-	private PluginManager()
+	private PluginServiceManager()
 	{
 		// Static
 	}
@@ -295,7 +293,9 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * <p>
 	 *
 	 * @param file File containing the plugin to load
+	 *
 	 * @return The Plugin instance
+	 *
 	 * @throws PluginInvalidException           Thrown when the specified file is not a valid plugin
 	 * @throws PluginDependencyUnknownException If a required dependency could not be found
 	 */
@@ -355,7 +355,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 				try
 				{
 					String message = String.format( "Loading %s", plugin.getDescription().getFullName() );
-					PluginManager.getLogger().info( message );
+					PluginServiceManager.getLogger().info( message );
 					plugin.onLoad();
 				}
 				catch ( Throwable ex )
@@ -372,6 +372,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * <p>
 	 *
 	 * @param directory Directory to check for plugins
+	 *
 	 * @return A list of all plugins loaded
 	 */
 	public Plugin[] loadPlugins( File directory )
@@ -591,6 +592,12 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 		return result.toArray( new Plugin[result.size()] );
 	}
 
+	@Override
+	public void onDestory() throws ApplicationException.Error
+	{
+
+	}
+
 	/**
 	 * Loads plugins in order as PluginManager receives the notices from the EventBus
 	 */
@@ -617,6 +624,7 @@ public class PluginManager implements Listener, ServiceManager, EventRegistrar, 
 	 * <p>
 	 *
 	 * @param loader Class name of the PluginLoader to register
+	 *
 	 * @throws IllegalArgumentException Thrown when the given Class is not a valid PluginLoader
 	 */
 	public void registerInterface( Class<? extends PluginLoader> loader ) throws IllegalArgumentException

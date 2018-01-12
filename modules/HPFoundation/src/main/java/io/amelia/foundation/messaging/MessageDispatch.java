@@ -12,7 +12,7 @@ package io.amelia.messaging;
 import io.amelia.events.EventDispatcher;
 import io.amelia.events.EventException;
 import io.amelia.events.messaging.MessageEvent;
-import io.amelia.foundation.binding.AppBindings;
+import io.amelia.foundation.binding.Bindings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,7 +71,7 @@ public class MessageDispatch
 	 */
 	public static void sendMessage( Object... objs ) throws MessageException
 	{
-		List<MessageReceiver> receivers = AppBindings.getReference( BINDING_PREFIX ).fetch( MessageReceiver.class ).filter( MessageReceiver::validate ).collect( Collectors.toList() );
+		List<MessageReceiver> receivers = Bindings.getReference( BINDING_PREFIX ).fetch( MessageReceiver.class ).filter( MessageReceiver::validate ).collect( Collectors.toList() );
 		sendMessage( MessageBuilder.msg( objs ).to( receivers ) );
 	}
 }

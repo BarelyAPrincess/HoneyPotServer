@@ -1,152 +1,35 @@
 package io.amelia.foundation.binding;
 
-import com.sun.istack.internal.NotNull;
-import io.amelia.support.Namespace;
-import io.amelia.support.NamespaceBase;
-import io.amelia.support.Objs;
+import io.amelia.lang.ParcelableException;
+import io.amelia.support.data.StackerWithValue;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-public abstract class BindingReference<T extends BindingReference<T, V>, V>
+@SuppressWarnings( "unchecked" )
+public final class BindingBase extends StackerWithValue<BindingBase, Object>
 {
-	BindingBase binding;
-	BindingReference<T, V> parent = null;
-	Namespace prefix;
-	Supplier<T> supplier;
-	Class<V> valueClass;
-
-	public BindingReference( @NotNull Class<V> valueClass )
+	protected BindingBase( String key )
 	{
-		this.valueClass = valueClass;
+		super( BindingBase::new, key );
 	}
 
-	public V computeValue( Function<Optional<V>, V> function )
+	protected BindingBase( BindingBase parent, String key )
 	{
-		Supplier<Stream<V>> values = () -> binding.fetch( 1, valueClass );
-
-		if ( values.get().count() > 1 )
-			values.get().skip( 1 ).forEach( v -> binding.remove( v ) );
-
-		Optional<V> value = values.get().findFirst();
-
-		V returnedValue = function.apply( value );
-
-		if ( !value.isPresent() || !Objects.equals( value, returnedValue ) )
-		{
-			value.ifPresent( v -> binding.remove( v ) );
-			binding.store( returnedValue );
-		}
-
-		return returnedValue;
+		super( BindingBase::new, parent, key );
 	}
 
-	T create( BindingBase bindingBase, BindingReference parent )
+	protected BindingBase( BindingBase parent, String key, Object value )
 	{
-		@NotNull
-		T bindingReference = supplier.get();
-		bindingReference.parent = parent;
-		return bindingReference;
+		super( BindingBase::new, parent, key, value );
 	}
 
-	T create( BindingBase bindingBase )
+	@Override
+	protected void throwExceptionError( String message ) throws BindingException.Error
 	{
-		@NotNull
-		T bindingReference = supplier.get();
-		bindingReference.prefix = prefix;
-		bindingReference.supplier = supplier;
-		bindingReference.binding = bindingBase;
-		return bindingReference;
+		throw new BindingException.Error( this, message );
 	}
 
-	public final T getChild( @NotNull Namespace path )
+	@Override
+	protected void throwExceptionIgnorable( String message ) throws ParcelableException.Ignorable
 	{
-		goCheck();
-		@NotNull
-		T bindingReference = create( binding.getChild( path ) );
-		bindingReference.parent = this;
-		return bindingReference;
-	}
-
-	public final T getChild( @NotNull String path )
-	{
-		return getChild( Namespace.parseString( path ) );
-	}
-
-	public String getChildNamespace()
-	{
-		goCheck();
-		return binding.getDomainChild();
-	}
-
-	public Stream<T> getChildren()
-	{
-		goCheck();
-		return binding.getChildren().filter( v -> v.fetch( 1, valueClass ).count() > 0 ).map( v -> create( v, this ) );
-	}
-
-	public final Stream<T> getChildrenRecursive()
-	{
-		return getChildren().flatMap( BindingReference::getChildrenRecursive0 );
-	}
-
-	protected final Stream<T> getChildrenRecursive0()
-	{
-		goCheck();
-		return Stream.concat( Stream.of( ( T ) this ), getChildren().flatMap( BindingReference::getChildrenRecursive0 ) );
-	}
-
-	public String getLocalName()
-	{
-		goCheck();
-		return binding.getName();
-	}
-
-	public String getNamespace()
-	{
-		goCheck();
-		return binding.getCurrentPath().substring( prefix.getNodeCount() );
-	}
-
-	public NamespaceBase getNamespaceObj()
-	{
-		goCheck();
-		return binding.getNamespace().subNamespace( prefix.getNodeCount() );
-	}
-
-	public boolean hasParent()
-	{
-		goCheck();
-		return binding.getNamespace().getNodeCount() - prefix.getNodeCount() > 0;
-	}
-
-	public BindingReference<T, V> getParent()
-	{
-		goCheck();
-		if ( parent == null && hasParent() )
-			parent = create( binding.getParent() );
-		return parent;
-	}
-
-	public String getRootNamespace()
-	{
-		return binding.getDomainTLD();
-	}
-
-	protected void goCheck()
-	{
-		Objs.notNull( binding );
-		Objs.notNull( valueClass );
-		Objs.notNull( prefix );
-		Objs.notNull( supplier );
-	}
-
-	public boolean hasChildren()
-	{
-		goCheck();
-		return binding.getChildren().filter( v -> v.fetch( 1, valueClass ).count() > 0 ).count() > 0;
+		throw new BindingException.Ignorable( this, message );
 	}
 }
