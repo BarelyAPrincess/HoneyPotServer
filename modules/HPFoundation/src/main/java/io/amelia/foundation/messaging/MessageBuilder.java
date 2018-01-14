@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.messaging;
+package io.amelia.foundation.messaging;
 
 import com.chiorichan.account.AccountType;
 

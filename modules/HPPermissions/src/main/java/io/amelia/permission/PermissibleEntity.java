@@ -10,7 +10,7 @@
 package io.amelia.permission;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.events.EventDispatcher;
+import io.amelia.foundation.events.EventDispatcher;
 import io.amelia.lang.EnumColor;
 import io.amelia.permission.event.PermissibleEntityEvent;
 import io.amelia.permission.lang.PermissionException;

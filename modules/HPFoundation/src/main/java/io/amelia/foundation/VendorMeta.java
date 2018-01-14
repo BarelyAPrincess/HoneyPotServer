@@ -1,12 +1,13 @@
 package io.amelia.foundation;
 
-import io.amelia.support.Maps;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+
+import io.amelia.support.Maps;
+import io.amelia.support.data.ParcelLoader;
 
 public class VendorMeta extends MetaMap
 {
@@ -30,12 +31,12 @@ public class VendorMeta extends MetaMap
 
 	public VendorMeta( final File file ) throws IOException
 	{
-		Maps.builder( ConfigLoader.parseFile( file ) ).to( this );
+		Maps.builder( ParcelLoader.decodeToMap( file, ParcelLoader.Type.AUTO_DETECT ) ).to( this );
 	}
 
-	public VendorMeta( final InputStream stream, ConfigLoader.StreamType streamType ) throws IOException
+	public VendorMeta( final InputStream inputStream, ParcelLoader.Type type ) throws IOException
 	{
-		Maps.builder( ConfigLoader.parseStream( stream, streamType ) ).to( this );
+		Maps.builder( ParcelLoader.decodeToMap( inputStream, ParcelLoader.Type.AUTO_DETECT ) ).to( this );
 	}
 
 	public VendorMeta( final ConfigMap config )

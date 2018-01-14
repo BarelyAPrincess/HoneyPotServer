@@ -43,7 +43,7 @@ import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.NIO;
 import io.amelia.support.Sys;
-import io.amelia.tasks.TaskDispatcher;
+import io.amelia.foundation.tasks.TaskDispatcher;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;

@@ -1,15 +1,7 @@
-/**
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
- * <p>
- * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
- * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
- * <p>
- * All Rights Reserved.
- */
 package io.amelia.foundation.plugins;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,61 +11,73 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.amelia.events.EventHandlers;
-import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Foundation;
-import io.amelia.foundation.binding.Bindings;
-import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.Kernel;
+import io.amelia.foundation.events.EventHandlers;
+import io.amelia.foundation.events.EventPriority;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.plugins.loader.JavaPluginLoader;
 import io.amelia.foundation.plugins.loader.Plugin;
+import io.amelia.foundation.plugins.loader.PluginClassLoader;
 import io.amelia.foundation.plugins.loader.PluginLoader;
-import io.amelia.lang.ApplicationException;
+import io.amelia.foundation.tasks.Tasks;
+import io.amelia.injection.Libraries;
+import io.amelia.injection.MavenReference;
 import io.amelia.lang.PluginDependencyUnknownException;
 import io.amelia.lang.PluginException;
 import io.amelia.lang.PluginInvalidException;
 import io.amelia.lang.PluginMetaException;
 import io.amelia.lang.PluginNotFoundException;
-import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.IO;
-import io.amelia.tasks.TaskDispatcher;
+import io.amelia.support.Objs;
+import io.amelia.support.Runlevel;
 
-public class PluginServiceManager implements FacadeService// Listener, ServiceManager, EventRegistrar, TaskRegistrar
+public class Plugins
 {
-	public static final Logger L = LogBuilder.get( PluginServiceManager.class );
+	public static final Logger L = LogBuilder.get( Plugins.class );
 
-	public static PluginServiceManager i()
+	private static final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
+	private static final ReentrantLock lock = new ReentrantLock();
+	private static final Map<String, Plugin> lookupNames = new HashMap<>();
+	private static final List<Plugin> plugins = new ArrayList<>();
+	private static Set<String> loadedPlugins = new HashSet<>();
+
+	static
 	{
-		return Bindings.getSystemNamespace().getFacade( "plugin.manager", PluginServiceManager.class );
+		// Loads plugins in order as PluginManager receives the notices from the Events
+		Events.listen( Foundation.getApplication(), EventPriority.NORMAL, RunlevelEvent.class, event -> {
+			Runlevel level = event.getRunLevel();
+
+			Plugin[] plugins = getPlugins();
+
+			for ( Plugin plugin : plugins )
+				if ( !plugin.isEnabled() && plugin.getDescription().getLoad() == level )
+					enablePlugin( plugin );
+		} );
 	}
 
-	private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
-	private final Map<String, Plugin> lookupNames = new HashMap<>();
-	private final List<Plugin> plugins = new ArrayList<>();
-	private Set<String> loadedPlugins = new HashSet<>();
-
-	private PluginServiceManager()
+	private static void checkUpdate( File file )
 	{
-		// Static
-	}
-
-	private void checkUpdate( File file )
-	{
-		if ( !Foundation.getPath( Foundation.PATH_UPDATES ).isDirectory() )
+		if ( !Kernel.getPath( Kernel.PATH_UPDATES ).isDirectory() )
 			return;
 
-		File updateFile = new File( Foundation.getPath( Foundation.PATH_UPDATES ), file.getName() );
+		File updateFile = new File( Kernel.getPath( Kernel.PATH_UPDATES ), file.getName() );
 		if ( updateFile.isFile() && IO.copy( updateFile, file ) )
 			updateFile.delete();
 	}
 
-	public void clearPlugins()
+	public static void clearPlugins()
 	{
-		synchronized ( this )
+		lock.lock();
+		try
 		{
 			disablePlugins();
 			plugins.clear();
@@ -81,9 +85,13 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			EventHandlers.unregisterAll();
 			fileAssociations.clear();
 		}
+		finally
+		{
+			lock.unlock();
+		}
 	}
 
-	public void disablePlugin( final Plugin plugin )
+	public static void disablePlugin( final Plugin plugin )
 	{
 		if ( plugin.isEnabled() )
 		{
@@ -97,12 +105,12 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
 			{
-				TaskDispatcher.cancelTasks( plugin );
+				Tasks.cancelTasks( plugin );
 			}
 			catch ( NoClassDefFoundError ex )
 			{
@@ -110,7 +118,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				getLogger().log( Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -123,7 +131,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				getLogger().log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -136,11 +144,13 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				getLogger().log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
 			{
+				// TODO Implement here the unregistering of plugin loopers
+
 				// Loader.getMessenger().unregisterIncomingPluginChannel( plugin );
 				// Loader.getMessenger().unregisterOutgoingPluginChannel( plugin );
 			}
@@ -150,19 +160,19 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				getLogger().log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 			}
 		}
 	}
 
-	public void disablePlugins()
+	public static void disablePlugins()
 	{
 		Plugin[] plugins = getPlugins();
 		for ( int i = plugins.length - 1; i >= 0; i-- )
 			disablePlugin( plugins[i] );
 	}
 
-	public void enablePlugin( final Plugin plugin )
+	public static void enablePlugin( final Plugin plugin )
 	{
 		if ( !plugin.isEnabled() )
 			try
@@ -171,17 +181,11 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( Throwable ex )
 			{
-				getLogger().log( Level.SEVERE, "Error occurred (in the plugin loader) while enabling " + plugin.getDescription().getFullName() + " (Check for Version Mismatch)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while enabling " + plugin.getDescription().getDisplayName() + " (Check for Version Mismatch)", ex );
 			}
 	}
 
-	@Override
-	public String getName()
-	{
-		return "Plugin Manager";
-	}
-
-	public Plugin getPluginByClass( Class<?> clz ) throws PluginNotFoundException
+	public static Plugin getPluginByClass( Class<?> clz ) throws PluginNotFoundException
 	{
 		try
 		{
@@ -198,7 +202,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		throw new PluginNotFoundException( "We could not find a plugin with the class '" + clz.getSimpleName() + "', maybe it's not loaded." );
 	}
 
-	public Plugin getPluginByClassWithoutException( Class<?> clz )
+	public static Plugin getPluginByClassWithoutException( Class<?> clz )
 	{
 		try
 		{
@@ -206,12 +210,12 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().finest( e.getMessage() );
+			L.finest( e.getMessage() );
 			return null;
 		}
 	}
 
-	public Plugin getPluginByClassname( String className ) throws PluginNotFoundException
+	public static Plugin getPluginByClassname( String className ) throws PluginNotFoundException
 	{
 		try
 		{
@@ -227,7 +231,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		throw new PluginNotFoundException( "We could not find a plugin with the classname '" + className + "', maybe it's not loaded." );
 	}
 
-	public Plugin getPluginByClassnameWithoutException( String className )
+	public static Plugin getPluginByClassnameWithoutException( String className )
 	{
 		try
 		{
@@ -235,12 +239,12 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().finest( e.getMessage() );
+			L.finest( e.getMessage() );
 			return null;
 		}
 	}
 
-	public Plugin getPluginByName( String pluginName ) throws PluginNotFoundException
+	public static Plugin getPluginByName( String pluginName ) throws PluginNotFoundException
 	{
 		try
 		{
@@ -256,7 +260,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		throw new PluginNotFoundException( "We could not find a plugin by the name '" + pluginName + "', maybe it's not loaded." );
 	}
 
-	public Plugin getPluginByNameWithoutException( String pluginName )
+	public static Plugin getPluginByNameWithoutException( String pluginName )
 	{
 		try
 		{
@@ -264,26 +268,14 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		}
 		catch ( PluginNotFoundException e )
 		{
-			getLogger().finest( e.getMessage() );
+			L.finest( e.getMessage() );
 			return null;
 		}
 	}
 
-	public synchronized Plugin[] getPlugins()
+	public static synchronized Plugin[] getPlugins()
 	{
 		return plugins.toArray( new Plugin[0] );
-	}
-
-	@Override
-	public String getServiceId()
-	{
-		return "PluginMgr";
-	}
-
-	@Override
-	public boolean isEnabled()
-	{
-		return true;
 	}
 
 	/**
@@ -299,9 +291,9 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 	 * @throws PluginInvalidException           Thrown when the specified file is not a valid plugin
 	 * @throws PluginDependencyUnknownException If a required dependency could not be found
 	 */
-	public synchronized Plugin loadPlugin( File file ) throws PluginInvalidException, PluginDependencyUnknownException
+	public static synchronized Plugin loadPlugin( File file ) throws PluginInvalidException, PluginDependencyUnknownException
 	{
-		Validate.notNull( file, "File cannot be null" );
+		Objs.notNull( file, "File cannot be null" );
 
 		checkUpdate( file );
 
@@ -330,7 +322,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		return result;
 	}
 
-	protected void loadPlugin( Plugin plugin )
+	protected static void loadPlugin( Plugin plugin )
 	{
 		try
 		{
@@ -338,29 +330,29 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 		}
 		catch ( Throwable ex )
 		{
-			getLogger().log( Level.SEVERE, ex.getMessage() + " loading " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+			L.log( Level.SEVERE, ex.getMessage() + " loading " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 		}
 	}
 
-	public void loadPlugins() throws PluginException
+	public static void loadPlugins() throws PluginException.Error
 	{
 		registerInterface( JavaPluginLoader.class );
 		// registerInterface( GroovyPluginLoader.class );
 
-		File pluginFolder = ConfigRegistry.i().getDirectoryPlugins();
+		File pluginFolder = Kernel.getPath( Kernel.PATH_PLUGINS );
 		if ( pluginFolder.exists() )
 		{
 			Plugin[] plugins = loadPlugins( pluginFolder );
 			for ( Plugin plugin : plugins )
 				try
 				{
-					String message = String.format( "Loading %s", plugin.getDescription().getFullName() );
-					PluginServiceManager.getLogger().info( message );
+					String message = String.format( "Loading %s", plugin.getDescription().getDisplayName() );
+					L.info( message );
 					plugin.onLoad();
 				}
 				catch ( Throwable ex )
 				{
-					getLogger().log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+					L.log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
 				}
 		}
 		else
@@ -375,18 +367,18 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 	 *
 	 * @return A list of all plugins loaded
 	 */
-	public Plugin[] loadPlugins( File directory )
+	public static Plugin[] loadPlugins( File directory )
 	{
-		Validate.notNull( directory, "Directory cannot be null" );
-		Validate.isTrue( directory.isDirectory(), "Directory must be a directory" );
+		Objs.notNull( directory, "Directory cannot be null" );
+		Objs.notFalse( directory.isDirectory(), "Directory must be a directory" );
 
 		List<Plugin> result = new ArrayList<Plugin>();
 		Set<Pattern> filters = fileAssociations.keySet();
 
 		Map<String, File> plugins = new HashMap<String, File>();
-		Map<String, Collection<MavenReference>> libraries = Maps.newHashMap();
-		Map<String, Collection<String>> dependencies = Maps.newHashMap();
-		Map<String, Collection<String>> softDependencies = Maps.newHashMap();
+		Map<String, Collection<MavenReference>> libraries = new HashMap<>();
+		Map<String, Collection<String>> dependencies = new HashMap<>();
+		Map<String, Collection<String>> softDependencies = new HashMap<>();
 
 		// This is where it figures out all possible plugins
 		for ( File file : directory.listFiles() )
@@ -409,7 +401,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 			}
 			catch ( PluginMetaException ex )
 			{
-				getLogger().log( Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
+				L.log( Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
 				continue;
 			}
 
@@ -421,15 +413,15 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 					// Duplicates do not matter, they will be removed together if applicable
 					softDependencies.get( description.getName() ).addAll( softDependencySet );
 				else
-					softDependencies.put( description.getName(), new LinkedList<String>( softDependencySet ) );
+					softDependencies.put( description.getName(), new LinkedList<>( softDependencySet ) );
 
 			Collection<MavenReference> librariesSet = description.getLibraries();
 			if ( librariesSet != null )
-				libraries.put( description.getName(), new LinkedList<MavenReference>( librariesSet ) );
+				libraries.put( description.getName(), new LinkedList<>( librariesSet ) );
 
 			Collection<String> dependencySet = description.getDepend();
 			if ( dependencySet != null )
-				dependencies.put( description.getName(), new LinkedList<String>( dependencySet ) );
+				dependencies.put( description.getName(), new LinkedList<>( dependencySet ) );
 
 			Collection<String> loadBeforeSet = description.getLoadBefore();
 			if ( loadBeforeSet != null )
@@ -439,7 +431,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 					else
 					{
 						// softDependencies is never iterated, so 'ghost' plugins aren't an issue
-						Collection<String> shortSoftDependency = new LinkedList<String>();
+						Collection<String> shortSoftDependency = new LinkedList<>();
 						shortSoftDependency.add( description.getName() );
 						softDependencies.put( loadBeforeTarget, shortSoftDependency );
 					}
@@ -473,7 +465,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 							softDependencies.remove( plugin );
 							dependencies.remove( plugin );
 
-							getLogger().severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "' due to issue with library '" + library + "'." );
+							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "' due to issue with library '" + library + "'." );
 							break;
 						}
 					}
@@ -499,7 +491,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 							softDependencies.remove( plugin );
 							dependencies.remove( plugin );
 
-							getLogger().severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", new PluginDependencyUnknownException( dependency ) );
+							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", new PluginDependencyUnknownException( dependency ) );
 							break;
 						}
 					}
@@ -509,16 +501,8 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 				}
 				if ( softDependencies.containsKey( plugin ) )
 				{
-					Iterator<String> softDependencyIterator = softDependencies.get( plugin ).iterator();
-
-					while ( softDependencyIterator.hasNext() )
-					{
-						String softDependency = softDependencyIterator.next();
-
-						// Soft depend is no longer around
-						if ( !plugins.containsKey( softDependency ) )
-							softDependencyIterator.remove();
-					}
+					// Soft depend is no longer around
+					softDependencies.get( plugin ).removeIf( softDependency -> !plugins.containsKey( softDependency ) );
 
 					if ( softDependencies.get( plugin ).isEmpty() )
 						softDependencies.remove( plugin );
@@ -538,7 +522,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 					}
 					catch ( PluginInvalidException ex )
 					{
-						getLogger().severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
+						L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
 					}
 				}
 			}
@@ -568,7 +552,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 						}
 						catch ( PluginInvalidException ex )
 						{
-							getLogger().severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
+							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
 						}
 					}
 				}
@@ -583,40 +567,13 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 					{
 						File file = failedPluginIterator.next();
 						failedPluginIterator.remove();
-						getLogger().severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "': circular dependency detected" );
+						L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "': circular dependency detected" );
 					}
 				}
 			}
 		}
 
 		return result.toArray( new Plugin[result.size()] );
-	}
-
-	@Override
-	public void onDestory() throws ApplicationException.Error
-	{
-
-	}
-
-	/**
-	 * Loads plugins in order as PluginManager receives the notices from the EventBus
-	 */
-	@EventHandler( priority = EventPriority.NORMAL )
-	public void onServerRunLevelEvent( RunlevelEvent event )
-	{
-		Runlevel level = event.getRunLevel();
-
-		Plugin[] plugins = getPlugins();
-
-		for ( Plugin plugin : plugins )
-			if ( !plugin.isEnabled() && plugin.getDescription().getLoad() == level )
-				enablePlugin( plugin );
-	}
-
-	@Override
-	public void onServiceLoad()
-	{
-		EventDispatcher.i().registerEvents( this, this );
 	}
 
 	/**
@@ -627,7 +584,7 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 	 *
 	 * @throws IllegalArgumentException Thrown when the given Class is not a valid PluginLoader
 	 */
-	public void registerInterface( Class<? extends PluginLoader> loader ) throws IllegalArgumentException
+	public static void registerInterface( Class<? extends PluginLoader> loader ) throws IllegalArgumentException
 	{
 		PluginLoader instance;
 
@@ -671,15 +628,25 @@ public class PluginServiceManager implements FacadeService// Listener, ServiceMa
 
 		Pattern[] patterns = instance.getPluginFileFilters();
 
-		synchronized ( this )
+		lock.lock();
+		try
 		{
 			for ( Pattern pattern : patterns )
 				fileAssociations.put( pattern, instance );
 		}
+		finally
+		{
+			lock.unlock();
+		}
 	}
 
-	public void shutdown()
+	public static void shutdown()
 	{
 		clearPlugins();
+	}
+
+	private Plugins()
+	{
+		// Static Manager
 	}
 }

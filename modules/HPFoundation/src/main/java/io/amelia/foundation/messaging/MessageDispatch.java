@@ -7,11 +7,11 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.messaging;
+package io.amelia.foundation.messaging;
 
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.EventException;
-import io.amelia.events.messaging.MessageEvent;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.EventException;
+import io.amelia.foundation.events.messaging.MessageEvent;
 import io.amelia.foundation.binding.Bindings;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class MessageDispatch
 		MessageEvent event = new MessageEvent( builder.getSender(), builder.compileReceivers(), builder.getMessages() );
 		try
 		{
-			EventDispatcher.callEventWithException( event );
+			Events.callEventWithException( event );
 		}
 		catch ( EventException e )
 		{

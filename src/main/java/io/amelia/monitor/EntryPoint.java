@@ -1,25 +1,25 @@
 package io.amelia.monitor;
 
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.application.RunlevelEvent;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.MinimalApplication;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.application.RunlevelEvent;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.networking.IPC;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPWorker;
+import io.amelia.support.Runlevel;
 
 public class EntryPoint
 {
 	public static void main( String... args ) throws Exception
 	{
-		/* Prepare the environment by downloading and applying the builtin libraries required */
+		// Prepare the environment by downloading and applying the builtin libraries required
 		Foundation.prepare();
 
-		/* Specify the ApplicationInterface for this environment. */
+		// Specify the ApplicationInterface for this environment.
 		MinimalApplication app = new MinimalApplication();
 		Foundation.setApplication( app );
 
@@ -29,17 +29,17 @@ public class EntryPoint
 
 		final String instanceId = app.getEnv().getString( "instance-id" );
 
-		/* Load up Network UDP Driver */
+		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP().get();
 
-		EventDispatcher.listen( app, RunlevelEvent.class, ( event ) -> {
+		Events.listen( app, RunlevelEvent.class, ( event ) -> {
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
 				try
 				{
 					udp.start();
 				}
-				catch ( ApplicationException e )
+				catch ( ApplicationException.Error e )
 				{
 					throw new StartupException( e );
 				}

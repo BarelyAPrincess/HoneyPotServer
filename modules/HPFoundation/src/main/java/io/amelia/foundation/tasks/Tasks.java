@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.tasks;
+package io.amelia.foundation.tasks;
 
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.RegistrarBase;
@@ -36,9 +36,9 @@ import java.util.logging.Level;
 /**
  * Manages task scheduled in the main thread
  */
-public class TaskDispatcher
+public class Tasks
 {
-	public static final Logger L = LogBuilder.get( TaskDispatcher.class );
+	public static final Logger L = LogBuilder.get( Tasks.class );
 
 	private static final int RECENT_TICKS = 20;
 	/**
@@ -90,7 +90,7 @@ public class TaskDispatcher
 
 	private static void addTask( final Task task )
 	{
-		final AtomicReference<Task> tail = TaskDispatcher.tail;
+		final AtomicReference<Task> tail = Tasks.tail;
 		Task tailTask = tail.get();
 		while ( !tail.compareAndSet( tailTask, task ) )
 			tailTask = tail.get();
@@ -324,8 +324,8 @@ public class TaskDispatcher
 		if ( !Foundation.isPrimaryThread() )
 			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
 
-		TaskDispatcher.currentTick = currentTick;
-		final List<Task> temp = TaskDispatcher.temp;
+		Tasks.currentTick = currentTick;
+		final List<Task> temp = Tasks.temp;
 		parsePending();
 		while ( isReady( currentTick ) )
 		{
@@ -437,7 +437,7 @@ public class TaskDispatcher
 
 	private static void parsePending()
 	{
-		Task head = TaskDispatcher.head;
+		Task head = Tasks.head;
 		Task task = head.getNext();
 		Task lastTask = head;
 		for ( ; task != null; task = ( lastTask = task ).getNext() )
@@ -455,7 +455,7 @@ public class TaskDispatcher
 			head = task.getNext();
 			task.setNext( null );
 		}
-		TaskDispatcher.head = lastTask;
+		Tasks.head = lastTask;
 	}
 
 	/**
@@ -717,7 +717,7 @@ public class TaskDispatcher
 		}
 	}
 
-	private TaskDispatcher()
+	private Tasks()
 	{
 		// Static Access
 	}

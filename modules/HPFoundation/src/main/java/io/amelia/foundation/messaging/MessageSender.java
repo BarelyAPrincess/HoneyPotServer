@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.messaging;
+package io.amelia.foundation.messaging;
 
 /**
  * Represents entities with the ability to send messages thru the {@link MessageDispatch}

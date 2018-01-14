@@ -11,11 +11,13 @@ package io.amelia.support;
 
 import org.fusesource.jansi.Ansi;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * All supported color values for chat
@@ -182,6 +184,7 @@ public enum EnumColor
 	 * Gets the color represented by the specified color code
 	 *
 	 * @param code Code to check
+	 *
 	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
 	 */
 	public static EnumColor getByChar( char code )
@@ -193,6 +196,7 @@ public enum EnumColor
 	 * Gets the color represented by the specified color code
 	 *
 	 * @param code Code to check
+	 *
 	 * @return Associative ConsoleColor with the given code, or null if it doesn't exist
 	 */
 	public static EnumColor getByChar( String code )
@@ -212,6 +216,7 @@ public enum EnumColor
 	 * Gets the ChatColors used at the end of the given input string.
 	 *
 	 * @param input Input string to retrieve the colors from.
+	 *
 	 * @return Any remaining ChatColors to pass onto the next line.
 	 */
 	public static String getLastColors( String input )
@@ -242,6 +247,14 @@ public enum EnumColor
 		return result;
 	}
 
+	/**
+	 * Used when chaining colors together.
+	 */
+	public static String join( EnumColor... colors )
+	{
+		return Arrays.stream( colors ).map( EnumColor::toString ).collect( Collectors.joining() );
+	}
+
 	public static String removeAltColors( String var )
 	{
 		var = var.replaceAll( "&.", "" );
@@ -253,6 +266,7 @@ public enum EnumColor
 	 * Strips the given message of all color codes
 	 *
 	 * @param input String to strip of color
+	 *
 	 * @return A copy of the input string, without any coloring
 	 */
 	public static String stripColor( final String input )
@@ -283,6 +297,7 @@ public enum EnumColor
 	 *
 	 * @param altColorChar    The alternate color code character to replace. Ex: &
 	 * @param textToTranslate Text containing the alternate color code character.
+	 *
 	 * @return Text containing the ChatColor.COLOR_CODE color code character.
 	 */
 	public static String translateAlternateColorCodes( char altColorChar, String textToTranslate )
@@ -296,11 +311,9 @@ public enum EnumColor
 			}
 		return new String( b );
 	}
-
 	private final char code;
 	private final int intCode;
 	private final boolean isFormat;
-
 	private final String toString;
 
 	EnumColor( char code, int intCode )

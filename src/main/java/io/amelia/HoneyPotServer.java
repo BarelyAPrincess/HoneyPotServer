@@ -5,14 +5,14 @@ import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.PropDevMeta;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.support.Encrypt;
+import io.amelia.support.Runlevel;
 
-import static io.amelia.lang.Runlevel.INITIALIZATION;
-import static io.amelia.lang.Runlevel.SHUTDOWN;
+import static io.amelia.support.Runlevel.INITIALIZATION;
+import static io.amelia.support.Runlevel.SHUTDOWN;
 
 public class HoneyPotServer extends DefaultApplication
 {
@@ -23,7 +23,7 @@ public class HoneyPotServer extends DefaultApplication
 	public static final String PATH_DATABASE = "__database";
 	public static final String PATH_SESSIONS = "__sessions";
 
-	public HoneyPotServer() throws ApplicationException
+	public HoneyPotServer() throws ApplicationException.Error
 	{
 		/* Register keyed directory paths with the ConfigRegistry */
 		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_APP, "webroot" );
@@ -35,10 +35,12 @@ public class HoneyPotServer extends DefaultApplication
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
+
+		getRouter().onTick( ( currentTick, averageTick ) -> NetworkLoader.heartbeat() );
 	}
 
 	@Override
-	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException
+	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error
 	{
 		super.onRunlevelChange( previousRunlevel, currentRunlevel );
 
@@ -70,13 +72,5 @@ public class HoneyPotServer extends DefaultApplication
 			LogBuilder.get().info( "Shutting Down Account Manager..." );
 			// AccountManager.shutdown();
 		}
-	}
-
-	@Override
-	protected void onTick( int currentTick, float averageTick ) throws ApplicationException
-	{
-		super.onTick( currentTick, averageTick );
-
-		NetworkLoader.heartbeat();
 	}
 }

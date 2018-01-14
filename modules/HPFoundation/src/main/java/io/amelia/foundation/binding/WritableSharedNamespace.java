@@ -1,9 +1,9 @@
 package io.amelia.foundation.binding;
 
-public class WritableSharedBinding extends SharedBinding
+public class WritableSharedNamespace extends SharedNamespace implements WritableBinding
 {
-	public void put( String key, Object obj )
+	public WritableSharedNamespace( String namespace )
 	{
-
+		super( namespace );
 	}
 }

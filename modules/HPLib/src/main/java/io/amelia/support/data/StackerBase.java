@@ -23,24 +23,24 @@ import io.amelia.support.Namespace;
 import io.amelia.support.Objs;
 
 @SuppressWarnings( "unchecked" )
-public abstract class StackerBase<B extends StackerBase<B>>
+public abstract class StackerBase<BaseClass extends StackerBase<BaseClass>>
 {
-	public static final int LISTENER_CHILD_ADD = 0xff;
-	public static final int LISTENER_CHILD_REMOVE = 0xfe;
-	protected final List<B> children = new ArrayList<>();
-	private final BiFunction<B, String, B> creator;
+	public static final int LISTENER_CHILD_ADD = 0x00;
+	public static final int LISTENER_CHILD_REMOVE = 0x01;
+	protected final List<BaseClass> children = new ArrayList<>();
+	private final BiFunction<BaseClass, String, BaseClass> creator;
 	private final Map<Integer, StackerListener.Container> listeners = new ConcurrentHashMap<>();
 	protected EnumSet<StackerWithValue.Flag> flags = EnumSet.noneOf( StackerWithValue.Flag.class );
-	protected B parent;
+	protected BaseClass parent;
 	protected StackerOptions stackerOptions = null;
 	private String localName;
 
-	protected StackerBase( BiFunction<B, String, B> creator, String localName )
+	protected StackerBase( BiFunction<BaseClass, String, BaseClass> creator, String localName )
 	{
 		this( creator, null, localName );
 	}
 
-	protected StackerBase( BiFunction<B, String, B> creator, B parent, String localName )
+	protected StackerBase( BiFunction<BaseClass, String, BaseClass> creator, BaseClass parent, String localName )
 	{
 		Objs.notNull( creator );
 		Objs.notNull( localName );
@@ -53,31 +53,31 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		this.localName = localName;
 	}
 
-	public final int addChildAddListener( StackerListener.OnChildAdd<B> function, StackerListener.Flags... flags )
+	public final int addChildAddListener( StackerListener.OnChildAdd<BaseClass> function, StackerListener.Flags... flags )
 	{
 		return addListener( new StackerListener.Container( LISTENER_CHILD_ADD, flags )
 		{
 			@Override
 			public void call( Object[] objs )
 			{
-				function.listen( ( B ) objs[0] );
+				function.listen( ( BaseClass ) objs[0] );
 			}
 		} );
 	}
 
-	public final int addChildRemoveListener( StackerListener.OnChildRemove<B> function, StackerListener.Flags... flags )
+	public final int addChildRemoveListener( StackerListener.OnChildRemove<BaseClass> function, StackerListener.Flags... flags )
 	{
 		return addListener( new StackerListener.Container( LISTENER_CHILD_REMOVE, flags )
 		{
 			@Override
 			public void call( Object[] objs )
 			{
-				function.listen( ( B ) objs[0], ( B ) objs[1] );
+				function.listen( ( BaseClass ) objs[0], ( BaseClass ) objs[1] );
 			}
 		} );
 	}
 
-	public final B addFlag( Flag... flags )
+	public final BaseClass addFlag( Flag... flags )
 	{
 		disposeCheck();
 		for ( Flag flag : flags )
@@ -86,7 +86,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 				throwExceptionIgnorable( "You can not set the DISPOSED flag. The flag is reserved for internal use." );
 			this.flags.add( flag );
 		}
-		return ( B ) this;
+		return ( BaseClass ) this;
 	}
 
 	protected final int addListener( StackerListener.Container container )
@@ -94,15 +94,15 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return Maps.firstKeyAndPut( listeners, container );
 	}
 
-	public final <C> Stream<C> collect( Function<B, C> function )
+	public final <C> Stream<C> collect( Function<BaseClass, C> function )
 	{
 		disposeCheck();
-		return Stream.concat( Stream.of( function.apply( ( B ) this ) ), children.stream().flatMap( c -> c.collect( function ) ) ).filter( Objects::nonNull );
+		return Stream.concat( Stream.of( function.apply( ( BaseClass ) this ) ), children.stream().flatMap( c -> c.collect( function ) ) ).filter( Objects::nonNull );
 	}
 
-	private B createChild( String key )
+	private BaseClass createChild( String key )
 	{
-		B child = creator.apply( ( B ) this, key );
+		BaseClass child = creator.apply( ( BaseClass ) this, key );
 		children.add( child );
 		fireListener( LISTENER_CHILD_ADD, child );
 		return child;
@@ -113,7 +113,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		disposeCheck();
 		notFlag( Flag.READ_ONLY );
 		removeFromParent();
-		for ( B child : children )
+		for ( BaseClass child : children )
 			child.destroy();
 		children.clear();
 		flags = EnumSet.of( Flag.DISPOSED );
@@ -124,7 +124,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		getChild( key, StackerBase::destroy );
 	}
 
-	public B destroyChildThenCreate( String key )
+	public BaseClass destroyChildThenCreate( String key )
 	{
 		destroyChild( key );
 		return getChildOrCreate( key );
@@ -136,29 +136,29 @@ public abstract class StackerBase<B extends StackerBase<B>>
 			throwExceptionIgnorable( getCurrentPath() + " has been disposed." );
 	}
 
-	public final B empty( String key )
+	public final BaseClass empty( @Nonnull String key )
 	{
 		return creator.apply( null, key );
 	}
 
-	public final B empty()
+	public final BaseClass empty()
 	{
 		return empty( "" );
 	}
 
-	protected B findChild( @Nonnull String key, boolean create )
+	protected BaseClass findChild( @Nonnull String key, boolean create )
 	{
 		disposeCheck();
 		Objs.notNull( key );
 
 		Namespace ns = Namespace.parseString( key, getStackerOptions().getSeparator() );
 		if ( ns.getNodeCount() == 0 )
-			return ( B ) this;
+			return ( BaseClass ) this;
 
 		String first = ns.getFirst();
-		B found = null;
+		BaseClass found = null;
 
-		for ( B child : children )
+		for ( BaseClass child : children )
 			if ( child.getName() == null )
 				children.remove( child );
 			else if ( first.equals( child.getName() ) )
@@ -178,10 +178,10 @@ public abstract class StackerBase<B extends StackerBase<B>>
 			return found.findChild( ns.subString( 1 ), create );
 	}
 
-	final B findFlag( Flag flag )
+	final BaseClass findFlag( Flag flag )
 	{
 		disposeCheck();
-		return ( B ) ( flags.contains( flag ) ? this : parent == null ? null : parent.findFlag( flag ) );
+		return ( BaseClass ) ( flags.contains( flag ) ? this : parent == null ? null : parent.findFlag( flag ) );
 	}
 
 	void fireListener( int type, Object... objs )
@@ -189,7 +189,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		fireListener( true, type, objs );
 	}
 
-	void fireListener( boolean first, int type, Object... objs )
+	void fireListener( boolean local, int type, Object... objs )
 	{
 		if ( hasParent() )
 			parent.fireListener( false, type, objs );
@@ -198,7 +198,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 			{
 				if ( entry.getValue().flags.contains( StackerListener.Flags.FIRE_ONCE ) )
 					listeners.remove( entry.getKey() );
-				if ( first || !entry.getValue().flags.contains( StackerListener.Flags.NO_RECURSIVE ) )
+				if ( local || !entry.getValue().flags.contains( StackerListener.Flags.NO_RECURSIVE ) )
 					Kernel.getExecutorParallel().execute( () -> entry.getValue().call( objs ) );
 			}
 	}
@@ -209,54 +209,54 @@ public abstract class StackerBase<B extends StackerBase<B>>
 	 * @param key      The dot separator namespace
 	 * @param consumer Action to perform
 	 */
-	public void getChild( String key, Consumer<B> consumer )
+	public void getChild( String key, Consumer<BaseClass> consumer )
 	{
 		consumer.accept( findChild( key, false ) );
 	}
 
-	public final B getChild( @Nonnull String key )
+	public final BaseClass getChild( @Nonnull String key )
 	{
 		return findChild( key, false );
 	}
 
-	public void getChildIfPresent( String key, Consumer<B> consumer )
+	public void getChildIfPresent( String key, Consumer<BaseClass> consumer )
 	{
-		B child = findChild( key, false );
+		BaseClass child = findChild( key, false );
 		if ( child != null )
 			consumer.accept( child );
 	}
 
-	public <R> R getChildOrCreate( String key, Function<B, R> function )
+	public <R> R getChildOrCreate( String key, Function<BaseClass, R> function )
 	{
 		return function.apply( findChild( key, true ) );
 	}
 
-	public void getChildOrCreate( String key, Consumer<B> consumer )
+	public void getChildOrCreate( String key, Consumer<BaseClass> consumer )
 	{
 		consumer.accept( findChild( key, true ) );
 	}
 
-	public final B getChildOrCreate( @Nonnull String key )
+	public final BaseClass getChildOrCreate( @Nonnull String key )
 	{
 		return findChild( key, true );
 	}
 
-	public final Stream<B> getChildren()
+	public final Stream<BaseClass> getChildren()
 	{
 		disposeCheck();
 		return children.stream();
 	}
 
-	public final Stream<B> getChildrenRecursive()
+	public final Stream<BaseClass> getChildrenRecursive()
 	{
 		disposeCheck();
 		return children.stream().flatMap( StackerBase::getChildrenRecursive0 );
 	}
 
-	protected final Stream<B> getChildrenRecursive0()
+	protected final Stream<BaseClass> getChildrenRecursive0()
 	{
 		disposeCheck();
-		return Stream.concat( Stream.of( ( B ) this ), children.stream().flatMap( StackerBase::getChildrenRecursive0 ) );
+		return Stream.concat( Stream.of( ( BaseClass ) this ), children.stream().flatMap( StackerBase::getChildrenRecursive0 ) );
 	}
 
 	public final String getCurrentPath()
@@ -294,7 +294,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 	}
 
 	/**
-	 * Gets the name of this individual {@link B}, in the path.
+	 * Gets the name of this individual {@link BaseClass}, in the path.
 	 *
 	 * @return Name of this node
 	 */
@@ -311,27 +311,27 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return hasParent() ? getParent().getNamespace().append( getName() ) : Namespace.parseString( getName(), getStackerOptions().getSeparator() );
 	}
 
-	public final B getParent()
+	public final BaseClass getParent()
 	{
 		disposeCheck();
 		return parent;
 	}
 
-	public final Stream<B> getParents()
+	public final Stream<BaseClass> getParents()
 	{
 		disposeCheck();
 		return Stream.of( parent ).flatMap( StackerBase::getParents0 );
 	}
 
-	protected final Stream<B> getParents0()
+	protected final Stream<BaseClass> getParents0()
 	{
 		disposeCheck();
-		return Stream.concat( Stream.of( ( B ) this ), Stream.of( parent ).flatMap( StackerBase::getParents0 ) );
+		return Stream.concat( Stream.of( ( BaseClass ) this ), Stream.of( parent ).flatMap( StackerBase::getParents0 ) );
 	}
 
-	public final B getRoot()
+	public final BaseClass getRoot()
 	{
-		return parent == null ? ( B ) this : parent.getRoot();
+		return parent == null ? ( BaseClass ) this : parent.getRoot();
 	}
 
 	protected StackerOptions getStackerOptions()
@@ -368,16 +368,29 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return hasFlag( Flag.DISPOSED );
 	}
 
-	public void mergeChild( @Nonnull B child )
+	/**
+	 * Expects subclasses to override this method and add new checks.
+	 *
+	 * @see #trimChildren();
+	 */
+	protected boolean isTrimmable()
+	{
+		for ( BaseClass child : children )
+			if ( !child.isTrimmable() )
+				return false;
+		return true;
+	}
+
+	public void mergeChild( @Nonnull BaseClass child )
 	{
 		disposeCheck();
 
 		Objs.notNull( child );
 		notFlag( Flag.READ_ONLY );
 
-		for ( B oldChild : child.children )
+		for ( BaseClass oldChild : child.children )
 		{
-			B newChild = getChild( oldChild.getName() );
+			BaseClass newChild = getChild( oldChild.getName() );
 			if ( newChild == null )
 				setChild( oldChild );
 			else
@@ -391,12 +404,12 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		flags.addAll( child.flags );
 	}
 
-	public final B move( @Nonnull String movePath )
+	public final BaseClass move( @Nonnull String movePath )
 	{
 		return move( movePath, "/" );
 	}
 
-	public final B move( @Nonnull String movePath, @Nonnull String separator )
+	public final BaseClass move( @Nonnull String movePath, @Nonnull String separator )
 	{
 		Objs.notEmpty( movePath );
 
@@ -405,7 +418,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 
 		Namespace ns = Namespace.parseString( movePath, separator );
 
-		B newParent = parent;
+		BaseClass newParent = parent;
 
 		for ( int i = 0; i < ns.getNodeCount(); i++ )
 		{
@@ -435,10 +448,10 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		{
 			removeFromParent();
 			if ( newParent != null )
-				newParent.setChild( ( B ) this );
+				newParent.setChild( ( BaseClass ) this );
 		}
 
-		return ( B ) this;
+		return ( BaseClass ) this;
 	}
 
 	public void notFlag( Flag flag )
@@ -454,9 +467,9 @@ public abstract class StackerBase<B extends StackerBase<B>>
 	 *
 	 * @return found instance or null if does not exist.
 	 */
-	public B pollChild( String key )
+	public BaseClass pollChild( String key )
 	{
-		B child = getChild( key );
+		BaseClass child = getChild( key );
 		if ( child != null )
 			child.removeFromParent();
 		return child;
@@ -467,14 +480,14 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		listeners.clear();
 	}
 
-	public final B removeFlag( Flag... flags )
+	public final BaseClass removeFlag( Flag... flags )
 	{
 		disposeCheck();
 		this.flags.removeAll( Arrays.asList( flags ) );
-		return ( B ) this;
+		return ( BaseClass ) this;
 	}
 
-	public final B removeFlagRecursive( Flag... flags )
+	public final BaseClass removeFlagRecursive( Flag... flags )
 	{
 		disposeCheck();
 		if ( parent != null )
@@ -482,7 +495,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		return removeFlag( flags );
 	}
 
-	public final B removeFromParent()
+	public final BaseClass removeFromParent()
 	{
 		if ( hasParent() )
 		{
@@ -491,7 +504,7 @@ public abstract class StackerBase<B extends StackerBase<B>>
 			fireListener( LISTENER_CHILD_REMOVE, parent, this );
 			parent = null;
 		}
-		return ( B ) this;
+		return ( BaseClass ) this;
 	}
 
 	public final void removeListener( int inx )
@@ -499,19 +512,19 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		listeners.remove( inx );
 	}
 
-	public final void setChild( @Nonnull B child )
+	public final void setChild( @Nonnull BaseClass child )
 	{
 		setChild( child, false );
 	}
 
-	public final void setChild( @Nonnull B child, boolean mergeWithExisting )
+	public final void setChild( @Nonnull BaseClass child, boolean mergeWithExisting )
 	{
 		disposeCheck();
 		Objs.notNull( child );
 
 		notFlag( Flag.READ_ONLY );
 
-		B oldChild = getChild( child.getName() );
+		BaseClass oldChild = getChild( child.getName() );
 		if ( oldChild != null )
 		{
 			notFlag( Flag.NO_OVERRIDE );
@@ -528,16 +541,16 @@ public abstract class StackerBase<B extends StackerBase<B>>
 		child.removeFromParent();
 
 		children.add( child );
-		child.parent = ( B ) this;
+		child.parent = ( BaseClass ) this;
 		child.stackerOptions = null;
 	}
 
-	public final void setChild( @Nonnull String key, @Nonnull B child )
+	public final void setChild( @Nonnull String key, @Nonnull BaseClass child )
 	{
 		setChild( key, child, false );
 	}
 
-	public final void setChild( @Nonnull String key, @Nonnull B child, boolean mergeWithExisting )
+	public final void setChild( @Nonnull String key, @Nonnull BaseClass child, boolean mergeWithExisting )
 	{
 		disposeCheck();
 		Objs.notEmpty( key );
@@ -553,13 +566,25 @@ public abstract class StackerBase<B extends StackerBase<B>>
 
 	public int sizeOf( String key )
 	{
-		B keyChild = getChild( key );
+		BaseClass keyChild = getChild( key );
 		return keyChild == null ? -1 : keyChild.size();
 	}
 
 	protected abstract void throwExceptionError( String message ) throws ApplicationException.Error;
 
 	protected abstract void throwExceptionIgnorable( String message ) throws ApplicationException.Ignorable;
+
+	/**
+	 * Attempts to remove each sub-node based on if {@link #isTrimmable()} returns true.
+	 */
+	public void trimChildren()
+	{
+		for ( BaseClass child : children )
+			if ( child.isTrimmable() )
+				child.destroy();
+			else
+				child.trimChildren();
+	}
 
 	public enum Flag
 	{

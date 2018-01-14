@@ -1,297 +1,343 @@
 package io.amelia.foundation.binding;
 
-import com.sun.istack.internal.NotNull;
-
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.TreeMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Predicate;
 
-import io.amelia.events.EventDispatcher;
-import io.amelia.foundation.ConfigMap;
-import io.amelia.foundation.ConfigRegistry;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import io.amelia.foundation.Foundation;
-import io.amelia.foundation.facades.FacadePriority;
-import io.amelia.foundation.facades.FacadeService;
-import io.amelia.foundation.facades.events.FacadeRegisterEvent;
-import io.amelia.lang.ApplicationException;
+import io.amelia.foundation.Kernel;
+import io.amelia.support.Maps;
 import io.amelia.support.Namespace;
 import io.amelia.support.Objs;
 
-public class AppBindings
+public class Bindings implements WritableBinding
 {
-	private static final BindingBase bindings = new BindingBase( "" );
-	private static final Map<Class<? extends FacadeService>, List<RegisteredFacade<? extends FacadeService>>> providers = new HashMap<>();
-
-	protected static BindingBase getBinding( String path )
-	{
-		return bindings.getChild( path, true );
-	}
-
-	public static <T extends FacadeService> T getFacade( Class<T> serviceClass )
-	{
-		return getFacadeRegistration( serviceClass ).map( registeredFacade -> ( T ) registeredFacade.getInstance() ).orElse( null );
-	}
+	public static final Kernel.Logger L = Kernel.getLogger( Bindings.class );
+	/**
+	 * Privately bound SELF that allows internal code to make changes to the bindings without restrictions.
+	 * Public access to restricted to the static methods contained.
+	 */
+	private static final Bindings SELF = new Bindings();
+	private static final BindingReference bindings = new BindingReference( "" );
+	private static final Map<String, WeakReference<BoundNamespace>> boundNamespaces = new HashMap<>();
+	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private static final Lock readLock = lock.readLock();
+	private static final List<BindingResolver> resolvers = new ArrayList<>();
+	private static final SharedNamespace systemNamespace = new SharedNamespace( "io.amelia" );
+	private static final Lock writeLock = lock.writeLock();
 
 	/**
-	 * Queries for a facade registration. This will return if no facade has been registered.
+	 * Returns a {@link BoundNamespace} for the requested namespace.
+	 * Bindings can only be updated using the returned instance.
+	 * Binding the namespace allows for only the requesting code to make changes to requested namespace bindings.
+	 * <p>
+	 * Be sure not to keep reference to the returned binding or the binding could and will be automatically unbound and disposed of at any moment.
+	 * <p>
+	 * Setter:
+	 * <pre>
+	 * {
+	 *      NamespaceBinding nb = Bindings.bindNamespace("com.google.somePlugin");
+	 *      nb.setObject("facade", new SomeFacadeService());
+	 *      nb.setObject("obj", new Object());
+	 * }
+	 * </pre>
+	 * <p>
+	 * Getter:
+	 * <pre>
+	 * {
+	 *      // When getting a facade service; we look at the namespace, then the namespace plus "facade" for an object that extends the FacadeService interface.
+	 *      Bindings.getFacade("com.google.somePlugin");
+	 *      // You can also define the expected facade class to ensure not just any facade is returned. This ensures you receive null instead of a ClassCastException.
+	 *      Bindings.getFacade("com.google.somePlugin", SomeFacadeService.class);
+	 *      // Any object can be set and retrieved from the bindings.
+	 *      Bindings.getObject("com.google.somePlugin.obj");
+	 * }
+	 * </pre>
 	 *
-	 * @param <T>    The facade interface
-	 * @param facade The facade interface
+	 * @param namespace The namespace you wish to bind.
 	 *
-	 * @return provider registration or null
+	 * @return The namespace binder.
 	 */
-	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Optional<RegisteredFacade<? extends FacadeService>> getFacadeRegistration( @NotNull Class<T> facade )
+	public static BoundNamespace bindNamespace( @Nonnull String namespace ) throws BindingException.Error
 	{
-		synchronized ( providers )
+		readLock.lock();
+		try
 		{
-			return providers.computeIfAbsent( facade, ( k ) -> new ArrayList<>() ).stream().findFirst();
+			Namespace ns = Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii();
+			if ( ns.startsWith( "io.amelia" ) )
+				throw new BindingException.Error( "Namespace \"io.amelia\" is reserved for internal use only." );
+			if ( ns.getNodeCount() < 3 )
+				throw new BindingException.Error( "Namespaces can only be bound with no less than 3 nodes." );
+			namespace = ns.getString();
+
+			for ( Map.Entry<String, WeakReference<BoundNamespace>> entry : boundNamespaces.entrySet() )
+				if ( namespace.startsWith( entry.getKey() ) && entry.getValue().get() != null )
+					throw new BindingException.Error( "That namespace (or parent there of) is already bound!" );
+
+			BoundNamespace boundNamespace = new BoundNamespace( namespace );
+			boundNamespaces.put( namespace, new WeakReference<>( boundNamespace ) );
+			return boundNamespace;
+		}
+		finally
+		{
+			readLock.unlock();
 		}
 	}
 
-	/**
-	 * Get registrations for facade class.
-	 *
-	 * @param <T>    The facade
-	 * @param facade The facade class
-	 *
-	 * @return a stream of registrations
-	 */
-	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Stream<RegisteredFacade<T>> getFacadeRegistrations( @NotNull Class<T> facade )
+	static BindingReference getChild( @Nonnull String namespace )
 	{
-		synchronized ( providers )
+		return bindings.getChild( namespace );
+	}
+
+	static BindingReference getChildOrCreate( @Nonnull String namespace )
+	{
+		return bindings.getChildOrCreate( namespace );
+	}
+
+	private static List<BindingResolver> getResolvers()
+	{
+		return getResolvers( null );
+	}
+
+	private static List<BindingResolver> getResolvers( String namespace )
+	{
+		readLock.lock();
+		try
 		{
-			return providers.computeIfAbsent( facade, ( k ) -> new ArrayList<>() ).stream().map( r -> ( RegisteredFacade<T> ) r );
+			List<BindingResolver> list = new ArrayList<>();
+			namespace = normalizeNamespace( namespace );
+
+			for ( Map.Entry<String, WeakReference<BoundNamespace>> entry : boundNamespaces.entrySet() )
+				if ( ( namespace == null || namespace.startsWith( entry.getKey() ) ) && entry.getValue().get() != null )
+				{
+					BindingResolver bindingResolver = entry.getValue().get().getResolver();
+					if ( bindingResolver != null )
+						list.add( bindingResolver );
+				}
+
+			resolvers.sort( new BindingResolver.Comparator() );
+
+			for ( BindingResolver bindingResolver : resolvers )
+				if ( namespace == null || namespace.startsWith( bindingResolver.baseNamespace ) )
+					list.add( bindingResolver );
+
+			return list;
+		}
+		finally
+		{
+			readLock.unlock();
 		}
 	}
 
-	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Stream<T> getFacades( @NotNull Class<?> service ) throws ClassCastException
+	public static SharedNamespace getSharedNamespace( @Nonnull String namespace )
 	{
-		synchronized ( providers )
+		readLock.lock();
+		try
 		{
-			return providers.entrySet().stream().filter( e -> e.getKey().isAssignableFrom( service ) ).flatMap( e -> e.getValue().stream() ).map( p -> ( T ) p.getInstance() );
+			namespace = Namespace.parseString( namespace ).fixInvalidChars().getString();
+
+			// TODO Check if the namespace is allowed to be publicly writable.
+			if ( true )
+				return new WritableSharedNamespace( namespace );
+			return new SharedNamespace( namespace );
+		}
+		finally
+		{
+			readLock.unlock();
 		}
 	}
 
-	public static Set<Class<? extends FacadeService>> getKnownFacades()
+	public static SharedNamespace getSystemNamespace()
 	{
-		return providers.keySet();
+		return systemNamespace;
 	}
 
-	public static GenericBinding getReference( String prefix, String path )
+	public static <T> T invokeFields( @Nonnull Object declaringObject, @Nonnull Predicate<Field> fieldPredicate )
 	{
-		GenericBinding binding = new GenericBinding();
-
-		binding.supplier = GenericBinding::new;
-		binding.prefix = Namespace.parseString( prefix );
-		binding.binding = getBinding( path );
-
-		return binding;
+		return invokeFields( declaringObject, fieldPredicate, null );
 	}
 
-	/**
-	 * Returns a subclass BindingReference.
-	 *
-	 * @param bindingSupplier The subclass supplier. Using BindingSubclass::create is recommended.
-	 * @param prefix          The path prefix, used to create jailed namespaces.
-	 * @param path            The path to amend to the jailed namespace.
-	 * @param <T>             The subclass extending our BindingReference.
-	 *
-	 * @return Instance of the BindingReference
-	 */
-	public static <T extends BindingReference> T getReference( Supplier<T> bindingSupplier, String prefix, String path )
+	protected static <T> T invokeFields( @Nonnull Object declaringObject, @Nonnull Predicate<Field> fieldPredicate, @Nullable String namespace )
 	{
-		@NotNull
-		T bindingReference = bindingSupplier.get();
+		for ( Field field : declaringObject.getClass().getDeclaredFields() )
+			if ( fieldPredicate.test( field ) )
+				try
+				{
+					field.setAccessible( true );
+					T obj = ( T ) field.get( declaringObject );
 
-		bindingReference.supplier = bindingSupplier;
-		bindingReference.prefix = Namespace.parseString( prefix );
-		bindingReference.binding = getBinding( prefix + "." + path );
+					if ( !field.isAnnotationPresent( DynamicBinding.class ) && !Objs.isEmpty( namespace ) )
+						bindings.getChildOrCreate( namespace ).setValue( obj );
 
-		return bindingReference;
+					return obj;
+				}
+				catch ( IllegalAccessException e )
+				{
+					e.printStackTrace();
+				}
+
+		return null;
 	}
 
-	public static GenericBinding getReference( String path )
+	public static <T> T invokeMethods( @Nonnull Object declaringObject, @Nonnull Predicate<Method> methodPredicate )
 	{
-		return getReference( "", path );
+		return invokeMethods( declaringObject, methodPredicate, null );
 	}
 
-	public static <R, T extends FacadeService> R ifFacadePresent( Class<T> serviceClass, Function<T, R> consumer )
+	protected static <T> T invokeMethods( @Nonnull Object declaringObject, @Nonnull Predicate<Method> methodPredicate, @Nullable String namespace )
 	{
-		return getFacadeRegistration( serviceClass ).map( registeredFacade -> consumer.apply( ( T ) registeredFacade.getInstance() ) ).orElse( null );
-	}
+		Map<Integer, Method> possibleMethods = new TreeMap<>();
 
-	public static void init()
-	{
-		// Load Builtin Facades First
-		registerFacade( FacadeService.class, FacadePriority.STRICT, FacadeService::new );
+		for ( Method method : declaringObject.getClass().getDeclaredMethods() )
+			if ( methodPredicate.test( method ) )
+				possibleMethods.put( method.getParameterCount(), method );
 
-		// Load Facades from Config
-		ConfigMap facades = ConfigRegistry.getChild( Foundation.ConfigKeys.BINDINGS_FACADES );
-
-		facades.getChildren().forEach( c -> {
-			if ( c.hasChild( "class" ) )
+		// Try each possible method, starting with the one with the least number of parameters.
+		for ( Method method : possibleMethods.values() )
+			try
 			{
-				Class<FacadeService> facadeClass = c.getStringAsClass( "class", FacadeService.class ).orElse( null );
-				FacadePriority priority = c.getEnum( "priority", FacadePriority.class ).orElse( FacadePriority.NORMAL );
+				method.setAccessible( true );
+				T obj = ( T ) method.invoke( declaringObject, resolveParameters( method.getParameters() ) );
 
-				if ( facadeClass != null )
-					registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
-				else
-					Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
+				if ( !method.isAnnotationPresent( DynamicBinding.class ) && !Objs.isEmpty( namespace ) )
+					bindings.getChildOrCreate( namespace ).setValue( obj );
+
+				return obj;
 			}
-			else
-				Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
-		} );
+			catch ( IllegalAccessException | InvocationTargetException | BindingException.Error e )
+			{
+				e.printStackTrace();
+			}
+
+		return null;
+	}
+
+	static boolean isBound0( @Nonnull BoundNamespace boundNamespace )
+	{
+		for ( WeakReference<BoundNamespace> ref : boundNamespaces.values() )
+			if ( ref.get() == boundNamespace )
+				return true;
+		return false;
+	}
+
+	static boolean isRegistered0( @Nonnull BindingResolver bindingResolver )
+	{
+		return resolvers.contains( bindingResolver );
+	}
+
+	static String normalizeNamespace( @Nonnull String namespace )
+	{
+		return Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii().getString();
 	}
 
 	/**
-	 * Returns whether a facade has been registered
-	 *
-	 * @param <T>     facade
-	 * @param service facade to check
-	 *
-	 * @return true if and only if the facade is registered
+	 * TODO To be made PUBLIC later when API is improved and better secured.
 	 */
-	public static <T> boolean isFacadeRegistered( @NotNull Class<T> service )
+	private static void registerResolver( @Nonnull String namespace, @Nonnull BindingResolver bindingResolver ) throws BindingException.Error
 	{
-		synchronized ( providers )
-		{
-			return providers.containsKey( service );
-		}
+		Objs.notEmpty( namespace );
+		Objs.notNull( bindingResolver );
+
+		Namespace ns = Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii();
+		if ( ns.startsWith( "io.amelia" ) )
+			throw new BindingException.Error( "Namespace \"io.amelia\" is reserved for internal use only." );
+		if ( ns.getNodeCount() < 3 )
+			throw new BindingException.Error( "Resolvers can only be registered to namespaces with no less than 3 nodes." );
+		namespace = ns.getString();
+
+		bindingResolver.baseNamespace = namespace;
+		resolvers.add( bindingResolver );
 	}
 
-	public static <T extends FacadeService> void registerFacade( Class<T> facadeClass, FacadePriority priority, Supplier<T> serviceSupplier )
+	public static <T> T resolveClass( @Nonnull Class<T> expectedClass )
 	{
-		RegisteredFacade<T> registeredFacade = new RegisteredFacade<>( facadeClass, priority, serviceSupplier );
+		Objs.notNull( expectedClass );
 
-		synchronized ( providers )
+		for ( BindingResolver bindingResolver : getResolvers() )
 		{
-			List<RegisteredFacade<? extends FacadeService>> priorityList = providers.computeIfAbsent( facadeClass, ( k ) -> new ArrayList<>() );
+			Object obj = bindingResolver.get( expectedClass );
+			if ( obj != null )
+				return ( T ) obj;
+		}
 
-			// Insert the provider into the collection, much more efficient big O than sort
-			int position = Collections.binarySearch( priorityList, registeredFacade );
-			if ( position < 0 )
-				priorityList.add( -( position + 1 ), registeredFacade );
+		return null;
+	}
+
+	protected static <T> T resolveNamespace( @Nonnull String namespace, @Nonnull Class<T> expectedClass )
+	{
+		Objs.notEmpty( namespace );
+		Objs.notNull( expectedClass );
+
+		for ( BindingResolver bindingResolver : getResolvers( namespace ) )
+		{
+			Object obj = bindingResolver.get( namespace, expectedClass );
+			if ( obj != null )
+				return ( T ) obj;
+		}
+
+		return null;
+	}
+
+	public static Object[] resolveParameters( @Nonnull Parameter[] parameters ) throws BindingException.Error
+	{
+		if ( parameters.length == 0 )
+			return new Object[0];
+
+		Object[] parameterObjects = new Object[parameters.length];
+
+		for ( int i = 0; i < parameters.length; i++ )
+		{
+			Parameter parameter = parameters[i];
+			Object obj = null;
+
+			if ( parameter.isAnnotationPresent( BindingNamespace.class ) )
+			{
+				String ns = parameter.getAnnotation( BindingNamespace.class ).value();
+				obj = SELF.getObject( ns );
+			}
+
+			if ( obj == null && parameter.isAnnotationPresent( BindingClass.class ) )
+				obj = resolveClass( parameter.getAnnotation( BindingClass.class ).value() );
+
+			if ( obj == null )
+				obj = resolveClass( parameter.getType() );
+
+			// If the obj is null and the parameter is not nullable, then throw an exception.
+			if ( obj == null && !parameter.isAnnotationPresent( Nullable.class ) )
+				throw new BindingException.Error( "Method parameter " + parameter.getName() + " had BindingNamespace annotation and we failed to resolve it!" );
 			else
-				priorityList.add( position, registeredFacade );
+				parameterObjects[i] = obj;
 		}
 
-		EventDispatcher.callEvent( new FacadeRegisterEvent<T>( registeredFacade ) );
+		return parameterObjects;
 	}
 
-	public static class BindingsLookup<T>
+	static void unbind0( BoundNamespace boundNamespace )
 	{
-		private Class<?> aClass = null;
-		private String key = null;
-
-		private BindingsLookup()
-		{
-
-		}
-
-		public List<T> asList()
-		{
-			return asStream().collect( Collectors.toList() );
-		}
-
-		public Stream<T> asStream()
-		{
-			return child().collect( v -> aClass == null ? v.fetch() : v.fetch( aClass ) ).flatMap( s -> s ).map( o -> ( T ) o );
-		}
-
-		private BindingBase child()
-		{
-			return ( key == null ? bindings : bindings.getChild( key, true ) );
-		}
-
-		public Stream<T> collect( Function<Object, T> function )
-		{
-			return child().collect( v -> v.fetch( o -> aClass == null || o.getClass() == aClass ? function.apply( o ) : null ) ).flatMap( s -> s );
-		}
-
-		private <C> BindingsLookup<C> copy()
-		{
-			BindingsLookup<C> bindingsLookup = new BindingsLookup<>();
-			bindingsLookup.key = key;
-			bindingsLookup.aClass = aClass;
-			return bindingsLookup;
-		}
-
-		public <C> BindingsLookup<C> filterClass( Class<C> aClass )
-		{
-			BindingsLookup<C> bindingsLookup = copy();
-			bindingsLookup.aClass = aClass;
-			return bindingsLookup;
-		}
-
-		public BindingsLookup<T> filterKey( String key )
-		{
-			BindingsLookup<T> bindingsLookup = copy();
-			bindingsLookup.key = key;
-			return bindingsLookup;
-		}
+		Maps.removeIf( boundNamespaces, ( key, value ) -> value.get() == boundNamespace );
 	}
 
-	/**
-	 * @param <T> Facade Interface
-	 */
-	public static class RegisteredFacade<T extends FacadeService> implements Comparable<RegisteredFacade<?>>
+	private Bindings()
 	{
-		private final Class<T> facadeClass;
-		private final FacadePriority priority;
-		private final Supplier<T> supplier;
-		private T instance = null;
+		// Private Access
+	}
 
-		public RegisteredFacade( @NotNull Class<T> facadeClass, @NotNull FacadePriority priority, @NotNull Supplier<T> supplier )
-		{
-			this.facadeClass = facadeClass;
-			this.supplier = supplier;
-			this.priority = priority;
-		}
-
-		@Override
-		public int compareTo( RegisteredFacade<?> o )
-		{
-			if ( priority.ordinal() == o.getPriority().ordinal() )
-				return 0;
-			else
-				return priority.ordinal() < o.getPriority().ordinal() ? 1 : -1;
-		}
-
-		public void destoryInstance() throws ApplicationException
-		{
-			// TODO Run exception through exception handler
-			if ( instance != null )
-				instance.onDestory();
-			instance = null;
-		}
-
-		public T getInstance()
-		{
-			if ( instance == null )
-				instance = supplier.get();
-			return instance;
-		}
-
-		public FacadePriority getPriority()
-		{
-			return priority;
-		}
-
-		public Class<T> getServiceClass()
-		{
-			return facadeClass;
-		}
+	@Override
+	public String getBaseNamespace()
+	{
+		return "";
 	}
 }

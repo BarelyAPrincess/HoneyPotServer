@@ -14,27 +14,27 @@ public class PropDevMeta implements ImplDevMeta
 {
 	private Properties prop = new Properties();
 
-	public PropDevMeta() throws ApplicationException
+	public PropDevMeta() throws ApplicationException.Error
 	{
 		this( "build.properties" );
 	}
 
-	public PropDevMeta( File propFile ) throws FileNotFoundException, ApplicationException
+	public PropDevMeta( File propFile ) throws FileNotFoundException, ApplicationException.Error
 	{
 		this( new FileInputStream( propFile ) );
 	}
 
-	public PropDevMeta( String fileName ) throws ApplicationException
+	public PropDevMeta( String fileName ) throws ApplicationException.Error
 	{
 		this( Kernel.class, fileName );
 	}
 
-	public PropDevMeta( Class<?> cls, String fileName ) throws ApplicationException
+	public PropDevMeta( Class<?> cls, String fileName ) throws ApplicationException.Error
 	{
 		this( cls.getClassLoader().getResourceAsStream( fileName ) );
 	}
 
-	public PropDevMeta( InputStream is ) throws ApplicationException
+	public PropDevMeta( InputStream is ) throws ApplicationException.Error
 	{
 		try
 		{

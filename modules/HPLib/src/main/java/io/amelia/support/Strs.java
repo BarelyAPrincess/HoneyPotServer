@@ -18,6 +18,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import java.awt.Color;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.IDN;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -173,13 +174,6 @@ public class Strs
 		CHARS_MAP = Collections.unmodifiableMap( chars );
 	}
 
-	public static String ascii( String str )
-	{
-		for ( Map.Entry<String, String[]> charSet : CHARS_MAP.entrySet() )
-			str = str.replaceAll( Strs.join( charSet.getValue(), "|" ), charSet.getKey() );
-		return str.replaceAll( "[^\\x20-\\x7E]", "" );
-	}
-
 	public static String bytesToStringASCII( byte[] bytes )
 	{
 		return new String( bytes, StandardCharsets.US_ASCII );
@@ -254,7 +248,9 @@ public class Strs
 	 * @param token      String to search for
 	 * @param originals  An iterable collection of strings to filter.
 	 * @param collection The collection to add matches to
+	 *
 	 * @return the collection provided that would have the elements copied into
+	 *
 	 * @throws UnsupportedOperationException if the collection is immutable and originals contains a string which starts with the specified search
 	 *                                       string.
 	 * @throws IllegalArgumentException      if any parameter is is null
@@ -350,6 +346,7 @@ public class Strs
 	 * Determines if a string is all lowercase using the toLowerCase() method.
 	 *
 	 * @param str The string to check
+	 *
 	 * @return Is it all lowercase?
 	 */
 	public static boolean isLowercase( String str )
@@ -361,6 +358,7 @@ public class Strs
 	 * Determines if a string is all uppercase using the toUpperCase() method.
 	 *
 	 * @param str The string to check
+	 *
 	 * @return Is it all uppercase?
 	 */
 	public static boolean isUppercase( String str )
@@ -408,11 +406,16 @@ public class Strs
 		return value.substring( 0, 1 ).toLowerCase() + value.substring( 1 );
 	}
 
-	public static String limitLength( String text, int max )
+	public static String limitLength( String str, int max )
 	{
-		if ( text.length() <= max )
-			return text;
-		return text.substring( 0, max ) + "...";
+		return limitLength( str, max, true );
+	}
+
+	public static String limitLength( String str, int max, boolean appendEllipsis )
+	{
+		if ( str.length() <= max )
+			return str;
+		return str.substring( 0, max ) + ( appendEllipsis ? "..." : "" );
 	}
 
 	public static Color parseColor( String color )
@@ -589,7 +592,7 @@ public class Strs
 
 	public static String slugify( String str, String glue )
 	{
-		str = ascii( str );
+		str = toAscii( str );
 
 		// Convert all dashes/underscores into separator
 		String flip = "-".equals( glue ) ? "_" : "-";
@@ -631,7 +634,9 @@ public class Strs
 	 *
 	 * @param string   String to check
 	 * @param prefixes Prefix of string to compare
+	 *
 	 * @return true if provided string starts with, ignoring case, the prefix provided
+	 *
 	 * @throws NullPointerException if prefix is null
 	 */
 	public static boolean startsWithIgnoreCase( @NotNull final String string, @NotNull final String... prefixes ) throws NullPointerException
@@ -678,10 +683,18 @@ public class Strs
 		return b;*/
 	}
 
+	public static String toAscii( String str )
+	{
+		for ( Map.Entry<String, String[]> charSet : CHARS_MAP.entrySet() )
+			str = str.replaceAll( Strs.join( charSet.getValue(), "|" ), charSet.getKey() );
+		return str.replaceAll( "[^\\x20-\\x7E]", "" );
+	}
+
 	/**
 	 * Convert a value to camel case.
 	 *
 	 * @param value
+	 *
 	 * @return String
 	 */
 	public static String toCamelCase( String value )
@@ -693,6 +706,7 @@ public class Strs
 	 * Scans a string list for entries that are not lower case.
 	 *
 	 * @param strings The original list to check.
+	 *
 	 * @return Lowercase string array.
 	 */
 	public static List<String> toLowerCase( List<String> strings )
@@ -714,11 +728,18 @@ public class Strs
 	 * Convert a value to studly caps case.
 	 *
 	 * @param value
+	 *
 	 * @return String
 	 */
 	public static String toStudlyCase( String value )
 	{
-		return Strs.capitalizeWordsFully( value.replaceAll( "-_", " " ) ).replaceAll( " ", "" );
+		return Strs.capitalizeWordsFully( value.replaceAll( "[.-_/\\\\]", " " ).trim() ).replaceAll( " ", "" );
+	}
+
+	public static String toUnicode( String str )
+	{
+		// TODO Implement
+		return IDN.toUnicode( str );
 	}
 
 	/**
@@ -726,11 +747,12 @@ public class Strs
 	 *
 	 * @param text      Text
 	 * @param character Character to remove
+	 *
 	 * @return Trimmed text
 	 */
 	public static String trimAll( String text, char character )
 	{
-		String normalizedText = trimFront( text, character );
+		String normalizedText = trimStart( text, character );
 		return trimEnd( normalizedText, character );
 	}
 
@@ -739,6 +761,7 @@ public class Strs
 	 *
 	 * @param text      Text
 	 * @param character Character to remove
+	 *
 	 * @return Trimmed text
 	 */
 	public static String trimEnd( String text, char character )
@@ -758,23 +781,47 @@ public class Strs
 		return normalizedText.substring( 0, index + 1 ).trim();
 	}
 
+	public static String trimEnd( String text, String substr )
+	{
+		if ( Objs.isEmpty( text ) )
+			return text;
+
+		if ( text.trim().endsWith( substr ) )
+			text = text.trim().substring( 0, text.trim().length() - substr.length() ).trim();
+
+		return text;
+	}
+
+	private static String trimRegex( String text, String regex )
+	{
+		if ( Objs.isEmpty( text ) )
+			return text;
+
+		String normalizedText = text.trim();
+		int index = -1;
+
+		do
+			index++;
+		while ( index < normalizedText.length() && Pattern.matches( regex, normalizedText.substring( index, 1 ) ) );
+
+		return normalizedText.substring( index ).trim();
+	}
+
 	/**
 	 * Trim specified character from front of string
 	 *
 	 * @param text      Text
 	 * @param character Character to remove
+	 *
 	 * @return Trimmed text
 	 */
-	public static String trimFront( String text, char character )
+	public static String trimStart( String text, char character )
 	{
-		String normalizedText;
-		int index;
-
-		if ( text == null || text.isEmpty() )
+		if ( Objs.isEmpty( text ) )
 			return text;
 
-		normalizedText = text.trim();
-		index = -1;
+		String normalizedText = text.trim();
+		int index = -1;
 
 		do
 			index++;
@@ -783,22 +830,15 @@ public class Strs
 		return normalizedText.substring( index ).trim();
 	}
 
-	private static String trimRegex( String text, String regex )
+	public static String trimStart( String text, String substr )
 	{
-		String normalizedText;
-		int index;
-
-		if ( text == null || text.isEmpty() )
+		if ( Objs.isEmpty( text ) )
 			return text;
 
-		normalizedText = text.trim();
-		index = -1;
+		if ( text.trim().startsWith( substr ) )
+			text = text.trim().substring( substr.length() ).trim();
 
-		do
-			index++;
-		while ( index < normalizedText.length() && Pattern.matches( regex, normalizedText.substring( index, 1 ) ) );
-
-		return normalizedText.substring( index ).trim();
+		return text;
 	}
 
 	public static Map<String, String> wrap( Map<String, String> map )
@@ -1085,7 +1125,7 @@ public class Strs
 
 		public StringChain trimAll( char character )
 		{
-			String normalizedText = Strs.trimFront( str, character );
+			String normalizedText = Strs.trimStart( str, character );
 			str = Strs.trimEnd( normalizedText, character );
 			return this;
 		}
@@ -1103,7 +1143,7 @@ public class Strs
 
 		public StringChain trimFront( char character )
 		{
-			str = Strs.trimFront( str, character );
+			str = Strs.trimStart( str, character );
 			return this;
 		}
 

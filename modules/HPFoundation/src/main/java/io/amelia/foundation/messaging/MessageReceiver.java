@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.messaging;
+package io.amelia.foundation.messaging;
 
 /**
  * Interfaces classes that can receive incoming messages from the {@link MessageDispatch}

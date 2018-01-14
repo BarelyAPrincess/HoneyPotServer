@@ -2,7 +2,7 @@ package io.amelia.foundation;
 
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.Runlevel;
+import io.amelia.support.Runlevel;
 
 public class MinimalApplication extends ApplicationInterface
 {

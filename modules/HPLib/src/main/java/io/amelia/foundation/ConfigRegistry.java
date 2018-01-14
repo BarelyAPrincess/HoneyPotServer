@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ConfigException;
@@ -24,7 +25,7 @@ public class ConfigRegistry
 		config.setValue( "app.developmentMode", false );
 	}
 
-	public static void clearCache( @Nonnull File path, @Nonnull long keepHistory )
+	public static void clearCache( @Nonnull File path, @Nonnegative long keepHistory )
 	{
 		Objs.notNull( path );
 		Objs.notNull( keepHistory );
@@ -39,7 +40,7 @@ public class ConfigRegistry
 		}
 	}
 
-	public static void clearCache( @Nonnull long keepHistory )
+	public static void clearCache( @Nonnegative long keepHistory )
 	{
 		clearCache( Kernel.getPath( Kernel.PATH_CACHE ), keepHistory );
 	}

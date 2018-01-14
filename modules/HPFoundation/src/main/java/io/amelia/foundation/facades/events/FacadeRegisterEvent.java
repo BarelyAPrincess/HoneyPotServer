@@ -9,8 +9,8 @@
  */
 package io.amelia.foundation.facades.events;
 
-import io.amelia.foundation.binding.AppBindings;
-import io.amelia.foundation.facades.interfaces.FacadeService;
+import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.facades.Facades;
 
 /**
  * This event is called when a service is registered.
@@ -19,7 +19,7 @@ import io.amelia.foundation.facades.interfaces.FacadeService;
  */
 public class FacadeRegisterEvent<T extends FacadeService> extends FacadeEvent<T>
 {
-	public FacadeRegisterEvent( AppBindings.RegisteredFacade<T> registeredFacade )
+	public FacadeRegisterEvent( Facades.RegisteredFacade<T> registeredFacade )
 	{
 		super( registeredFacade );
 	}

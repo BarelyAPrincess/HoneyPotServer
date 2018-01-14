@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.events;
+package io.amelia.foundation.events;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

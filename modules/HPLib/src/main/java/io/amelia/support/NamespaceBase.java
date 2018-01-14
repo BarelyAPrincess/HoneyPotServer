@@ -12,37 +12,46 @@ package io.amelia.support;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+/**
+ * Advanced class for handling namespaces with virtually any separator character.
+ *
+ * @param <T> Subclass of this class
+ */
 public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneable
 {
+	// TODO Implement a flag setup that does things such as forces nodes to lowercase or normalizes with it being done manually.
+
 	public static final Pattern RANGE_EXPRESSION = Pattern.compile( "(0-9+)-(0-9+)" );
 
-	private final NotNullFunction<String[], T> creator;
+	private final NonnullFunction<String[], T> creator;
 
 	protected String[] nodes;
-
 	private String glue;
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue, String[] nodes )
+	protected NamespaceBase( NonnullFunction<String[], T> creator, String glue, String[] nodes )
 	{
 		this.creator = creator;
 		this.glue = glue;
 		this.nodes = Strs.toLowerCase( nodes );
 	}
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue, List<String> nodes )
+	protected NamespaceBase( NonnullFunction<String[], T> creator, String glue, List<String> nodes )
 	{
 		this.creator = creator;
 		this.glue = glue;
 		this.nodes = Strs.toLowerCase( nodes.toArray( new String[0] ) );
 	}
 
-	protected NamespaceBase( NotNullFunction<String[], T> creator, String glue )
+	protected NamespaceBase( NonnullFunction<String[], T> creator, String glue )
 	{
 		this.creator = creator;
 		this.glue = glue;
@@ -109,7 +118,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	/**
 	 * Filters out invalid characters from namespace.
 	 *
-	 * @return The fixed PermissionNamespace.
+	 * @return The fixed {@link T}
 	 */
 	public T fixInvalidChars()
 	{
@@ -193,6 +202,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	 * Converts Namespace to a String
 	 *
 	 * @param escape Shall we escape separator characters in node names
+	 *
 	 * @return The converted String
 	 */
 	public String getString( boolean escape )
@@ -207,28 +217,36 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		return nodes.length == 0;
 	}
 
-	public int matchPercentage( String namespace )
+	public int matchPercentage( @Nonnull String namespace )
 	{
 		return matchPercentage( namespace, "." );
 	}
 
-	public int matchPercentage( String namespace, String separator )
+	public int matchPercentage( @Nonnull String namespace, @Nonnull String separator )
+	{
+		String[] nodes = splitString( namespace, separator );
+		return matchPercentage( creator.apply( nodes ) );
+	}
+
+	/**
+	 * Calculates the matching percentage of this namespace and the provided one.
+	 */
+	public int matchPercentage( @Nonnull T namespace )
 	{
 		Objs.notEmpty( namespace );
-
-		String[] dest = Strs.split( namespace.toLowerCase(), separator ).toArray( String[]::new );
+		String[] other = namespace.nodes;
 
 		int total = 0;
-		int perNode = 99 / nodes.length;
+		int perNode = 100 / nodes.length; // Points per matching node.
 
-		for ( int i = 0; i < Math.min( nodes.length, dest.length ); i++ )
-			if ( nodes[i].equals( dest[i] ) )
+		for ( int i = 0; i < Math.min( nodes.length, other.length ); i++ )
+			if ( nodes[i].equals( other[i] ) )
 				total += perNode;
 			else
-				break;
+				return total;
 
-		if ( nodes.length == dest.length )
-			total += 1;
+		if ( other.length > nodes.length )
+			total += 10 * ( other.length - nodes.length );
 
 		return total;
 	}
@@ -248,6 +266,32 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	public T merge( Namespace ns )
 	{
 		return creator.apply( Stream.of( nodes, ns.nodes ).flatMap( Stream::of ).toArray( String[]::new ) );
+	}
+
+	/**
+	 * Normalizes each node to ASCII and to lowercase using Locale US.
+	 *
+	 * @return The new normalized {@link T}
+	 */
+	public T normalizeAscii()
+	{
+		String[] result = new String[nodes.length];
+		for ( int i = 0; i < nodes.length; i++ )
+			result[i] = Strs.toAscii( nodes[i] ).toLowerCase( Locale.US );
+		return creator.apply( result );
+	}
+
+	/**
+	 * Normalizes each node to Unicode and to lowercase using Locale US.
+	 *
+	 * @return The new normalized {@link T}
+	 */
+	public T normalizeUnicode()
+	{
+		String[] result = new String[nodes.length];
+		for ( int i = 0; i < nodes.length; i++ )
+			result[i] = Strs.toUnicode( nodes[i] ).toLowerCase( Locale.US );
+		return creator.apply( result );
 	}
 
 	/**
@@ -351,15 +395,72 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 		return ( T ) this;
 	}
 
-	private String[] splitString( String str )
+	private String[] splitString( @Nonnull String str )
 	{
 		return splitString( str, null );
 	}
 
-	private String[] splitString( String str, String glue )
+	private String[] splitString( @Nonnull String str, String separator )
 	{
-		glue = Objs.notEmptyOrDef( glue, "." );
-		return Strs.split( str, glue ).filter( v -> !Objs.isEmpty( v ) ).toArray( String[]::new );
+		Objs.notNull( str );
+		separator = Objs.notEmptyOrDef( separator, "." );
+		return Strs.split( str, separator ).filter( v -> !Objs.isEmpty( v ) ).toArray( String[]::new );
+	}
+
+	public boolean startsWith( @Nonnull T namespace )
+	{
+		return startsWith( namespace, true );
+	}
+
+	/**
+	 * Computes if this namespace starts with the provided namespace.
+	 * <p>
+	 * ex: (Left being this namespace, right being the provided namespace)
+	 * <pre>
+	 *   True: "com.google.exampleSite.home" == "com.google.exampleSite"
+	 *   False: "com.google.exampleSite.home" == "com.google.example"
+	 * </pre>
+	 *
+	 * @param namespace        The namespace this namespace might start with.
+	 * @param matchAtSeparator Should we only match each node or can the last node partially match? Setting this to FALSE would result in both examples above being TRUE.
+	 *
+	 * @return Does this namespace start with the provided namespace. True if so, false otherwise.
+	 */
+	public boolean startsWith( @Nonnull T namespace, boolean matchAtSeparator )
+	{
+		Objs.notNull( namespace );
+
+		if ( namespace.getNodeCount() == 0 )
+			return true;
+
+		if ( namespace.getNodeCount() > getNodeCount() )
+			return false;
+
+		for ( int i = 0; i < namespace.getNodeCount(); i++ )
+			if ( !namespace.nodes[i].equals( nodes[i] ) )
+				return !matchAtSeparator && i + 1 == namespace.getNodeCount() && nodes[i].startsWith( namespace.nodes[i] );
+
+		return true;
+	}
+
+	public boolean startsWith( @Nonnull String namespace, String separator, boolean matchAtSeparator )
+	{
+		return startsWith( creator.apply( splitString( namespace, separator ) ), matchAtSeparator );
+	}
+
+	public boolean startsWith( @Nonnull String namespace )
+	{
+		return startsWith( namespace, null );
+	}
+
+	public boolean startsWith( @Nonnull String namespace, boolean matchAtSeparator )
+	{
+		return startsWith( namespace, null, matchAtSeparator );
+	}
+
+	public boolean startsWith( @Nonnull String namespace, String separator )
+	{
+		return startsWith( creator.apply( splitString( namespace, separator ) ), true );
 	}
 
 	public T subNamespace( int start )

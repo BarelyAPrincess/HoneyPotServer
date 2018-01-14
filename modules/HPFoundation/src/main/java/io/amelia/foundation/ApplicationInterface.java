@@ -11,12 +11,12 @@ import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.support.Encrypt;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
+import io.amelia.support.Runlevel;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -60,7 +60,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void dispose()
 	{
-		router.quitAndDestroy();
+		router.dispose();
 	}
 
 	@Override
@@ -126,10 +126,10 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public boolean isMainThread()
 	{
-		return router.isThreadJoined();
+		return router.isPrimaryThread();
 	}
 
-	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException;
+	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error;
 
 	/**
 	 * Handles internal argument options and triggers, such as
@@ -186,9 +186,14 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		}
 	}
 
-	void shutdown()
+	void quitSafely()
 	{
-		router.quitSafely();
+		router.quit( true );
+	}
+
+	public void quitUnsafe()
+	{
+		router.quit( false );
 	}
 
 	public void throwStartupException( Exception e ) throws StartupException

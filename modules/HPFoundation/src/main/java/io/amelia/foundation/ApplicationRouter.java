@@ -1,5 +1,6 @@
 package io.amelia.foundation;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import io.amelia.looper.LooperFactory;
@@ -31,6 +32,7 @@ import io.amelia.looper.LooperFactory;
  */
 public class ApplicationRouter
 {
+	public final Thread primaryThread = Thread.currentThread();
 	final boolean async;
 	final Consumer<ParcelCarrier> callback;
 	final ApplicationLooper looper;
@@ -181,6 +183,11 @@ public class ApplicationRouter
 		}
 	}
 
+	public void dispose()
+	{
+		// TODO
+	}
+
 	private boolean enqueueMessage( LooperQueue queue, ParcelCarrier msg, long uptimeMillis )
 	{
 		msg.target = this;
@@ -238,6 +245,11 @@ public class ApplicationRouter
 	{
 	}
 
+	public boolean isPrimaryThread()
+	{
+		return primaryThread == Thread.currentThread();
+	}
+
 	/**
 	 * Returns a new {@link ParcelCarrier} from the global message pool. More efficient than
 	 * creating and allocating new instances. The retrieved message has its handler set to this instance (InternalMessage.target == this).
@@ -246,6 +258,16 @@ public class ApplicationRouter
 	public final ParcelCarrier obtainMessage()
 	{
 		return ParcelCarrier.obtain( this );
+	}
+
+	public void onTick( BiConsumer<Integer, Integer> tickConsumer )
+	{
+
+	}
+
+	public void quit( boolean safely )
+	{
+		// TODO
 	}
 
 	/**

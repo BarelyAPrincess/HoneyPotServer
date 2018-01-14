@@ -7,9 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.events.application;
+package io.amelia.foundation.events.application;
 
-import io.amelia.events.AbstractEvent;
+import io.amelia.foundation.events.AbstractEvent;
 
 /**
  * Internal Application Events

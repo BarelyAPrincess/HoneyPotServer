@@ -9,23 +9,24 @@
  */
 package io.amelia.foundation.facades.events;
 
-import io.amelia.events.application.ApplicationEvent;
-import io.amelia.foundation.binding.AppBindings;
-import io.amelia.foundation.facades.interfaces.FacadeService;
+import io.amelia.foundation.events.application.ApplicationEvent;
+import io.amelia.foundation.binding.Bindings;
+import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.facades.Facades;
 
 /**
- * An event relating to a registered facades. This is called in a {@link AppBindings}
+ * An event relating to a registered facades. This is called in a {@link Bindings}
  */
 public abstract class FacadeEvent<T extends FacadeService> extends ApplicationEvent
 {
-	private final AppBindings.RegisteredFacade<T> facade;
+	private final Facades.RegisteredFacade<T> facade;
 
-	public FacadeEvent( final AppBindings.RegisteredFacade<T> facade )
+	public FacadeEvent( final Facades.RegisteredFacade<T> facade )
 	{
 		this.facade = facade;
 	}
 
-	public AppBindings.RegisteredFacade<T> getFacade()
+	public Facades.RegisteredFacade<T> getFacade()
 	{
 		return facade;
 	}

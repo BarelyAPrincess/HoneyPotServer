@@ -7,12 +7,12 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.events.messaging;
+package io.amelia.foundation.events.messaging;
 
-import io.amelia.events.Cancellable;
-import io.amelia.events.application.ApplicationEvent;
-import io.amelia.messaging.MessageReceiver;
-import io.amelia.messaging.MessageSender;
+import io.amelia.foundation.events.Cancellable;
+import io.amelia.foundation.events.application.ApplicationEvent;
+import io.amelia.foundation.messaging.MessageReceiver;
+import io.amelia.foundation.messaging.MessageSender;
 import io.amelia.support.Lists;
 
 import java.util.Arrays;

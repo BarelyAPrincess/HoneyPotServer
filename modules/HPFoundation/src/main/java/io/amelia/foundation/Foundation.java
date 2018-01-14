@@ -4,18 +4,21 @@ import java.io.IOException;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.application.RunlevelEvent;
+import io.amelia.foundation.binding.Bindings;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.facades.FacadePriority;
+import io.amelia.foundation.facades.FacadeService;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.Runlevel;
 import io.amelia.lang.StartupException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
+import io.amelia.support.Runlevel;
 import io.amelia.support.Timing;
 
 /**
@@ -36,13 +39,6 @@ import io.amelia.support.Timing;
 public final class Foundation
 {
 	public static final Logger L = LogBuilder.get();
-
-	/**
-	 * Set to the thread that first accessed this class.
-	 * Thread MUST also be the thread used to join the Main Looper
-	 */
-	public static final Thread PRIMARY_THREAD = Thread.currentThread();
-
 	private static ApplicationInterface app = null;
 	private static Runlevel currentRunlevel = Runlevel.INITIALIZATION;
 	private static String currentRunlevelReason = null;
@@ -63,7 +59,7 @@ public final class Foundation
 	 *
 	 * @param app The ApplicationInterface instance
 	 */
-	public static void setApplication( @Nonnull ApplicationInterface app ) throws ApplicationException
+	public static void setApplication( @Nonnull ApplicationInterface app ) throws ApplicationException.Error
 	{
 		Objs.notNull( app );
 
@@ -85,6 +81,11 @@ public final class Foundation
 		return previousRunlevel;
 	}
 
+	public static ApplicationRouter getRouter()
+	{
+		return app.getRouter();
+	}
+
 	public static Runlevel getRunlevel()
 	{
 		return currentRunlevel;
@@ -97,7 +98,7 @@ public final class Foundation
 
 	public static boolean isPrimaryThread()
 	{
-		return PRIMARY_THREAD == Thread.currentThread();
+		return app.getRouter().isPrimaryThread();
 	}
 
 	private static boolean isRunlevel( Runlevel runlevel )
@@ -108,30 +109,36 @@ public final class Foundation
 	/**
 	 * Handles post runlevel change events. Should almost always be the very last method call when the runlevel changes.
 	 */
-	private static void onRunlevelChange() throws ApplicationException
+	private static void onRunlevelChange() throws ApplicationException.Error
 	{
-		EventDispatcher.callEventWithException( new RunlevelEvent( previousRunlevel, currentRunlevel ) );
+		Events.callEventWithException( new RunlevelEvent( previousRunlevel, currentRunlevel ) );
 
 		getApplication().onRunlevelChange( previousRunlevel, currentRunlevel );
 
-		/* Indicates the application has begun the main loop */
+		// TODO Register Foundation Resolver at STARTUP
+		// if ( currentRunlevel == Runlevel.STARTUP )
+		// Bindings.registerResolver( "io.amelia", new FoundationBindingResolver() );
+
+		// Indicates the application has begun the main loop
 		if ( currentRunlevel == Runlevel.MAINLOOP )
 			setRunlevel( Runlevel.NETWORKING );
 
-		/* Indicates the application has started all and any networking */
+		// Indicates the application has started all and any networking
 		if ( currentRunlevel == Runlevel.NETWORKING )
 			setRunlevel( Runlevel.STARTED );
 
-		/* Indicates the application is now started */
+		// Indicates the application is now started
 		if ( currentRunlevel == Runlevel.STARTED )
-			Foundation.L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Now Running! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+			Foundation.L.info( EnumColor.join( EnumColor.GOLD, EnumColor.NEGATIVE ) + "Now Running! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 
-		if ( currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.SHUTDOWN )
-		{
+		if ( currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.SHUTDOWN )
 			L.notice( currentRunlevelReason );
 
-			app.shutdown();
-		}
+		if ( currentRunlevel == Runlevel.CRASHED )
+			app.quitUnsafe();
+
+		if ( currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.SHUTDOWN )
+			app.quitSafely();
 
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 			Foundation.setRunlevel( Runlevel.DISPOSED );
@@ -192,11 +199,11 @@ public final class Foundation
 
 	public static void setRunlevel( Runlevel level, String reason )
 	{
-		ApplicationLooper mainLooper = getApplication().getRouter();
-		if ( mainLooper.isThreadJoined() )
+		ApplicationLooper mainLooper = getApplication().getRouter().getLooper();
+		if ( mainLooper.isHeldByCurrentThread() )
 			setRunlevel0( level, reason );
 		else
-			mainLooper.getQueue().postTask( () -> setRunlevel0( level, reason ) );
+			mainLooper.postTask( () -> setRunlevel0( level, reason ) );
 	}
 
 	private synchronized static void setRunlevel0( Runlevel level, String reason )
@@ -233,13 +240,13 @@ public final class Foundation
 			if ( level != Runlevel.DISPOSED && level != Runlevel.STARTED )
 				L.info( "Application Runlevel has been changed to " + level.name() + "! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 		}
-		catch ( ApplicationException e )
+		catch ( ApplicationException.Error e )
 		{
 			Kernel.handleExceptions( e );
 		}
 	}
 
-	public static void shutdown() throws ApplicationException
+	public static void shutdown() throws ApplicationException.Error
 	{
 		setRunlevel( Runlevel.SHUTDOWN );
 	}
@@ -250,7 +257,7 @@ public final class Foundation
 	 * <p>
 	 * start() will not return until the main looper quits.
 	 */
-	public static void start() throws ApplicationException
+	public static void start() throws ApplicationException.Error
 	{
 		requirePrimaryThread();
 		requireRunlevel( Runlevel.INITIALIZATION, "Start() must be called at runlevel INITIALIZATION" );
@@ -264,10 +271,10 @@ public final class Foundation
 		setRunlevel( Runlevel.STARTUP );
 
 		// This ensures the next set of runlevels are handled in sequence after the main looper is started.
-		ApplicationLooper mainLooper = getApplication().getRouter();
+		ApplicationLooper mainLooper = getApplication().getRouter().getLooper();
 
 		// As soon as the main Looper gets a kick in it's pants, the first runlevel is initiated.
-		mainLooper.getQueue().postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );
+		mainLooper.postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );
 
 		// Join this thread to the main looper.
 		mainLooper.joinLoop();
@@ -276,5 +283,30 @@ public final class Foundation
 	private Foundation()
 	{
 		// Static Access
+	}
+
+	public static class ConfigKeys
+	{
+		/**
+		 * Specifies built-in facades which can be registered here or by calling {@link io.amelia.foundation.binding.BoundNamespace#registerFacade(String, FacadeService, FacadePriority)}; {@see Bindings#bindNamespace(String)}}.
+		 * Benefits of using configuration for facade registration is it adds the ability for end-users to disable select facades, however, this should be used if the facade is used by scripts.
+		 *
+		 * <pre>
+		 * bindings:
+		 *   facades:
+		 *     permissions:
+		 *       class: io.amelia.foundation.facades.PermissionsService
+		 *       priority: NORMAL
+		 *     events:
+		 *       class: io.amelia.foundation.facades.EventService
+		 *       priority: NORMAL
+		 * </pre>
+		 */
+		public static final String BINDINGS_FACADES = "bindings.facades";
+
+		private ConfigKeys()
+		{
+			// Static Access
+		}
 	}
 }

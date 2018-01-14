@@ -7,9 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.messaging;
+package io.amelia.foundation.messaging;
 
-import io.amelia.events.EventException;
+import io.amelia.foundation.events.EventException;
 
 import java.util.List;
 

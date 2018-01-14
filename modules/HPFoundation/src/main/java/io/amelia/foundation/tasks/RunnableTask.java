@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.tasks;
+package io.amelia.foundation.tasks;
 
 
 import io.amelia.foundation.RegistrarBase;
@@ -26,7 +26,7 @@ public abstract class RunnableTask implements CallableTask
 	 */
 	public synchronized void cancel() throws IllegalStateException
 	{
-		TaskDispatcher.cancelTask( getTaskId() );
+		Tasks.cancelTask( getTaskId() );
 	}
 
 	private void checkState()
@@ -56,12 +56,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTask(RegistrarBase, CallableTask)
+	 * @see Tasks#runTask(RegistrarBase, CallableTask)
 	 */
 	public synchronized Task runTask( RegistrarBase creator ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTask( creator, this ) );
+		return setupId( Tasks.runTask( creator, this ) );
 	}
 
 	/**
@@ -74,12 +74,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTaskAsynchronously(RegistrarBase, CallableTask)
+	 * @see Tasks#runTaskAsynchronously(RegistrarBase, CallableTask)
 	 */
 	public synchronized Task runTaskAsynchronously( RegistrarBase creator ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTaskAsynchronously( creator, this ) );
+		return setupId( Tasks.runTaskAsynchronously( creator, this ) );
 	}
 
 	/**
@@ -90,12 +90,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTaskLater(RegistrarBase, long, CallableTask)
+	 * @see Tasks#runTaskLater(RegistrarBase, long, CallableTask)
 	 */
 	public synchronized Task runTaskLater( RegistrarBase creator, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTaskLater( creator, delay, this ) );
+		return setupId( Tasks.runTaskLater( creator, delay, this ) );
 	}
 
 	/**
@@ -109,12 +109,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTaskLaterAsynchronously(RegistrarBase, long, CallableTask)
+	 * @see Tasks#runTaskLaterAsynchronously(RegistrarBase, long, CallableTask)
 	 */
 	public synchronized Task runTaskLaterAsynchronously( RegistrarBase creator, long delay ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTaskLaterAsynchronously( creator, delay, this ) );
+		return setupId( Tasks.runTaskLaterAsynchronously( creator, delay, this ) );
 	}
 
 	/**
@@ -126,12 +126,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTaskTimer(RegistrarBase, long, long, CallableTask)
+	 * @see Tasks#runTaskTimer(RegistrarBase, long, long, CallableTask)
 	 */
 	public synchronized Task runTaskTimer( RegistrarBase creator, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTaskTimer( creator, delay, period, this ) );
+		return setupId( Tasks.runTaskTimer( creator, delay, period, this ) );
 	}
 
 	/**
@@ -147,12 +147,12 @@ public abstract class RunnableTask implements CallableTask
 	 * @return a ChioriTask that contains the id number
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
-	 * @see TaskDispatcher#runTaskTimerAsynchronously(RegistrarBase, long, long, CallableTask)
+	 * @see Tasks#runTaskTimerAsynchronously(RegistrarBase, long, long, CallableTask)
 	 */
 	public synchronized Task runTaskTimerAsynchronously( RegistrarBase creator, long delay, long period ) throws IllegalArgumentException, IllegalStateException
 	{
 		checkState();
-		return setupId( TaskDispatcher.runTaskTimerAsynchronously( creator, delay, period, this ) );
+		return setupId( Tasks.runTaskTimerAsynchronously( creator, delay, period, this ) );
 	}
 
 	private Task setupId( final Task task )

@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.events;
+package io.amelia.foundation.events;
 
 /**
  * Represents an event's priority in execution

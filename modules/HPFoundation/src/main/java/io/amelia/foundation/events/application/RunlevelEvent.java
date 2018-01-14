@@ -7,9 +7,9 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.events.application;
+package io.amelia.foundation.events.application;
 
-import io.amelia.lang.Runlevel;
+import io.amelia.support.Runlevel;
 
 public class RunlevelEvent extends ApplicationEvent
 {

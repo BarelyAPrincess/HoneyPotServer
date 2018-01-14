@@ -149,7 +149,7 @@ public class GlobalReference<ValueType>
 	 * @param function The function to receive and return the value.
 	 * @return Was it a success
 	 */
-	public boolean sync( NotNullFunction<ValueType, ValueType> function )
+	public boolean sync( NonnullFunction<ValueType, ValueType> function )
 	{
 		LockState state = acquireLock();
 
@@ -218,7 +218,7 @@ public class GlobalReference<ValueType>
 		return false;
 	}
 
-	public boolean trySync( NotNullFunction<ValueType, ValueType> function )
+	public boolean trySync( NonnullFunction<ValueType, ValueType> function )
 	{
 		LockState state = acquireLock();
 

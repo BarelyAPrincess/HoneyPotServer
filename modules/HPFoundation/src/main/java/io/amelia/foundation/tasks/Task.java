@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.tasks;
+package io.amelia.foundation.tasks;
 
 import io.amelia.foundation.RegistrarBase;
 
@@ -50,7 +50,7 @@ public class Task implements ITask, Runnable
 	@Override
 	public void cancel()
 	{
-		TaskDispatcher.cancelTask( id );
+		Tasks.cancelTask( id );
 	}
 
 	@Override

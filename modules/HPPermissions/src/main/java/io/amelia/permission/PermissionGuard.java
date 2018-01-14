@@ -10,9 +10,9 @@
 package io.amelia.permission;
 
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.EventHandler;
-import io.amelia.events.EventPriority;
+import io.amelia.foundation.events.EventDispatcher;
+import io.amelia.foundation.events.EventHandler;
+import io.amelia.foundation.events.EventPriority;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.binding.AppBindings;
 import io.amelia.foundation.facades.interfaces.PermissionService;
@@ -30,8 +30,8 @@ import io.amelia.permission.event.PermissibleEvent;
 import io.amelia.permission.event.PermissibleSystemEvent;
 import io.amelia.permission.lang.PermissionBackendException;
 import io.amelia.support.Objs;
-import io.amelia.tasks.CallableTask;
-import io.amelia.tasks.TaskDispatcher;
+import io.amelia.foundation.tasks.CallableTask;
+import io.amelia.foundation.tasks.TaskDispatcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;

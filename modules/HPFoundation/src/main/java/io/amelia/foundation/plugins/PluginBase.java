@@ -9,15 +9,15 @@
  */
 package io.amelia.foundation.plugins;
 
+import java.io.File;
+import java.io.InputStream;
+
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
 
-import java.io.File;
-import java.io.InputStream;
-
-public abstract class PluginBase extends RegistrarBase
+public abstract class PluginBase implements RegistrarBase
 {
 	@Override
 	public final boolean equals( Object obj )
@@ -87,6 +87,7 @@ public abstract class PluginBase extends RegistrarBase
 	 * Gets an embedded resource in this plugin
 	 *
 	 * @param filename Filename of the resource
+	 *
 	 * @return File if found, otherwise null
 	 */
 	public abstract InputStream getResource( String filename );
@@ -163,6 +164,7 @@ public abstract class PluginBase extends RegistrarBase
 	 *
 	 * @param resourcePath the embedded resource path to look for within the plugin's .jar file. (No preceding slash).
 	 * @param replace      if true, the embedded resource will overwrite the contents of an existing file.
+	 *
 	 * @throws IllegalArgumentException if the resource path is null, empty, or points to a nonexistent resource.
 	 */
 	public abstract void saveResource( String resourcePath, boolean replace );

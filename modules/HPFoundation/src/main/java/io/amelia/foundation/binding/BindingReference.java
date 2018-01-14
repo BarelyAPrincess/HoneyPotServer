@@ -1,24 +1,31 @@
 package io.amelia.foundation.binding;
 
+import java.util.Optional;
+
 import io.amelia.lang.ParcelableException;
 import io.amelia.support.data.StackerWithValue;
 
 @SuppressWarnings( "unchecked" )
-public final class BindingBase extends StackerWithValue<BindingBase, Object>
+public final class BindingReference extends StackerWithValue<BindingReference, Object>
 {
-	protected BindingBase( String key )
+	protected BindingReference( String key )
 	{
-		super( BindingBase::new, key );
+		super( BindingReference::new, key );
 	}
 
-	protected BindingBase( BindingBase parent, String key )
+	protected BindingReference( BindingReference parent, String key )
 	{
-		super( BindingBase::new, parent, key );
+		super( BindingReference::new, parent, key );
 	}
 
-	protected BindingBase( BindingBase parent, String key, Object value )
+	protected BindingReference( BindingReference parent, String key, Object value )
 	{
-		super( BindingBase::new, parent, key, value );
+		super( BindingReference::new, parent, key, value );
+	}
+
+	public <T> Optional<T> getValue( String key, Class<T> cls )
+	{
+		return getValue( key ).filter( obj -> cls.isAssignableFrom( obj.getClass() ) ).map( obj -> ( T ) obj );
 	}
 
 	@Override

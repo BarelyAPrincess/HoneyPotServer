@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention( RetentionPolicy.RUNTIME )
 @Target( ElementType.PARAMETER )
-public @interface BindingKey
+public @interface BindingNamespace
 {
 	String value();
 }

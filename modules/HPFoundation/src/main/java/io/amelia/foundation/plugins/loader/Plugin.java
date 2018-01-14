@@ -13,7 +13,7 @@ import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.PluginBase;
-import io.amelia.foundation.plugins.PluginManager;
+import io.amelia.foundation.plugins.Plugins;
 import io.amelia.foundation.plugins.PluginMeta;
 import io.amelia.lang.PluginException;
 import io.amelia.logcompat.Logger;
@@ -326,7 +326,7 @@ public abstract class Plugin extends PluginBase
 
 	public final Logger getLogger()
 	{
-		return PluginManager.L.getLogger( this );
+		return Plugins.L.getLogger( this );
 	}
 
 	public VendorMeta getPluginMeta()

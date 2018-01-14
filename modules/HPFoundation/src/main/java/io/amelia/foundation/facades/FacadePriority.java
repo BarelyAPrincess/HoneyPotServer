@@ -15,5 +15,10 @@ public enum FacadePriority
 	LOW,
 	NORMAL,
 	HIGH,
-	HIGHEST
+	HIGHEST,
+	/**
+	 * Prevent new facades from overriding this facade.
+	 * Internal use only!
+	 */
+	STRICT
 }

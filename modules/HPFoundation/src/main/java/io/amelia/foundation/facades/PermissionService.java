@@ -1,4 +1,4 @@
-package io.amelia.foundation.facades.interfaces;
+package io.amelia.foundation.facades;
 
 public interface PermissionService extends FacadeService
 {

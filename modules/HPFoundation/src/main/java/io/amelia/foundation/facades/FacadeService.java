@@ -1,8 +1,8 @@
-package io.amelia.foundation.facades.interfaces;
+package io.amelia.foundation.facades;
 
 import io.amelia.lang.ApplicationException;
 
 public interface FacadeService
 {
-	void onDestory() throws ApplicationException;
+	void onDestory() throws ApplicationException.Error;
 }

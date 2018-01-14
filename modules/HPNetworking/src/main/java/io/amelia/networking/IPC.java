@@ -10,16 +10,14 @@ public class IPC
 {
 	public static void start()
 	{
-		udp().sendPacket( new PacketRequestInfo(), r ->
-		{
+		udp().sendPacket( new PacketRequestInfo(), r -> {
 
 		} );
 	}
 
 	public static void status()
 	{
-		udp().sendPacket( new PacketRequestInfo(), r ->
-		{
+		udp().sendPacket( new PacketRequestInfo(), r -> {
 			Kernel.L.info( "Found Instance: " + r.instanceId + " with IP " + r.ipAddress );
 		} );
 	}
@@ -28,8 +26,7 @@ public class IPC
 	{
 		try
 		{
-			udp().sendPacket( new PacketRequestStop( instanceId ), r ->
-			{
+			udp().sendPacket( new PacketRequestStop( instanceId ), r -> {
 
 			} );
 		}

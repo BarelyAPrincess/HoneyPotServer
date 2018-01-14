@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import io.amelia.foundation.Kernel;
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Kernel;
 
 public class Namespace extends NamespaceBase<Namespace>
 {
@@ -35,7 +35,7 @@ public class Namespace extends NamespaceBase<Namespace>
 
 	public static boolean isTld( String domain )
 	{
-		domain = Web.normalize( domain );
+		domain = Web.hostnameNormalize( domain );
 		for ( String tld : tldMaps )
 			if ( domain.matches( tld ) )
 				return true;
@@ -44,7 +44,7 @@ public class Namespace extends NamespaceBase<Namespace>
 
 	public static Domain parseDomain( String namespace )
 	{
-		namespace = Web.normalize( namespace );
+		namespace = Web.hostnameNormalize( namespace );
 
 		if ( Objs.isEmpty( namespace ) )
 			return new Domain( new Namespace(), new Namespace() );

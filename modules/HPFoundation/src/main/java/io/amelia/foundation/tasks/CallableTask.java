@@ -1,4 +1,4 @@
-package io.amelia.tasks;
+package io.amelia.foundation.tasks;
 
 @FunctionalInterface
 public interface CallableTask

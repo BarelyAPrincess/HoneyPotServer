@@ -26,9 +26,9 @@ import com.google.common.collect.Sets;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
 import io.amelia.lang.EnumColor;
-import io.amelia.messaging.MessageBuilder;
-import io.amelia.messaging.MessageDispatch;
-import io.amelia.messaging.MessageException;
+import io.amelia.foundation.messaging.MessageBuilder;
+import io.amelia.foundation.messaging.MessageDispatch;
+import io.amelia.foundation.messaging.MessageException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collection;

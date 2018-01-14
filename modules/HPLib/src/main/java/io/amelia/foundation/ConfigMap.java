@@ -36,11 +36,12 @@ public final class ConfigMap extends StackerWithValue<ConfigMap, Object> impleme
 
 	void loadNewValue( Object obj )
 	{
+		disposeCheck();
 		// A loaded value is only set if the current value is null, was never set, or the new value hash doesn't match the loaded one.
 		if ( loadedValueHash == null || value == null || !ParcelLoader.hashObject( obj ).equals( loadedValueHash ) )
 		{
 			loadedValueHash = ParcelLoader.hashObject( obj );
-			setValueIgnoreFlags( obj );
+			updateValue( obj );
 		}
 	}
 

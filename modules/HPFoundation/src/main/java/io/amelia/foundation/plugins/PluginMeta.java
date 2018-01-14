@@ -9,15 +9,6 @@
  */
 package io.amelia.foundation.plugins;
 
-import io.amelia.foundation.ConfigLoader;
-import io.amelia.foundation.ConfigMap;
-import io.amelia.foundation.MetaMap;
-import io.amelia.foundation.VendorMeta;
-import io.amelia.injection.MavenReference;
-import io.amelia.lang.PluginMetaException;
-import io.amelia.lang.Runlevel;
-import io.amelia.support.Lists;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.MetaMap;
+import io.amelia.foundation.VendorMeta;
+import io.amelia.injection.MavenReference;
+import io.amelia.lang.PluginMetaException;
+import io.amelia.support.Lists;
+import io.amelia.support.Runlevel;
+import io.amelia.support.data.ParcelLoader;
 
 /**
  * This type is the runtime-container for the information in the plugin.yaml. All plugins must have a respective
@@ -145,14 +145,14 @@ public class PluginMeta extends VendorMeta
 		super( file );
 	}
 
-	public PluginMeta( final InputStream stream, ConfigLoader.StreamType streamType ) throws IOException
-	{
-		super( stream, streamType );
-	}
-
 	public PluginMeta( final ConfigMap config )
 	{
 		super( config );
+	}
+
+	public PluginMeta( final InputStream inputStream, ParcelLoader.Type type ) throws IOException
+	{
+		super( inputStream, type );
 	}
 
 	/**
@@ -209,15 +209,14 @@ public class PluginMeta extends VendorMeta
 	 */
 	public List<MavenReference> getLibraries()
 	{
-		return getList( "libraries", "|", e ->
-		{
+		return getList( "libraries", "|", e -> {
 			try
 			{
 				return new MavenReference( getName(), e );
 			}
 			catch ( IllegalArgumentException ee )
 			{
-				PluginManager.L.severe( "Could not parse the library '" + e + "' for plugin '" + getName() + "', expected pattern 'group:name:version'. Unless fixed, it will be ignored.", ee );
+				Plugins.L.severe( "Could not parse the library '" + e + "' for plugin '" + getName() + "', expected pattern 'group:name:version'. Unless fixed, it will be ignored.", ee );
 			}
 			return null;
 		} );
@@ -364,7 +363,7 @@ public class PluginMeta extends VendorMeta
 	}
 
 	/**
-	 * Gives a list of other plugins that the plugin requires for full functionality. The {@link PluginManager} will make
+	 * Gives a list of other plugins that the plugin requires for full functionality. The {@link Plugins} will make
 	 * best effort to treat all entries here as if they were a {@link #getDepend() dependency}, but will never fail
 	 * because of one of these entries.
 	 * <ul>

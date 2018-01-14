@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.IDN;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
@@ -68,15 +67,7 @@ public class Web
 		return Kernel.getDevMeta().getProductName() + "/" + Kernel.getDevMeta().getVersion() + "/" + Sys.getJavaVersion();
 	}
 
-	public static boolean matches( String strTemplate, String str )
-	{
-		if ( DNS_WILDCARD_PATTERN.matcher( strTemplate ).matches() )
-			return strTemplate.substring( 2 ).equals( str ) || str.endsWith( strTemplate.substring( 1 ) );
-		else
-			return strTemplate.equals( str );
-	}
-
-	public static boolean needsNormalization( String str )
+	public static boolean hostnameNeedsNormalization( String str )
 	{
 		final int length = str.length();
 		for ( int i = 0; i < length; i++ )
@@ -88,20 +79,31 @@ public class Web
 		return false;
 	}
 
-	public static String normalize( String str )
+	public static String hostnameNormalize( String str )
 	{
 		if ( str == null )
 			return null;
-		if ( needsNormalization( str ) )
-			str = IDN.toASCII( str, IDN.ALLOW_UNASSIGNED );
+		if ( hostnameNeedsNormalization( str ) )
+			str = Strs.toAscii( str );
+		// str = IDN.toASCII( str, IDN.ALLOW_UNASSIGNED );
 		return str.toLowerCase( Locale.US );
+	}
+
+	public static boolean matches( String strTemplate, String str )
+	{
+		if ( DNS_WILDCARD_PATTERN.matcher( strTemplate ).matches() )
+			return strTemplate.substring( 2 ).equals( str ) || str.endsWith( strTemplate.substring( 1 ) );
+		else
+			return strTemplate.equals( str );
 	}
 
 	/**
 	 * Establishes an HttpURLConnection from a URL, with the correct configuration to receive content from the given URL.
 	 *
 	 * @param url The URL to set up and receive content from
+	 *
 	 * @return A valid HttpURLConnection
+	 *
 	 * @throws IOException The openConnection() method throws an IOException and the calling method is responsible for handling it.
 	 */
 	public static HttpURLConnection openHttpConnection( URL url ) throws IOException
@@ -122,6 +124,7 @@ public class Web
 	 * and we can successfully open a stream to the content.
 	 *
 	 * @param url The HTTP URL indicating the location of the content.
+	 *
 	 * @return True if the content can be accessed successfully, false otherwise.
 	 */
 	public static boolean pingHttpURL( String url )

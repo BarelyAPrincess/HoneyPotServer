@@ -34,6 +34,18 @@ public class StackerListener
 		void listen( B target, T oldValue, T newValue );
 	}
 
+	@FunctionalInterface
+	public interface OnValueRemove<B, T>
+	{
+		void listen( B target, T oldValue );
+	}
+
+	@FunctionalInterface
+	public interface OnValueStore<B, T>
+	{
+		void listen( B target, T newValue );
+	}
+
 	static abstract class Container
 	{
 		final EnumSet<Flags> flags;

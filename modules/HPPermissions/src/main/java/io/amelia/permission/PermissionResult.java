@@ -11,7 +11,7 @@ package io.amelia.permission;
 
 import io.amelia.permission.lang.PermissionException;
 import io.amelia.permission.lang.PermissionValueException;
-import io.amelia.tasks.Timings;
+import io.amelia.foundation.tasks.Timings;
 import io.amelia.support.Objs;
 
 /**

@@ -1,9 +1,9 @@
 package io.amelia.foundation;
 
+import io.amelia.foundation.tasks.Tasks;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.Runlevel;
 import io.amelia.logcompat.LogBuilder;
-import io.amelia.tasks.TaskDispatcher;
+import io.amelia.support.Runlevel;
 
 /**
  * Implements a basic application environment with modules Config, Tasks, Events.
@@ -17,13 +17,19 @@ public abstract class DefaultApplication extends ApplicationInterface
 		System.setProperty( "file.encoding", "utf-8" );
 	}
 
+	public DefaultApplication()
+	{
+		// CommandDispatch.handleCommands();
+		getRouter().onTick( ( currentTick, averageTick ) -> Tasks.heartbeat( currentTick ) );
+	}
+
 	@Override
-	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException
+	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error
 	{
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 		{
 			LogBuilder.get().info( "Shutting Down Task Manager..." );
-			TaskDispatcher.shutdown();
+			Tasks.shutdown();
 
 			LogBuilder.get().info( "Saving Configuration..." );
 			ConfigRegistry.save();
@@ -39,12 +45,5 @@ public abstract class DefaultApplication extends ApplicationInterface
 				Foundation.L.warning( "Cache directory is invalid!" );
 			}
 		}
-	}
-
-	@Override
-	protected void onTick( int currentTick, float averageTick ) throws ApplicationException
-	{
-		// CommandDispatch.handleCommands();
-		TaskDispatcher.heartbeat( currentTick );
 	}
 }
