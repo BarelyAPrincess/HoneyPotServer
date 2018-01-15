@@ -68,13 +68,13 @@ public class ParcelCarrier
 	 */
 	private Parcel payload;
 	/**
-	 * Receivers have the ability to process queued incoming messages.
-	 */
-	private ApplicationRouter target;
-	/**
 	 * Indicates the location of the PostalSender. This will either be local or remote over a network connection.
 	 */
 	private ApplicationRouter source;
+	/**
+	 * Receivers have the ability to process queued incoming messages.
+	 */
+	private ApplicationRouter target;
 
 	ParcelCarrier()
 	{

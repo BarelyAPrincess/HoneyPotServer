@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="HoneyPotServer:test" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="1.0.0-git+H1ae4610" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="HoneyPotServer:test" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="null.null.null-git+H32b884c" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output-test url="file://$MODULE_DIR$/../../out/test/classes" />
     <exclude-output />
@@ -12,8 +12,6 @@
     <orderEntry type="module" module-name="HoneyPotServer_main" />
     <orderEntry type="module" module-name="HPLib_main" />
     <orderEntry type="module" module-name="HPFoundation_main" />
-    <orderEntry type="module" module-name="HPConfig_main" />
-    <orderEntry type="module" module-name="HPPlugins_main" />
     <orderEntry type="module" module-name="HPScripting_main" />
     <orderEntry type="module" module-name="HPPermissions_main" />
     <orderEntry type="module" module-name="HPNetworking_main" />

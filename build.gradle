@@ -87,7 +87,6 @@ dependencies {
 
 	compile project( ':HPLib' )
 	compile project( ':HPFoundation' )
-	compile project( ':HPPlugins' )
 	compile project( ':HPScripting' )
 	compile project( ':HPPermissions' )
 	compile project( ':HPNetworking' )

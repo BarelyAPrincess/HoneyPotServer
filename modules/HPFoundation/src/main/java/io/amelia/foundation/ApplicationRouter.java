@@ -214,9 +214,7 @@ public class ApplicationRouter
 	public String getMessageName( ParcelCarrier message )
 	{
 		if ( message.callback != null )
-		{
 			return message.callback.getClass().getName();
-		}
 		return "0x" + Integer.toHexString( message.what );
 	}
 

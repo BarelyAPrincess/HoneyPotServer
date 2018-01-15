@@ -7,6 +7,7 @@ import io.amelia.networking.udp.UDPWorker;
 import io.amelia.support.data.Parcel;
 import io.amelia.support.Encrypt;
 import io.amelia.support.NIO;
+import io.amelia.support.data.ParcelLoader;
 import io.amelia.support.data.StackerBase;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -52,7 +53,7 @@ public abstract class NetworkMessage
 
 		dataLastReceived = new Parcel();
 
-		dataLastReceived = Parcel.parseStream( NIO.readByteBufToInputStream( encoded ), ConfigLoader.StreamType.JSON );
+		dataLastReceived = ParcelLoader.decodeJson( NIO.readByteBufToInputStream( encoded ) );
 
 		dataLastReceived.addFlag( StackerBase.Flag.READ_ONLY );
 	}

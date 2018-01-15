@@ -21,7 +21,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar
+public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ApplicationRegistry.ApplicationChannel
 {
 	private final OptionParser optionParser = new OptionParser();
 	private final ApplicationRouter router;
@@ -127,6 +127,12 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	public boolean isMainThread()
 	{
 		return router.isPrimaryThread();
+	}
+
+	@Override
+	public final boolean isRemote()
+	{
+		return false;
 	}
 
 	public abstract void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error;

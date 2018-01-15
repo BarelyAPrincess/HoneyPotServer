@@ -18,7 +18,7 @@ dependencies {
 
 	compile project( ':HPLib' )
 	compile project( ':HPLog' )
-	compile project( ':HPConfig' )
+	compile project( ':HPFoundation' )
 
 	compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'

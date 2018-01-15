@@ -15,17 +15,17 @@ public final class ApplicationException
 {
 	public static Error error( String message )
 	{
-		return new Error( ReportingLevel.E_ERROR, message );
+		return new Error( message );
 	}
 
 	public static Error error( String message, Throwable cause )
 	{
-		return new Error( ReportingLevel.E_ERROR, message, cause );
+		return new Error( message, cause );
 	}
 
 	public static Error error( Throwable cause )
 	{
-		return new Error( ReportingLevel.E_ERROR, cause );
+		return new Error( cause );
 	}
 
 	public static Ignorable ignorable( String message )
@@ -60,22 +60,22 @@ public final class ApplicationException
 
 	public static Runtime runtime( String message )
 	{
-		return new Runtime( ReportingLevel.E_USER_ERROR, message );
+		return new Runtime( message );
 	}
 
 	public static Runtime runtime( Throwable cause )
 	{
-		return new Runtime( ReportingLevel.E_USER_ERROR, cause );
+		return new Runtime( cause );
 	}
 
 	public static Runtime runtime( String message, Throwable cause )
 	{
-		return new Runtime( ReportingLevel.E_USER_ERROR, message, cause );
+		return new Runtime( message, cause );
 	}
 
 	private ApplicationException()
 	{
-		// Static Wrapper Class
+		// Static
 	}
 
 	public static class Error extends Exception implements ExceptionContext
