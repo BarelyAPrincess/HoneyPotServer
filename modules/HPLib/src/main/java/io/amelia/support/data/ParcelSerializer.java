@@ -6,7 +6,7 @@ import io.amelia.lang.ParcelableException;
  * Interface for implementing an object serializer.
  * <p>
  * You can register the serializer by either calling {@link Parcel.Factory#registerClassSerializer(Class, ParcelSerializer)}
- * or by adding the {@link Parcelable} annotation to the coupled object class.
+ * or by adding the {@link Parcelable} annotation to any class to be serialized.
  * <p>
  * Ex:
  * <pre>

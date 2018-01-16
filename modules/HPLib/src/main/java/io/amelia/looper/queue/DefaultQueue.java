@@ -12,20 +12,14 @@ import io.amelia.support.DateAndTime;
 
 /**
  * Low-level class holding the list of {@link AbstractEntry entries} and sometimes {@link Runnable tasks}.
- * Tasks are posted directly to the queue, while messages are through the {@link ApplicationRouter} associated with the {@link AbstractLooper}.
  * <p>
- * You can retrieve the looper for the current thread with {@link ApplicationLooper.Factory#obtain()}
- * You can retrieve the queue for the looper from {@link ApplicationLooper#getQueue()}
+ * You can retrieve the looper for the current thread with {@link io.amelia.looper.LooperFactory#obtain()}
+ * You can retrieve the queue for the looper from {@link AbstractLooper#getQueue()}
  */
 public class DefaultQueue extends AbstractQueue
 {
 	protected final NavigableSet<AbstractEntry> entries = new TreeSet<>();
-	protected final AbstractLooper looper;
-
-	public DefaultQueue( AbstractLooper looper )
-	{
-		this.looper = looper;
-	}
+	protected AbstractLooper looper;
 
 	public void cancel( long id )
 	{
@@ -245,7 +239,7 @@ public class DefaultQueue extends AbstractQueue
 		if ( !removePendingMessages )
 			return;
 
-		if ( !looper.isHeldByCurrentThread() )
+		if ( !looper.isLockedByCurrentThread() )
 			throw ApplicationException.runtime( "Looper must be locked by this thread to quit the LooperQueue." );
 
 		final long now = System.currentTimeMillis();

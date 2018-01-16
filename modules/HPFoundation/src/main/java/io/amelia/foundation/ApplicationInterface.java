@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import io.amelia.foundation.parcel.ParcelChannel;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
@@ -21,11 +22,12 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ApplicationRegistry.ApplicationChannel
+public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ParcelChannel
 {
 	private final OptionParser optionParser = new OptionParser();
 	private final ApplicationRouter router;
 	private Env env = null;
+	private ApplicationLooper looper;
 	private OptionSet optionSet = null;
 
 	public ApplicationInterface()
@@ -79,6 +81,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	public String getId()
 	{
 		return env.getString( "applicationId" );
+	}
+
+	public ApplicationLooper getLooper()
+	{
+		return looper;
 	}
 
 	public OptionParser getOptionParser()

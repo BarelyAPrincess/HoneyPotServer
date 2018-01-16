@@ -12,7 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.Runlevel;
 import io.amelia.looper.queue.AbstractQueue;
 
 /**
@@ -25,6 +24,11 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 */
 	private static volatile AtomicLong UNIQUE = new AtomicLong( 0L );
 
+	/**
+	 * Returns a globally unique id number, generally used for queue entry id numbers.
+	 *
+	 * @return Global unique id number, only limited by {@link Long#MAX_VALUE}.
+	 */
 	public static long getGloballyUniqueId()
 	{
 		return UNIQUE.getAndIncrement();
@@ -34,44 +38,49 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 * The Looper Queue
 	 */
 	final Q queue;
+
 	/**
 	 * List of threads that were spawned by this Looper.
 	 * Used to obtain() this Looper from a async thread.
 	 */
 	private final List<WeakReference<Thread>> aliasThreads = new ArrayList<>();
+
 	/**
 	 * The Looper Flags
 	 */
 	private final EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
+
 	/**
 	 * Used to synchronize certain methods with the loop, so to avoid concurrent and/or race issues
 	 */
 	private final ReentrantLock lock = new ReentrantLock();
+
 	/**
 	 * States the average millis between iterations.
 	 */
 	private long averagePolledMillis = 0L;
+
 	/**
 	 * Indicates the Looper is overloaded.
 	 */
 	private boolean isOverloaded = false;
+
 	/**
 	 * Indicates the Looper is preparing to quit.
 	 */
 	private boolean isQuitting = false;
+
 	/**
 	 * Stores the amount of time that has past between iterations.
 	 */
 	private long lastPolledMillis = 0L;
+
 	/**
 	 * Reference to the thread running this Looper.
 	 * Remains null until {@link #joinLoop()} is called.
 	 */
 	private Thread thread = null;
 
-	/**
-	 * @hide
-	 */
 	public AbstractLooper( Q queue, Flag... flags )
 	{
 		this.queue = queue;
@@ -137,12 +146,33 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		return flags.contains( flag );
 	}
 
-	public boolean isDisposed()
+	public abstract boolean isDisposed();
+
+	/**
+	 * Returns true if this Looper belongs to this the current thread.
+	 * Will also check child threads and return true as well.
+	 *
+	 * @return True if the current thread is the same as the one used in {@link #joinLoop()}
+	 */
+	public boolean isHeldByCurrentThread()
 	{
-		return !loopers.contains( this );
+		if ( thread == null )
+			return false;
+		Thread currentThread = Thread.currentThread();
+		if ( thread == currentThread )
+			return true;
+		synchronized ( aliasThreads )
+		{
+			for ( WeakReference<Thread> threadReference : aliasThreads )
+				if ( threadReference.get() == null )
+					aliasThreads.remove( threadReference );
+				else if ( threadReference.get() == currentThread )
+					return true;
+		}
+		return false;
 	}
 
-	public boolean isHeldByCurrentThread()
+	public boolean isLockedByCurrentThread()
 	{
 		return lock.isHeldByCurrentThread();
 	}
@@ -172,28 +202,9 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		return thread != null;
 	}
 
-	/**
-	 * Returns true if this Looper belongs to this the current thread.
-	 * Will also check child threads and return true as well.
-	 *
-	 * @return True if the current thread is the same as the one used in {@link #joinLoop()}
-	 */
 	public boolean isThreadJoined()
 	{
-		if ( thread == null )
-			return false;
-		Thread currentThread = Thread.currentThread();
-		if ( thread == currentThread )
-			return true;
-		synchronized ( aliasThreads )
-		{
-			for ( WeakReference<Thread> threadReference : aliasThreads )
-				if ( threadReference.get() == null )
-					aliasThreads.remove( threadReference );
-				else if ( threadReference.get() == currentThread )
-					return true;
-		}
-		return false;
+		return thread != null;
 	}
 
 	/**
@@ -227,7 +238,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 				// Prevent negative numbers and warn
 				if ( lastPolledMillis < 0L )
 				{
-					L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
+					Kernel.L.warning( "[" + getName() + "] Time ran backwards! Did the system time change?" );
 					lastPolledMillis = 0L;
 				}
 
@@ -239,7 +250,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 				{
 					if ( loopStartMillis - lastWarningMillis >= 15000L && ConfigRegistry.config.isTrue( ConfigRegistry.ConfigKeys.WARN_ON_OVERLOAD ) )
 					{
-						L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
+						Kernel.L.warning( "[" + getName() + "] Can't keep up! Did the system time change, or is it overloaded?" );
 						lastWarningMillis = loopStartMillis;
 					}
 					isOverloaded = true;
@@ -281,12 +292,8 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		}
 	}
 
-	private void quit( boolean removePendingMessages )
+	protected void quit( boolean removePendingMessages )
 	{
-		// SYSTEM Loopers are meant to run perpetually and can only quit during the DISPOSED runlevel.
-		if ( hasFlag( Flag.SYSTEM ) && Foundation.getRunlevel() != Runlevel.DISPOSED )
-			throw ApplicationException.runtime( "SYSTEM Looper is not permitted to quit." );
-
 		// If we're already quitting or have been disposed, return immediately.
 		if ( isQuitting() || isDisposed() )
 			return;
@@ -318,10 +325,9 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 * before the looper terminates.  Consider using {@link #quitSafely} instead to ensure
 	 * that all pending work is completed in an orderly manner.
 	 *
-	 * @hide
 	 * @see #quitSafely
 	 */
-	public void quitAndDestroy()
+	public final void quitAndDestroy()
 	{
 		quit( true );
 	}
@@ -329,10 +335,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	/**
 	 * Does some final tasks before the Looper is permanently disposed of.
 	 */
-	private void quitFinal()
-	{
-		loopers.remove( this );
-	}
+	protected abstract void quitFinal();
 
 	/**
 	 * Quits the looper safely.
@@ -342,7 +345,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 * However pending delayed messages with due times in the future will not be
 	 * delivered before the loop terminates.
 	 */
-	public void quitSafely()
+	public final void quitSafely()
 	{
 		quit( false );
 	}
@@ -373,7 +376,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 * Executes {@link Runnable} on a new thread, i.e., async.
 	 * <p>
 	 * We also add the new thread to the aliases, such that calls to
-	 * the {@link AbstractLooper.Factory#obtain()} returns this {@link AbstractLooper}.
+	 * the {@link LooperFactory#obtain()} returns this {@link AbstractLooper}.
 	 * <p>
 	 * This also prevents a async task from creating a new Looper by accident.
 	 */

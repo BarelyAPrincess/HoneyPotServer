@@ -20,23 +20,26 @@ public final class DefaultLooper extends AbstractLooper<DefaultQueue>
 
 	public boolean isDisposed()
 	{
-		return !FACTORY.contains( this );
+		return !FACTORY.hasLooper( this );
+	}
+
+	@Override
+	protected void quitFinal()
+	{
+		FACTORY.remove( this );
 	}
 
 	@Override
 	protected void tick( long loopStartMillis )
 	{
 		// Call the actual loop logic.
-		DefaultQueue.Result result = queue.next( loopStartMillis );
+		AbstractQueue.Result result = queue.next( loopStartMillis );
 
 		// A queue entry was successful returned and can now be ran then recycled.
 		if ( result == AbstractQueue.Result.SUCCESS )
 		{
 			// As of now, the only entry returned on the SUCCESS result is the RunnableEntry (or more so TaskEntry and ParcelEntry).
-			EntryRunnable entry = ( EntryRunnable ) queue.getLastEntry();
-
-			if ( !( entry instanceof EntryParcel ) && !( entry instanceof LooperTaskTrait.TaskEntry ) )
-				throw new IllegalStateException( "BUG? Unimplemented QueueEntry subclass " + entry.getClass().getSimpleName() );
+			EntryRunnable entry = ( EntryRunnable ) queue.getActiveEntry();
 
 			entry.markFinalized();
 			entry.run();

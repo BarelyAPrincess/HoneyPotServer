@@ -265,6 +265,12 @@ public abstract class StackerWithValue<BaseClass extends StackerWithValue<BaseCl
 			consumer.accept( child.value );
 	}
 
+	public final boolean hasValue( String key )
+	{
+		BaseClass child = findChild( key, false );
+		return child != null && child.hasValue();
+	}
+
 	public boolean hasValue()
 	{
 		return value != null;

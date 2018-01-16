@@ -3,6 +3,7 @@ package io.amelia.foundation;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
+import io.amelia.foundation.parcel.ParcelCarrier;
 import io.amelia.looper.queue.EntryRunnable;
 import io.amelia.looper.queue.DefaultQueue;
 

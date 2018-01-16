@@ -20,6 +20,11 @@ public abstract class AbstractQueue
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private Condition blockingCondition = lock.writeLock().newCondition();
 
+	public AbstractQueue()
+	{
+		this( new TriEnum<>() );
+	}
+
 	public AbstractQueue( TriEnum<Flag> flags )
 	{
 		if ( flags.isUnset( Flag.BLOCKING ) )
@@ -217,7 +222,7 @@ public abstract class AbstractQueue
 	 */
 	protected abstract Result processEntry( AbstractEntry activeEntry, long now );
 
-	abstract void quit( boolean removePendingMessages );
+	public abstract void quit( boolean removePendingMessages );
 
 	protected final Lock readLock()
 	{
@@ -258,7 +263,7 @@ public abstract class AbstractQueue
 		BLOCKING
 	}
 
-	enum Result
+	public enum Result
 	{
 		/**
 		 * Indicates the queue is new or something has changed since the last time next() was called.

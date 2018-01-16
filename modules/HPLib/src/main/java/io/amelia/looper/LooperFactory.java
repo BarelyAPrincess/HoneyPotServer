@@ -21,6 +21,11 @@ public final class LooperFactory<L extends AbstractLooper>
 		this.supplier = supplier;
 	}
 
+	public boolean hasLooper( L looper )
+	{
+		return loopers.contains( looper );
+	}
+
 	/**
 	 * Destroys the Looper associated with the calling Thread.
 	 *
@@ -107,6 +112,11 @@ public final class LooperFactory<L extends AbstractLooper>
 	 */
 	AbstractLooper peek()
 	{
-		return peek( AbstractLooper::isThreadJoined ).findFirst().orElse( null );
+		return peek( AbstractLooper::isHeldByCurrentThread ).findFirst().orElse( null );
+	}
+
+	void remove( L looper )
+	{
+		loopers.remove( looper );
 	}
 }

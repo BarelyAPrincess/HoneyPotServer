@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.foundation.parcel.ParcelCarrier;
+import io.amelia.foundation.parcel.ParcelReceiver;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.support.Objs;
@@ -20,20 +22,19 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private static final Logger L = LogBuilder.get( AsyncTask.class );
 	private static final int MESSAGE_POST_PROGRESS = 0x2;
 	private static final int MESSAGE_POST_RESULT = 0x1;
-	private static ApplicationRouter sHandler;
+	private static ParcelReceiver receiver;
 
-	private static ApplicationRouter getHandler()
+	private static ParcelReceiver getReceiver()
 	{
 		synchronized ( AsyncTask.class )
 		{
-			if ( sHandler == null )
-				sHandler = new ApplicationRouter( Foundation.getApplication().getRouter() )
+			if ( receiver == null )
+				receiver = new ParcelReceiver()
 				{
-					@SuppressWarnings( {"unchecked", "RawUseOfParameterizedType"} )
 					@Override
-					public void handleMessage( ParcelCarrier msg )
+					public void handleParcel( ParcelCarrier msg )
 					{
-						AsyncTaskResult<?> result = ( AsyncTaskResult<?> ) msg.getPayload();
+						AsyncTaskResult<?> result = ( AsyncTaskResult<?> ) msg.getPayloadObject();
 						switch ( msg.getCode() )
 						{
 							case MESSAGE_POST_RESULT:
@@ -46,7 +47,8 @@ public abstract class AsyncTask<Params, Progress, Result>
 						}
 					}
 				};
-			return sHandler;
+
+			return receiver;
 		}
 	}
 
@@ -133,9 +135,11 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this
 	 *                              task should be interrupted; otherwise, in-progress tasks are allowed
 	 *                              to complete.
+	 *
 	 * @return <tt>false</tt> if the task could not be cancelled,
 	 * typically because it has already completed normally;
 	 * <tt>true</tt> otherwise
+	 *
 	 * @see #isCancelled()
 	 * @see #onCancelled(Object)
 	 */
@@ -154,7 +158,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * on the UI thread.
 	 *
 	 * @param params The parameters of the task.
+	 *
 	 * @return A activeState, defined by the subclass of this task.
+	 *
 	 * @see #onPreExecute()
 	 * @see #onPostExecute
 	 * @see #publishProgress
@@ -181,7 +187,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 *
 	 * @param executor The executor to use.
 	 * @param params   The parameters of the task.
+	 *
 	 * @return This instance of AsyncTask.
+	 *
 	 * @throws IllegalStateException If {@link #getStatus()} returns either
 	 *                               {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
 	 * @see #executeSerial(Object[])
@@ -217,7 +225,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * itself (this) so that the caller can keep a reference to it.
 	 *
 	 * @param params The parameters of the task.
+	 *
 	 * @return This instance of AsyncTask.
+	 *
 	 * @throws IllegalStateException If {@link #getStatus()} returns either
 	 *                               {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
 	 * @see #execute(java.util.concurrent.Executor, Object[])
@@ -235,7 +245,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * thread or pool of threads depending on the platform version.
 	 *
 	 * @param params The parameters of the task.
+	 *
 	 * @return This instance of AsyncTask.
+	 *
 	 * @throws IllegalStateException If {@link #getStatus()} returns either
 	 *                               {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
 	 * @see #execute(java.util.concurrent.Executor, Object[])
@@ -259,6 +271,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * retrieves its activeState.
 	 *
 	 * @return The computed activeState.
+	 *
 	 * @throws CancellationException If the computation was cancelled.
 	 * @throws ExecutionException    If the computation threw an exception.
 	 * @throws InterruptedException  If the current thread was interrupted while waiting.
@@ -274,7 +287,9 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 *
 	 * @param timeout Time to wait before cancelling the operation.
 	 * @param unit    The time unit for the timeout.
+	 *
 	 * @return The computed activeState.
+	 *
 	 * @throws CancellationException If the computation was cancelled.
 	 * @throws ExecutionException    If the computation threw an exception.
 	 * @throws InterruptedException  If the current thread was interrupted
@@ -303,6 +318,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * {@link #doInBackground(Object[])} to end the task as soon as possible.
 	 *
 	 * @return <tt>true</tt> if task was cancelled before it completed
+	 *
 	 * @see #cancel(boolean)
 	 */
 	public final boolean isCancelled()
@@ -320,6 +336,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 *
 	 * @param result The activeState, if any, computed in
 	 *               {@link #doInBackground(Object[])}, can be null
+	 *
 	 * @see #cancel(boolean)
 	 * @see #isCancelled()
 	 */
@@ -352,6 +369,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * <p>This method won't be invoked if the task was cancelled.</p>
 	 *
 	 * @param result The activeState of the operation computed by {@link #doInBackground}.
+	 *
 	 * @see #onPreExecute
 	 * @see #doInBackground
 	 * @see #onCancelled(Object)
@@ -376,6 +394,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * The specified values are the values passed to {@link #publishProgress}.
 	 *
 	 * @param values The values indicating progress.
+	 *
 	 * @see #publishProgress
 	 * @see #doInBackground
 	 */
@@ -387,8 +406,8 @@ public abstract class AsyncTask<Params, Progress, Result>
 	private Result postResult( Result result )
 	{
 		@SuppressWarnings( "unchecked" )
-		ParcelCarrier message = getHandler().obtainMessage( MESSAGE_POST_RESULT, new AsyncTaskResult<Result>( this, result ) );
-		message.sendToTarget();
+		ParcelCarrier carrier = ParcelCarrier.obtain( MESSAGE_POST_RESULT, new AsyncTaskResult<>( this, result ) );
+		carrier.sendToTarget();
 		return result;
 	}
 
@@ -411,6 +430,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	 * canceled.
 	 *
 	 * @param values The progress values to update the UI with.
+	 *
 	 * @see #onProgressUpdate
 	 * @see #doInBackground
 	 */
@@ -418,7 +438,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	{
 		if ( !isCancelled() )
 		{
-			getHandler().obtainMessage( MESSAGE_POST_PROGRESS, new AsyncTaskResult<>( this, values ) ).sendToTarget();
+			ParcelCarrier.obtain( MESSAGE_POST_PROGRESS, new AsyncTaskResult<Progress>( this, values ) ).sendToTarget();
 		}
 	}
 
@@ -448,6 +468,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 		final Data[] mData;
 		final AsyncTask mTask;
 
+		@SafeVarargs
 		AsyncTaskResult( AsyncTask task, Data... data )
 		{
 			mTask = task;

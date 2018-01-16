@@ -3,13 +3,14 @@ package io.amelia.foundation;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import io.amelia.foundation.parcel.ParcelCarrier;
 import io.amelia.looper.LooperFactory;
 
 /**
  * A {@link ApplicationRouter} allows you to send and receive objects through
- * a thread's {@link ApplicationLooper}. There is only one per {@link ApplicationLooper}.
+ * a thread's {@link ApplicationLooper}. There is only one per {@link ApplicationLooper} and one looper per Application.
  * <p>
- * The main use for this class is to enqueue an action to be performed on a different thread.
+ * The main use for this class is to enqueue an action to be performed on a different threads or even Applications.
  * <p>
  * Sending messages is accomplished with the {@link #sendEmptyMessage}, {@link #sendMessage},
  * {@link #sendMessageAtTime}, and {@link #sendMessageDelayed} methods.
@@ -33,8 +34,6 @@ import io.amelia.looper.LooperFactory;
 public class ApplicationRouter
 {
 	public final Thread primaryThread = Thread.currentThread();
-	final boolean async;
-	final Consumer<ParcelCarrier> callback;
 	final ApplicationLooper looper;
 
 	/**
@@ -408,5 +407,4 @@ public class ApplicationRouter
 	{
 		return "Handler (" + getClass().getName() + ") {" + Integer.toHexString( System.identityHashCode( this ) ) + "}";
 	}
-
 }

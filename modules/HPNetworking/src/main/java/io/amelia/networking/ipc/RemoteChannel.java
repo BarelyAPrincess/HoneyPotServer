@@ -1,8 +1,8 @@
 package io.amelia.networking.ipc;
 
-import io.amelia.foundation.ApplicationRegistry;
+import io.amelia.foundation.parcel.ParcelChannel;
 
-public class RemoteChannel implements ApplicationRegistry.ApplicationChannel
+public class RemoteChannel implements ParcelChannel
 {
 
 }
