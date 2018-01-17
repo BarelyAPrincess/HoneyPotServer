@@ -42,7 +42,7 @@ public class EntryPoint
 			// Start the Networking
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
-				try
+				/*try
 				{
 					udp.start();
 				}
@@ -52,7 +52,7 @@ public class EntryPoint
 				}
 
 				if ( !udp.isStarted() )
-					throw new StartupException( "The UDP service failed to start for unknown reasons." );
+					throw new StartupException( "The UDP service failed to start for unknown reasons." );*/
 			}
 			// Make sure I'm the only process with my instanceId running
 			if ( event.getRunLevel() == Runlevel.NETWORKING )

@@ -212,25 +212,25 @@ public interface LooperTaskTrait
 	{
 		private long delay;
 
-		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay )
+		public RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay )
 		{
 			super( queue, task, when );
 			setDelay( delay );
 		}
 
-		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay, boolean async )
+		public RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay, boolean async )
 		{
 			super( queue, task, when, async );
 			setDelay( delay );
 		}
 
-		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay, boolean async )
+		public RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay, boolean async )
 		{
 			super( queue, task, async );
 			setDelay( delay );
 		}
 
-		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay )
+		public RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay )
 		{
 			super( queue, task );
 			setDelay( delay );
@@ -243,7 +243,8 @@ public interface LooperTaskTrait
 
 		public void setDelay( @Nonnegative long delay )
 		{
-			Objs.notNegative( delay );
+			if ( delay < 50 )
+				throw new IllegalArgumentException( "RepeatingTask delay can't be less than 50 milliseconds. Anything less can cause looper lag issues." );
 			this.delay = delay;
 		}
 
@@ -263,12 +264,12 @@ public interface LooperTaskTrait
 		protected final LooperTask task;
 		protected final long when;
 
-		TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when )
+		public TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when )
 		{
 			this( queue, task, when, false );
 		}
 
-		TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, boolean async )
+		public TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, boolean async )
 		{
 			super( queue, async );
 
@@ -283,12 +284,12 @@ public interface LooperTaskTrait
 				this.when = when;
 		}
 
-		TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, boolean async )
+		public TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, boolean async )
 		{
 			this( queue, task, -1, async );
 		}
 
-		TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task )
+		public TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task )
 		{
 			this( queue, task, -1 );
 		}

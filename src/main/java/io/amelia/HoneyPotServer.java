@@ -14,6 +14,7 @@ import io.amelia.support.Encrypt;
 import io.amelia.support.Runlevel;
 
 import static io.amelia.support.Runlevel.INITIALIZATION;
+import static io.amelia.support.Runlevel.MAINLOOP;
 import static io.amelia.support.Runlevel.SHUTDOWN;
 
 public class HoneyPotServer extends DefaultApplication
@@ -37,8 +38,6 @@ public class HoneyPotServer extends DefaultApplication
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
-
-		getLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 20L, 20L );
 	}
 
 	@Override
@@ -69,6 +68,8 @@ public class HoneyPotServer extends DefaultApplication
 				throwStartupException( e );
 			}
 		}
+		if ( currentRunlevel == MAINLOOP )
+			getLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
 		if ( currentRunlevel == SHUTDOWN )
 		{
 			LogBuilder.get().info( "Shutting Down Plugin Manager..." );

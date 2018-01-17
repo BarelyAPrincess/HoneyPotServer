@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
+import io.amelia.looper.queue.AbstractEntry;
 import io.amelia.looper.queue.AbstractQueue;
 
 /**
@@ -175,6 +176,8 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		return isOverloaded;
 	}
 
+	public abstract boolean isPermitted( AbstractEntry entry );
+
 	/**
 	 * Returns true if this Looper is currently working on quitting.
 	 * No more tasks will be accepted.
@@ -205,9 +208,10 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 
 		// Attempt to acquire the lock on the Looper, as to force outside calls to only process while Looper is asleep.
 		lock.lock();
-
 		try
 		{
+			signalPreJoinLoop();
+
 			// Stores the last time the overload warning was displayed as to not flood the console.
 			long lastWarningMillis = 0L;
 
@@ -252,6 +256,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 					blockingCondition.await( 50 - lastPolledMillis, TimeUnit.MILLISECONDS );
 
 				// If we are overloaded and the last time we processed calls was over 1 second ago, a force the Looper to momentarily sleep for 20 millis.
+				// Technically, this only stands to make an overloaded application, even more overloaded, but it's a necessary evil.
 				if ( isOverloaded && loopStartMillis - lastOverloadMillis > 1000L )
 				{
 					blockingCondition.await( 20, TimeUnit.MILLISECONDS );
@@ -274,7 +279,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		}
 		finally
 		{
-			tickShutdown();
+			signalPostJoinLoop();
 			queue.clearState();
 			lock.unlock();
 			thread = null;
@@ -344,9 +349,22 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		this.exceptionHandler = exceptionHandler;
 	}
 
-	protected abstract void tick( long loopStartMillis );
+	protected void signalInfallibleStartup()
+	{
 
-	protected abstract void tickShutdown();
+	}
+
+	protected void signalPostJoinLoop()
+	{
+
+	}
+
+	protected void signalPreJoinLoop()
+	{
+
+	}
+
+	protected abstract void tick( long loopStartMillis );
 
 	@Override
 	public String toString()
@@ -440,6 +458,11 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 				task.run();
 				removeChildThread( thread );
 			} );
+		}
+
+		public void signalInfallibleStartup()
+		{
+			AbstractLooper.this.signalInfallibleStartup();
 		}
 	}
 }

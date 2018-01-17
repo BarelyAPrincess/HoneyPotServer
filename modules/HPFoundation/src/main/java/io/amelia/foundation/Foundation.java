@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.amelia.foundation.events.Events;
 import io.amelia.foundation.events.builtin.RunlevelEvent;
@@ -117,7 +118,7 @@ public final class Foundation
 		return currentRunlevel;
 	}
 
-	public static void setRunlevel( Runlevel level )
+	public static void setRunlevel( @Nonnull Runlevel level )
 	{
 		setRunlevel( level, null );
 	}
@@ -150,11 +151,11 @@ public final class Foundation
 
 		// Indicates the application has begun the main loop
 		if ( currentRunlevel == Runlevel.MAINLOOP )
-			setRunlevel( Runlevel.NETWORKING );
+			setRunlevelLater( Runlevel.NETWORKING );
 
 		// Indicates the application has started all and any networking
 		if ( currentRunlevel == Runlevel.NETWORKING )
-			setRunlevel( Runlevel.STARTED );
+			setRunlevelLater( Runlevel.STARTED );
 
 		// Indicates the application is now started
 		if ( currentRunlevel == Runlevel.STARTED )
@@ -169,7 +170,7 @@ public final class Foundation
 
 		// TODO Implement the RELOAD runlevel!
 		if ( currentRunlevel == Runlevel.RELOAD )
-			throw ApplicationException.error( "Not Implemented! Sorry!" );
+			throw ApplicationException.error( "Not Implemented. Sorry!" );
 
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 			app.quitSafely();
@@ -244,21 +245,22 @@ public final class Foundation
 	 * Systematically changes the application runlevel.
 	 * If this method is called by the application main thread, the change is made immediate.
 	 */
-	public static void setRunlevel( Runlevel level, String reason )
+	public static void setRunlevel( @Nonnull Runlevel level, @Nullable String reason )
 	{
+		Objs.notNull( level );
 		ApplicationLooper mainLooper = getLooper();
 		// If we confirm that the current thread is the one used by the ApplicationLooper, we make the runlevel change immediate instead of posting it for later.
-		if ( mainLooper.isHeldByCurrentThread() )
+		if ( !mainLooper.isThreadJoined() && app.isPrimaryThread() || mainLooper.isHeldByCurrentThread() )
 			setRunlevel0( level, reason );
 		else
-			mainLooper.postTask( () -> setRunlevel0( level, reason ) );
+			setRunlevelLater( level, reason );
 	}
 
 	private synchronized static void setRunlevel0( Runlevel level, String reason )
 	{
 		try
 		{
-			if ( !getLooper().isHeldByCurrentThread() )
+			if ( getLooper().isThreadJoined() && !getLooper().isHeldByCurrentThread() )
 				throw ApplicationException.error( "Runlevel can only be set from the application looper thread. Be more careful next time." );
 			if ( currentRunlevel == level )
 				throw ApplicationException.error( "Runlevel is already set to " + level.name() + ". This might be a severe race bug." );
@@ -287,12 +289,23 @@ public final class Foundation
 			onRunlevelChange();
 
 			if ( level != Runlevel.DISPOSED && level != Runlevel.STARTED )
-				L.info( "Application Runlevel has been changed to " + level.name() + "! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+				L.info( "The runlevel has been changed to " + level.name() + "! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 		}
 		catch ( ApplicationException.Error e )
 		{
 			Kernel.handleExceptions( e );
 		}
+	}
+
+	public static void setRunlevelLater( @Nonnull Runlevel level )
+	{
+		setRunlevelLater( level, null );
+	}
+
+	public static void setRunlevelLater( @Nonnull Runlevel level, @Nullable String reason )
+	{
+		Objs.notNull( level );
+		getLooper().postTask( () -> setRunlevel0( level, reason ) );
 	}
 
 	public static void shutdown() throws ApplicationException.Error
@@ -319,14 +332,8 @@ public final class Foundation
 		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
 
-		// This ensures the next set of runlevels are handled in sequence after the main looper is started.
-		ApplicationLooper mainLooper = getApplication().getLooper();
-
-		// As soon as the looper gets started by the following line, we set the first runlevel appropriately.
-		mainLooper.postTask( () -> setRunlevel0( Runlevel.MAINLOOP, null ) );
-
 		// Join this thread to the main looper.
-		mainLooper.joinLoop();
+		getLooper().joinLoop();
 
 		// Sets the application to the disposed state once the joinLoop method returns exception free.
 		setRunlevel( Runlevel.DISPOSED );

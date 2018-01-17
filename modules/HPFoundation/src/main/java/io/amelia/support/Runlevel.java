@@ -14,46 +14,54 @@ public enum Runlevel
 	/**
 	 * Indicates the application has not done anything. Variable initialization has only occurred.
 	 */
-	INITIALIZATION,
+	INITIALIZATION( 200 ),
 	/**
 	 * Indicates the application has started all managers and dispatchers then loads plugins.
 	 */
-	STARTUP,
+	STARTUP( 400 ),
 	/**
 	 * Indicates the application has started the main loop. Expect heartbeat and task execution.
 	 */
-	MAINLOOP,
+	MAINLOOP( 600 ),
 	/**
 	 * Indicates the application has started the networking (UDP in particular) and is waiting on the cluster.
 	 */
-	NETWORKING,
+	NETWORKING( 800 ),
 	/**
 	 * Indicates the application has started.
 	 */
-	STARTED,
+	STARTED( 1000 ),
 	/**
 	 * Indicates the application is reloading.
 	 * TODO Not Implemented - Needs to disconnect from cluster, unload managers and dispatchers, then reload everything.
 	 */
-	RELOAD,
+	RELOAD( 400 ),
 	/**
 	 * Indicates the application is preparing to shutdown. Best point to get the most critical shutdown logic done before managers, dispatchers, and plugins are disposed of.
 	 */
-	SHUTDOWN,
+	SHUTDOWN( 100 ),
 	/**
 	 * Indicates the application has been shutdown. The main loop will cease execution here. It's like no plugins will ever see this Runlevel as they have been unloaded.
 	 */
-	DISPOSED,
+	DISPOSED( 0 ),
 	/**
 	 * Indicates the application has CRASHED. Similar to DISPOSED with the exception that Plugins might see this one depending on the exception source.
 	 * A crash report will soon be generated and dispatched to the server admin.
 	 */
-	CRASHED;
+	CRASHED( 0 );
+
+	private final int intValue;
+
+	Runlevel( int intValue )
+	{
+		this.intValue = intValue;
+	}
 
 	/**
 	 * Checks the RunLevel was called in proper order.
 	 *
 	 * @param currentRunlevel The current Runlevel
+	 *
 	 * @return Was the Runlevel called in proper level
 	 */
 	public boolean checkRunlevelOrder( Runlevel currentRunlevel )
@@ -63,9 +71,9 @@ public enum Runlevel
 			case INITIALIZATION:
 				return false;
 			case STARTUP:
-				return currentRunlevel == INITIALIZATION || currentRunlevel == RELOAD;
+				return currentRunlevel == INITIALIZATION;
 			case MAINLOOP:
-				return currentRunlevel == STARTUP;
+				return currentRunlevel == STARTUP || currentRunlevel == RELOAD;
 			case NETWORKING:
 				return currentRunlevel == MAINLOOP;
 			case STARTED:
@@ -78,5 +86,10 @@ public enum Runlevel
 		}
 
 		return true;
+	}
+
+	public int intValue()
+	{
+		return intValue;
 	}
 }

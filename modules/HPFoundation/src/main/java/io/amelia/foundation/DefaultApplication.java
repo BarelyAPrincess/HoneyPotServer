@@ -20,8 +20,6 @@ public abstract class DefaultApplication extends ApplicationInterface
 	public DefaultApplication()
 	{
 		// CommandDispatch.handleCommands();
-
-		getLooper().postTaskRepeatingLater( () -> Tasks.heartbeat( Foundation.getLooper().getLastPolledMillis() ), 20L, 20L );
 	}
 
 	@Override
@@ -33,6 +31,8 @@ public abstract class DefaultApplication extends ApplicationInterface
 	@Override
 	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error
 	{
+		if ( currentRunlevel == Runlevel.MAINLOOP )
+			getLooper().postTaskRepeatingLater( () -> Tasks.heartbeat( Foundation.getLooper().getLastPolledMillis() ), 50L, 50L );
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 		{
 			LogBuilder.get().info( "Shutting Down Task Manager..." );

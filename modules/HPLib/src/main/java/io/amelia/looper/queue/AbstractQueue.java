@@ -13,12 +13,12 @@ public abstract class AbstractQueue
 	 * Queue flags - Blocking is default.
 	 */
 	private final EnumSet<Flag> flags;
+	protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private AbstractEntry activeEntry = null;
 	private Result activeResult = Result.NONE;
+	private Condition blockingCondition = lock.writeLock().newCondition();
 	private boolean isBlocking = false;
 	private boolean isPolling = false;
-	protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private Condition blockingCondition = lock.writeLock().newCondition();
 
 	public AbstractQueue()
 	{
@@ -129,6 +129,9 @@ public abstract class AbstractQueue
 		isPolling = true;
 		try
 		{
+			activeResult = Result.NONE;
+			activeEntry = null;
+
 			for ( ; ; )
 			{
 				Lock writeLock = lock.writeLock();
@@ -225,8 +228,8 @@ public abstract class AbstractQueue
 	/**
 	 * Process the active entry.
 	 *
-	 * @param activeEntry
-	 * @param now
+	 * @param activeEntry The active entry
+	 * @param now         What's the current epoch
 	 *
 	 * @return The Result associated with the provided entry, returning null indicates an entry type that's internally handled.
 	 */

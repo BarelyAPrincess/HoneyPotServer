@@ -1,5 +1,6 @@
 package io.amelia.looper;
 
+import io.amelia.looper.queue.AbstractEntry;
 import io.amelia.looper.queue.AbstractQueue;
 import io.amelia.looper.queue.DefaultQueue;
 import io.amelia.looper.queue.EntryRunnable;
@@ -28,6 +29,13 @@ public final class DefaultLooper extends AbstractLooper<DefaultQueue>
 	public boolean isDisposed()
 	{
 		return !FACTORY.hasLooper( this );
+	}
+
+	@Override
+	public boolean isPermitted( AbstractEntry entry )
+	{
+		// TODO Check known built-in AbstractEntry sub-classes, so someone doesn't add one we don't know how to handle.
+		return true;
 	}
 
 	@Override
@@ -60,7 +68,7 @@ public final class DefaultLooper extends AbstractLooper<DefaultQueue>
 	}
 
 	@Override
-	protected void tickShutdown()
+	protected void signalPostJoinLoop()
 	{
 
 	}

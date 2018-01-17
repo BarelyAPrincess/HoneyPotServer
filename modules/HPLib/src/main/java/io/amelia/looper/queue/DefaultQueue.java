@@ -8,8 +8,11 @@ import java.util.TreeSet;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+
 import io.amelia.lang.ApplicationException;
 import io.amelia.looper.AbstractLooper;
+import io.amelia.looper.LooperTaskTrait;
 import io.amelia.support.DateAndTime;
 
 /**
@@ -30,6 +33,9 @@ public class DefaultQueue extends AbstractQueue
 	public DefaultQueue( AbstractLooper<DefaultQueue>.LooperControl looperControl )
 	{
 		this.looperControl = new WeakReference<>( looperControl );
+
+		// We add a manual TaskEntry, which is executed first to signal an infallible start-up of the looper.
+		entries.add( new LooperTaskTrait.TaskEntry( this, looperControl::signalInfallibleStartup, 0 ) );
 	}
 
 	public void cancel( long id )
@@ -273,8 +279,12 @@ public class DefaultQueue extends AbstractQueue
 		return postEntry( new EntryCheckpoint( this, predicate ) );
 	}
 
-	protected void postEntry0( AbstractEntry entry )
+	@Override
+	protected void postEntry0( @Nonnull AbstractEntry entry )
 	{
+		if ( !getLooper().isPermitted( entry ) )
+			throw new ApplicationException.Runtime( "Entry " + entry.getClass().getSimpleName() + " is not permitted." );
+
 		entries.add( entry );
 	}
 
