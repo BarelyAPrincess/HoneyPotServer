@@ -1,12 +1,12 @@
 ![HPSLogo](http://penoaks.com/assets/external/HoneyPotServerLogo.png "Honey Pot Server Logo")
 
 # Introduction
-**Honey Pot Server** is a modular multi-protocol networking server allowing for both dynamic and static content via a powerful subsystem consisting of plugins and built-in Groovy scripting language. Features also include ORM, events, clustering, users, permissions, enforced access policies, and much more. Nearly everything was designed with an extendable concept in mind and can be extended using the provided API. HPS is intended to provide easy-access to the best of the best Java 8 features without the mess and time-constracts of traditional Java servers. We strive to make the code base as easy to understand as possible by leaving out needless interfaces and classes.
+**Honey Pot Server** is a multi-protocol networking server allowing for both dynamic and static content via a powerful subsystem consisting of modular classes, plugins, and built-in Groovy scripting language. Features also include ORM, events, clustering, users, permissions, enforced access policies, and much more. Nearly everything was designed with an extendable concept in mind and can be extended using the provided API. HPS is intended to provide easy-access to the best of the best Java 8 features without the mess and time constants of traditional Java servers. HPS also honors convention over configuration, most everything will work with little to no additional setup, even its libraries are downloaded directly from Maven. We strive to make the code base as easy to understand as possible by leaving out needless interfaces and classes whenever possible.
 
 You can find our official documentation at https://hps-docs.penoaks.com/. It contains tutorials and great advanced details on how to utilize the server the possible from the developers themselves.
 
 # How To Build
-HPS is easily built using Gradle. If you are new to Gradle, just execute the `./gradlew build` (or `grandle.bat build` for Windows) script and you should find a fresh build in the `build/dest` directory. Keep in mind that you might have compilition errors if building from the bleeding-edge (`master-dev`) branch.
+HPS is easily built using Gradle. If you are new to Gradle, just execute the `./gradlew build` (or `grandle.bat build` for Windows) script and you should find a fresh build in the `build/dest` directory. Keep in mind that you might encounter compilation errors if building from the bleeding-edge (`master-dev`) branch.
 
 # Coding
 Our Gradle Build environment uses the CodeStyle plugin to check coding standards, as follows:
@@ -31,8 +31,6 @@ Because Winnie The Pooh loves honey!
 # License
 **Honey Pot Server** is licensed under the MIT License. If you decide to use our server or use any of our code (In part or whole), PLEASE, we would love to hear about it. We don't require this but it's generally cool to hear what others do with our stuff.
 
-Copyright (c) 2017 Amelia DeWitt <TheAmeliaDeWitt@gmail.com>
-
-Copyright (c) 2017 Penoaks Publishing LLC. <development@penoaks.com>
-
-ll Rights Reserved.
+* Copyright (c) 2017 Amelia DeWitt <TheAmeliaDeWitt@gmail.com>
+* Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+* All Rights Reserved.

@@ -19,6 +19,7 @@ import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Runlevel;
+import io.amelia.support.Strs;
 import io.amelia.support.Timing;
 
 /**
@@ -45,6 +46,24 @@ public final class Foundation
 	private static Runlevel previousRunlevel;
 	private static Object runlevelTimingObject = new Object();
 
+	static
+	{
+		Kernel.setLogHandler( new ImplLogHandler()
+		{
+			@Override
+			public void log( Level level, Class<?> source, String message, Object... args )
+			{
+				L.log( level, message, args );
+			}
+
+			@Override
+			public void log( Level level, Class<?> source, Throwable cause )
+			{
+				Strs.split( Strs.getStackTrace( cause ), "\n" ).forEach( str -> L.log( level, str ) );
+			}
+		} );
+	}
+
 	public static <T extends ApplicationInterface> T getApplication()
 	{
 		if ( isRunlevel( Runlevel.DISPOSED ) )
@@ -67,21 +86,6 @@ public final class Foundation
 			throw ApplicationException.error( "The application has been DISPOSED!" );
 		if ( Foundation.app != null )
 			throw ApplicationException.error( "The application instance has already been set!" );
-
-		Kernel.setLogHandler( new ImplLogHandler()
-		{
-			@Override
-			public void log( Level level, Class<?> source, String message, Object... args )
-			{
-				L.log( level, message, args );
-			}
-
-			@Override
-			public void log( Level level, Class<?> source, Throwable cause )
-			{
-				L.log( level, cause.getMessage(), cause );
-			}
-		} );
 
 		Kernel.setExceptionContext( app );
 
@@ -179,6 +183,15 @@ public final class Foundation
 			app = null;
 
 			L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+
+			try
+			{
+				Thread.sleep( 500 );
+			}
+			catch ( InterruptedException e )
+			{
+				// Ignore
+			}
 
 			System.exit( 0 );
 		}

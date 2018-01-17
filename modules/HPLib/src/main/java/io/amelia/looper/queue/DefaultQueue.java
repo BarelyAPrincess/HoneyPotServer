@@ -34,7 +34,8 @@ public class DefaultQueue extends AbstractQueue
 
 	public void cancel( long id )
 	{
-		synchronized ( entries )
+		lock.writeLock().lock();
+		try
 		{
 			Iterator<AbstractEntry> queueIterator = entries.iterator();
 			while ( queueIterator.hasNext() )
@@ -49,11 +50,16 @@ public class DefaultQueue extends AbstractQueue
 
 			throw new IllegalStateException( "The specified id does not exist or has already been removed." );
 		}
+		finally
+		{
+			lock.writeLock().unlock();
+		}
 	}
 
 	public void cancelAllBarriers()
 	{
-		synchronized ( entries )
+		lock.writeLock().lock();
+		try
 		{
 			AbstractEntry activeEntry = getActiveEntry();
 			/* If a barrier is actively blocking the queue, wake the Looper. */
@@ -66,6 +72,10 @@ public class DefaultQueue extends AbstractQueue
 
 			/* Iterate over the pending entries. */
 			entries.removeIf( entry -> entry instanceof EntryBarrier );
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -80,7 +90,8 @@ public class DefaultQueue extends AbstractQueue
 	{
 		// Remove a sync barrier id from the queue.
 		// If the queue is no longer stalled by a barrier then wake it.
-		synchronized ( entries )
+		lock.writeLock().lock();
+		try
 		{
 			AbstractEntry activeEntry = getActiveEntry();
 			/* The barrier is actively blocking the queue, so wake the Looper. */
@@ -106,11 +117,16 @@ public class DefaultQueue extends AbstractQueue
 
 			throw new IllegalStateException( "The specified barrier id does not exist or has already been removed." );
 		}
+		finally
+		{
+			lock.writeLock().unlock();
+		}
 	}
 
 	@Override
 	public long getEarliestEntry()
 	{
+		lock.readLock().lock();
 		try
 		{
 			return entries.first().getWhen();
@@ -119,11 +135,16 @@ public class DefaultQueue extends AbstractQueue
 		{
 			return 0L;
 		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public long getLatestEntry()
 	{
+		lock.readLock().lock();
 		try
 		{
 			return entries.last().getWhen();
@@ -131,6 +152,10 @@ public class DefaultQueue extends AbstractQueue
 		catch ( NoSuchElementException e )
 		{
 			return Long.MAX_VALUE;
+		}
+		finally
+		{
+			lock.readLock().unlock();
 		}
 	}
 
@@ -147,7 +172,15 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	public boolean hasPendingEntries()
 	{
-		return entries.size() > 0;
+		lock.readLock().lock();
+		try
+		{
+			return entries.size() > 0;
+		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	@Override
@@ -159,7 +192,15 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	protected AbstractEntry pollNext()
 	{
-		return entries.pollFirst();
+		lock.readLock().lock();
+		try
+		{
+			return entries.pollFirst();
+		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	private EntryBarrier postBarrier( long when )
@@ -170,11 +211,16 @@ public class DefaultQueue extends AbstractQueue
 	private EntryBarrier postBarrier( long when, Predicate<AbstractLooper> predicate )
 	{
 		/* Enqueue a new barrier. We don't need to wake the queue because the purpose of a barrier is to stall it. */
-		synchronized ( this )
+		lock.writeLock().lock();
+		try
 		{
 			EntryBarrier barrier = new EntryBarrier( this, predicate, when );
 			entries.add( barrier );
 			return barrier;
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -235,33 +281,41 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	protected Result processEntry( AbstractEntry activeEntry, long now )
 	{
-		if ( activeEntry instanceof EntryCheckpoint )
+		lock.writeLock().lock();
+		try
 		{
-			// We filter out the remaining entries looking for anything besides just more CheckpointEntry instances.
-			// This allows for all remaining CheckpointEntry instances that may be in a row to receive the same answer.
-			boolean hasMoreEntries = entries.stream().filter( e -> !( e instanceof EntryCheckpoint ) ).count() > 0;
+			if ( activeEntry instanceof EntryCheckpoint )
+			{
+				// We filter out the remaining entries looking for anything besides just more CheckpointEntry instances.
+				// This allows for all remaining CheckpointEntry instances that may be in a row to receive the same answer.
+				boolean hasMoreEntries = entries.stream().filter( e -> !( e instanceof EntryCheckpoint ) ).count() > 0;
 
-			BiPredicate<AbstractLooper, Boolean> predicate = ( ( EntryCheckpoint ) activeEntry ).predicate;
+				BiPredicate<AbstractLooper, Boolean> predicate = ( ( EntryCheckpoint ) activeEntry ).predicate;
 
-			// Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled for a later time.
-			if ( predicate.test( getLooper(), hasMoreEntries ) )
-				postCheckpoint( predicate );
+				// Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled for a later time.
+				if ( predicate.test( getLooper(), hasMoreEntries ) )
+					postCheckpoint( predicate );
 
-			// Reset the entry and go again.
-			return null;
-		}
-		else if ( activeEntry instanceof EntryBarrier )
-		{
-			// Executes the inner Predicate contained in the barrier, removing it on False.
-			( ( EntryBarrier ) activeEntry ).run();
-			return Result.STALLED;
-		}
-		else
-		{
-			if ( now < activeEntry.getWhen() )
-				return Result.WAITING;
+				// Reset the entry and go again.
+				return null;
+			}
+			else if ( activeEntry instanceof EntryBarrier )
+			{
+				// Executes the inner Predicate contained in the barrier, removing it on False.
+				( ( EntryBarrier ) activeEntry ).run();
+				return Result.STALLED;
+			}
 			else
-				return Result.SUCCESS;
+			{
+				if ( now < activeEntry.getWhen() )
+					return Result.WAITING;
+				else
+					return Result.SUCCESS;
+			}
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -276,7 +330,8 @@ public class DefaultQueue extends AbstractQueue
 			throw ApplicationException.runtime( "Looper must be locked by this thread to quit the LooperQueue." );
 
 		final long now = System.currentTimeMillis();
-		synchronized ( entries )
+		lock.writeLock().lock();
+		try
 		{
 			entries.removeIf( entry -> {
 				if ( entry.isSafe() && entry.getWhen() > now )
@@ -288,11 +343,9 @@ public class DefaultQueue extends AbstractQueue
 					return false;
 			} );
 		}
-	}
-
-	@Override
-	public void wake()
-	{
-		entries.notifyAll();
+		finally
+		{
+			lock.writeLock().unlock();
+		}
 	}
 }

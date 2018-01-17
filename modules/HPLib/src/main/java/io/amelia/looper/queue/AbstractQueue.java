@@ -17,7 +17,7 @@ public abstract class AbstractQueue
 	private Result activeResult = Result.NONE;
 	private boolean isBlocking = false;
 	private boolean isPolling = false;
-	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	private Condition blockingCondition = lock.writeLock().newCondition();
 
 	public AbstractQueue()

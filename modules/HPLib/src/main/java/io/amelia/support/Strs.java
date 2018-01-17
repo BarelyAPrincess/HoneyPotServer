@@ -17,6 +17,7 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -335,7 +336,7 @@ public class Strs
 	public static String getStackTrace( Throwable t )
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		t.printStackTrace( new PrintWriter( out ) );
+		t.printStackTrace( new PrintStream( out ) );
 		return encodeDefault( out.toByteArray() );
 	}
 

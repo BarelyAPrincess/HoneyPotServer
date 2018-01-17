@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
@@ -47,6 +48,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 * Used to synchronize certain methods with the loop, so to avoid concurrent and/or race issues
 	 */
 	private final ReentrantLock lock = new ReentrantLock();
+	private final Condition blockingCondition = lock.newCondition();
 	/**
 	 * States the average millis between iterations.
 	 */
@@ -247,12 +249,12 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 
 				// Cycle time was under the 50 millis minimum, so we wait the remainder of time. This also gives the Looper a chance to process awaiting calls.
 				if ( lastPolledMillis < 50L )
-					lock.newCondition().await( 50 - lastPolledMillis, TimeUnit.MILLISECONDS );
+					blockingCondition.await( 50 - lastPolledMillis, TimeUnit.MILLISECONDS );
 
 				// If we are overloaded and the last time we processed calls was over 1 second ago, a force the Looper to momentarily sleep for 20 millis.
 				if ( isOverloaded && loopStartMillis - lastOverloadMillis > 1000L )
 				{
-					lock.newCondition().await( 20, TimeUnit.MILLISECONDS );
+					blockingCondition.await( 20, TimeUnit.MILLISECONDS );
 					lastOverloadMillis = loopStartMillis;
 				}
 

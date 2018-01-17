@@ -157,17 +157,17 @@ public class Logger
 		}
 	}
 
-	public void log( Level l, String msg, Throwable t )
+	public void log( Level l, String msg, Throwable throwable )
 	{
 		try
 		{
 			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored )
 			{
 				FAILOVER_OUTPUT_STREAM.println( "Failover Logger [" + l.getName() + "] " + msg );
-				t.printStackTrace( FAILOVER_OUTPUT_STREAM );
+				throwable.printStackTrace( FAILOVER_OUTPUT_STREAM );
 			}
 			else
-				logger.log( l, ( LogBuilder.useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, t );
+				logger.log( l, ( LogBuilder.useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, throwable );
 		}
 		catch ( Throwable tt )
 		{
