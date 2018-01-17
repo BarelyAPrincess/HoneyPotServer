@@ -14,5 +14,10 @@ dependencies {
 	testCompile( group: 'junit', name: 'junit', version: '4.12' ) {
 		exclude group: 'org.hamcrest'
 	}
+
+	compile project( ":HPLib" )
+	compile project( ":HPLog" )
+	compile project( ':HPFoundation' )
+
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
 }

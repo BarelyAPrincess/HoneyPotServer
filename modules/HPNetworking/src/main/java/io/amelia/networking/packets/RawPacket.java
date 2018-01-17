@@ -2,7 +2,7 @@ package io.amelia.networking.packets;
 
 import com.sun.istack.internal.NotNull;
 import io.amelia.lang.ApplicationException;
-import io.amelia.lang.PacketValidationException;
+import io.amelia.lang.NetworkException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.udp.UDPHandler;
@@ -101,7 +101,7 @@ public abstract class RawPacket
 		return classId;
 	}
 
-	protected Object getField( String field ) throws PacketValidationException
+	protected Object getField( String field ) throws NetworkException.PacketValidation
 	{
 		try
 		{
@@ -111,7 +111,7 @@ public abstract class RawPacket
 		}
 		catch ( Throwable e )
 		{
-			throw new PacketValidationException( this, "Packet validation failed for the following reason.", e );
+			throw new NetworkException.PacketValidation( this, "Packet validation failed for the following reason.", e );
 		}
 	}
 
@@ -144,16 +144,16 @@ public abstract class RawPacket
 		return false;
 	}
 
-	protected void notEmpty( String field ) throws PacketValidationException
+	protected void notEmpty( String field ) throws NetworkException.PacketValidation
 	{
 		if ( Objs.isEmpty( getField( field ) ) )
-			throw new PacketValidationException( this, "Packet validation failed! The variable '" + field + "' must not be empty." );
+			throw new NetworkException.PacketValidation( this, "Packet validation failed! The variable '" + field + "' must not be empty." );
 	}
 
-	protected void notNull( String field ) throws PacketValidationException
+	protected void notNull( String field ) throws NetworkException.PacketValidation
 	{
 		if ( Objs.isNull( getField( field ) ) )
-			throw new PacketValidationException( this, "Packet validation failed! The variable '" + field + "' must not be empty." );
+			throw new NetworkException.PacketValidation( this, "Packet validation failed! The variable '" + field + "' must not be empty." );
 	}
 
 	public abstract void processPacket( UDPPacketHandler packetHandler );
@@ -171,7 +171,7 @@ public abstract class RawPacket
 		return this.getClass().getSimpleName();
 	}
 
-	public abstract void validate() throws PacketValidationException;
+	public abstract void validate() throws NetworkException.PacketValidation;
 
 	public enum PacketPayload
 	{

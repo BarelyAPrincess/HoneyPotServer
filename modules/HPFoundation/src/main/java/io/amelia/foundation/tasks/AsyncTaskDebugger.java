@@ -15,10 +15,10 @@ class AsyncTaskDebugger
 {
 	private final Class<? extends CallableTask> clazz;
 	private final RegistrarBase creator;
-	private final int expiry;
+	private final long expiry;
 	private AsyncTaskDebugger next = null;
 
-	AsyncTaskDebugger( final int expiry, final RegistrarBase creator, final Class<? extends CallableTask> clazz )
+	AsyncTaskDebugger( final long expiry, final RegistrarBase creator, final Class<? extends CallableTask> clazz )
 	{
 		this.expiry = expiry;
 		this.creator = creator;
@@ -35,13 +35,11 @@ class AsyncTaskDebugger
 		return string;
 	}
 
-	final AsyncTaskDebugger getNextHead( final int time )
+	final AsyncTaskDebugger getNextHead( final long time )
 	{
 		AsyncTaskDebugger next, current = this;
 		while ( time > current.expiry && ( next = current.next ) != null )
-		{
 			current = next;
-		}
 		return current;
 	}
 

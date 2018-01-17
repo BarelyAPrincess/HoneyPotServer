@@ -9,6 +9,10 @@
  */
 package io.amelia.lang;
 
+import com.sun.istack.internal.NotNull;
+
+import io.amelia.networking.packets.RawPacket;
+
 public class NetworkException
 {
 	public static Error error( String message )
@@ -148,6 +152,34 @@ public class NetworkException
 		public Notice( Throwable cause )
 		{
 			super( cause );
+		}
+	}
+
+	public static class PacketValidation extends Error
+	{
+		private final RawPacket packet;
+
+		public PacketValidation( @NotNull RawPacket packet, @NotNull String message )
+		{
+			super( message );
+			this.packet = packet;
+		}
+
+		public PacketValidation( @NotNull RawPacket packet, @NotNull String message, @NotNull Throwable cause )
+		{
+			super( message, cause );
+			this.packet = packet;
+		}
+
+		public PacketValidation( @NotNull RawPacket packet, @NotNull Throwable cause )
+		{
+			super( cause );
+			this.packet = packet;
+		}
+
+		public RawPacket getPacket()
+		{
+			return packet;
 		}
 	}
 

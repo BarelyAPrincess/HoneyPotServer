@@ -4,6 +4,8 @@ project( ':HPLib' ).projectDir = new File( 'modules/HPLib' )
 project( ':HPLog' ).projectDir = new File( 'modules/HPLog' )
 project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
 project( ':HPScripting' ).projectDir = new File( 'modules/HPScripting' )
-project( ':HPPermissions' ).projectDir = new File( 'modules/HPPermissions' )
+
+// Temp removed
+// project( ':HPPermissions' ).projectDir = new File( 'modules/HPPermissions' )
 
 rootProject.name = 'HoneyPotServer'

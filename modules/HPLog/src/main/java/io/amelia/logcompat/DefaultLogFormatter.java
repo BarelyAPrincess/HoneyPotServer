@@ -9,25 +9,24 @@
  */
 package io.amelia.logcompat;
 
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.support.EnumColor;
-import io.amelia.support.Strs;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.support.EnumColor;
+import io.amelia.support.Strs;
+
 public class DefaultLogFormatter extends Formatter
 {
 	public static boolean debugMode = false;
 	public static int debugModeHowDeep = 1;
 	private SimpleDateFormat dateFormat;
-	private SimpleDateFormat timeFormat;
 	private boolean fancyConsole;
-
 	private boolean formatConfigLoaded = false;
+	private SimpleDateFormat timeFormat;
 
 	public DefaultLogFormatter()
 	{
@@ -46,12 +45,12 @@ public class DefaultLogFormatter extends Formatter
 	{
 		if ( ConfigRegistry.isConfigLoaded() && !formatConfigLoaded )
 		{
-			dateFormat = new SimpleDateFormat( ConfigRegistry.getString( "console.dateFormat", "MM-dd" ) );
-			timeFormat = new SimpleDateFormat( ConfigRegistry.getString( "console.timeFormat", "HH:mm:ss.SSS" ) );
+			dateFormat = new SimpleDateFormat( ConfigRegistry.config.getString( "console.dateFormat" ).orElse( "MM-dd" ) );
+			timeFormat = new SimpleDateFormat( ConfigRegistry.config.getString( "console.timeFormat" ).orElse( "HH:mm:ss.SSS" ) );
 			formatConfigLoaded = true;
 		}
 
-		String style = ConfigRegistry.isConfigLoaded() ? ConfigRegistry.getString( "console.style", "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" ) : "&r&7%dt %tm [%lv&7]&f";
+		String style = ConfigRegistry.isConfigLoaded() ? ConfigRegistry.config.getString( "console.style" ).orElse( "&r&7[&d%ct&7] %dt %tm [%lv&7]&f" ) : "&r&7%dt %tm [%lv&7]&f";
 
 		Throwable ex = record.getThrown();
 

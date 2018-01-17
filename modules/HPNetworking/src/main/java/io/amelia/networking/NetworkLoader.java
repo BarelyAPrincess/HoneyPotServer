@@ -48,7 +48,7 @@ public class NetworkLoader
 		return getWorker( UDPWorker.class, UDPWorker::new );
 	}
 
-	public static void disposeWorker( Class<? extends NetworkWorker> workerClass ) throws NetworkException
+	public static void disposeWorker( Class<? extends NetworkWorker> workerClass ) throws NetworkException.Error
 	{
 		Objs.ifPresent( networkWorkers.remove( workerClass ), NetworkWorker::stop );
 	}

@@ -9,10 +9,10 @@
  */
 package io.amelia.logcompat;
 
-import io.amelia.foundation.ConfigRegistry;
-
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import io.amelia.foundation.ConfigRegistry;
 
 public class ChildLogger extends Logger
 {
@@ -24,7 +24,7 @@ public class ChildLogger extends Logger
 	@Override
 	public void log( LogRecord logRecord )
 	{
-		if ( ConfigRegistry.i().isConfigLoaded() && !ConfigRegistry.i().getBoolean( "console.hideLoggerName" ) )
+		if ( ConfigRegistry.isConfigLoaded() && !ConfigRegistry.config.getBoolean( "console.hideLoggerName" ).orElse( false ) )
 			logRecord.setMessage( "&7[" + getName() + "]&f " + logRecord.getMessage() );
 
 		super.log( logRecord );

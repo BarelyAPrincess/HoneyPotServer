@@ -10,36 +10,21 @@
 package io.amelia.logging;
 
 import com.google.common.collect.Lists;
-import io.amelia.support.EnumColor;
-import io.amelia.lang.ExceptionContext;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.support.Versioning;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.logging.Level;
 
+import io.amelia.foundation.Kernel;
+import io.amelia.lang.ExceptionContext;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.support.EnumColor;
+import io.amelia.support.Strs;
+
 class LogRecord implements ILogEvent
 {
-	static class LogElement
-	{
-		Level level;
-		String msg;
-		EnumColor color;
-		long time = System.currentTimeMillis();
-
-		LogElement( Level level, String msg, EnumColor color )
-		{
-			this.level = level;
-			this.msg = msg;
-			this.color = color;
-		}
-	}
-
-	String header = null;
-
 	final List<LogElement> elements = Lists.newLinkedList();
+	String header = null;
 
 	LogRecord()
 	{
@@ -59,8 +44,8 @@ class LogRecord implements ILogEvent
 			else
 				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + t.getClass().getSimpleName() + ": " + t.getMessage() );
 
-			if ( Versioning.isDevelopment() )
-				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + ExceptionUtils.getStackTrace( t ) );
+			if ( Kernel.isDevelopment() )
+				log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + Strs.getStackTrace( t ) );
 		}
 	}
 
@@ -93,5 +78,20 @@ class LogRecord implements ILogEvent
 			elements.add( new LogElement( level, msg, EnumColor.fromLevel( level ) ) );
 		else
 			elements.add( new LogElement( level, String.format( msg, objs ), EnumColor.fromLevel( level ) ) );
+	}
+
+	static class LogElement
+	{
+		EnumColor color;
+		Level level;
+		String msg;
+		long time = System.currentTimeMillis();
+
+		LogElement( Level level, String msg, EnumColor color )
+		{
+			this.level = level;
+			this.msg = msg;
+			this.color = color;
+		}
 	}
 }

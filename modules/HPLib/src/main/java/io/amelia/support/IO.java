@@ -210,6 +210,7 @@ public class IO
 	 *
 	 * @param inFile  the source filename
 	 * @param outFile the target filename
+	 *
 	 * @return true on success
 	 */
 	@SuppressWarnings( "resource" )
@@ -312,6 +313,7 @@ public class IO
 	 * given byte.
 	 *
 	 * @param data a byte[] to convert to Hex characters
+	 *
 	 * @return A char[] containing hexadecimal characters
 	 */
 	public static char[] encodeHex( final byte[] data )
@@ -339,6 +341,7 @@ public class IO
 	 * String will be double the length of the passed array, as it takes two characters to represent any given byte.
 	 *
 	 * @param data a byte[] to convert to Hex characters
+	 *
 	 * @return A String containing hexadecimal characters
 	 */
 	public static String encodeHexString( final byte[] data )
@@ -752,7 +755,9 @@ public class IO
 	 *
 	 * @param clazz Any java class that lives in the same place as the resources you want.
 	 * @param path  Should end with "/", but not start with one.
+	 *
 	 * @return Just the name of each member item, not the full paths.
+	 *
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @author Greg Briggs
@@ -1040,7 +1045,7 @@ public class IO
 		}
 	}
 
-	public static ByteArrayOutputStream readStreamToByteArray( InputStream is ) throws IOException
+	public static ByteArrayOutputStream readStreamToByteArray( InputStream inputStream ) throws IOException
 	{
 		try
 		{
@@ -1049,7 +1054,7 @@ public class IO
 			int nRead;
 			byte[] data = new byte[16384];
 
-			while ( ( nRead = is.read( data, 0, data.length ) ) != -1 )
+			while ( ( nRead = inputStream.read( data, 0, data.length ) ) != -1 )
 				buffer.write( data, 0, nRead );
 
 			buffer.flush();
@@ -1057,7 +1062,7 @@ public class IO
 		}
 		finally
 		{
-			closeQuietly( is );
+			closeQuietly( inputStream );
 		}
 	}
 
@@ -1086,9 +1091,9 @@ public class IO
 		return new BufferedReader( new InputStreamReader( is ) ).lines();
 	}
 
-	public static String readStreamToString( @Nonnull InputStream is ) throws IOException
+	public static String readStreamToString( @Nonnull InputStream inputStream ) throws IOException
 	{
-		return Strs.encodeDefault( readStreamToByteArray( is ).toByteArray() );
+		return Strs.encodeDefault( readStreamToByteArray( inputStream ).toByteArray() );
 	}
 
 	public static List<File> recursiveFiles( final File dir )
@@ -1134,6 +1139,7 @@ public class IO
 	 * Constructs a relative path from the server root
 	 *
 	 * @param file The file you wish to get relative to
+	 *
 	 * @return The relative path to the file, will return absolute if file is not relative to server root
 	 */
 	public static String relPath( File file )

@@ -21,7 +21,7 @@ import io.amelia.foundation.Kernel;
 import io.amelia.foundation.events.EventHandlers;
 import io.amelia.foundation.events.EventPriority;
 import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.events.builtin.RunlevelEvent;
 import io.amelia.foundation.plugins.loader.JavaPluginLoader;
 import io.amelia.foundation.plugins.loader.Plugin;
 import io.amelia.foundation.plugins.loader.PluginClassLoader;
@@ -59,7 +59,7 @@ public class Plugins
 			Plugin[] plugins = getPlugins();
 
 			for ( Plugin plugin : plugins )
-				if ( !plugin.isEnabled() && plugin.getDescription().getLoad() == level )
+				if ( !plugin.isEnabled() && plugin.getMeta().getLoad() == level )
 					enablePlugin( plugin );
 		} );
 	}
@@ -105,7 +105,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -118,7 +118,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -131,7 +131,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -144,7 +144,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
 			try
@@ -160,7 +160,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 		}
 	}
@@ -181,7 +181,7 @@ public class Plugins
 			}
 			catch ( Throwable ex )
 			{
-				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while enabling " + plugin.getDescription().getDisplayName() + " (Check for Version Mismatch)", ex );
+				L.log( Level.SEVERE, "Error occurred (in the plugin loader) while enabling " + plugin.getMeta().getDisplayName() + " (Check for Version Mismatch)", ex );
 			}
 	}
 
@@ -316,7 +316,7 @@ public class Plugins
 		if ( result != null )
 		{
 			plugins.add( result );
-			lookupNames.put( result.getDescription().getName(), result );
+			lookupNames.put( result.getMeta().getName(), result );
 		}
 
 		return result;
@@ -330,7 +330,7 @@ public class Plugins
 		}
 		catch ( Throwable ex )
 		{
-			L.log( Level.SEVERE, ex.getMessage() + " loading " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+			L.log( Level.SEVERE, ex.getMessage() + " loading " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 		}
 	}
 
@@ -346,13 +346,13 @@ public class Plugins
 			for ( Plugin plugin : plugins )
 				try
 				{
-					String message = String.format( "Loading %s", plugin.getDescription().getDisplayName() );
+					String message = String.format( "Loading %s", plugin.getMeta().getDisplayName() );
 					L.info( message );
 					plugin.onLoad();
 				}
 				catch ( Throwable ex )
 				{
-					L.log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getDisplayName() + " (Is it up to date?)", ex );
+					L.log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 				}
 		}
 		else
@@ -397,7 +397,7 @@ public class Plugins
 			PluginMeta description = null;
 			try
 			{
-				description = loader.getPluginDescription( file );
+				description = loader.getPluginMeta( file );
 			}
 			catch ( PluginMetaException ex )
 			{
@@ -645,7 +645,7 @@ public class Plugins
 		clearPlugins();
 	}
 
-	private Plugins()
+	public Plugins()
 	{
 		// Static Manager
 	}

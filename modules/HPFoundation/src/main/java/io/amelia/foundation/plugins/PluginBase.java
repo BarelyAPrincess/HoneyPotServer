@@ -10,12 +10,14 @@
 package io.amelia.foundation.plugins;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
+import io.amelia.support.data.Parcel;
 
 public abstract class PluginBase implements RegistrarBase
 {
@@ -45,7 +47,7 @@ public abstract class PluginBase implements RegistrarBase
 	 *
 	 * @return Plugin configuration
 	 */
-	public abstract ConfigMap getConfig();
+	public abstract Parcel getConfig();
 
 	public abstract File getConfigFile();
 
@@ -61,7 +63,7 @@ public abstract class PluginBase implements RegistrarBase
 	 *
 	 * @return Contents of the plugin.yaml file
 	 */
-	public abstract PluginMeta getDescription();
+	public abstract PluginMeta getMeta();
 
 	/**
 	 * Returns the name of the plugin.
@@ -73,7 +75,7 @@ public abstract class PluginBase implements RegistrarBase
 	@Override
 	public final String getName()
 	{
-		return getDescription().getName();
+		return getMeta().getName();
 	}
 
 	/**
@@ -145,7 +147,7 @@ public abstract class PluginBase implements RegistrarBase
 	/**
 	 * Discards any data in {@link #getConfig()} and reloads from disk.
 	 */
-	public abstract void reloadConfig();
+	public abstract void reloadConfig() throws IOException;
 
 	/**
 	 * Saves the {@link ConfigMap} retrievable by {@link #getConfig()}.

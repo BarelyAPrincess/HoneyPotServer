@@ -1,13 +1,10 @@
 package io.amelia.log;
 
-import io.amelia.foundation.InternalMessage;
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.Looper;
-import io.amelia.foundation.LooperReceiver;
 
 public class LogProcessing
 {
-	private Looper selfLooper;
+	/* private Looper selfLooper;
 
 	public LogProcessing()
 	{
@@ -15,7 +12,7 @@ public class LogProcessing
 		Kernel.getExecutorParallel().execute( selfLooper::joinLoop );
 	}
 
-	private class LogHandler extends LooperReceiver
+	private class LogHandler extends ParcelReceiver
 	{
 		public LogHandler( Looper.Factory logisticsFactory )
 		{
@@ -27,5 +24,5 @@ public class LogProcessing
 		{
 
 		}
-	}
+	}*/
 }

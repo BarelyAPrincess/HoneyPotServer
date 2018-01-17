@@ -10,13 +10,6 @@
 package io.amelia.permission;
 
 import com.sun.istack.internal.NotNull;
-import io.amelia.foundation.events.EventDispatcher;
-import io.amelia.lang.EnumColor;
-import io.amelia.permission.event.PermissibleEntityEvent;
-import io.amelia.permission.lang.PermissionException;
-import io.amelia.support.Objs;
-import io.amelia.support.Timings;
-import io.amelia.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +22,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.amelia.foundation.events.Events;
+import io.amelia.permission.event.PermissibleEntityEvent;
+import io.amelia.permission.lang.PermissionException;
+import io.amelia.support.DateAndTime;
+import io.amelia.support.EnumColor;
+import io.amelia.support.NamespaceBase;
+import io.amelia.support.Objs;
+import io.amelia.support.Pair;
 
 public abstract class PermissibleEntity
 {
@@ -157,7 +159,7 @@ public abstract class PermissibleEntity
 		PermissionResult result = cachedResults.get( perm.getNamespace() + "-" + refs.hash() );
 
 		if ( result != null )
-			if ( result.epoch > Timings.epoch() - 600 ) // 600 Seconds = 10 Minutes
+			if ( result.epoch > DateAndTime.epoch() - 600 ) // 600 Seconds = 10 Minutes
 				return result;
 			else
 				cachedResults.remove( perm.getNamespace() + "-" + refs.hash() );
@@ -166,7 +168,7 @@ public abstract class PermissibleEntity
 
 		cachedResults.put( perm.getNamespace() + "-" + refs.hash(), result );
 
-		if ( isDebug() && !perm.getNamespace().equalsIgnoreCase( PermissionDefault.OP.getNamespace() ) )
+		if ( isDebug() && !perm.getNamespace().equals( PermissionDefault.OP.getNamespace() ) )
 			PermissionGuard.L.info( EnumColor.YELLOW + "Entity `" + getId() + "` checked for permission `" + perm.getNamespace() + "`" + ( refs.isEmpty() ? "" : " with reference `" + refs.toString() + "`" ) + " with result `" + result + "`" );
 
 		return result;
@@ -250,6 +252,7 @@ public abstract class PermissibleEntity
 	 *
 	 * @param perm The {@link Permission} we associate with
 	 * @param refs Reference to be looking for
+	 *
 	 * @return The resulting {@link ChildPermission}
 	 */
 	protected ChildPermission getChildPermissionRecursive( Permission perm, References refs )
@@ -331,7 +334,6 @@ public abstract class PermissibleEntity
 	 *
 	 * @return id
 	 */
-	@Override
 	public String getId()
 	{
 		return id;
@@ -341,7 +343,7 @@ public abstract class PermissibleEntity
 	{
 		for ( Permission exp : permissions )
 			if ( PermissionGuard.getMatcher().isMatches( exp, permission ) )
-				return exp.getNamespace();
+				return exp.getNamespace().toString();
 		return null;
 	}
 
@@ -362,7 +364,7 @@ public abstract class PermissibleEntity
 
 	public List<String> getPermissionNames( References refs )
 	{
-		return getPermissions( refs ).keySet().stream().map( Permission::getNamespace ).collect( Collectors.toList() );
+		return getPermissions( refs ).keySet().stream().map( Permission::getNamespace ).map( NamespaceBase::toString ).collect( Collectors.toList() );
 	}
 
 	public References getPermissionReferences()
@@ -426,13 +428,14 @@ public abstract class PermissibleEntity
 	 *
 	 * @param perm Name of permission
 	 * @param refs The permission references
+	 *
 	 * @return remaining lifetime in seconds of timed permission. 0 if permission is transient
 	 */
 	public long getTimedPermissionLifetime( Permission perm, References refs )
 	{
 		for ( Entry<ChildPermission, TimedReferences> entry : timedPermissions.entrySet() )
 			if ( entry.getValue().match( refs ) && entry.getKey().getPermission() == perm )
-				return Timings.epoch() - entry.getValue().lifeTime;
+				return DateAndTime.epoch() - entry.getValue().lifeTime;
 		return -1;
 	}
 
@@ -445,6 +448,7 @@ public abstract class PermissibleEntity
 	 * Return entity timed (temporary) permission
 	 *
 	 * @param refs The Reference to check
+	 *
 	 * @return Collection of timed permissions
 	 */
 	public Collection<Permission> getTimedPermissions( References refs )
@@ -576,17 +580,17 @@ public abstract class PermissibleEntity
 			if ( entry.getValue().isExpired() )
 			{
 				timedGroups.remove( entry.getKey() );
-				EventDispatcher.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDGROUP_EXPIRED ) );
+				Events.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDGROUP_EXPIRED ) );
 			}
 		for ( Entry<ChildPermission, TimedReferences> entry : timedPermissions.entrySet() )
 			if ( entry.getValue().isExpired() )
 			{
 				timedPermissions.remove( entry.getKey() );
-				EventDispatcher.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDPERMISSION_EXPIRED ) );
+				Events.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.TIMEDPERMISSION_EXPIRED ) );
 			}
 		for ( PermissionResult cache : cachedResults.values() )
 			cache.recalculatePermissions();
-		EventDispatcher.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.PERMISSIONS_CHANGED ) );
+		Events.callEvent( new PermissibleEntityEvent( this, PermissibleEntityEvent.Action.PERMISSIONS_CHANGED ) );
 	}
 
 	public void reload()

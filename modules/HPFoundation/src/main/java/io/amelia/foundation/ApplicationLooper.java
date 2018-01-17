@@ -9,52 +9,29 @@ import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.looper.AbstractLooper;
 import io.amelia.looper.LooperTaskTrait;
-import io.amelia.looper.queue.AbstractQueue;
 import io.amelia.looper.queue.DefaultQueue;
-import io.amelia.support.Objs;
+import io.amelia.looper.queue.EntryRunnable;
 import io.amelia.support.Runlevel;
 
-/**
- * The Looper is intended to be interfaced by the thread that intends to execute tasks or oversee the process.
- */
 public class ApplicationLooper extends AbstractLooper<DefaultQueue> implements LooperTaskTrait
 {
 	public static final Logger L = LogBuilder.get( ApplicationLooper.class );
 
 	public ApplicationLooper()
 	{
-		super( new DefaultQueue() );
+		setQueue( new DefaultQueue( getLooperControl() ) );
 	}
 
-	boolean enqueueMessage( @Nonnull ParcelCarrier msg, @Nonnegative long when )
+	boolean enqueueParcel( @Nonnull ParcelCarrier parcelCarrier, @Nonnegative long when )
 	{
-		Objs.notNull( msg );
-		Objs.notNegative( when );
-
-		if ( msg.isInUse() )
-			throw new IllegalStateException( "Message is already in use." );
-
 		if ( isQuitting() )
 		{
 			ApplicationLooper.L.warning( "Looper is quiting." );
-			msg.recycle();
+			parcelCarrier.recycle();
 			return false;
 		}
 
-		DefaultQueue queue = getQueue();
-
-		synchronized ( queue.entries )
-		{
-			msg.markInUse( true );
-
-			// TODO
-			boolean needWake = queue.getActiveResult() == AbstractQueue.Result.EMPTY || when == 0 || when < queue.getEarliestEntry();
-
-			queue.postEntry( new EntryParcel( this, msg, when ) );
-
-			if ( needWake )
-				queue.wake();
-		}
+		getQueue().postEntry( new EntryParcel( getQueue(), parcelCarrier, when ) );
 
 		return true;
 	}
@@ -83,20 +60,20 @@ public class ApplicationLooper extends AbstractLooper<DefaultQueue> implements L
 	protected void tick( long loopStartMillis )
 	{
 		// Call the actual loop logic.
-		LooperQueue.Result result = queue.next( loopStartMillis );
+		DefaultQueue.Result result = getQueue().next( loopStartMillis );
 
 		// A queue entry was successful returned and can now be ran then recycled.
-		if ( result == LooperQueue.Result.SUCCESS )
+		if ( result == DefaultQueue.Result.SUCCESS )
 		{
-			// As of now, the only entry returned on the SUCCESS result is the RunnableEntry (or more so TaskEntry and ParcelEntry).
-			LooperQueue.RunnableEntry entry = ( LooperQueue.RunnableEntry ) queue.getLastEntry();
+			// As of now, the only entry returned on the SUCCESS result is the EntryRunnable (or more so TaskEntry and ParcelEntry).
+			EntryRunnable entry = ( EntryRunnable ) getQueue().getActiveEntry();
 
 			entry.markFinalized();
 			entry.run();
 			entry.recycle();
 		}
 		// The queue is empty and this looper quits in such cases.
-		else if ( result == LooperQueue.Result.EMPTY && hasFlag( ApplicationLooper.Flag.AUTO_QUIT ) && !isQuitting() )
+		else if ( result == DefaultQueue.Result.EMPTY && hasFlag( ApplicationLooper.Flag.AUTO_QUIT ) && !isQuitting() )
 		{
 			quitSafely();
 		}
@@ -105,6 +82,6 @@ public class ApplicationLooper extends AbstractLooper<DefaultQueue> implements L
 	@Override
 	protected void tickShutdown()
 	{
-		queue.clearState();
+
 	}
 }

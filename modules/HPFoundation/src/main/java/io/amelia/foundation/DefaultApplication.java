@@ -20,7 +20,14 @@ public abstract class DefaultApplication extends ApplicationInterface
 	public DefaultApplication()
 	{
 		// CommandDispatch.handleCommands();
-		getRouter().onTick( ( currentTick, averageTick ) -> Tasks.heartbeat( currentTick ) );
+
+		getLooper().postTaskRepeatingLater( () -> Tasks.heartbeat( Foundation.getLooper().getLastPolledMillis() ), 20L, 20L );
+	}
+
+	@Override
+	public String getName()
+	{
+		return getClass().getSimpleName();
 	}
 
 	@Override

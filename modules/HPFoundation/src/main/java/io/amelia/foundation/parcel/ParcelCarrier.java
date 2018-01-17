@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.amelia.foundation.Foundation;
 import io.amelia.lang.ParcelException;
 import io.amelia.lang.ParcelableException;
 import io.amelia.support.data.Parcel;
@@ -59,18 +58,36 @@ public class ParcelCarrier
 		parcelCarrier.payloadObject = orig.payloadObject;
 		parcelCarrier.origin = orig.origin;
 		parcelCarrier.replyTo = orig.replyTo;
-		parcelCarrier.target = orig.target;
+		parcelCarrier.targetReceiver = orig.targetReceiver;
 
+		return parcelCarrier;
+	}
+
+	public static ParcelCarrier obtain( ResultCode code, Object payload )
+	{
+		ParcelCarrier parcelCarrier = obtain( code );
+		parcelCarrier.setPayload( payload );
 		return parcelCarrier;
 	}
 
 	public static ParcelCarrier obtain( int code, Object payload )
 	{
-		ParcelCarrier parcelCarrier = obtain();
-
-		parcelCarrier.setCode( code );
+		ParcelCarrier parcelCarrier = obtain( code );
 		parcelCarrier.setPayload( payload );
+		return parcelCarrier;
+	}
 
+	public static ParcelCarrier obtain( ResultCode code )
+	{
+		ParcelCarrier parcelCarrier = obtain();
+		parcelCarrier.setCode( code );
+		return parcelCarrier;
+	}
+
+	public static ParcelCarrier obtain( int code )
+	{
+		ParcelCarrier parcelCarrier = obtain();
+		parcelCarrier.setCode( code );
 		return parcelCarrier;
 	}
 
@@ -79,7 +96,7 @@ public class ParcelCarrier
 	 */
 	private int code = ResultCode.DEFAULT.getCode();
 	/**
-	 * Indicates the Parcel has been transmitted. This prevents remote {@link io.amelia.foundation.parcel.ParcelChannel} from modifying the parcel intentionally or accidentally.
+	 * Indicates the Parcel has been transmitted. This prevents remote {@link ParcelInterface} from modifying the parcel intentionally or accidentally.
 	 */
 	private boolean finalized = false;
 	/**
@@ -109,23 +126,24 @@ public class ParcelCarrier
 	 */
 	private String tag = null;
 	/**
-	 * Receivers have the ability to process queued incoming messages.
+	 * The channel to transmit this parcel over.
 	 */
-	private ParcelReceiver target;
+	private ParcelChannel targetChannel = null;
 	/**
-	 * Allows for the parcel to be transmitted at a later date.
-	 * Anything before the current epoch will be immediately transmitted.
+	 * Receiver with the ability to process this parcel.
 	 */
-	private long when = 0;
+	private ParcelReceiver targetReceiver = null;
 
 	public int getCode()
 	{
 		return code;
 	}
 
-	public void setCode( ResultCode code )
+	public void setCode( int code )
 	{
-		this.code = code.getCode();
+		if ( ResultCode.isReserved( code ) )
+			throw ParcelException.runtime( "The specified code is reserved, as it belongs to the ResultCode enum. Use another code or use the enum instead." );
+		this.code = code;
 	}
 
 	public Object getPayloadObject()
@@ -149,20 +167,26 @@ public class ParcelCarrier
 		this.tag = tag;
 	}
 
-	public ParcelReceiver getTarget()
+	public ParcelChannel getTargetChannel()
 	{
-		return target;
+		return targetChannel;
 	}
 
-	public void setTarget( ParcelReceiver target )
+	public void setTargetChannel( ParcelChannel targetChannel )
 	{
 		notFinalized();
-		this.target = target;
+		this.targetChannel = targetChannel;
 	}
 
-	public long getWhen()
+	public ParcelReceiver getTargetReceiver()
 	{
-		return when;
+		return targetReceiver;
+	}
+
+	public void setTargetReceiver( ParcelReceiver targetReceiver )
+	{
+		notFinalized();
+		this.targetReceiver = targetReceiver;
 	}
 
 	/**
@@ -173,7 +197,7 @@ public class ParcelCarrier
 	 */
 	public boolean isTransmittable()
 	{
-		if ( target == null )
+		if ( targetReceiver == null || targetChannel == null )
 			return false;
 		if ( payloadParcel == null && payloadObject != null && !Parcel.Factory.isSerializable( payloadObject ) )
 			return false;
@@ -183,6 +207,7 @@ public class ParcelCarrier
 
 	public void markFinalized()
 	{
+		notFinalized();
 		this.finalized = true;
 	}
 
@@ -206,29 +231,18 @@ public class ParcelCarrier
 		{
 			finalized = false;
 			payloadParcel = null;
+			payloadObject = null;
 			origin = null;
-			target = null;
+			replyTo = null;
+			targetReceiver = null;
 
 			unusedPool.add( this );
 		}
 	}
 
-	public void sendToTarget()
+	public void setCode( ResultCode code )
 	{
-		Foundation.getRouter().sendMessage( this );
-	}
-
-	public void setCode( int code )
-	{
-		if ( ResultCode.isReserved( code ) )
-			throw ParcelException.runtime( "The specified code is reserved, as it belongs to the ResultCode enum. Use another code or use the enum instead." );
-		this.code = code;
-	}
-
-	public void setForFuture( long delay )
-	{
-		notFinalized();
-		when = System.currentTimeMillis() + delay;
+		this.code = code.getCode();
 	}
 
 	public void setOrigin( ParcelSender origin )
@@ -321,7 +335,6 @@ public class ParcelCarrier
 
 			ParcelCarrier parcelCarrier = ParcelCarrier.obtain();
 
-			parcelCarrier.when = src.getLong( "when" ).orElseThrow( exp );
 			parcelCarrier.code = src.getInteger( "code" ).orElseThrow( exp );
 			parcelCarrier.tag = src.getString( "tag" ).orElseThrow( exp );
 
@@ -343,7 +356,6 @@ public class ParcelCarrier
 			if ( !parcelCarrier.isTransmittable() )
 				throw exp.get();
 
-			dest.setValue( "when", parcelCarrier.when );
 			dest.setValue( "code", parcelCarrier.code );
 			dest.setValue( "tag", parcelCarrier.tag );
 

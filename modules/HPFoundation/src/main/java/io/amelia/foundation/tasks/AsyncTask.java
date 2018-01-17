@@ -91,7 +91,7 @@ class AsyncTask extends Task
 		catch ( final Throwable t )
 		{
 			thrown = t;
-			// throw new UnhandledException( String.format( "TaskCreator %s generated an exception while executing task %s", getOwner().getDescription().getFullName(), getTaskId() ), thrown );
+			// throw new UnhandledException( String.format( "TaskCreator %s generated an exception while executing task %s", getOwner().getMeta().getFullName(), getTaskId() ), thrown );
 		}
 		finally
 		{

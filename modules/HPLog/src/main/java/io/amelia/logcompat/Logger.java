@@ -9,15 +9,14 @@
  */
 package io.amelia.logcompat;
 
-import com.chiorichan.utils.Objs;
-import io.amelia.support.EnumColor;
-import io.amelia.support.Info;
-import io.amelia.support.Objs;
-
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
+
+import io.amelia.foundation.Kernel;
+import io.amelia.support.EnumColor;
+import io.amelia.support.Objs;
 
 /**
  * Logger Instance
@@ -50,7 +49,7 @@ public class Logger
 
 	public void debug( String format, Object... args )
 	{
-		if ( !Info.isDevelopment() )
+		if ( !Kernel.isDevelopment() )
 			return;
 
 		log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + ">>>>   " + format + "   <<<< ", args );
@@ -63,7 +62,7 @@ public class Logger
 
 	public void dev( String format, Object... args )
 	{
-		if ( !Info.isDevelopment() )
+		if ( !Kernel.isDevelopment() )
 			return;
 
 		log( Level.INFO, EnumColor.GOLD + "" + EnumColor.NEGATIVE + "[DEV NOTICE] " + format, args );
@@ -104,9 +103,9 @@ public class Logger
 		return hasErrored;
 	}
 
-	public void info( String s )
+	public void info( String msg )
 	{
-		log( Level.INFO, s );
+		log( Level.INFO, msg );
 	}
 
 	public void info( String format, Object... arguments )
@@ -128,7 +127,7 @@ public class Logger
 	{
 		try
 		{
-			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored )
 				FAILOVER_OUTPUT_STREAM.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( LogBuilder.useColor() ? EnumColor.fromLevel( l ) : "" ) + msg );
@@ -136,7 +135,7 @@ public class Logger
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Info.isDevelopment() )
+			if ( Kernel.isDevelopment() )
 				throw t;
 		}
 	}
@@ -145,7 +144,7 @@ public class Logger
 	{
 		try
 		{
-			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored )
 				FAILOVER_OUTPUT_STREAM.println( "Failover Logger [" + l.getName() + "] " + msg );
 			else
 				logger.log( l, ( LogBuilder.useColor() ? EnumColor.fromLevel( l ) : "" ) + msg, params );
@@ -153,7 +152,7 @@ public class Logger
 		catch ( Throwable t )
 		{
 			markError( t );
-			if ( Info.isDevelopment() )
+			if ( Kernel.isDevelopment() )
 				throw t;
 		}
 	}
@@ -162,7 +161,7 @@ public class Logger
 	{
 		try
 		{
-			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored || AppController.hasErrored() )
+			if ( !Objs.stackTraceAntiLoop( java.util.logging.Logger.class, "log" ) || hasErrored )
 			{
 				FAILOVER_OUTPUT_STREAM.println( "Failover Logger [" + l.getName() + "] " + msg );
 				t.printStackTrace( FAILOVER_OUTPUT_STREAM );
@@ -173,7 +172,7 @@ public class Logger
 		catch ( Throwable tt )
 		{
 			markError( tt );
-			if ( Info.isDevelopment() )
+			if ( Kernel.isDevelopment() )
 				throw tt;
 		}
 	}
@@ -184,7 +183,7 @@ public class Logger
 
 		FAILOVER_OUTPUT_STREAM.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "The child logger \"" + getId() + "\" has thrown an unrecoverable exception!" );
 		FAILOVER_OUTPUT_STREAM.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Please report the following stacktrace/log to the application developer." );
-		if ( Info.isDevelopment() )
+		if ( Kernel.isDevelopment() )
 			FAILOVER_OUTPUT_STREAM.println( EnumColor.RED + "" + EnumColor.NEGATIVE + "Developer Node: Calling the method \"Log.get( [log name] ).unmarkError()\" will reset the errored log state." );
 		t.printStackTrace( FAILOVER_OUTPUT_STREAM );
 	}
@@ -215,30 +214,6 @@ public class Logger
 	{
 		log( Level.WARNING, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
 
-	}
-
-	public void panic( String var1 )
-	{
-		severe( var1 );
-		AppController.stopApplication( var1 );
-	}
-
-	public void panic( String var1, Object... objs )
-	{
-		severe( var1, objs );
-		AppController.stopApplication( String.format( var1, objs ) );
-	}
-
-	public void panic( String var1, Throwable t )
-	{
-		severe( var1, t );
-		AppController.stopApplication( var1 );
-	}
-
-	public void panic( Throwable e )
-	{
-		severe( e );
-		AppController.stopApplication( "The server is stopping due to a severe error!" );
 	}
 
 	public void severe( String s )

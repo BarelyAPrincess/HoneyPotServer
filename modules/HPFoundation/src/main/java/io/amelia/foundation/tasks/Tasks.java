@@ -9,12 +9,6 @@
  */
 package io.amelia.foundation.tasks;
 
-import io.amelia.foundation.Foundation;
-import io.amelia.foundation.RegistrarBase;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
-import io.amelia.support.Objs;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -33,6 +27,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 
+import io.amelia.foundation.Foundation;
+import io.amelia.foundation.RegistrarBase;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.logcompat.Logger;
+import io.amelia.support.Objs;
+
 /**
  * Manages task scheduled in the main thread
  */
@@ -40,7 +40,7 @@ public class Tasks
 {
 	public static final Logger L = LogBuilder.get( Tasks.class );
 
-	private static final int RECENT_TICKS = 20;
+	private static final long RECENT_TICKS = 20L;
 	/**
 	 * Holds tasks that are awaiting for there owners to be enabled
 	 */
@@ -69,7 +69,7 @@ public class Tasks
 	 * Main thread logic only
 	 */
 	private static final List<Task> temp = new ArrayList<Task>();
-	private static volatile int currentTick = -1;
+	private static volatile long currentTick = -1;
 	private static AsyncTaskDebugger debugHead = new AsyncTaskDebugger( -1, null, null )
 	{
 		@Override
@@ -112,6 +112,7 @@ public class Tasks
 	 * @param <T>     The callable's return type
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
+	 *
 	 * @return Future Future object related to the task
 	 */
 	public static <T> Future<T> callSyncMethod( final RegistrarBase creator, final Callable<T> task )
@@ -130,8 +131,7 @@ public class Tasks
 	 */
 	public static void cancelAllTasks()
 	{
-		final Task task = new Task( () ->
-		{
+		final Task task = new Task( () -> {
 			Iterator<Task> it = runners.values().iterator();
 			while ( it.hasNext() )
 			{
@@ -183,10 +183,8 @@ public class Tasks
 		Objs.notNull( task );
 		final int taskId = task.getTaskId();
 		task.cancel0();
-		task = new Task( () ->
-		{
-			Function<Iterable<Task>, Boolean> check = ( collection ) ->
-			{
+		task = new Task( () -> {
+			Function<Iterable<Task>, Boolean> check = ( collection ) -> {
 				final Iterator<Task> tasks = collection.iterator();
 				while ( tasks.hasNext() )
 				{
@@ -225,10 +223,8 @@ public class Tasks
 	public static void cancelTasks( final RegistrarBase creator )
 	{
 		Objs.notNull( creator, "Cannot cancel tasks of null creator" );
-		final Task task = new Task( () ->
-		{
-			Consumer<Iterable<Task>> check = ( collection ) ->
-			{
+		final Task task = new Task( () -> {
+			Consumer<Iterable<Task>> check = ( collection ) -> {
 				final Iterator<Task> tasks = collection.iterator();
 				while ( tasks.hasNext() )
 				{
@@ -319,7 +315,7 @@ public class Tasks
 	/**
 	 * This method is designed to never block or wait for locks; an immediate execution of all current tasks.
 	 */
-	public static void heartbeat( final int currentTick )
+	public static void heartbeat( final long currentTick )
 	{
 		if ( !Foundation.isPrimaryThread() )
 			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
@@ -391,6 +387,7 @@ public class Tasks
 	 *
 	 * @param taskId The task to check.
 	 *               <p>
+	 *
 	 * @return If the task is currently running.
 	 */
 	public static boolean isCurrentlyRunning( final int taskId )
@@ -412,6 +409,7 @@ public class Tasks
 	 *
 	 * @param taskId The task to check.
 	 *               <p>
+	 *
 	 * @return If the task is queued to be run.
 	 */
 	public static boolean isQueued( final int taskId )
@@ -425,7 +423,7 @@ public class Tasks
 		return task != null && task.getPeriod() >= -1L;
 	}
 
-	private static boolean isReady( final int currentTick )
+	private static boolean isReady( final long currentTick )
 	{
 		return !pending.isEmpty() && pending.peek().getNextRun() <= currentTick;
 	}
@@ -463,10 +461,14 @@ public class Tasks
 	 *
 	 * @param creator  the reference to the creator scheduling task
 	 * @param callable the task to be run
+	 *
 	 * @return a {@link Task} that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTask( RegistrarBase creator, CallableTask callable )
 	{
 		return runTaskLater( creator, 0L, callable );
@@ -479,10 +481,14 @@ public class Tasks
 	 *
 	 * @param creator  the reference to the creator scheduling task
 	 * @param callable the task to be run
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTaskAsynchronously( RegistrarBase creator, CallableTask callable )
 	{
 		return runTaskLaterAsynchronously( creator, 0L, callable );
@@ -494,10 +500,14 @@ public class Tasks
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task
 	 * @param callable the task to be run
+	 *
 	 * @return a {@link Task} that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTaskLater( RegistrarBase creator, long delay, CallableTask callable )
 	{
 		return runTaskTimer( creator, delay, -1L, callable );
@@ -511,10 +521,14 @@ public class Tasks
 	 * @param creator  the reference to the creator scheduling task
 	 * @param delay    the ticks to wait before running the task
 	 * @param callable the task to be run
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTaskLaterAsynchronously( RegistrarBase creator, long delay, CallableTask callable )
 	{
 		return runTaskTimerAsynchronously( creator, delay, -1L, callable );
@@ -527,10 +541,14 @@ public class Tasks
 	 * @param delay    the ticks to wait before running the task
 	 * @param period   the ticks to wait between runs
 	 * @param callable the task to be run
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTaskTimer( RegistrarBase creator, long delay, long period, CallableTask callable )
 	{
 		validate( creator, callable );
@@ -559,10 +577,14 @@ public class Tasks
 	 * @param delay    the ticks to wait before running the task for the first time
 	 * @param period   the ticks to wait between runs
 	 * @param callable the task to be run
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
+	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
 	 */
+	@Deprecated
 	public static Task runTaskTimerAsynchronously( RegistrarBase creator, long delay, long period, CallableTask callable )
 	{
 		validate( creator, callable );
@@ -582,6 +604,7 @@ public class Tasks
 			return backlog( task, delay );
 	}
 
+	@Deprecated
 	public static void runTaskWithTimeout( final RegistrarBase creator, final long timeout, final CallableTask callable )
 	{
 		final Task task = runTaskAsynchronously( creator, callable );
@@ -618,6 +641,7 @@ public class Tasks
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
 	 * @param delay   Delay in server ticks before executing task
+	 *
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public static int scheduleAsyncDelayedTask( final RegistrarBase creator, final long delay, final CallableTask task )
@@ -632,6 +656,7 @@ public class Tasks
 	 *
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
+	 *
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public static int scheduleAsyncDelayedTask( final RegistrarBase creator, final CallableTask task )
@@ -648,6 +673,7 @@ public class Tasks
 	 * @param delay    Delay in server ticks before executing first repeat
 	 * @param period   Period in server ticks of the task
 	 * @param callable Task to be executed
+	 *
 	 * @return Task id number (-1 if scheduling failed), calling {@link #cancelTask(int)} will cancel it
 	 */
 	public static int scheduleAsyncRepeatingTask( final RegistrarBase creator, long delay, long period, final CallableTask callable )
@@ -661,6 +687,7 @@ public class Tasks
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
 	 * @param delay   Delay in server ticks before executing task
+	 *
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public static int scheduleSyncDelayedTask( final RegistrarBase creator, final long delay, final CallableTask task )
@@ -673,6 +700,7 @@ public class Tasks
 	 *
 	 * @param creator TaskCreator that owns the task
 	 * @param task    Task to be executed
+	 *
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public static int scheduleSyncDelayedTask( final RegistrarBase creator, final CallableTask task )
@@ -687,6 +715,7 @@ public class Tasks
 	 * @param delay    Delay in server ticks before executing first repeat
 	 * @param period   Period in server ticks of the task
 	 * @param callable Task to be executed
+	 *
 	 * @return Task id number (-1 if scheduling failed)
 	 */
 	public static int scheduleSyncRepeatingTask( final RegistrarBase creator, long delay, long period, final CallableTask callable )

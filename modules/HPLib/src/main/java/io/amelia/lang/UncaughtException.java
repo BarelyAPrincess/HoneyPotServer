@@ -9,6 +9,8 @@
  */
 package io.amelia.lang;
 
+import javax.annotation.Nonnull;
+
 public class UncaughtException extends RuntimeException implements ExceptionContext
 {
 	private static final long serialVersionUID = 6854413013575591783L;
@@ -90,6 +92,18 @@ public class UncaughtException extends RuntimeException implements ExceptionCont
 		return level;
 	}
 
+	public void setReportingLevel( ReportingLevel level )
+	{
+		this.level = level;
+	}
+
+	@Nonnull
+	@Override
+	public Throwable getThrowable()
+	{
+		return this;
+	}
+
 	@Override
 	public ReportingLevel handle( ExceptionReport report, ExceptionRegistrar registrar )
 	{
@@ -100,11 +114,6 @@ public class UncaughtException extends RuntimeException implements ExceptionCont
 	public boolean isIgnorable()
 	{
 		return level.isIgnorable();
-	}
-
-	public void setReportingLevel( ReportingLevel level )
-	{
-		this.level = level;
 	}
 
 	private void throwCauseException()

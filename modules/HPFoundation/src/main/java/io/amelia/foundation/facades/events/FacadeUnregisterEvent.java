@@ -9,17 +9,17 @@
  */
 package io.amelia.foundation.facades.events;
 
-import io.amelia.foundation.service.ServiceDispatcher;
-import io.amelia.foundation.service.ServiceProvider;
+import io.amelia.foundation.facades.FacadeService;
+import io.amelia.foundation.facades.Facades;
 
 /**
- * This event is called when a service is unregistered.
+ * This event is called when a facade is unregistered.
  * <p>
  * Warning: The order in which register and unregister events are called should not be relied upon.
  */
-public class FacadeUnregisterEvent<T> extends FacadeEvent<T>
+public class FacadeUnregisterEvent<T extends FacadeService> extends FacadeEvent<T>
 {
-	public FacadeUnregisterEvent( ServiceDispatcher.RegisteredService<T, ServiceProvider> serviceProvider )
+	public FacadeUnregisterEvent( Facades.RegisteredFacade<T> serviceProvider )
 	{
 		super( serviceProvider );
 	}

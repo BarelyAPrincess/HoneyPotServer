@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.lang.ApplicationException;
+
 /**
  * Advanced class for handling namespaces with virtually any separator character.
  *
@@ -32,8 +34,12 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 
 	public static final Pattern RANGE_EXPRESSION = Pattern.compile( "(0-9+)-(0-9+)" );
 
-	private final NonnullFunction<String[], T> creator;
+	private static boolean containsRegex( String namespace )
+	{
+		return namespace.contains( "*" ) || namespace.matches( ".*[0-9]+-[0-9]+.*" );
+	}
 
+	private final NonnullFunction<String[], T> creator;
 	protected String[] nodes;
 	private String glue;
 
@@ -113,6 +119,36 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 	public T dropLast()
 	{
 		return subNamespace( 0, getNodeCount() - 1 );
+	}
+
+	@Override
+	public boolean equals( Object obj )
+	{
+		if ( !( obj instanceof NamespaceBase ) )
+			return false;
+
+		NamespaceBase ns = ( NamespaceBase ) obj;
+
+		if ( nodes.length != ns.nodes.length )
+			return false;
+
+		for ( int i = 0; i < nodes.length; i++ )
+			if ( !nodes[i].equals( ns.nodes[i] ) )
+				return false;
+
+		return true;
+	}
+
+	public boolean equals( String namespace )
+	{
+		/*
+		 * We are not going to try and match a permission if it contains regex.
+		 * The other way around should be true and likely means someone got their strings backwards.
+		 */
+		if ( containsRegex( namespace ) )
+			throw ApplicationException.runtime( "The namespace \"" + namespace + "\" contains wildcard/regex. This is usually a bug or the check was backwards." );
+
+		return prepareRegexp().matcher( namespace ).matches();
 	}
 
 	/**
@@ -249,18 +285,6 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			total += 10 * ( other.length - nodes.length );
 
 		return total;
-	}
-
-	public boolean matches( String perm )
-	{
-		/*
-		 * We are not going to try and match a permission if it contains regex.
-		 * This means someone must have gotten their strings backward.
-		 */
-		if ( perm.contains( "*" ) || perm.matches( ".*[0-9]+-[0-9]+.*" ) )
-			return false;
-
-		return prepareRegexp().matcher( perm ).matches();
 	}
 
 	public T merge( Namespace ns )

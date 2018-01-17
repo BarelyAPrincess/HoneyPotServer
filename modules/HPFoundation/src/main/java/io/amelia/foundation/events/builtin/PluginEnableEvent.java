@@ -7,14 +7,17 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.events.application;
+package io.amelia.foundation.events.builtin;
 
-import io.amelia.foundation.events.AbstractEvent;
+import io.amelia.foundation.plugins.PluginBase;
 
 /**
- * Internal Application Events
+ * Called when a plugin is enabled.
  */
-public abstract class ApplicationEvent extends AbstractEvent
+public class PluginEnableEvent extends PluginEvent
 {
-
+	public PluginEnableEvent( final PluginBase plugin )
+	{
+		super( plugin );
+	}
 }

@@ -9,31 +9,8 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import com.chiorichan.configuration.serialization.ConfigurationSerializable;
-import com.chiorichan.configuration.serialization.ConfigurationSerialization;
-import com.chiorichan.event.AbstractEvent;
-import com.chiorichan.event.EventDispatcher;
-import com.chiorichan.event.EventException;
-import com.chiorichan.event.EventExecutor;
-import com.chiorichan.event.EventHandler;
-import com.chiorichan.event.Listener;
-import com.chiorichan.event.RegisteredListener;
-import com.chiorichan.event.TimedRegisteredListener;
-import com.chiorichan.event.plugin.PluginDisableEvent;
-import com.chiorichan.event.plugin.PluginEnableEvent;
-import com.chiorichan.plugin.PluginInformation;
-import com.chiorichan.plugin.PluginManager;
-import com.chiorichan.utils.UtilIO;
 import com.google.common.collect.ImmutableList;
-import io.amelia.lang.DeprecatedDetail;
-import io.amelia.lang.PluginException;
-import io.amelia.lang.PluginMetaException;
-import io.amelia.lang.PluginInvalidException;
-import io.amelia.lang.PluginUnconfiguredException;
-import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.PluginDependencyUnknownException;
-import io.amelia.storage.support.RegistrarContext;
-import org.apache.commons.lang3.Validate;
+
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
@@ -54,6 +31,25 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import io.amelia.foundation.events.AbstractEvent;
+import io.amelia.foundation.events.EventException;
+import io.amelia.foundation.events.EventHandler;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.RegisteredListener;
+import io.amelia.foundation.events.builtin.PluginDisableEvent;
+import io.amelia.foundation.events.builtin.PluginEnableEvent;
+import io.amelia.foundation.plugins.PluginMeta;
+import io.amelia.foundation.plugins.Plugins;
+import io.amelia.lang.DeprecatedDetail;
+import io.amelia.lang.PluginDependencyUnknownException;
+import io.amelia.lang.PluginException;
+import io.amelia.lang.PluginInvalidException;
+import io.amelia.lang.PluginMetaException;
+import io.amelia.lang.ReportingLevel;
+import io.amelia.support.IO;
+import io.amelia.support.Objs;
+import io.amelia.support.data.ParcelLoader;
+
 /**
  * Represents a Java plugin loader, allowing plugins in the form of .jar
  */
@@ -63,12 +59,15 @@ public final class JavaPluginLoader implements PluginLoader
 	private final Pattern[] fileFilters = new Pattern[] {Pattern.compile( "\\.jar$" )};
 	private final Map<String, PluginClassLoader> loaders = new LinkedHashMap<String, PluginClassLoader>();
 
-	public Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> createRegisteredListeners( Listener listener, final Plugin plugin )
+	/**
+	 * Any class can be scanned for event methods.
+	 */
+	public Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> createRegisteredListeners( Object listener, final Plugin plugin )
 	{
-		Validate.notNull( plugin, "Plugin can not be null" );
-		Validate.notNull( listener, "Listener can not be null" );
+		Objs.notNull( plugin, "Plugin can not be null" );
+		Objs.notNull( listener, "Listener can not be null" );
 
-		boolean useTimings = EventDispatcher.i().useTimings();
+		boolean useTimings = false; //EventDispatcher.i().useTimings();
 		Map<Class<? extends AbstractEvent>, Set<RegisteredListener>> ret = new HashMap<Class<? extends AbstractEvent>, Set<RegisteredListener>>();
 		Set<Method> methods;
 		try
@@ -82,7 +81,7 @@ public final class JavaPluginLoader implements PluginLoader
 		}
 		catch ( NoClassDefFoundError e )
 		{
-			PluginManager.getLogger().severe( "Plugin " + plugin.getDescription().getFullName() + " has failed to register events for " + listener.getClass() + " because " + e.getMessage() + " does not exist." );
+			Plugins.L.severe( "Plugin " + plugin.getMeta().getDisplayName() + " has failed to register events for " + listener.getClass() + " because " + e.getMessage() + " does not exist." );
 			return ret;
 		}
 
@@ -94,7 +93,7 @@ public final class JavaPluginLoader implements PluginLoader
 			final Class<?> checkClass;
 			if ( method.getParameterTypes().length != 1 || !AbstractEvent.class.isAssignableFrom( checkClass = method.getParameterTypes()[0] ) )
 			{
-				PluginManager.getLogger().severe( plugin.getDescription().getFullName() + " attempted to register an invalid EventHandler method signature \"" + method.toGenericString() + "\" in " + listener.getClass() );
+				Plugins.L.severe( plugin.getMeta().getDisplayName() + " attempted to register an invalid EventHandler method signature \"" + method.toGenericString() + "\" in " + listener.getClass() );
 				continue;
 			}
 			final Class<? extends AbstractEvent> eventClass = checkClass.asSubclass( AbstractEvent.class );
@@ -112,44 +111,35 @@ public final class JavaPluginLoader implements PluginLoader
 					if ( clazz.isAnnotationPresent( DeprecatedDetail.class ) )
 					{
 						DeprecatedDetail deprecated = clazz.getAnnotation( DeprecatedDetail.class );
-						PluginManager.getLogger().warning( String.format( "The plugin '%s' has registered a listener for %s on method '%s', but the event is Deprecated because '%s'; please notify the authors %s.", plugin.getDescription().getFullName(), clazz.getName(), method.toGenericString(), deprecated.reason(), Arrays.toString( plugin.getDescription().getAuthors().toArray() ) ) );
+						Plugins.L.warning( String.format( "The plugin '%s' has registered a EventListener for %s on method '%s', but the event is Deprecated because '%s'; please notify the authors %s.", plugin.getMeta().getDisplayName(), clazz.getName(), method.toGenericString(), deprecated.reason(), Arrays.toString( plugin.getMeta().getAuthors().toArray() ) ) );
 						break;
 					}
 
 					if ( clazz.isAnnotationPresent( Deprecated.class ) )
 					{
-						PluginManager.getLogger().warning( String.format( "The plugin '%s' has registered a listener for %s on method '%s', but the event is Deprecated! Please notify the authors %s.", plugin.getDescription().getFullName(), clazz.getName(), method.toGenericString(), Arrays.toString( plugin.getDescription().getAuthors().toArray() ) ) );
+						Plugins.L.warning( String.format( "The plugin '%s' has registered a EventListener for %s on method '%s', but the event is Deprecated! Please notify the authors %s.", plugin.getMeta().getDisplayName(), clazz.getName(), method.toGenericString(), Arrays.toString( plugin.getMeta().getAuthors().toArray() ) ) );
 						break;
 					}
 				}
 
-			EventExecutor executor = new EventExecutor()
-			{
-				@Override
-				public void execute( Listener listener, AbstractEvent event ) throws EventException
+			RegisteredListener registeredListener = new RegisteredListener<>( plugin, eh.priority(), event -> {
+				try
 				{
-					try
-					{
-						if ( !eventClass.isAssignableFrom( event.getClass() ) )
-							return;
-						method.invoke( listener, event );
-					}
-					catch ( InvocationTargetException ex )
-					{
-						throw new EventException( ex.getCause() );
-					}
-					catch ( Throwable t )
-					{
-						throw new EventException( t );
-					}
+					if ( !eventClass.isAssignableFrom( event.getClass() ) )
+						return;
+					method.invoke( listener, event );
 				}
-			};
-
-			RegistrarContext context = new RegistrarContext( plugin );
-			if ( useTimings )
-				eventSet.add( new TimedRegisteredListener( listener, executor, eh.priority(), context, eh.ignoreCancelled() ) );
-			else
-				eventSet.add( new RegisteredListener( listener, executor, eh.priority(), context, eh.ignoreCancelled() ) );
+				catch ( InvocationTargetException ex )
+				{
+					throw new EventException.Error( ex.getCause() );
+				}
+				catch ( Throwable t )
+				{
+					throw new EventException.Error( t );
+				}
+			} );
+			registeredListener.setUseTimings( useTimings );
+			eventSet.add( registeredListener );
 		}
 		return ret;
 	}
@@ -158,14 +148,12 @@ public final class JavaPluginLoader implements PluginLoader
 	@SuppressWarnings( "resource" )
 	public void disablePlugin( Plugin plugin )
 	{
-		Validate.isTrue( plugin instanceof Plugin, "Plugin is not associated with this PluginLoader" );
-
 		if ( plugin.isEnabled() )
 		{
-			String message = String.format( "Disabling %s", plugin.getDescription().getFullName() );
-			PluginManager.getLogger().info( message );
+			String message = String.format( "Disabling %s", plugin.getMeta().getDisplayName() );
+			Plugins.L.info( message );
 
-			EventDispatcher.i().callEvent( new PluginDisableEvent( plugin ) );
+			Events.callEvent( new PluginDisableEvent( plugin ) );
 
 			Plugin jPlugin = plugin;
 			ClassLoader cloader = jPlugin.getClassLoader();
@@ -176,10 +164,10 @@ public final class JavaPluginLoader implements PluginLoader
 			}
 			catch ( Throwable ex )
 			{
-				PluginManager.getLogger().log( Level.SEVERE, "Error occurred while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex );
+				Plugins.L.log( Level.SEVERE, "Error occurred while disabling " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
 			}
 
-			loaders.remove( jPlugin.getDescription().getName() );
+			loaders.remove( jPlugin.getMeta().getName() );
 
 			if ( cloader instanceof PluginClassLoader )
 			{
@@ -195,15 +183,13 @@ public final class JavaPluginLoader implements PluginLoader
 	@Override
 	public void enablePlugin( final Plugin plugin )
 	{
-		Validate.isTrue( plugin instanceof Plugin, "Plugin is not associated with this PluginLoader" );
-
 		if ( !plugin.isEnabled() )
 		{
-			PluginManager.getLogger().info( "Enabling " + plugin.getDescription().getFullName() );
+			Plugins.L.info( "Enabling " + plugin.getMeta().getDisplayName() );
 
 			Plugin jPlugin = plugin;
 
-			String pluginName = jPlugin.getDescription().getName();
+			String pluginName = jPlugin.getMeta().getName();
 
 			if ( !loaders.containsKey( pluginName ) )
 				loaders.put( pluginName, ( PluginClassLoader ) jPlugin.getClassLoader() );
@@ -212,25 +198,25 @@ public final class JavaPluginLoader implements PluginLoader
 			{
 				jPlugin.setEnabled( true );
 			}
-			catch ( PluginUnconfiguredException ex )
+			catch ( PluginException.Unconfigured ex )
 			{
 				// Manually thrown by plugins to convey when they are unconfigured
-				PluginManager.getLogger().severe( String.format( "The plugin %s has reported that it's unconfigured, the plugin has been disabled until this is resolved.", plugin.getDescription().getFullName() ), ex );
+				Plugins.L.severe( String.format( "The plugin %s has reported that it's unconfigured, the plugin has been disabled until this is resolved.", plugin.getMeta().getDisplayName() ), ex );
 			}
-			catch ( PluginException ex )
+			catch ( PluginException.Error ex )
 			{
 				// Manually thrown by plugins to convey an issue
-				PluginManager.getLogger().severe( String.format( "The plugin %s has thrown the internal PluginException, the plugin has been disabled until this is resolved.", plugin.getDescription().getFullName() ), ex );
+				Plugins.L.severe( String.format( "The plugin %s has thrown the internal PluginException, the plugin has been disabled until this is resolved.", plugin.getMeta().getDisplayName() ), ex );
 			}
 			catch ( Throwable ex )
 			{
 				// Thrown for unexpected internal plugin problems
-				PluginManager.getLogger().severe( String.format( "Error occurred while enabling %s (Is it up to date?)", plugin.getDescription().getFullName() ), ex );
+				Plugins.L.severe( String.format( "Error occurred while enabling %s (Is it up to date?)", plugin.getMeta().getDisplayName() ), ex );
 			}
 
 			// Perhaps abort here, rather than continue going, but as it stands,
 			// an abort is not possible the way it's currently written
-			EventDispatcher.i().callEvent( new PluginEnableEvent( plugin ) );
+			Events.callEvent( new PluginEnableEvent( plugin ) );
 		}
 	}
 
@@ -280,9 +266,15 @@ public final class JavaPluginLoader implements PluginLoader
 	}
 
 	@Override
-	public PluginInformation getPluginDescription( File file ) throws PluginMetaException
+	public Pattern[] getPluginFileFilters()
 	{
-		Validate.notNull( file, "File cannot be null" );
+		return fileFilters.clone();
+	}
+
+	@Override
+	public PluginMeta getPluginMeta( File file ) throws PluginMetaException
+	{
+		Objs.notNull( file, "File cannot be null" );
 
 		JarFile jar = null;
 		InputStream stream = null;
@@ -300,53 +292,44 @@ public final class JavaPluginLoader implements PluginLoader
 
 			stream = jar.getInputStream( entry );
 
-			return new PluginInformation( stream );
+			// TODO Implement additional plugin meta types.
+			return new PluginMeta( stream, ParcelLoader.Type.YAML );
 
 		}
-		catch ( IOException ex )
-		{
-			throw new PluginMetaException( ex );
-		}
-		catch ( YAMLException ex )
+		catch ( YAMLException | IOException ex )
 		{
 			throw new PluginMetaException( ex );
 		}
 		finally
 		{
 			if ( jar != null )
-				UtilIO.closeQuietly( jar );
+				IO.closeQuietly( jar );
 			if ( stream != null )
-				UtilIO.closeQuietly( stream );
+				IO.closeQuietly( stream );
 		}
-	}
-
-	@Override
-	public Pattern[] getPluginFileFilters()
-	{
-		return fileFilters.clone();
 	}
 
 	@Override
 	public Plugin loadPlugin( File file ) throws PluginInvalidException
 	{
-		Validate.notNull( file, "File cannot be null" );
+		Objs.notNull( file, "File cannot be null" );
 
 		if ( !file.exists() )
 			throw new PluginInvalidException( new FileNotFoundException( file.getPath() + " does not exist" ) );
 
-		PluginInformation description;
+		PluginMeta pluginMeta;
 		try
 		{
-			description = getPluginDescription( file );
+			pluginMeta = getPluginMeta( file );
 		}
 		catch ( PluginMetaException ex )
 		{
 			throw new PluginInvalidException( ex );
 		}
 
-		File dataFolder = new File( file.getParentFile(), description.getName().replaceAll( "\\W", "" ) );
+		File dataFolder = new File( file.getParentFile(), pluginMeta.getName().replaceAll( "\\W", "" ) );
 
-		List<String> depend = description.getDepend();
+		List<String> depend = pluginMeta.getDepend();
 		if ( depend == null )
 			depend = ImmutableList.of();
 
@@ -363,7 +346,7 @@ public final class JavaPluginLoader implements PluginLoader
 		PluginClassLoader loader;
 		try
 		{
-			loader = new PluginClassLoader( this, getClass().getClassLoader(), description, dataFolder, file );
+			loader = new PluginClassLoader( this, getClass().getClassLoader(), pluginMeta, dataFolder, file );
 		}
 		catch ( PluginInvalidException ex )
 		{
@@ -374,20 +357,20 @@ public final class JavaPluginLoader implements PluginLoader
 			throw new PluginInvalidException( ex );
 		}
 
-		loaders.put( description.getName(), loader );
+		loaders.put( pluginMeta.getName(), loader );
 
-		if ( description.getNatives().size() > 0 )
+		if ( pluginMeta.getNatives().size() > 0 )
 			try
 			{
-				UtilIO.extractNatives( description.getNatives(), file, dataFolder );
+				IO.extractNatives( pluginMeta.getNatives(), file, dataFolder );
 			}
 			catch ( IOException e )
 			{
-				PluginManager.getLogger().severe( "We had a problem trying to extract native libraries from plugin file '" + file + "':", e );
+				Plugins.L.severe( "We had a problem trying to extract native libraries from plugin file '" + file + "':", e );
 			}
 
 		// Attempts to extract bundled library files
-		UtilIO.extractLibraries( file, dataFolder );
+		IO.extractLibraries( file, dataFolder );
 
 		return loader.plugin;
 	}
@@ -398,11 +381,11 @@ public final class JavaPluginLoader implements PluginLoader
 
 		try
 		{
-			if ( clazz != null && ConfigurationSerializable.class.isAssignableFrom( clazz ) )
+			/*if ( clazz != null && ConfigurationSerializable.class.isAssignableFrom( clazz ) )
 			{
 				Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass( ConfigurationSerializable.class );
 				ConfigurationSerialization.unregisterClass( serializable );
-			}
+			}*/
 		}
 		catch ( NullPointerException ex )
 		{
@@ -417,11 +400,11 @@ public final class JavaPluginLoader implements PluginLoader
 		{
 			classes.put( name, clazz );
 
-			if ( ConfigurationSerializable.class.isAssignableFrom( clazz ) )
+			/*if ( ConfigurationSerializable.class.isAssignableFrom( clazz ) )
 			{
 				Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass( ConfigurationSerializable.class );
 				ConfigurationSerialization.registerClass( serializable );
-			}
+			}*/
 		}
 	}
 }

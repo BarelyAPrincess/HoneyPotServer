@@ -3,16 +3,15 @@ package io.amelia.looper.queue;
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ApplicationException;
-import io.amelia.looper.AbstractLooper;
 
 public abstract class EntryRunnable extends AbstractEntry implements Runnable
 {
-	EntryRunnable( @Nonnull DefaultQueue queue )
+	public EntryRunnable( @Nonnull DefaultQueue queue )
 	{
 		super( queue );
 	}
 
-	EntryRunnable( @Nonnull DefaultQueue queue, boolean async )
+	public EntryRunnable( @Nonnull DefaultQueue queue, boolean async )
 	{
 		super( queue, async );
 	}
@@ -20,14 +19,25 @@ public abstract class EntryRunnable extends AbstractEntry implements Runnable
 	@Override
 	public synchronized void run()
 	{
-		if ( queue.lastEntry != this )
-			throw ApplicationException.runtime( "Entry must only be ran while it's the active entry for the parcel queue!" );
+		if ( queue.getActiveEntry() != this )
+			throw ApplicationException.runtime( "Entry can only be ran while it's the active entry for the queue!" );
 
-		if ( isAsync() || queue.looper.hasFlag( AbstractLooper.Flag.ASYNC ) )
-			queue.looper.runAsync( this::run0 );
+		Runnable runnable = () -> {
+			try
+			{
+				run0();
+			}
+			catch ( ApplicationException.Error error )
+			{
+				queue.getLooperControl().handleException( error );
+			}
+		};
+
+		if ( isAsync() || queue.hasFlag( AbstractQueue.Flag.ASYNC ) )
+			queue.getLooperControl().runAsync( runnable );
 		else
-			run0();
+			runnable.run();
 	}
 
-	protected abstract void run0() throws ApplicationException;
+	protected abstract void run0() throws ApplicationException.Error;
 }

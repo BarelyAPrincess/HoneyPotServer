@@ -11,46 +11,85 @@ package io.amelia.foundation.events;
 
 import io.amelia.lang.ApplicationException;
 
-public class EventException extends ApplicationException.Error
+public class EventException
 {
-	private static final long serialVersionUID = 3532808232324183999L;
-
-	/**
-	 * Constructs a new EventException
-	 */
-	public EventException()
+	private EventException()
 	{
-		super();
+		// Private Wrapper Class
 	}
 
-	/**
-	 * Constructs a new EventException with the given message
-	 *
-	 * @param message The message
-	 */
-	public EventException( String message )
+	public static class Error extends ApplicationException.Error
 	{
-		super( message );
+		private static final long serialVersionUID = 3532808232324183999L;
+
+		public Error()
+		{
+			super();
+		}
+
+		public Error( String message )
+		{
+			super( message );
+		}
+
+		public Error( String message, Throwable cause )
+		{
+			super( message, cause );
+		}
+
+		public Error( Throwable cause )
+		{
+			super( cause );
+		}
 	}
 
-	/**
-	 * Constructs a new EventException with the given message
-	 *
-	 * @param cause   The exception that caused this
-	 * @param message The message
-	 */
-	public EventException( String message, Throwable cause )
+	public static class Ignorable extends ApplicationException.Ignorable
 	{
-		super( message, cause );
+		private static final long serialVersionUID = 3532808232324183999L;
+
+		public Ignorable()
+		{
+			super();
+		}
+
+		public Ignorable( String message )
+		{
+			super( message );
+		}
+
+		public Ignorable( String message, Throwable cause )
+		{
+			super( message, cause );
+		}
+
+		public Ignorable( Throwable cause )
+		{
+			super( cause );
+		}
 	}
 
-	/**
-	 * Constructs a new EventException based on the given Exception
-	 *
-	 * @param cause Exception that triggered this Exception
-	 */
-	public EventException( Throwable cause )
+	public static class Internal extends ApplicationException.Runtime
 	{
-		super( cause );
+		private static final long serialVersionUID = 3532808232324183999L;
+
+		public Internal()
+		{
+			super();
+		}
+
+		public Internal( String message )
+		{
+			super( message );
+		}
+
+		public Internal( String message, Throwable cause )
+		{
+			super( message, cause );
+		}
+
+		public Internal( Throwable cause )
+		{
+			super( cause );
+		}
 	}
 }

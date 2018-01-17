@@ -4,7 +4,9 @@ import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.PropDevMeta;
+import io.amelia.foundation.parcel.ParcelCarrier;
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ParcelException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.networking.NetworkLoader;
@@ -36,7 +38,13 @@ public class HoneyPotServer extends DefaultApplication
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
 
-		getRouter().onTick( ( currentTick, averageTick ) -> NetworkLoader.heartbeat() );
+		getLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 20L, 20L );
+	}
+
+	@Override
+	public void handleParcel( ParcelCarrier parcelCarrier ) throws ParcelException.Error
+	{
+		// TODO Nothing Yet!
 	}
 
 	@Override
@@ -72,5 +80,11 @@ public class HoneyPotServer extends DefaultApplication
 			LogBuilder.get().info( "Shutting Down Account Manager..." );
 			// AccountManager.shutdown();
 		}
+	}
+
+	@Override
+	public void sendToAll( ParcelCarrier parcel )
+	{
+		// TODO Distribute the parcel to all available receivers.
 	}
 }

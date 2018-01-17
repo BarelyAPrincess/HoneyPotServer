@@ -9,4 +9,10 @@ public class ApplicationInfoMessage extends NetworkMessage
 	{
 
 	}
+
+	@Override
+	protected void beforeCommit()
+	{
+
+	}
 }

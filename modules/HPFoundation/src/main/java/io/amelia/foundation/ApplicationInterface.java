@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import io.amelia.foundation.parcel.ParcelChannel;
+import io.amelia.foundation.parcel.ParcelInterface;
+import io.amelia.foundation.parcel.ParcelReceiver;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
@@ -22,17 +23,19 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ParcelChannel
+public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ParcelInterface, ParcelReceiver
 {
+	public final Thread primaryThread = Thread.currentThread();
+	private final ApplicationLooper looper;
 	private final OptionParser optionParser = new OptionParser();
 	private final ApplicationRouter router;
 	private Env env = null;
-	private ApplicationLooper looper;
 	private OptionSet optionSet = null;
 
 	public ApplicationInterface()
 	{
 		router = new ApplicationRouter();
+		looper = new ApplicationLooper();
 
 		optionParser.acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
 		optionParser.acceptsAll( Arrays.asList( "v", "version" ), "Show the version" );
@@ -131,9 +134,9 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		return optionSet.hasArgument( arg );
 	}
 
-	public boolean isMainThread()
+	public boolean isPrimaryThread()
 	{
-		return router.isPrimaryThread();
+		return primaryThread == Thread.currentThread();
 	}
 
 	@Override

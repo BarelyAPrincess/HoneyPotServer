@@ -7,9 +7,17 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.events;
+package io.amelia.foundation.events.builtin;
 
-public interface EventExecutor
+import io.amelia.foundation.plugins.PluginBase;
+
+/**
+ * Called when a plugin is disabled.
+ */
+public class PluginDisableEvent extends PluginEvent
 {
-	void execute( EventListener listener, AbstractEvent event ) throws EventException;
+	public PluginDisableEvent( final PluginBase plugin )
+	{
+		super( plugin );
+	}
 }

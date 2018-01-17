@@ -22,7 +22,7 @@ public interface NetworkWorker<T>
 
 	boolean isStarted();
 
-	T start() throws NetworkException;
+	T start() throws NetworkException.Error;
 
-	T stop() throws NetworkException;
+	T stop() throws NetworkException.Error;
 }

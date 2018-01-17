@@ -407,7 +407,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	{
 		@SuppressWarnings( "unchecked" )
 		ParcelCarrier carrier = ParcelCarrier.obtain( MESSAGE_POST_RESULT, new AsyncTaskResult<>( this, result ) );
-		carrier.sendToTarget();
+		Foundation.getRouter().sendParcel( carrier );
 		return result;
 	}
 
@@ -437,9 +437,7 @@ public abstract class AsyncTask<Params, Progress, Result>
 	protected final void publishProgress( Progress... values )
 	{
 		if ( !isCancelled() )
-		{
-			ParcelCarrier.obtain( MESSAGE_POST_PROGRESS, new AsyncTaskResult<Progress>( this, values ) ).sendToTarget();
-		}
+			Foundation.getRouter().sendParcel( ParcelCarrier.obtain( MESSAGE_POST_PROGRESS, new AsyncTaskResult<Progress>( this, values ) ) );
 	}
 
 	/**

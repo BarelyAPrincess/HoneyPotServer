@@ -13,6 +13,11 @@ public interface LooperTaskTrait
 {
 	DefaultQueue getQueue();
 
+	default boolean isHeldByCurrentThread()
+	{
+		return false;
+	}
+
 	/**
 	 * Causes the Runnable task to be added to the {@link DefaultQueue}.
 	 * The runnable will be run on the thread to which this queue is attached.
@@ -23,14 +28,13 @@ public interface LooperTaskTrait
 	 */
 	default TaskEntry postTask( LooperTask task )
 	{
-		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task ) );
+		return postTask( task, false );
 	}
 
-	default TaskEntry postTaskAsync( LooperTask task )
+	default TaskEntry postTask( LooperTask task, boolean async )
 	{
 		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, true ) );
+		return queue.postEntry( new TaskEntry( queue, task, async ) );
 	}
 
 	/**
@@ -42,21 +46,20 @@ public interface LooperTaskTrait
 	 *
 	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
 	 *
-	 * @see #postTaskAtAsync(LooperTask, long)
+	 * @see #postTaskAt(LooperTask, long)
 	 */
 	default TaskEntry postTaskAt( LooperTask task, long when )
 	{
-		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, when ) );
+		return postTaskAt( task, when, false );
 	}
 
 	/**
 	 * @see #postTaskAt(LooperTask, long)
 	 */
-	default TaskEntry postTaskAtAsync( LooperTask task, long when )
+	default TaskEntry postTaskAt( LooperTask task, long when, boolean async )
 	{
 		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, when, true ) );
+		return queue.postEntry( new TaskEntry( queue, task, when, async ) );
 	}
 
 	/**
@@ -69,21 +72,20 @@ public interface LooperTaskTrait
 	 *
 	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
 	 *
-	 * @see #postTaskLaterAsync(LooperTask, long)
+	 * @see #postTaskLater(LooperTask, long)
 	 */
 	default TaskEntry postTaskLater( LooperTask task, long delay )
 	{
-		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, System.currentTimeMillis() + delay ) );
+		return postTaskLater( task, delay, false );
 	}
 
 	/**
 	 * @see #postTaskLater(LooperTask, long)
 	 */
-	default TaskEntry postTaskLaterAsync( LooperTask task, long delay )
+	default TaskEntry postTaskLater( LooperTask task, long delay, boolean async )
 	{
 		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, System.currentTimeMillis() + delay, true ) );
+		return queue.postEntry( new TaskEntry( queue, task, System.currentTimeMillis() + delay, async ) );
 	}
 
 	/**
@@ -99,21 +101,64 @@ public interface LooperTaskTrait
 	 *
 	 * @return Returns an {@link TaskEntry} instance that references the enqueued runnable.
 	 *
-	 * @see #postTaskAsync(LooperTask)
+	 * @see #postTask(LooperTask)
 	 */
-	default TaskEntry postTaskNext( LooperTask task )
+	default TaskEntry postTaskNow( LooperTask task )
 	{
-		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, queue.getEarliestEntry() + 1L ) );
+		return postTaskNow( task, false );
 	}
 
 	/**
-	 * @see #postTaskNext(LooperTask)
+	 * @see #postTaskNow(LooperTask)
 	 */
-	default TaskEntry postTaskNextAsync( LooperTask task )
+	default TaskEntry postTaskNow( LooperTask task, boolean async )
 	{
 		DefaultQueue queue = getQueue();
-		return queue.postEntry( new TaskEntry( queue, task, queue.getEarliestEntry() + 1L, true ) );
+		return queue.postEntry( new TaskEntry( queue, task, queue.getEarliestEntry() + 1L, async ) );
+	}
+
+	default RepeatingTaskEntry postTaskRepeating( LooperTask task, long delay )
+	{
+		return postTaskRepeating( task, delay, false );
+	}
+
+	default RepeatingTaskEntry postTaskRepeating( LooperTask task, long delay, boolean async )
+	{
+		DefaultQueue queue = getQueue();
+		return queue.postEntry( new RepeatingTaskEntry( queue, task, delay, async ) );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingAt( LooperTask task, long when, long delay )
+	{
+		return postTaskRepeatingAt( task, when, delay, false );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingAt( LooperTask task, long when, long delay, boolean async )
+	{
+		DefaultQueue queue = getQueue();
+		return queue.postEntry( new RepeatingTaskEntry( queue, task, when, delay, async ) );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingLater( LooperTask task, long whenDelay, long delay )
+	{
+		return postTaskRepeatingLater( task, whenDelay, delay, false );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingLater( LooperTask task, long whenDelay, long delay, boolean async )
+	{
+		DefaultQueue queue = getQueue();
+		return queue.postEntry( new RepeatingTaskEntry( queue, task, System.currentTimeMillis() + whenDelay, delay, async ) );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingNext( LooperTask task, long delay )
+	{
+		return postTaskRepeatingNext( task, delay, false );
+	}
+
+	default RepeatingTaskEntry postTaskRepeatingNext( LooperTask task, long delay, boolean async )
+	{
+		DefaultQueue queue = getQueue();
+		return queue.postEntry( new RepeatingTaskEntry( queue, task, queue.getEarliestEntry() + 1L, delay, async ) );
 	}
 
 	/**
@@ -149,7 +194,10 @@ public interface LooperTaskTrait
 	 */
 	default <E extends Exception> boolean postTaskUnsafe( @Nonnull LooperTask<E> task, @Nonnegative long timeout ) throws E
 	{
-		if ( isThreadJoined() )
+		Objs.notNull( task );
+		Objs.notNegative( timeout );
+
+		if ( isHeldByCurrentThread() )
 		{
 			task.execute();
 			return true;
@@ -160,10 +208,60 @@ public interface LooperTaskTrait
 		return blockingRunnable.postAndWait( timeout );
 	}
 
+	class RepeatingTaskEntry extends TaskEntry
+	{
+		private long delay;
+
+		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay )
+		{
+			super( queue, task, when );
+			setDelay( delay );
+		}
+
+		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when, long delay, boolean async )
+		{
+			super( queue, task, when, async );
+			setDelay( delay );
+		}
+
+		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay, boolean async )
+		{
+			super( queue, task, async );
+			setDelay( delay );
+		}
+
+		RepeatingTaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long delay )
+		{
+			super( queue, task );
+			setDelay( delay );
+		}
+
+		public long getDelay()
+		{
+			return delay;
+		}
+
+		public void setDelay( @Nonnegative long delay )
+		{
+			Objs.notNegative( delay );
+			this.delay = delay;
+		}
+
+		@Override
+		protected void run0() throws ApplicationException.Error
+		{
+			super.run0();
+
+			// Repeat entry unless the queue is quitting.
+			if ( !queue.isQuitting() )
+				queue.postEntry( new RepeatingTaskEntry( queue, task, when + delay, delay, isAsync() ) );
+		}
+	}
+
 	class TaskEntry extends EntryRunnable
 	{
-		private final LooperTask task;
-		private final long when;
+		protected final LooperTask task;
+		protected final long when;
 
 		TaskEntry( @Nonnull DefaultQueue queue, @Nonnull LooperTask task, long when )
 		{
@@ -201,12 +299,6 @@ public interface LooperTaskTrait
 			return when;
 		}
 
-		@Override
-		public void recycle()
-		{
-
-		}
-
 		/**
 		 * Can this entry be removed without causing major bugs?
 		 * We use this TaskEntry to unblock after {@link LooperTaskTrait#postTaskUnsafe(LooperTask, long)} is called.
@@ -214,15 +306,32 @@ public interface LooperTaskTrait
 		 * @return True if so.
 		 */
 		@Override
-		public boolean removesSafely()
+		public boolean isSafe()
 		{
 			return !( task instanceof BlockingTask );
 		}
 
 		@Override
-		protected void run0() throws Exception
+		public void recycle()
 		{
-			task.execute();
+
+		}
+
+		@Override
+		protected void run0() throws ApplicationException.Error
+		{
+			try
+			{
+				task.execute();
+			}
+			catch ( ApplicationException.Error e )
+			{
+				throw e;
+			}
+			catch ( Exception e )
+			{
+				throw ApplicationException.error( e );
+			}
 		}
 	}
 }

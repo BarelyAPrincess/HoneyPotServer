@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a complete registration of receivers and sending available at each {@link ParcelChannel}.
+ * Provides a complete registration of receivers and sending available at each {@link ParcelInterface}.
  */
 class ApplicationRegistration
 {

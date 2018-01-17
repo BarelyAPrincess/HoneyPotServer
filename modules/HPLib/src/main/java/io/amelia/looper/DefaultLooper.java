@@ -10,12 +10,19 @@ public final class DefaultLooper extends AbstractLooper<DefaultQueue>
 
 	public DefaultLooper()
 	{
-		super( new DefaultQueue() );
+		setQueue( new DefaultQueue( getLooperControl() ) );
 	}
 
 	public DefaultLooper( Flag... flags )
 	{
-		super( new DefaultQueue(), flags );
+		super( flags );
+		setQueue( new DefaultQueue( getLooperControl() ) );
+	}
+
+	@Override
+	public boolean isAsync()
+	{
+		return getQueue().isAsync();
 	}
 
 	public boolean isDisposed()
@@ -33,13 +40,13 @@ public final class DefaultLooper extends AbstractLooper<DefaultQueue>
 	protected void tick( long loopStartMillis )
 	{
 		// Call the actual loop logic.
-		AbstractQueue.Result result = queue.next( loopStartMillis );
+		AbstractQueue.Result result = getQueue().next( loopStartMillis );
 
 		// A queue entry was successful returned and can now be ran then recycled.
 		if ( result == AbstractQueue.Result.SUCCESS )
 		{
 			// As of now, the only entry returned on the SUCCESS result is the RunnableEntry (or more so TaskEntry and ParcelEntry).
-			EntryRunnable entry = ( EntryRunnable ) queue.getActiveEntry();
+			EntryRunnable entry = ( EntryRunnable ) getQueue().getActiveEntry();
 
 			entry.markFinalized();
 			entry.run();

@@ -38,7 +38,7 @@ public class EntryBarrier extends EntryRunnable
 	}
 
 	@Override
-	public boolean removesSafely()
+	public boolean isSafe()
 	{
 		return true;
 	}
@@ -46,7 +46,7 @@ public class EntryBarrier extends EntryRunnable
 	@Override
 	protected void run0()
 	{
-		if ( !predicate.test( queue.looper ) )
+		if ( !predicate.test( queue.getLooper() ) )
 			cancel();
 	}
 }

@@ -9,16 +9,17 @@
  */
 package io.amelia.networking.udp;
 
+import java.security.KeyPair;
+import java.util.List;
+
+import javax.crypto.Cipher;
+
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.NetworkLoader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
-
-import javax.crypto.Cipher;
-import java.security.KeyPair;
-import java.util.List;
 
 /**
  * Translates the UDP Packet for network encryption.
@@ -30,27 +31,9 @@ public class UDPEncryptCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 
 	private final KeyPair keyPair;
 
-	UDPEncryptCodec() throws NetworkException
+	UDPEncryptCodec() throws NetworkException.Error
 	{
 		keyPair = NetworkLoader.UDP().getRSA();
-	}
-
-	@Override
-	protected void encode( ChannelHandlerContext ctx, ByteBuf msg, List<Object> out ) throws Exception
-	{
-		if ( keyPair == null )
-			out.add( msg );
-		else
-		{
-			byte[] dest = new byte[msg.readableBytes()];
-			msg.readBytes( dest );
-
-			final Cipher cipher = Cipher.getInstance( ALGORITHM );
-			cipher.init( Cipher.ENCRYPT_MODE, keyPair.getPublic() );
-			dest = cipher.doFinal( dest );
-
-			out.add( Unpooled.wrappedBuffer( dest ) );
-		}
 	}
 
 	@Override
@@ -69,6 +52,24 @@ public class UDPEncryptCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 			src = cipher.doFinal( src );
 
 			out.add( Unpooled.wrappedBuffer( src ) );
+		}
+	}
+
+	@Override
+	protected void encode( ChannelHandlerContext ctx, ByteBuf msg, List<Object> out ) throws Exception
+	{
+		if ( keyPair == null )
+			out.add( msg );
+		else
+		{
+			byte[] dest = new byte[msg.readableBytes()];
+			msg.readBytes( dest );
+
+			final Cipher cipher = Cipher.getInstance( ALGORITHM );
+			cipher.init( Cipher.ENCRYPT_MODE, keyPair.getPublic() );
+			dest = cipher.doFinal( dest );
+
+			out.add( Unpooled.wrappedBuffer( dest ) );
 		}
 	}
 }

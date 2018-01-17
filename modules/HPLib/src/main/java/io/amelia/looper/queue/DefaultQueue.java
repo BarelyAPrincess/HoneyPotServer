@@ -1,5 +1,6 @@
 package io.amelia.looper.queue;
 
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -19,7 +20,16 @@ import io.amelia.support.DateAndTime;
 public class DefaultQueue extends AbstractQueue
 {
 	protected final NavigableSet<AbstractEntry> entries = new TreeSet<>();
-	protected AbstractLooper looper;
+	/**
+	 * We use {@link WeakReference} to prevent a circular reference that negates the benefit of the GC.
+	 * Sometimes this isn't an issue but some JVMs ain't smart enough to detect these types of bugs.
+	 */
+	private WeakReference<AbstractLooper<DefaultQueue>.LooperControl> looperControl;
+
+	public DefaultQueue( AbstractLooper<DefaultQueue>.LooperControl looperControl )
+	{
+		this.looperControl = new WeakReference<>( looperControl );
+	}
 
 	public void cancel( long id )
 	{
@@ -111,6 +121,16 @@ public class DefaultQueue extends AbstractQueue
 		return last == null ? Long.MAX_VALUE : last.getWhen();
 	}
 
+	AbstractLooper<DefaultQueue> getLooper()
+	{
+		return looperControl.get().getLooper();
+	}
+
+	AbstractLooper<DefaultQueue>.LooperControl getLooperControl()
+	{
+		return looperControl.get();
+	}
+
 	@Override
 	public boolean hasPendingEntries()
 	{
@@ -120,7 +140,7 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	public boolean isQuitting()
 	{
-		return looper.isQuitting();
+		return getLooper().isQuitting();
 	}
 
 	@Override
@@ -211,7 +231,7 @@ public class DefaultQueue extends AbstractQueue
 			BiPredicate<AbstractLooper, Boolean> predicate = ( ( EntryCheckpoint ) activeEntry ).predicate;
 
 			// Based on the information provided, CheckpointEntry will decide if it would like to be rescheduled for a later time.
-			if ( predicate.test( looper, hasMoreEntries ) )
+			if ( predicate.test( getLooper(), hasMoreEntries ) )
 				postCheckpoint( predicate );
 
 			// Reset the entry and go again.
@@ -239,14 +259,14 @@ public class DefaultQueue extends AbstractQueue
 		if ( !removePendingMessages )
 			return;
 
-		if ( !looper.isLockedByCurrentThread() )
+		if ( !getLooper().isLockedByCurrentThread() )
 			throw ApplicationException.runtime( "Looper must be locked by this thread to quit the LooperQueue." );
 
 		final long now = System.currentTimeMillis();
 		synchronized ( entries )
 		{
 			entries.removeIf( entry -> {
-				if ( entry.removesSafely() && entry.getWhen() > now )
+				if ( entry.isSafe() && entry.getWhen() > now )
 				{
 					entry.recycle();
 					return true;

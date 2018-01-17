@@ -9,7 +9,7 @@
  */
 package io.amelia.foundation.facades.events;
 
-import io.amelia.foundation.events.application.ApplicationEvent;
+import io.amelia.foundation.events.builtin.ApplicationEvent;
 import io.amelia.foundation.binding.Bindings;
 import io.amelia.foundation.facades.FacadeService;
 import io.amelia.foundation.facades.Facades;

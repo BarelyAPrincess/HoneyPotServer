@@ -3,7 +3,7 @@ package io.amelia.main;
 import io.amelia.HoneyPotServer;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.events.builtin.RunlevelEvent;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
@@ -35,7 +35,7 @@ public class EntryPoint
 		final String instanceId = app.getEnv().getString( "instance-id" );
 
 		// Load up Network UDP Driver
-		final UDPWorker udp = NetworkLoader.UDP().get();
+		final UDPWorker udp = NetworkLoader.UDP();
 
 		Events.listen( app, RunlevelEvent.class, ( event ) -> {
 			// Start the Networking

@@ -9,11 +9,6 @@
  */
 package io.amelia.support;
 
-import io.amelia.foundation.Kernel;
-import io.amelia.logcompat.LogBuilder;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
@@ -29,6 +24,11 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+
+import io.amelia.foundation.Foundation;
+import io.amelia.logcompat.LogBuilder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 
 public class NIO
 {
@@ -212,7 +212,7 @@ public class NIO
 			HttpURLConnection con = ( HttpURLConnection ) urlObj.openConnection();
 			con.setRequestMethod( "POST" );
 
-			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + Kernel.getApplication().getId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
+			String urlParameters = "v=1&tid=UA-60405654-1&cid=" + Foundation.getApplication().getId() + "&t=event&ec=" + category + "&ea=" + action + "&el=" + label;
 
 			con.setDoOutput( true );
 			DataOutputStream wr = new DataOutputStream( con.getOutputStream() );

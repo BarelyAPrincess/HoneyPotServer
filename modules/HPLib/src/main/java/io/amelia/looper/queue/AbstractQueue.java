@@ -61,12 +61,17 @@ public abstract class AbstractQueue
 
 	public abstract long getLatestEntry();
 
-	private boolean hasFlag( Flag flag )
+	public boolean hasFlag( Flag flag )
 	{
 		return flags.contains( flag );
 	}
 
 	public abstract boolean hasPendingEntries();
+
+	public boolean isAsync()
+	{
+		return hasFlag( Flag.ASYNC );
+	}
 
 	public final boolean isBlocking()
 	{
@@ -190,13 +195,18 @@ public abstract class AbstractQueue
 	public final <T extends AbstractEntry> T postEntry( T entry )
 	{
 		if ( isQuitting() )
-			throw new IllegalStateException( "The LooperQueue is quitting!" );
+			throw new IllegalStateException( "The looper queue is quitting!" );
 
 		lock.writeLock().lock();
-
 		try
 		{
+			boolean needWake = getActiveResult() == AbstractQueue.Result.EMPTY || entry.getWhen() == 0 || entry.getWhen() < getEarliestEntry();
+
 			postEntry0( entry );
+
+			if ( needWake )
+				wake();
+
 			return entry;
 		}
 		finally

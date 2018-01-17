@@ -4,18 +4,25 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 import io.amelia.foundation.parcel.ParcelCarrier;
-import io.amelia.looper.queue.EntryRunnable;
 import io.amelia.looper.queue.DefaultQueue;
+import io.amelia.looper.queue.EntryRunnable;
+import io.amelia.support.Objs;
 
 public class EntryParcel extends EntryRunnable
 {
-	ParcelCarrier message;
+	ParcelCarrier parcelCarrier;
 	long when;
 
-	EntryParcel( @Nonnull DefaultQueue queue, @Nonnull ParcelCarrier message, @Nonnegative long when )
+	EntryParcel( @Nonnull DefaultQueue queue, @Nonnull ParcelCarrier parcelCarrier, @Nonnegative long when )
 	{
 		super( queue );
-		this.message = message;
+
+		Objs.notNull( parcelCarrier );
+		Objs.notNegative( when );
+
+		parcelCarrier.markFinalized();
+
+		this.parcelCarrier = parcelCarrier;
 		this.when = when;
 	}
 
@@ -28,11 +35,11 @@ public class EntryParcel extends EntryRunnable
 	@Override
 	public void recycle()
 	{
-		message.recycle();
+		parcelCarrier.recycle();
 	}
 
 	@Override
-	public boolean removesSafely()
+	public boolean isSafe()
 	{
 		return true;
 	}

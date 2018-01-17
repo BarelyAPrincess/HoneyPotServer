@@ -1,10 +1,5 @@
 package io.amelia.logcompat;
 
-import com.chiorichan.plugin.PluginBase;
-import com.chiorichan.utils.UtilIO;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.foundation.ModuleBase;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.PrintStream;
@@ -18,6 +13,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+
+import io.amelia.foundation.Kernel;
+import io.amelia.support.IO;
 
 /**
  * Builder for Loggers
@@ -45,12 +43,12 @@ public class LogBuilder
 	{
 		try
 		{
-			File log = new File( ConfigRegistry.i().getDirectoryLogs(), filename + ".log" );
+			File log = new File( Kernel.getPath( Kernel.PATH_LOGS ), filename + ".log" );
 
 			if ( log.exists() )
 			{
 				if ( archiveLimit > 0 )
-					UtilIO.gzFile( log, new File( ConfigRegistry.i().getDirectoryLogs(), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
+					IO.gzFile( log, new File( Kernel.getPath( Kernel.PATH_LOGS ), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
 				log.delete();
 			}
 
@@ -75,7 +73,7 @@ public class LogBuilder
 
 	private static void cleanupLogs( final String suffix, int limit )
 	{
-		File[] files = ConfigRegistry.i().getDirectoryLogs().listFiles( new FilenameFilter()
+		File[] files = Kernel.getPath( Kernel.PATH_LOGS ).listFiles( new FilenameFilter()
 		{
 			public boolean accept( File dir, String name )
 			{
@@ -94,10 +92,10 @@ public class LogBuilder
 			return;
 		}
 
-		UtilIO.SortableFile[] sfiles = new UtilIO.SortableFile[files.length];
+		IO.SortableFile[] sfiles = new IO.SortableFile[files.length];
 
 		for ( int i = 0; i < files.length; i++ )
-			sfiles[i] = new UtilIO.SortableFile( files[i] );
+			sfiles[i] = new IO.SortableFile( files[i] );
 
 		Arrays.sort( sfiles );
 
@@ -111,20 +109,11 @@ public class LogBuilder
 		return get( "" );
 	}
 
-	public static Logger get( ModuleBase module )
-	{
-		return get( module.getName() );
-	}
-
-	public static Logger get( PluginBase plugin )
-	{
-		return get( plugin.getName() );
-	}
-
 	/**
 	 * Gets an instance of Log for provided loggerId. If the logger does not exist one will be created.
 	 *
 	 * @param id The logger id
+	 *
 	 * @return ConsoleLogger An empty loggerId will return the System Logger.
 	 */
 	public static Logger get( String id )
@@ -143,7 +132,7 @@ public class LogBuilder
 
 	public static Logger get( Class<?> logClass )
 	{
-		get( logClass.getSimpleName() );
+		return get( logClass.getSimpleName() );
 	}
 
 	public static java.util.logging.Logger getRootLogger()

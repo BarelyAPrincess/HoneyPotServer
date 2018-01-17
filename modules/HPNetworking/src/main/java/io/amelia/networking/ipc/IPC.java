@@ -1,8 +1,9 @@
 package io.amelia.networking.ipc;
 
-import io.amelia.foundation.Kernel;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.parcel.ParcelCarrier;
-import io.amelia.lang.PacketValidationException;
+import io.amelia.lang.NetworkException;
+import io.amelia.lang.ParcelableException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.packets.PacketRequestInfo;
 import io.amelia.networking.packets.PacketRequestStop;
@@ -14,24 +15,22 @@ public class IPC
 	/**
 	 * temp?
 	 */
-	public static void processIncomingParcel( Parcel src )
+	public static void processIncomingParcel( Parcel src ) throws ParcelableException.Error
 	{
-		ParcelCarrier parcelCarrier = Parcel.Factory.deserialize( src, ParcelCarrier.class );
-
-		parcelCarrier.sendToTarget();
+		Foundation.getRouter().sendParcel( Parcel.Factory.deserialize( src, ParcelCarrier.class ) );
 	}
 
-	public static void start()
+	public static void start() throws NetworkException.PacketValidation
 	{
-		udp().sendPacket( new PacketRequestInfo(), r -> {
+		udp().sendPacket( new PacketRequestInfo( () -> null ), ( request, response ) -> {
 
 		} );
 	}
 
-	public static void status()
+	public static void status() throws NetworkException.PacketValidation
 	{
-		udp().sendPacket( new PacketRequestInfo(), r -> {
-			Kernel.L.info( "Found Instance: " + r.instanceId + " with IP " + r.ipAddress );
+		udp().sendPacket( new PacketRequestInfo( () -> null ), ( request, response ) -> {
+			//Kernel.L.info( "Found Instance: " + r.instanceId + " with IP " + r.ipAddress );
 		} );
 	}
 
@@ -39,11 +38,11 @@ public class IPC
 	{
 		try
 		{
-			udp().sendPacket( new PacketRequestStop( instanceId ), r -> {
+			udp().sendPacket( new PacketRequestStop( instanceId ), ( request, response ) -> {
 
 			} );
 		}
-		catch ( PacketValidationException e )
+		catch ( NetworkException.PacketValidation e )
 		{
 
 		}
@@ -51,7 +50,7 @@ public class IPC
 
 	private static UDPWorker udp()
 	{
-		return NetworkLoader.UDP().get();
+		return NetworkLoader.UDP();
 	}
 
 	private IPC()

@@ -16,16 +16,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.foundation.events.application.ApplicationEvent;
+import io.amelia.foundation.events.builtin.ApplicationEvent;
 import io.amelia.lang.DeprecatedDetail;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
+import io.amelia.support.ConsumerWithException;
 import io.amelia.support.Objs;
 
 public class Events
@@ -48,7 +48,7 @@ public class Events
 		{
 			return callEventWithException( event );
 		}
-		catch ( EventException ex )
+		catch ( EventException.Error ex )
 		{
 			// Ignore
 		}
@@ -62,9 +62,9 @@ public class Events
 	 *
 	 * @param event Event details
 	 *
-	 * @throws EventException Thrown if you try to call an async event on a sync thread
+	 * @throws EventException.Error Thrown if you try to call an async event on a sync thread
 	 */
-	public static <T extends AbstractEvent> T callEventWithException( T event ) throws EventException
+	public static <T extends AbstractEvent> T callEventWithException( T event ) throws EventException.Error
 	{
 		if ( event.isAsynchronous() )
 		{
@@ -83,7 +83,7 @@ public class Events
 		return event;
 	}
 
-	private static void fireEvent( AbstractEvent event ) throws EventException
+	private static void fireEvent( AbstractEvent event ) throws EventException.Error
 	{
 		event.onEventPreCall();
 
@@ -97,7 +97,7 @@ public class Events
 			{
 				registration.callEvent( event );
 			}
-			catch ( EventException ex )
+			catch ( EventException.Error ex )
 			{
 				if ( ex.getCause() == null )
 				{
@@ -133,7 +133,7 @@ public class Events
 		return eventHandlers;
 	}
 
-	private static void listen( final RegistrarBase registrar, final EventListener listener, final Method method ) throws EventException
+	private static void listen( final RegistrarBase registrar, final Object listener, final Method method ) throws EventException.Error
 	{
 		final EventHandler eventHandler = method.getAnnotation( EventHandler.class );
 		if ( eventHandler == null )
@@ -141,7 +141,7 @@ public class Events
 
 		final Class<?> checkClass;
 		if ( method.getParameterTypes().length != 1 || !AbstractEvent.class.isAssignableFrom( checkClass = method.getParameterTypes()[0] ) )
-			throw new EventException( "The EventHandler method signature \"" + method.toGenericString() + "\" in \"" + listener.getClass() + "\" is invalid. It must has at least one argument with an event that extends AbstractEvent." );
+			throw new EventException.Error( "The EventHandler method signature \"" + method.toGenericString() + "\" in \"" + listener.getClass() + "\" is invalid. It must has at least one argument with an event that extends AbstractEvent." );
 
 		final Class<? extends AbstractEvent> eventClass = checkClass.asSubclass( AbstractEvent.class );
 		method.setAccessible( true );
@@ -164,29 +164,25 @@ public class Events
 				}
 			}
 
-		EventExecutor executor = ( listener1, event ) -> {
+		listen( registrar, eventHandler.priority(), eventClass, event -> {
 			try
 			{
 				if ( !eventClass.isAssignableFrom( event.getClass() ) )
 					return;
-				method.invoke( listener1, event );
+				method.invoke( listener, event );
 			}
 			catch ( InvocationTargetException ex )
 			{
-				throw new EventException( ex.getCause() );
+				throw new EventException.Error( ex.getCause() );
 			}
 			catch ( Throwable t )
 			{
-				throw new EventException( t );
+				throw new EventException.Error( t );
 			}
-		};
-
-		listen( registrar, eventHandler.priority(), eventClass, ( e ) -> {
-
 		} );
 	}
 
-	public static void listen( final RegistrarBase registrar, final EventListener listener )
+	public static void listen( final RegistrarBase registrar, final Object listener )
 	{
 		Objs.notNull( registrar, "Registrar can not be null" );
 		Objs.notNull( listener, "Listener can not be null" );
@@ -204,13 +200,13 @@ public class Events
 			// TODO Does this need better handling? Shouldn't it pass to the caller in some form?
 			L.severe( String.format( "%s has failed to register events for %s because %s does not exist.", registrar.getName(), listener.getClass(), e.getMessage() ) );
 		}
-		catch ( EventException e )
+		catch ( EventException.Error e )
 		{
 			L.severe( e.getMessage() );
 		}
 	}
 
-	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, Class<E> event, Consumer<E> listener )
+	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, Class<E> event, ConsumerWithException<E, EventException.Error> listener )
 	{
 		listen( registrar, EventPriority.NORMAL, event, listener );
 	}
@@ -223,7 +219,7 @@ public class Events
 	 * @param event     Event class to register
 	 * @param listener  Consumer that will receive the event
 	 */
-	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, EventPriority priority, Class<E> event, Consumer<E> listener )
+	public static <E extends AbstractEvent> void listen( RegistrarBase registrar, EventPriority priority, Class<E> event, ConsumerWithException<E, EventException.Error> listener )
 	{
 		Objs.notNull( registrar, "Registrar cannot be null" );
 		Objs.notNull( priority, "Priority cannot be null" );

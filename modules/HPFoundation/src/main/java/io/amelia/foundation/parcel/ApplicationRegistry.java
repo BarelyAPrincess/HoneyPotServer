@@ -7,19 +7,19 @@ import io.amelia.foundation.Foundation;
 
 public class ApplicationRegistry
 {
-	private final static Map<ParcelChannel, ApplicationRegistration> registrationMap = new HashMap<>();
+	private final static Map<ParcelInterface, ApplicationRegistration> registrationMap = new HashMap<>();
 
 	public static ApplicationRegistration getApplicationRegistration()
 	{
 		return registrationMap.computeIfAbsent( Foundation.getApplication(), k -> new ApplicationRegistration() );
 	}
 
-	public static ApplicationRegistration registerChannel( ParcelChannel applicationChannel )
+	public static ApplicationRegistration registerChannel( ParcelInterface applicationChannel )
 	{
 		return registrationMap.computeIfAbsent( applicationChannel, k -> new ApplicationRegistration() );
 	}
 
-	public static void unregisterChannel( ParcelChannel applicationChannel )
+	public static void unregisterChannel( ParcelInterface applicationChannel )
 	{
 		// TODO Mark registration as invalid!
 		registrationMap.remove( applicationChannel );

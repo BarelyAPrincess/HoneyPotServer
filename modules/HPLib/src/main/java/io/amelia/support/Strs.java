@@ -16,6 +16,8 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.IDN;
@@ -328,6 +330,13 @@ public class Strs
 		Duration duration = new Duration( l );
 		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
 		return formatter.print( duration.toPeriod() );
+	}
+
+	public static String getStackTrace( Throwable t )
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		t.printStackTrace( new PrintWriter( out ) );
+		return encodeDefault( out.toByteArray() );
 	}
 
 	public static boolean isCamelCase( String var )

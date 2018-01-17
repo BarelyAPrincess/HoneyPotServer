@@ -16,6 +16,7 @@ import io.amelia.support.data.ParcelLoader;
 public class ConfigRegistry
 {
 	public static final ConfigMap config = new ConfigMap();
+	private static boolean isConfigLoaded;
 
 	/*
 	 * We set default config values here for end-user reference, they're then saved to the config file upon load (if unset).
@@ -89,6 +90,11 @@ public class ConfigRegistry
 		envNode.addFlag( ConfigMap.Flag.READ_ONLY, ConfigMap.Flag.NO_SAVE );
 	}
 
+	public static boolean isConfigLoaded()
+	{
+		return isConfigLoaded;
+	}
+
 	private static void loadConfig( @Nonnull File configPath, @Nonnull String nestingPrefix ) throws ConfigException.Error
 	{
 		if ( !configPath.isDirectory() )
@@ -111,6 +117,8 @@ public class ConfigRegistry
 				throw new ConfigException.Error( config, "Failed to load configuration file " + IO.relPath( file ), e );
 			}
 		}
+
+		isConfigLoaded = true;
 	}
 
 	private static void loadConfig() throws ConfigException.Error

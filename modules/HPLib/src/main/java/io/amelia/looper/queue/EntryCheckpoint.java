@@ -31,7 +31,7 @@ public class EntryCheckpoint extends AbstractEntry
 	}
 
 	@Override
-	public boolean removesSafely()
+	public boolean isSafe()
 	{
 		return true;
 	}

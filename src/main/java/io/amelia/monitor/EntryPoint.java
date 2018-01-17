@@ -3,8 +3,9 @@ package io.amelia.monitor;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.MinimalApplication;
 import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.events.builtin.RunlevelEvent;
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.NetworkException;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.networking.ipc.IPC;
@@ -30,7 +31,7 @@ public class EntryPoint
 		final String instanceId = app.getEnv().getString( "instance-id" );
 
 		// Load up Network UDP Driver
-		final UDPWorker udp = NetworkLoader.UDP().get();
+		final UDPWorker udp = NetworkLoader.UDP();
 
 		Events.listen( app, RunlevelEvent.class, ( event ) -> {
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
@@ -52,7 +53,14 @@ public class EntryPoint
 				if ( app.hasArgument( "status" ) )
 				{
 					Foundation.L.info( "Waiting..." );
-					IPC.status();
+					try
+					{
+						IPC.status();
+					}
+					catch ( NetworkException.PacketValidation packetValidation )
+					{
+						packetValidation.printStackTrace();
+					}
 				}
 				else if ( app.hasArgument( "stop" ) )
 				{
@@ -62,7 +70,14 @@ public class EntryPoint
 				else if ( app.hasArgument( "start" ) )
 				{
 					Foundation.L.info( "Starting..." );
-					IPC.start();
+					try
+					{
+						IPC.start();
+					}
+					catch ( NetworkException.PacketValidation packetValidation )
+					{
+						packetValidation.printStackTrace();
+					}
 				}
 
 			}

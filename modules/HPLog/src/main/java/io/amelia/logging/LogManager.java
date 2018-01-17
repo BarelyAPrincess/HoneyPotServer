@@ -9,8 +9,6 @@
  */
 package io.amelia.logging;
 
-import com.chiorichan.tasks.TaskManager;
-import com.chiorichan.tasks.TaskRegistrar;
 import com.google.common.collect.Maps;
 
 import java.lang.ref.ReferenceQueue;
@@ -20,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  *
  */
-public class LogManager implements TaskRegistrar
+public class LogManager
 {
 	public static final LogManager INSTANCE = new LogManager();
 	private static final ConcurrentMap<String, LogReference> activeLogs = Maps.newConcurrentMap();
@@ -44,7 +42,7 @@ public class LogManager implements TaskRegistrar
 
 	private LogManager()
 	{
-		TaskManager.instance().runTaskAsynchronously( this, new Runnable()
+		/*Tasks.runTaskAsynchronously( this, new Runnable()
 		{
 			@Override
 			public void run()
@@ -65,19 +63,7 @@ public class LogManager implements TaskRegistrar
 						// Do Nothing
 					}
 			}
-		} );
-	}
-
-	@Override
-	public String getName()
-	{
-		return "LogManager";
-	}
-
-	@Override
-	public boolean isEnabled()
-	{
-		return true;
+		} );*/
 	}
 
 	static class LogReference extends WeakReference<Object>

@@ -31,10 +31,10 @@ import java.util.function.BiConsumer;
 
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.Looper;
+import io.amelia.foundation.tasks.Tasks;
 import io.amelia.lang.NetworkException;
-import io.amelia.lang.PacketValidationException;
 import io.amelia.lang.StartupException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.NetworkWorker;
@@ -43,7 +43,6 @@ import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.NIO;
 import io.amelia.support.Sys;
-import io.amelia.foundation.tasks.TaskDispatcher;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -59,15 +58,9 @@ public class UDPWorker implements NetworkWorker
 	private final List<PacketContainer> awaiting = new CopyOnWriteArrayList<>();
 	private NioDatagramChannel channel = null;
 
-	@Override
-	public void dispose()
-	{
-
-	}
-
 	public InetSocketAddress getBroadcast()
 	{
-		return broadcast;
+		return null;
 	}
 
 	@Override
@@ -80,9 +73,10 @@ public class UDPWorker implements NetworkWorker
 	 * Returns the KeyPair per configured in the configuration, e.g., server.udp.rsaSecret and server.udp.rsaKey.
 	 *
 	 * @return The KeyPair, null if config is unset or null.
-	 * @throws NetworkException if there is a failure to initialize the KeyPair
+	 *
+	 * @throws NetworkException.Error if there is a failure to initialize the KeyPair
 	 */
-	public KeyPair getRSA() throws NetworkException
+	public KeyPair getRSA() throws NetworkException.Error
 	{
 		ObjectInputStream is = null;
 		try
@@ -99,7 +93,7 @@ public class UDPWorker implements NetworkWorker
 			if ( obj instanceof PEMEncryptedKeyPair )
 			{
 				PEMEncryptedKeyPair ckp = ( PEMEncryptedKeyPair ) obj;
-				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build( ConfigRegistry.getString( "server.udp.rsaSecret" ).orElse( "" ).toCharArray() );
+				PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build( ConfigRegistry.config.getString( "server.udp.rsaSecret" ).orElse( "" ).toCharArray() );
 				kp = converter.getKeyPair( ckp.decryptKeyPair( decProv ) );
 			}
 			else
@@ -112,7 +106,7 @@ public class UDPWorker implements NetworkWorker
 		}
 		catch ( Throwable t )
 		{
-			throw new NetworkException( "There was problem constructing the RSA file for UDP encryption.", t );
+			throw new NetworkException.Error( "There was problem constructing the RSA file for UDP encryption.", t );
 		}
 		finally
 		{
@@ -134,7 +128,7 @@ public class UDPWorker implements NetworkWorker
 		return channel != null && channel.isConnected();
 	}
 
-	public <S extends PacketRequest, R extends PacketResponse> void sendPacket( S packet, BiConsumer<S, R> received ) throws PacketValidationException
+	public <R> void sendPacket( PacketRequest packet, BiConsumer<PacketRequest, R> received ) throws NetworkException.PacketValidation
 	{
 		// Confirm that the UDPWorker has been started.
 		if ( !isStarted() )
@@ -150,16 +144,16 @@ public class UDPWorker implements NetworkWorker
 		awaiting.add( new PacketContainer( packet, received ) );
 
 		// Schedule a timeout that removes the packet from the awaiting map
-		TaskDispatcher.scheduleAsyncDelayedTask( Kernel.getApplication(), packet.getTimeout(), () -> awaiting.remove( packet.getPacketId() ) );
+		Tasks.scheduleAsyncDelayedTask( Foundation.getApplication(), packet.getTimeout(), () -> awaiting.remove( packet.getPacketId() ) );
 
 
 
-		channel.writeAndFlush( new DatagramPacket( packet.payload ) );
+		channel.writeAndFlush( new DatagramPacket( packet.getPayload(), null ) );
 		packet.sentTime = DateAndTime.epoch();
 		packet.sent = true;
 	}
 
-	public UDPWorker start() throws NetworkException
+	public UDPWorker start() throws NetworkException.Error
 	{
 		ConfigMap config = getConfig();
 		String dest = config.getString( "broadcast" ).orElse( "239.255.255.255" );
@@ -242,7 +236,7 @@ public class UDPWorker implements NetworkWorker
 
 			channel = ( NioDatagramChannel ) b.bind( broadcast.getPort() ).sync().channel();
 
-			Looper.Factory.dispatch( () -> {
+			Kernel.getExecutorParallel().execute( () -> {
 				try
 				{
 					channel.joinGroup( broadcast, iface ).sync();
@@ -275,7 +269,7 @@ public class UDPWorker implements NetworkWorker
 	}
 
 	@Override
-	public UDPWorker stop() throws NetworkException
+	public UDPWorker stop() throws NetworkException.Error
 	{
 		NIO.closeQuietly( channel );
 		return this;
@@ -285,7 +279,7 @@ public class UDPWorker implements NetworkWorker
 	{
 		PacketRequest request;
 
-		public <S extends PacketRequest> PacketContainer( PacketRequest request, BiConsumer<S, R> received )
+		public <S extends PacketRequest, R> PacketContainer( S request, BiConsumer<S, R> received )
 		{
 			this.request = request;
 		}

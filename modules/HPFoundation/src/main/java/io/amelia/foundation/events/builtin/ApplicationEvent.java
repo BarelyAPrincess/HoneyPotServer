@@ -7,14 +7,14 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.lang;
+package io.amelia.foundation.events.builtin;
+
+import io.amelia.foundation.events.AbstractEvent;
 
 /**
+ * Internal Application Events
  */
-public class PluginUnconfiguredException extends PluginException.Error
+public abstract class ApplicationEvent extends AbstractEvent
 {
-	public PluginUnconfiguredException( String message )
-	{
-		super( message );
-	}
+
 }

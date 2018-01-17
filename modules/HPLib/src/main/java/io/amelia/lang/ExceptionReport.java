@@ -223,7 +223,7 @@ public class ExceptionReport
 		{
 			Throwable throwable = context.getThrowable();
 
-			if ( throwable.getCause() != null && clz.isAssignableFrom( context.getCause().getClass() ) )
+			if ( throwable.getCause() != null && clz.isAssignableFrom( context.getThrowable().getClass() ) )
 				return true;
 
 			if ( clz.isAssignableFrom( throwable.getClass() ) )

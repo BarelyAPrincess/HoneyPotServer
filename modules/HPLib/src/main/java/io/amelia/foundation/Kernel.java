@@ -22,9 +22,9 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
-import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.Arrs;
 import io.amelia.support.IO;
@@ -78,6 +78,7 @@ public class Kernel
 			return newThread;
 		}
 	};
+
 	private static ImplLogHandler log;
 
 	static
@@ -317,6 +318,16 @@ public class Kernel
 		return devMeta != null && "0".equals( devMeta.getBuildNumber() ) || ConfigRegistry.config.getBoolean( "app.developmentMode" ).orElse( false );
 	}
 
+	public static void panic( String reason )
+	{
+		handleExceptions( ApplicationException.error( "Panic! " + reason ) );
+	}
+
+	public static void panic( String reason, Object... objs )
+	{
+		panic( String.format( reason, objs ) );
+	}
+
 	protected static void setAppPath( @Nonnull File appPath )
 	{
 		Objs.notNull( appPath );
@@ -369,7 +380,7 @@ public class Kernel
 
 		public Logger( Class<?> source )
 		{
-			Objs.notNull( log, "The LogHandler was never set." );
+			Objs.notNull( log, "The log handler was never set." );
 
 			this.source = source;
 		}

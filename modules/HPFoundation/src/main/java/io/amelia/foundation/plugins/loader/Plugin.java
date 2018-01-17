@@ -9,17 +9,6 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import io.amelia.foundation.ConfigMap;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.foundation.VendorMeta;
-import io.amelia.foundation.plugins.PluginBase;
-import io.amelia.foundation.plugins.Plugins;
-import io.amelia.foundation.plugins.PluginMeta;
-import io.amelia.lang.PluginException;
-import io.amelia.logcompat.Logger;
-import io.amelia.support.Objs;
-import io.amelia.support.Strs;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +16,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+
+import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.VendorMeta;
+import io.amelia.foundation.plugins.PluginBase;
+import io.amelia.foundation.plugins.PluginMeta;
+import io.amelia.lang.PluginException;
+import io.amelia.logcompat.LogBuilder;
+import io.amelia.logcompat.Logger;
+import io.amelia.support.IO;
+import io.amelia.support.Objs;
+import io.amelia.support.Strs;
+import io.amelia.support.data.Parcel;
+import io.amelia.support.data.ParcelLoader;
 
 public abstract class Plugin extends PluginBase
 {
@@ -36,7 +39,9 @@ public abstract class Plugin extends PluginBase
 	 * An exception to this would be if plugin's jar that contained the class does not extend the class, where the intended plugin would have resided in a different jar / classloader.
 	 *
 	 * @param clazz the class desired
+	 *
 	 * @return the plugin that provides and implements said class
+	 *
 	 * @throws IllegalArgumentException if clazz is null
 	 * @throws IllegalArgumentException if clazz does not extend {@link Plugin}
 	 * @throws IllegalStateException    if clazz was not provided by a plugin, for example, if called with <code>Plugin.getPlugin(Plugin.class)</code>
@@ -84,7 +89,7 @@ public abstract class Plugin extends PluginBase
 	private PluginLoader loader = null;
 	private PluginMeta meta = null;
 	private boolean naggable = true;
-	private ConfigMap newConfig = null;
+	private Parcel newConfig = null;
 
 	/*
 	 * protected Plugin( final PluginLoader loader, final PluginDescriptionFile description, final File dataFolder, final File file ) { final ClassLoader classLoader = this.getClass().getClassLoader(); if ( classLoader instanceof PluginClassLoader ) {
@@ -107,10 +112,17 @@ public abstract class Plugin extends PluginBase
 	}
 
 	@Override
-	public ConfigMap getConfig()
+	public Parcel getConfig()
 	{
 		if ( newConfig == null )
-			reloadConfig();
+			try
+			{
+				reloadConfig();
+			}
+			catch ( IOException e )
+			{
+				// Ignore
+			}
 		return newConfig;
 	}
 
@@ -118,6 +130,11 @@ public abstract class Plugin extends PluginBase
 	public File getConfigFile()
 	{
 		return configFile;
+	}
+
+	public ConfigMap getConfigNode()
+	{
+		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
 	}
 
 	/**
@@ -132,25 +149,29 @@ public abstract class Plugin extends PluginBase
 	}
 
 	/**
+	 * Returns the file which contains this plugin
+	 *
+	 * @return File containing this plugin
+	 */
+	protected final File getFile()
+	{
+		return file;
+	}
+
+	public final Logger getLogger()
+	{
+		return LogBuilder.get( getClass() );
+	}
+
+	/**
 	 * Returns the plugin.yaml file containing the details for this plugin
 	 *
 	 * @return Contents of the plugin.yaml file
 	 */
 	@Override
-	public final PluginMeta getDescription()
+	public final PluginMeta getMeta()
 	{
 		return meta;
-	}
-
-	/**
-	 * Returns a value indicating whether or not this plugin is currently enabled
-	 *
-	 * @return true if this plugin is enabled, otherwise false
-	 */
-	@Override
-	public final boolean isEnabled()
-	{
-		return isEnabled;
 	}
 
 	/**
@@ -162,6 +183,11 @@ public abstract class Plugin extends PluginBase
 	public final PluginLoader getPluginLoader()
 	{
 		return loader;
+	}
+
+	public VendorMeta getPluginMeta()
+	{
+		return meta;
 	}
 
 	@Override
@@ -187,6 +213,58 @@ public abstract class Plugin extends PluginBase
 		}
 	}
 
+	public String getSimpleName()
+	{
+		return Strs.toCamelCase( getName() );
+	}
+
+	final void init( PluginLoader loader, PluginMeta meta, File dataFolder, File file, ClassLoader classLoader )
+	{
+		this.loader = loader;
+		this.file = file;
+		this.meta = meta;
+		this.dataFolder = dataFolder;
+		this.classLoader = classLoader;
+		this.configFile = new File( dataFolder, "config.yaml" );
+	}
+
+	/**
+	 * Returns a value indicating whether or not this plugin is currently enabled
+	 *
+	 * @return true if this plugin is enabled, otherwise false
+	 */
+	@Override
+	public final boolean isEnabled()
+	{
+		return isEnabled;
+	}
+
+	/**
+	 * Sets the enabled state of this plugin
+	 *
+	 * @param enabled true if enabled, otherwise false
+	 */
+	protected final void setEnabled( final boolean enabled ) throws PluginException.Error
+	{
+		if ( isEnabled != enabled )
+		{
+			isEnabled = enabled;
+
+			try
+			{
+				if ( enabled )
+					onEnable();
+				else
+					onDisable();
+			}
+			catch ( Throwable e )
+			{
+				isEnabled = false;
+				throw e;
+			}
+		}
+	}
+
 	@Override
 	public final boolean isNaggable()
 	{
@@ -199,10 +277,18 @@ public abstract class Plugin extends PluginBase
 		naggable = canNag;
 	}
 
-	@Override
-	public void reloadConfig()
+	public void publishConfig()
 	{
-		newConfig = ConfigMap.loadConfiguration( configFile );
+		ConfigMap node = getConfigNode().destroyChildThenCreate( "conf" );
+
+
+
+	}
+
+	@Override
+	public void reloadConfig() throws IOException
+	{
+		newConfig = ParcelLoader.decodeYaml( configFile );
 
 		InputStream defConfigStream = getResource( "config.yaml" );
 
@@ -211,9 +297,8 @@ public abstract class Plugin extends PluginBase
 
 		if ( defConfigStream != null )
 		{
-			ConfigMap defConfig = ConfigMap.loadConfiguration( defConfigStream );
-
-			newConfig.setDefaults( defConfig );
+			Parcel defConfig = ParcelLoader.decodeYaml( defConfigStream );
+			// newConfig.setDefaults( defConfig );
 		}
 	}
 
@@ -222,7 +307,7 @@ public abstract class Plugin extends PluginBase
 	{
 		try
 		{
-			getConfig().save( configFile );
+			IO.writeStringToFile( configFile, ParcelLoader.encodeYaml( getConfig() ) );
 		}
 		catch ( IOException ex )
 		{
@@ -281,81 +366,6 @@ public abstract class Plugin extends PluginBase
 		{
 			getLogger().severe( "Could not save " + outFile.getName() + " to " + outFile, ex );
 		}
-	}
-
-	/**
-	 * Sets the enabled state of this plugin
-	 *
-	 * @param enabled true if enabled, otherwise false
-	 */
-	protected final void setEnabled( final boolean enabled ) throws PluginException.Error
-	{
-		if ( isEnabled != enabled )
-		{
-			isEnabled = enabled;
-
-			try
-			{
-				if ( enabled )
-					onEnable();
-				else
-					onDisable();
-			}
-			catch ( Throwable e )
-			{
-				isEnabled = false;
-				throw e;
-			}
-		}
-	}
-
-	public ConfigMap getConfigNode()
-	{
-		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
-	}
-
-	/**
-	 * Returns the file which contains this plugin
-	 *
-	 * @return File containing this plugin
-	 */
-	protected final File getFile()
-	{
-		return file;
-	}
-
-	public final Logger getLogger()
-	{
-		return Plugins.L.getLogger( this );
-	}
-
-	public VendorMeta getPluginMeta()
-	{
-		return meta;
-	}
-
-	public String getSimpleName()
-	{
-		return Strs.toCamelCase( getName() );
-	}
-
-	final void init( PluginLoader loader, PluginMeta meta, File dataFolder, File file, ClassLoader classLoader )
-	{
-		this.loader = loader;
-		this.file = file;
-		this.meta = meta;
-		this.dataFolder = dataFolder;
-		this.classLoader = classLoader;
-		this.configFile = new File( dataFolder, "config.yaml" );
-	}
-
-	public void publishConfig()
-	{
-		ConfigMap node = getConfigNode().destroyChildThenCreate( "conf" );
-
-
-
-
 	}
 
 	@Override

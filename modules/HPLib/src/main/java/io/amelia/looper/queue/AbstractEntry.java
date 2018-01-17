@@ -6,9 +6,9 @@ import io.amelia.looper.AbstractLooper;
 
 public abstract class AbstractEntry
 {
+	protected final boolean async;
+	protected final long id = AbstractLooper.getGloballyUniqueId();
 	protected final DefaultQueue queue;
-	private final boolean async;
-	private final long id = AbstractLooper.getGloballyUniqueId();
 	/**
 	 * Indicates when the entry has been processed by the queue
 	 * <p>
@@ -20,13 +20,13 @@ public abstract class AbstractEntry
 	 */
 	private boolean finalized;
 
-	AbstractEntry( @Nonnull DefaultQueue queue )
+	public AbstractEntry( @Nonnull DefaultQueue queue )
 	{
 		this.queue = queue;
 		this.async = false;
 	}
 
-	AbstractEntry( @Nonnull DefaultQueue queue, boolean async )
+	public AbstractEntry( @Nonnull DefaultQueue queue, boolean async )
 	{
 		this.queue = queue;
 		this.async = async;
@@ -36,7 +36,7 @@ public abstract class AbstractEntry
 	{
 		synchronized ( queue.entries )
 		{
-			if ( queue.lastEntry == this )
+			if ( queue.getActiveEntry() == this )
 			{
 				queue.clearState();
 				queue.wake();
@@ -73,7 +73,7 @@ public abstract class AbstractEntry
 
 	public boolean isActive()
 	{
-		return queue.lastEntry == this;
+		return queue.getActiveEntry() == this;
 	}
 
 	public boolean isAsync()
@@ -95,6 +95,13 @@ public abstract class AbstractEntry
 	}
 
 	/**
+	 * Determines that the entry can be removed from the queue with any bugs to the Application.
+	 *
+	 * @return True if removal is permitted and this task doesn't have to run.
+	 */
+	public abstract boolean isSafe();
+
+	/**
 	 * @hide
 	 */
 	public void markFinalized()
@@ -110,11 +117,4 @@ public abstract class AbstractEntry
 		cancel();
 		finalized = false;
 	}
-
-	/**
-	 * Determines that the entry can be removed from the queue with any bugs to the Application.
-	 *
-	 * @return True if removal is permitted and this task doesn't have to run.
-	 */
-	public abstract boolean removesSafely();
 }

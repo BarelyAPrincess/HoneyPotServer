@@ -49,7 +49,7 @@ public interface PluginLoader
 	 * @throws PluginMetaException If the plugin description file
 	 *                                    could not be created
 	 */
-	PluginMeta getPluginDescription( File file ) throws PluginMetaException;
+	PluginMeta getPluginMeta( File file ) throws PluginMetaException;
 
 	/**
 	 * Returns a list of all filename filters expected by this PluginLoader

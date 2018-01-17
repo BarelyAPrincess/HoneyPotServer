@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
-import io.amelia.lang.ApplicationException;
 import io.amelia.looper.queue.AbstractQueue;
 
 /**
@@ -35,79 +35,52 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	}
 
 	/**
-	 * The Looper Queue
-	 */
-	final Q queue;
-
-	/**
 	 * List of threads that were spawned by this Looper.
 	 * Used to obtain() this Looper from a async thread.
 	 */
 	private final List<WeakReference<Thread>> aliasThreads = new ArrayList<>();
-
 	/**
 	 * The Looper Flags
 	 */
 	private final EnumSet<Flag> flags = EnumSet.noneOf( Flag.class );
-
 	/**
 	 * Used to synchronize certain methods with the loop, so to avoid concurrent and/or race issues
 	 */
 	private final ReentrantLock lock = new ReentrantLock();
-
 	/**
 	 * States the average millis between iterations.
 	 */
 	private long averagePolledMillis = 0L;
-
+	/**
+	 * Retains a handler used for when exceptions are thrown by the looper.
+	 * If the handler is null, we forward them to the Kernel and quit the looper.
+	 */
+	private Consumer<Exception> exceptionHandler;
 	/**
 	 * Indicates the Looper is overloaded.
 	 */
 	private boolean isOverloaded = false;
-
 	/**
 	 * Indicates the Looper is preparing to quit.
 	 */
 	private boolean isQuitting = false;
-
 	/**
 	 * Stores the amount of time that has past between iterations.
 	 */
 	private long lastPolledMillis = 0L;
-
+	/**
+	 * The Looper Queue
+	 */
+	private Q queue;
 	/**
 	 * Reference to the thread running this Looper.
 	 * Remains null until {@link #joinLoop()} is called.
 	 */
 	private Thread thread = null;
 
-	public AbstractLooper( Q queue, Flag... flags )
+	public AbstractLooper( Flag... flags )
 	{
-		this.queue = queue;
 		this.flags.addAll( Arrays.asList( flags ) );
-	}
-
-	void addChildThread( Thread thread )
-	{
-		synchronized ( aliasThreads )
-		{
-			for ( WeakReference<Thread> reference : aliasThreads )
-				if ( reference.get() == null )
-					aliasThreads.remove( reference );
-
-			aliasThreads.add( new WeakReference<>( thread ) );
-			thread.setName( getJoinedThread().getName() + "-" + aliasThreads.size() );
-		}
-	}
-
-	public void addFlag( Flag flag )
-	{
-		if ( isRunning() )
-			throw ApplicationException.ignorable( "You can't modify Looper flags while it's running." );
-		if ( flag == Flag.SYSTEM || flag == Flag.PLUGIN )
-			throw ApplicationException.runtime( "Loopers must be instigated as SYSTEM or PLUGIN loopers." );
-
-		flags.add( flag );
 	}
 
 	public long getAveragePolledMillis()
@@ -128,6 +101,11 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		return lastPolledMillis;
 	}
 
+	protected LooperControl getLooperControl()
+	{
+		return new LooperControl();
+	}
+
 	public String getName()
 	{
 		return "Looper " + getJoinedThread().getName();
@@ -141,9 +119,19 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		return queue;
 	}
 
+	protected void setQueue( Q queue )
+	{
+		this.queue = queue;
+	}
+
 	public boolean hasFlag( Flag flag )
 	{
 		return flags.contains( flag );
+	}
+
+	public boolean isAsync()
+	{
+		return false;
 	}
 
 	public abstract boolean isDisposed();
@@ -195,13 +183,12 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	}
 
 	/**
-	 * Returns true if this Looper is currently running, i.e., a thread is actively calling the {@link #joinLoop()} method.
+	 * Determines if the looper is currently active with a joined thread.
+	 *
+	 * @return True is so, false otherwise.
+	 *
+	 * @see #joinLoop()
 	 */
-	public boolean isRunning()
-	{
-		return thread != null;
-	}
-
 	public boolean isThreadJoined()
 	{
 		return thread != null;
@@ -305,9 +292,9 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 
 			queue.quit( removePendingMessages );
 
-			if ( isRunning() && queue.isBlocking() )
+			if ( isThreadJoined() && queue.isBlocking() )
 				queue.wake();
-			if ( !isRunning() )
+			if ( !isThreadJoined() )
 				quitFinal();
 		}
 		finally
@@ -350,44 +337,9 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		quit( false );
 	}
 
-	void removeChildThread( Thread thread )
+	public void setExceptionHandler( Consumer<Exception> exceptionHandler )
 	{
-		synchronized ( aliasThreads )
-		{
-			for ( WeakReference<Thread> threadReference : aliasThreads )
-				if ( threadReference.get() == null || threadReference.get() == thread )
-					aliasThreads.remove( threadReference );
-		}
-	}
-
-	public void removeFlag( Flag flag )
-	{
-		if ( isRunning() )
-			throw ApplicationException.ignorable( "You can't modify Looper flags while it's running." );
-		if ( flag == Flag.SYSTEM )
-			throw ApplicationException.runtime( "System Loopers are the domain of the application Kernel." );
-		if ( flag == Flag.PLUGIN )
-			throw ApplicationException.runtime( "Plugin Loopers are the domain of the PluginManager." );
-
-		flags.remove( flag );
-	}
-
-	/**
-	 * Executes {@link Runnable} on a new thread, i.e., async.
-	 * <p>
-	 * We also add the new thread to the aliases, such that calls to
-	 * the {@link LooperFactory#obtain()} returns this {@link AbstractLooper}.
-	 * <p>
-	 * This also prevents a async task from creating a new Looper by accident.
-	 */
-	void runAsync( Runnable task )
-	{
-		Kernel.getExecutorParallel().execute( () -> {
-			Thread thread = Thread.currentThread();
-			addChildThread( thread );
-			task.run();
-			removeChildThread( thread );
-		} );
+		this.exceptionHandler = exceptionHandler;
 	}
 
 	protected abstract void tick( long loopStartMillis );
@@ -419,5 +371,73 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 		 * Indicates the Looper will auto-quit once the queue is empty.
 		 */
 		AUTO_QUIT
+	}
+
+	/**
+	 * LooperControl exposes sensitive and/or volatile methods and fields outside the package.
+	 */
+	public class LooperControl
+	{
+		private LooperControl()
+		{
+			// Can only be instigated by implementing subclasses of AbstractLooper.
+		}
+
+		public void addChildThread( Thread thread )
+		{
+			synchronized ( aliasThreads )
+			{
+				for ( WeakReference<Thread> reference : aliasThreads )
+					if ( reference.get() == null )
+						aliasThreads.remove( reference );
+
+				aliasThreads.add( new WeakReference<>( thread ) );
+				thread.setName( getJoinedThread().getName() + "-" + aliasThreads.size() );
+			}
+		}
+
+		public AbstractLooper<Q> getLooper()
+		{
+			return AbstractLooper.this;
+		}
+
+		public void handleException( Exception exception )
+		{
+			if ( exceptionHandler == null )
+			{
+				Kernel.handleExceptions( exception );
+				quitAndDestroy();
+			}
+			else
+				exceptionHandler.accept( exception );
+		}
+
+		public void removeChildThread( Thread thread )
+		{
+			synchronized ( aliasThreads )
+			{
+				for ( WeakReference<Thread> threadReference : aliasThreads )
+					if ( threadReference.get() == null || threadReference.get() == thread )
+						aliasThreads.remove( threadReference );
+			}
+		}
+
+		/**
+		 * Executes {@link Runnable} on a new thread, i.e., async.
+		 * <p>
+		 * We also add the new thread to the aliases, such that calls to
+		 * the {@link LooperFactory#obtain()} returns this {@link AbstractLooper}.
+		 * <p>
+		 * This also prevents a async task from creating a new Looper by accident.
+		 */
+		public void runAsync( Runnable task )
+		{
+			Kernel.getExecutorParallel().execute( () -> {
+				Thread thread = Thread.currentThread();
+				addChildThread( thread );
+				task.run();
+				removeChildThread( thread );
+			} );
+		}
 	}
 }

@@ -167,18 +167,18 @@ public class ParcelLoader
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public static void decodeMap( Map<String, Object> mapEncoded, Parcel root )
+	public static <ValueType> void decodeMap( Map<String, ValueType> mapEncoded, StackerWithValue<? extends StackerWithValue, ValueType> root )
 	{
-		for ( Map.Entry<String, Object> entry : mapEncoded.entrySet() )
+		for ( Map.Entry<String, ValueType> entry : mapEncoded.entrySet() )
 		{
 			if ( entry.getKey().equals( "__value" ) )
 				root.setValue( entry.getValue() );
 			else
 			{
-				Parcel child = root.getChildOrCreate( entry.getKey() );
+				StackerWithValue<? extends StackerWithValue, ValueType> child = root.getChildOrCreate( entry.getKey() );
 
 				if ( entry.getValue() instanceof Map )
-					decodeMap( ( Map<String, Object> ) entry.getValue(), child );
+					decodeMap( ( Map<String, ValueType> ) entry.getValue(), child );
 				else
 					child.setValue( entry.getValue() );
 			}
@@ -302,13 +302,13 @@ public class ParcelLoader
 		TODO Implement
 	} */
 
-	public static Map<String, Object> encodeMap( Parcel encoded )
+	public static <ValueType> Map<String, Object> encodeMap( StackerWithValue<? extends StackerWithValue, ValueType> encoded )
 	{
 		Map<String, Object> map = new HashMap<>();
 
-		for ( Parcel child : encoded.children )
+		for ( StackerWithValue<? extends StackerWithValue, ValueType> child : encoded.children )
 		{
-			Optional<Object> value = child.getValue();
+			Optional<ValueType> value = child.getValue();
 
 			if ( child.hasChildren() )
 			{

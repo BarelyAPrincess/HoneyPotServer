@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="HoneyPotServer-HPPermissions_main" target="1.8" />
+      <module name="HoneyPotServer-HPPermissions_test" target="1.8" />
       <module name="HoneyPotServer_main" target="1.8" />
       <module name="HoneyPotServer_test" target="1.8" />
       <module name="HPConfig_main" target="1.8" />

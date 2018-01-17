@@ -87,4 +87,12 @@ public class PluginException
 			super( cause );
 		}
 	}
+
+	public static class Unconfigured extends Error
+	{
+		public Unconfigured( String message )
+		{
+			super( message );
+		}
+	}
 }

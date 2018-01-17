@@ -7,13 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.events.messaging;
-
-import io.amelia.foundation.events.Cancellable;
-import io.amelia.foundation.events.application.ApplicationEvent;
-import io.amelia.foundation.messaging.MessageReceiver;
-import io.amelia.foundation.messaging.MessageSender;
-import io.amelia.support.Lists;
+package io.amelia.foundation.events.builtin;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,17 +15,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.amelia.foundation.events.Cancellable;
+import io.amelia.foundation.parcel.ParcelReceiver;
+import io.amelia.foundation.parcel.ParcelSender;
+import io.amelia.support.Lists;
+
 /**
  * Fired when a system message will be delivered
  */
+@Deprecated
 public class MessageEvent extends ApplicationEvent implements Cancellable
 {
-	private final MessageSender sender;
+	private final ParcelSender sender;
 	private boolean cancelled = false;
 	private Collection<Object> objs;
-	private Collection<MessageReceiver> recipients;
+	private Collection<ParcelReceiver> recipients;
 
-	public MessageEvent( final MessageSender sender, final Collection<MessageReceiver> recipients, final Object... objs )
+	public MessageEvent( final ParcelSender sender, final Collection<ParcelReceiver> recipients, final Object... objs )
 	{
 		this.sender = sender;
 		this.recipients = recipients;
@@ -43,14 +43,14 @@ public class MessageEvent extends ApplicationEvent implements Cancellable
 		objs.add( obj );
 	}
 
-	public void addRecipient( MessageReceiver acct )
+	public void addRecipient( ParcelReceiver acct )
 	{
 		recipients.add( acct );
 	}
 
-	public boolean containsRecipient( MessageReceiver acct )
+	public boolean containsRecipient( ParcelReceiver acct )
 	{
-		for ( MessageReceiver acct1 : recipients )
+		for ( ParcelReceiver acct1 : recipients )
 			if ( acct1.getId().equals( acct.getId() ) )
 				return true;
 		return false;
@@ -77,17 +77,17 @@ public class MessageEvent extends ApplicationEvent implements Cancellable
 		return objs.stream().filter( o -> o.getClass() == clz ).map( o -> ( T ) o ).collect( Collectors.toList() );
 	}
 
-	public Collection<MessageReceiver> getRecipients()
+	public Collection<ParcelReceiver> getRecipients()
 	{
 		return recipients;
 	}
 
-	public void setRecipients( Set<MessageReceiver> recipients )
+	public void setRecipients( Set<ParcelReceiver> recipients )
 	{
 		this.recipients = recipients;
 	}
 
-	public MessageSender getSender()
+	public ParcelSender getSender()
 	{
 		return sender;
 	}
@@ -119,9 +119,9 @@ public class MessageEvent extends ApplicationEvent implements Cancellable
 		return objs.remove( obj );
 	}
 
-	public boolean removeRecipient( MessageReceiver acct )
+	public boolean removeRecipient( ParcelReceiver acct )
 	{
-		for ( MessageReceiver acct1 : recipients )
+		for ( ParcelReceiver acct1 : recipients )
 			if ( acct1.getId().equals( acct.getId() ) )
 				return recipients.remove( acct1 );
 		return false;

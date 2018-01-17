@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 
 import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.application.RunlevelEvent;
+import io.amelia.foundation.events.builtin.RunlevelEvent;
 import io.amelia.foundation.facades.FacadePriority;
 import io.amelia.foundation.facades.FacadeService;
 import io.amelia.injection.Libraries;
@@ -102,7 +102,7 @@ public final class Foundation
 
 	public static boolean isPrimaryThread()
 	{
-		return app.getRouter().isPrimaryThread();
+		return app.isPrimaryThread();
 	}
 
 	public static boolean isRunlevel( Runlevel runlevel )
