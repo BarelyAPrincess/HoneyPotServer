@@ -1,5 +1,7 @@
 package io.amelia.support;
 
+import java.util.Optional;
+
 public class Maths
 {
 	/**
@@ -33,5 +35,52 @@ public class Maths
 		{
 			return false; // String is not a number, auto disqualified
 		}
+	}
+
+	public static <NumberType extends Number> Optional<NumberType> nonNegative( NumberType... numbers )
+	{
+		for ( NumberType i : numbers )
+			if ( i.intValue() >= 0 )
+				return Optional.of( i );
+		return Optional.empty();
+	}
+
+	public static <NumberType extends Number> Optional<NumberType> nonNegativeOrZero( NumberType... numbers )
+	{
+		for ( NumberType i : numbers )
+			if ( i.intValue() > 0 )
+				return Optional.of( i );
+		return Optional.empty();
+	}
+
+	public static <NumberType extends Number> Optional<NumberType> nonPositive( NumberType... numbers )
+	{
+		for ( NumberType i : numbers )
+			if ( i.intValue() <= 0 )
+				return Optional.of( i );
+		return Optional.empty();
+	}
+
+	public static <NumberType extends Number> Optional<NumberType> nonPositiveOrZero( NumberType... numbers )
+	{
+		for ( NumberType i : numbers )
+			if ( i.intValue() < 0 )
+				return Optional.of( i );
+		return Optional.empty();
+	}
+
+	/**
+	 * Returns the first argument that does not equal zero.
+	 *
+	 * @param numbers Array of numbers to check.
+	 *
+	 * @return First arg not zero, zero is all were zero.
+	 */
+	public static <NumberType extends Number> Optional<NumberType> nonZero( NumberType... numbers )
+	{
+		for ( NumberType i : numbers )
+			if ( i.intValue() != 0 )
+				return Optional.of( i );
+		return Optional.empty();
 	}
 }
