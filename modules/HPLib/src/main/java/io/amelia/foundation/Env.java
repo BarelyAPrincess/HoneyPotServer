@@ -1,11 +1,8 @@
 package io.amelia.foundation;
 
-import io.amelia.lang.UncaughtException;
-import io.amelia.support.Objs;
-import io.amelia.support.Pair;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -14,6 +11,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import io.amelia.lang.UncaughtException;
+import io.amelia.support.IO;
+import io.amelia.support.Objs;
+import io.amelia.support.Pair;
 
 public class Env
 {
@@ -28,7 +30,8 @@ public class Env
 		synchronized ( env )
 		{
 			Properties prop = new Properties();
-			prop.load( new FileInputStream( envFile ) );
+			if ( envFile.exists() )
+				prop.load( new FileInputStream( envFile ) );
 
 			for ( String key : prop.stringPropertyNames() )
 				env.put( key, prop.getProperty( key ) );
@@ -117,13 +120,17 @@ public class Env
 		try
 		{
 			Properties prop = new Properties();
-			prop.load( new FileInputStream( envFile ) );
+			if ( envFile.exists() )
+				prop.load( new FileInputStream( envFile ) );
 			prop.setProperty( key, Objs.castToString( value ) );
 			prop.store( new FileOutputStream( envFile ), "" );
 		}
 		catch ( IOException e )
 		{
-			throw new UncaughtException( e );
+			if ( e instanceof FileNotFoundException && e.getMessage().contains( "Permission denied" ) )
+				throw new UncaughtException( "We attempted to save the .env file and ran into a permissions issue for directory \"" + IO.relPath( envFile.getParentFile(), new File( "" ) ) + "\"", e );
+			else
+				throw new UncaughtException( e );
 		}
 	}
 }

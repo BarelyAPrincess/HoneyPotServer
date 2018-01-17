@@ -15,12 +15,8 @@ public class EntryPoint
 {
 	public static void main( String... args ) throws Exception
 	{
-		/* Prepare the environment by downloading and applying the builtin libraries required */
-		Foundation.prepare();
-
 		/* Specify the ApplicationInterface for this environment. */
 		HoneyPotServer app = new HoneyPotServer();
-		Foundation.setApplication( app );
 
 		try
 		{
@@ -31,6 +27,11 @@ public class EntryPoint
 			// Prevent exception from being printed to console
 			return;
 		}
+
+		/* Prepare the environment by downloading and applying the builtin libraries required */
+		Foundation.prepare();
+
+		Foundation.setApplication( app );
 
 		final String instanceId = app.getEnv().getString( "instance-id" );
 

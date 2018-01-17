@@ -211,6 +211,7 @@ public class Objs
 	 * Attempts to cast the object to an Integer.
 	 *
 	 * @param value The unknown object type
+	 *
 	 * @return The exact value of the object.
 	 */
 	public static Integer castToInt( Object value )
@@ -244,7 +245,9 @@ public class Objs
 	 * Attempts to cast the object to an Integer.
 	 *
 	 * @param value The unknown object type
+	 *
 	 * @return The exact value of the object.
+	 *
 	 * @throws ClassCastException If the value is null, overflows an int, or is an object type that is not castable to an Integer.
 	 */
 	public static Integer castToIntWithException( Object value )
@@ -564,6 +567,14 @@ public class Objs
 		}
 	}
 
+	public static <T> boolean isNull( T... objs )
+	{
+		for ( T obj : objs )
+			if ( isNull( obj ) )
+				return true;
+		return false;
+	}
+
 	public static <T> boolean isTrue( T bool )
 	{
 		try
@@ -633,8 +644,13 @@ public class Objs
 		if ( methodIsEmpty != null && invokeMethodSafe( methodIsEmpty, obj, false ) )
 			throw new IllegalArgumentException( String.format( message, values ) );
 
-		if ( methodLength != null && invokeMethodSafe( methodLength, obj, -1 ) == 0 )
-			throw new IllegalArgumentException( String.format( message, values ) );
+		if ( methodLength != null )
+		{
+			if ( methodLength.getReturnType() == Long.class && invokeMethodSafe( methodLength, obj, -1L ) == 0L )
+				throw new IllegalArgumentException( String.format( message, values ) );
+			else if ( methodLength.getReturnType() == Integer.class && invokeMethodSafe( methodLength, obj, -1 ) == 0 )
+				throw new IllegalArgumentException( String.format( message, values ) );
+		}
 
 		if ( methodSize != null && invokeMethodSafe( methodSize, obj, -1 ) == 0 )
 			throw new IllegalArgumentException( String.format( message, values ) );
@@ -671,6 +687,18 @@ public class Objs
 		return number;
 	}
 
+	public static <T extends Number> T notNegativeOrZero( T number )
+	{
+		return notNegativeOrZero( number, "Number must be positive or zero." );
+	}
+
+	public static <T extends Number> T notNegativeOrZero( T number, String message, Object... objects )
+	{
+		if ( number.longValue() <= 0 )
+			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return number;
+	}
+
 	public static <T> T notNull( final T object )
 	{
 		notNull( object, "Object is null" );
@@ -694,9 +722,21 @@ public class Objs
 		return notNegative( number, "Number must be negative." );
 	}
 
+	public static <T extends Number> T notPositiveOrZero( T number )
+	{
+		return notNegativeOrZero( number, "Number must be negative or zero." );
+	}
+
 	public static <T extends Number> T notPostive( T number, String message, Object... objects )
 	{
 		if ( number.longValue() > 0 )
+			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
+		return number;
+	}
+
+	public static <T extends Number> T notPostiveOrZero( T number, String message, Object... objects )
+	{
+		if ( number.longValue() >= 0 )
 			throw new IllegalArgumentException( objects == null || objects.length == 0 ? message : String.format( message, ( Object[] ) objects ) );
 		return number;
 	}
@@ -755,6 +795,7 @@ public class Objs
 	 * @param cls    The class to check.
 	 * @param method The method to check, null to ignore.
 	 * @param max    The maximum number of recurrence until failure.
+	 *
 	 * @return True if no loop was detected.
 	 */
 	public static boolean stackTraceAntiLoop( String cls, String method, int max )

@@ -178,7 +178,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		try
 		{
 			/* Load env file -- Can be set with arg `--env-file=.env` */
-			File envFile = IO.buildFile( true, ( String ) optionSet.valueOf( "env-file" ) );
+			File envFile = new File( ( String ) optionSet.valueOf( "env-file" ) );
 			env = new Env( envFile );
 
 			/* Override defaults and env with command args */

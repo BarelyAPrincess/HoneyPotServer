@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -79,7 +80,7 @@ public class Kernel
 		}
 	};
 
-	private static ImplLogHandler log;
+	private static ImplLogHandler log = new BuiltinLogHandler();
 
 	static
 	{
@@ -137,7 +138,7 @@ public class Kernel
 
 	public static void setDevMeta( ImplDevMeta devMeta )
 	{
-		if ( devMeta != null && !( devMeta instanceof NoDevMeta ) )
+		if ( Kernel.devMeta != null && !( Kernel.devMeta instanceof NoDevMeta ) )
 			throw new IllegalStateException( "DevMeta has already been set, are you setting it too late?" );
 		Kernel.devMeta = devMeta;
 	}
@@ -216,9 +217,9 @@ public class Kernel
 		{
 			String key = slugs[0].substring( 2 );
 			if ( key.equals( "app" ) )
-				slugs[0] = getPath().toString();
+				slugs[0] = getPath().getAbsolutePath();
 			else if ( Kernel.APP_PATHS.containsKey( key ) )
-				slugs = ( String[] ) Stream.concat( Kernel.APP_PATHS.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray();
+				slugs = Stream.concat( Kernel.APP_PATHS.get( key ).stream(), Arrays.stream( slugs ).skip( 1 ) ).toArray( String[]::new );
 			else
 				throw ApplicationException.ignorable( "Path " + key + " is not set!" );
 
@@ -231,14 +232,14 @@ public class Kernel
 
 		if ( createPath && !path.exists() )
 			if ( !path.mkdirs() )
-				throw ApplicationException.ignorable( "The path \"" + path.getAbsolutePath() + "\" does not exist and we failed to create it." );
+				throw ApplicationException.ignorable( "The app path \"" + path.getAbsolutePath() + "\" does not exist and we couldn't create it." );
 
 		return path;
 	}
 
 	public static File getPath()
 	{
-		Objs.notNull( appPath, "appPath has yet to be set." );
+		Objs.notEmpty( appPath, "The app path has not been set." );
 		return appPath;
 	}
 
@@ -265,27 +266,25 @@ public class Kernel
 	public static void handleExceptions( @NotNull List<? extends Throwable> throwables, boolean crashOnError )
 	{
 		ExceptionReport report = new ExceptionReport();
-		boolean hasErrored = false;
 
 		for ( Throwable t : throwables )
-		{
-			t.printStackTrace();
-			if ( report.handleException( t, exceptionContext ) )
-				hasErrored = true;
-		}
+			report.handleException( t, exceptionContext );
 
 		/* Non-Ignorable Exceptions */
 
 		Supplier<Stream<ExceptionContext>> errorStream = report::getNotIgnorableExceptions;
 
-		L.severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
+		if ( errorStream.get().count() > 0 )
+		{
+			L.severe( "We Encountered " + errorStream.get().count() + " Non-Ignorable Exception(s):" );
 
-		errorStream.get().forEach( cause -> {
-			if ( cause instanceof Throwable )
-				L.severe( ( Throwable ) cause );
-			else
-				L.severe( cause.getClass() + ": " + cause.getMessage() );
-		} );
+			errorStream.get().forEach( throwable -> {
+				if ( throwable instanceof Throwable )
+					L.severe( ( Throwable ) throwable );
+				else
+					L.severe( throwable.getClass() + ": " + throwable.getMessage() );
+			} );
+		}
 
 		/* Ignorable Exceptions */
 
@@ -293,18 +292,18 @@ public class Kernel
 
 		if ( debugStream.get().count() > 0 )
 		{
-			L.severe( "We Encountered " + debugStream.get().count() + " Ignorable Exception(s):" );
+			L.warning( "We Encountered " + debugStream.get().count() + " Ignorable Exception(s):" );
 
-			debugStream.get().forEach( e -> {
-				if ( e instanceof Throwable )
-					L.warning( ( Throwable ) e );
+			debugStream.get().forEach( throwable -> {
+				if ( throwable instanceof Throwable )
+					L.warning( ( Throwable ) throwable );
 				else
-					L.warning( e.getClass() + ": " + e.getMessage() );
+					L.warning( throwable.getClass() + ": " + throwable.getMessage() );
 			} );
 		}
 
 		// Pass crash information for examination
-		if ( hasErrored && exceptionContext != null )
+		if ( report.hasErrored() && exceptionContext != null )
 			exceptionContext.fatalError( report, crashOnError );
 	}
 
@@ -339,7 +338,7 @@ public class Kernel
 		Kernel.exceptionContext = exceptionContext;
 	}
 
-	public static void setLogHandler( ImplLogHandler log )
+	public static void setLogHandler( @Nonnull ImplLogHandler log )
 	{
 		Kernel.log = log;
 	}
@@ -374,14 +373,32 @@ public class Kernel
 
 	}
 
+	private static class BuiltinLogHandler implements ImplLogHandler
+	{
+		@Override
+		public void log( Level level, Class<?> source, String message, Object... args )
+		{
+			message = "[" + level.getName() + "] " + message;
+
+			if ( level.intValue() <= Level.INFO.intValue() )
+				System.out.println( message );
+			else
+				System.err.println( message );
+		}
+
+		@Override
+		public void log( Level debug, Class<?> source, Throwable cause )
+		{
+			log( debug, source, Strs.getStackTrace( cause ) );
+		}
+	}
+
 	public static class Logger
 	{
 		private Class<?> source;
 
 		public Logger( Class<?> source )
 		{
-			Objs.notNull( log, "The log handler was never set." );
-
 			this.source = source;
 		}
 
@@ -402,7 +419,7 @@ public class Kernel
 
 		public void info( String message, Object... args )
 		{
-			log.info( message, args );
+			log.info( source, message, args );
 		}
 
 		public void severe( Throwable cause )

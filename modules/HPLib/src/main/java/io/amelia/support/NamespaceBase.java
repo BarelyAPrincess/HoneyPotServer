@@ -71,7 +71,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		this.nodes = Arrs.merge( this.nodes, nodes );
+		this.nodes = Arrs.concat( this.nodes, nodes );
 		return ( T ) this;
 	}
 
@@ -81,7 +81,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		return creator.apply( Arrs.merge( this.nodes, nodes ) );
+		return creator.apply( Arrs.concat( this.nodes, nodes ) );
 	}
 
 	@Override
@@ -373,7 +373,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		this.nodes = Arrs.merge( nodes, this.nodes );
+		this.nodes = Arrs.concat( nodes, this.nodes );
 		return ( T ) this;
 	}
 
@@ -383,7 +383,7 @@ public abstract class NamespaceBase<T extends NamespaceBase> implements Cloneabl
 			throw new IllegalArgumentException( "Nodes are empty" );
 		if ( nodes.length == 1 )
 			nodes = splitString( nodes[0] );
-		return creator.apply( Arrs.merge( nodes, this.nodes ) );
+		return creator.apply( Arrs.concat( nodes, this.nodes ) );
 	}
 
 	@SuppressWarnings( "unchecked" )

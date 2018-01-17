@@ -213,7 +213,6 @@ public class Logger
 	public void notice( String msg )
 	{
 		log( Level.WARNING, EnumColor.GOLD + "" + EnumColor.NEGATIVE + msg );
-
 	}
 
 	public void severe( String s )

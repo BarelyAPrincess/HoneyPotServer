@@ -3,6 +3,7 @@ package io.amelia.looper.queue;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.TreeSet;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -110,15 +111,27 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	public long getEarliestEntry()
 	{
-		AbstractEntry first = entries.first();
-		return first == null ? 0L : first.getWhen();
+		try
+		{
+			return entries.first().getWhen();
+		}
+		catch ( NoSuchElementException e )
+		{
+			return 0L;
+		}
 	}
 
 	@Override
 	public long getLatestEntry()
 	{
-		AbstractEntry last = entries.last();
-		return last == null ? Long.MAX_VALUE : last.getWhen();
+		try
+		{
+			return entries.last().getWhen();
+		}
+		catch ( NoSuchElementException e )
+		{
+			return Long.MAX_VALUE;
+		}
 	}
 
 	AbstractLooper<DefaultQueue> getLooper()

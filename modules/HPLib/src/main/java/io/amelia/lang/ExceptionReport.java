@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import io.amelia.foundation.Kernel;
 import io.amelia.support.Objs;
 
@@ -75,6 +77,7 @@ public class ExceptionReport
 	}
 
 	protected final List<ExceptionContext> contexts = new ArrayList<>();
+	private boolean hasErrored = false;
 
 	public ExceptionReport addException( ExceptionContext exception )
 	{
@@ -127,30 +130,29 @@ public class ExceptionReport
 	 *
 	 * @return True if we should abort any further execution of code
 	 */
-	public final boolean handleException( Throwable cause, ExceptionRegistrar context )
+	public final void handleException( @Nonnull Throwable cause, @Nonnull ExceptionRegistrar context )
 	{
-		if ( Objs.isNull( cause ) )
-			return false;
+		if ( Objs.isNull( cause, context ) )
+			return;
 
 		/* Give an IException a chance to self-handle the exception report */
 		if ( cause instanceof ExceptionContext )
 		{
-			// TODO Might not be desirable if a handle method was to return severe but not provide any exception or debug information to the ExceptionReport
+			// TODO Might not be desirable if a handle method was to return severe but did not provide any exception or debug information to the ExceptionReport. How can we force this behavior?
 			ReportingLevel reportingLevel = ( ( ExceptionContext ) cause ).handle( this, context );
 			if ( reportingLevel != null )
-				return !reportingLevel.isIgnorable();
+			{
+				hasErrored = !reportingLevel.isIgnorable();
+				return;
+			}
 		}
 
-		/* Parse each IException and return true if one or more IExceptions produced NonIgnorableExceptions */
+		/* Parse each IException and set hasErrored if one or more IExceptions produced Non-Ignorable Exceptions */
 		if ( cause instanceof MultipleException )
 		{
-			boolean abort = false;
 			for ( ExceptionContext e : ( ( MultipleException ) cause ).getExceptions() )
-			{
-				if ( handleException( ( Throwable ) e, context ) )
-					abort = true;
-			}
-			return abort;
+				handleException( ( Throwable ) e, context );
+			return;
 		}
 
 		Map<Class<? extends Throwable>, ExceptionCallback> assignable = new HashMap<>();
@@ -160,7 +162,10 @@ public class ExceptionReport
 			{
 				ReportingLevel e = entry.getValue().callback( cause, this, context );
 				if ( e != null )
-					return !e.isIgnorable();
+				{
+					hasErrored = !e.isIgnorable();
+					return;
+				}
 			}
 			else if ( entry.getKey().isAssignableFrom( cause.getClass() ) )
 				assignable.put( entry.getKey(), entry.getValue() );
@@ -169,7 +174,10 @@ public class ExceptionReport
 		{
 			ReportingLevel e = assignable.values().toArray( new ExceptionCallback[0] )[0].callback( cause, this, context );
 			if ( e != null )
-				return !e.isIgnorable();
+			{
+				hasErrored = !e.isIgnorable();
+				return;
+			}
 		}
 		else if ( assignable.size() > 1 )
 			for ( Entry<Class<? extends Throwable>, ExceptionCallback> entry : assignable.entrySet() )
@@ -179,7 +187,10 @@ public class ExceptionReport
 					{
 						ReportingLevel e = entry.getValue().callback( cause, this, context );
 						if ( e != null )
-							return !e.isIgnorable();
+						{
+							hasErrored = !e.isIgnorable();
+							return;
+						}
 						break;
 					}
 
@@ -191,7 +202,10 @@ public class ExceptionReport
 						{
 							ReportingLevel e = entry.getValue().callback( cause, this, context );
 							if ( e != null )
-								return !e.isIgnorable();
+							{
+								hasErrored = !e.isIgnorable();
+								return;
+							}
 							break;
 						}
 						superClass = cause.getClass();
@@ -203,9 +217,12 @@ public class ExceptionReport
 		 * Handle the remainder unhandled run of the mill exceptions
 		 * NullPointerException, ArrayIndexOutOfBoundsException, IOException, StackOverflowError, ClassFormatError
 		 */
-		L.severe( String.format( "The exception %s went unhandled.", cause.getClass().getName() ), cause );
 		addException( ReportingLevel.E_UNHANDLED, cause );
-		return true;
+	}
+
+	public boolean hasErrored()
+	{
+		return hasErrored;
 	}
 
 	/**

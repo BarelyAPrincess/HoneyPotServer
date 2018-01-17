@@ -248,7 +248,7 @@ task writeDependenciesFile {
 			allDependencies += it.getConfigurations().getByName( "runtime" ).getAllDependencies().withType( ExternalModuleDependency )
 		}
 
-		def output
+		def output = ""
 		allDependencies.unique().each {
 			output += it.group + ":" + it.name + ":" + it.version + "\n"
 		}

@@ -3,8 +3,9 @@ package io.amelia.looper.queue;
 import javax.annotation.Nonnull;
 
 import io.amelia.looper.AbstractLooper;
+import io.amelia.support.Maths;
 
-public abstract class AbstractEntry
+public abstract class AbstractEntry implements Comparable<AbstractEntry>
 {
 	protected final boolean async;
 	protected final long id = AbstractLooper.getGloballyUniqueId();
@@ -44,6 +45,12 @@ public abstract class AbstractEntry
 			else
 				queue.entries.remove( this );
 		}
+	}
+
+	@Override
+	public int compareTo( AbstractEntry abstractEntry )
+	{
+		return Maths.nonZero( Long.compare( getWhen(), abstractEntry.getWhen() ), Long.compare( getId(), abstractEntry.getId() ) ).orElse( 0 );
 	}
 
 	public long getId()

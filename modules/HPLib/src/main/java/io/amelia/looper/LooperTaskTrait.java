@@ -275,10 +275,10 @@ public interface LooperTaskTrait
 			Objs.notNull( task );
 
 			this.task = task;
-			if ( when < 0 ) // Now
+			if ( when <= 0 ) // Now
 				this.when = System.currentTimeMillis();
-			else if ( when < queue.getEarliestEntry() ) // Confirm this task won't come before any active entries unless it's async.
-				throw ApplicationException.runtime( "Task must be in the future." );
+				// else if ( when < queue.getEarliestEntry() && !async ) // Confirm this task won't come before any active entries unless it's async.
+				// throw ApplicationException.runtime( "Task must be in the future. {When: " + when + ", Earliest: " + queue.getEarliestEntry() + "}" );
 			else
 				this.when = when;
 		}

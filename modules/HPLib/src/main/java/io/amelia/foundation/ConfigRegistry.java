@@ -76,7 +76,7 @@ public class ConfigRegistry
 
 	public static void init( Env env ) throws ConfigException.Error
 	{
-		Kernel.setAppPath( IO.buildFile( true, env.getString( "app-dir" ) ) );
+		Kernel.setAppPath( IO.buildFile( false, env.getString( "app-dir" ) ) );
 		// for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
 		// setPath( key, Strs.split( env.getString( "dir-" + key ), "/" ).toArray( String[]::new ) );
 
@@ -84,9 +84,9 @@ public class ConfigRegistry
 
 		loadConfig();
 
-		ConfigMap envNode = config.getChild( "env" );
+		ConfigMap envNode = config.getChildOrCreate( "env" );
 		for ( Map.Entry<String, Object> entry : env.map().entrySet() )
-			envNode.setValue( entry.getKey(), entry.getValue() );
+			envNode.setValue( entry.getKey().replace( '-', '_' ), entry.getValue() );
 		envNode.addFlag( ConfigMap.Flag.READ_ONLY, ConfigMap.Flag.NO_SAVE );
 	}
 

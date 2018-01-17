@@ -1,6 +1,7 @@
 package io.amelia.foundation;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
 
@@ -66,7 +67,24 @@ public final class Foundation
 			throw ApplicationException.error( "The application has been DISPOSED!" );
 		if ( Foundation.app != null )
 			throw ApplicationException.error( "The application instance has already been set!" );
+
+		Kernel.setLogHandler( new ImplLogHandler()
+		{
+			@Override
+			public void log( Level level, Class<?> source, String message, Object... args )
+			{
+				L.log( level, message, args );
+			}
+
+			@Override
+			public void log( Level level, Class<?> source, Throwable cause )
+			{
+				L.log( level, cause.getMessage(), cause );
+			}
+		} );
+
 		Kernel.setExceptionContext( app );
+
 		Foundation.app = app;
 	}
 

@@ -132,19 +132,15 @@ public class Arrs
 		return leftSum.compareTo( rightSum );
 	}
 
-	public static <T> T[] concat( @NotNull T[]... arrs )
+	public static <T> T[] concat( @NotNull T[]... arr )
 	{
-		return ( T[] ) Arrays.stream( arrs ).flatMap( Arrays::stream ).toArray();
+		Objs.notNegativeOrZero( arr.length );
+		return Arrays.stream( arr ).flatMap( Arrays::stream ).toArray( size -> Arrays.copyOf( arr[0], size ) );
 	}
 
 	public static <T> T[] limit( @NotNull T[] arr, int limit )
 	{
-		return ( T[] ) Arrays.stream( arr ).limit( limit ).toArray();
-	}
-
-	public static <T> T[] merge( T[]... arrs )
-	{
-		return ( T[] ) Arrays.stream( arrs ).flatMap( Arrays::stream ).toArray();
+		return Arrays.stream( arr ).limit( limit ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
 
 	public static <T> T[] pop( @NotNull T[] arr )
@@ -154,17 +150,17 @@ public class Arrs
 
 	public static <T> T[] prepend( @NotNull T[] arr, T first )
 	{
-		return ( T[] ) Stream.concat( Stream.of( first ), Arrays.stream( arr ) ).toArray();
+		return Stream.concat( Stream.of( first ), Arrays.stream( arr ) ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
 
 	public static <T> T[] push( @NotNull T[] arr, @NotNull T obj )
 	{
-		return ( T[] ) ( obj == null ? arr : Stream.concat( Arrays.stream( arr ), Stream.of( obj ) ).toArray() );
+		return ( obj == null ? arr : Stream.concat( Arrays.stream( arr ), Stream.of( obj ) ).toArray( size -> Arrays.copyOf( arr, size ) ) );
 	}
 
 	public static <T> T[] skip( @NotNull T[] arr, int skip )
 	{
-		return ( T[] ) Arrays.stream( arr ).skip( skip ).toArray();
+		return Arrays.stream( arr ).skip( skip ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
 
 	public static Long[] toLongArray( Object obj )
