@@ -1,7 +1,5 @@
 package io.amelia.support.data;
 
-import com.sun.istack.internal.NotNull;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -186,7 +184,7 @@ public abstract class StackerWithValue<BaseClass extends StackerWithValue<BaseCl
 		return child.children.stream().map( c -> ( LT ) c.value ).filter( Objects::nonNull ).collect( Collectors.toList() );
 	}
 
-	public <T> T getChildAsObject( @NotNull String key, Class<T> cls )
+	public <T> T getChildAsObject( @Nonnull String key, Class<T> cls )
 	{
 		BaseClass child = findChild( key, false );
 		if ( child == null )

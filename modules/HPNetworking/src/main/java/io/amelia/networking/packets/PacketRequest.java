@@ -1,9 +1,10 @@
 package io.amelia.networking.packets;
 
-import com.sun.istack.internal.NotNull;
-import io.amelia.support.Objs;
-
 import java.util.function.Supplier;
+
+import javax.annotation.Nonnull;
+
+import io.amelia.support.Objs;
 
 /**
  * @param <T> The Packet subclass
@@ -17,7 +18,7 @@ public abstract class PacketRequest<T extends PacketRequest, R> extends RawPacke
 	// 15 Second Response Timeout
 	private long timeout = 15;
 
-	public PacketRequest( @NotNull Supplier<R> responsePacketSupplier )
+	public PacketRequest( @Nonnull Supplier<R> responsePacketSupplier )
 	{
 		Objs.notNull( responsePacketSupplier );
 		this.responsePacketSupplier = responsePacketSupplier;

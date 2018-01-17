@@ -151,7 +151,7 @@ dependencies {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-mainClassName = "io.amelia.EntryPoint"
+mainClassName = "io.amelia.main.EntryPoint"
 def rawVersion = getVersionNumber()
 def jenkins_build = System.getenv( "BUILD_NUMBER" )
 def travis_build = System.getenv( "TRAVIS_BUILD_NUMBER" )

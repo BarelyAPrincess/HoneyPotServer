@@ -9,7 +9,6 @@
  */
 package io.amelia.foundation.tasks;
 
-
 import io.amelia.foundation.RegistrarBase;
 
 /**
@@ -39,6 +38,7 @@ public abstract class RunnableTask implements CallableTask
 	 * Gets the task id for this runnable.
 	 *
 	 * @return the task id that this runnable was scheduled as
+	 *
 	 * @throws IllegalStateException if task was not scheduled yet
 	 */
 	public synchronized int getTaskId() throws IllegalStateException
@@ -53,7 +53,9 @@ public abstract class RunnableTask implements CallableTask
 	 * Schedules this in the Chiori scheduler to run on next tick.
 	 *
 	 * @param creator the reference to the plugin scheduling task
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTask(RegistrarBase, CallableTask)
@@ -71,7 +73,9 @@ public abstract class RunnableTask implements CallableTask
 	 * Schedules this in the Chiori scheduler to run asynchronously.
 	 *
 	 * @param creator the reference to the plugin scheduling task
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTaskAsynchronously(RegistrarBase, CallableTask)
@@ -87,7 +91,9 @@ public abstract class RunnableTask implements CallableTask
 	 *
 	 * @param creator the reference to the plugin scheduling task
 	 * @param delay   the ticks to wait before running the task
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTaskLater(RegistrarBase, long, CallableTask)
@@ -106,7 +112,9 @@ public abstract class RunnableTask implements CallableTask
 	 *
 	 * @param creator the reference to the plugin scheduling task
 	 * @param delay   the ticks to wait before running the task
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTaskLaterAsynchronously(RegistrarBase, long, CallableTask)
@@ -123,7 +131,9 @@ public abstract class RunnableTask implements CallableTask
 	 * @param creator the reference to the plugin scheduling task
 	 * @param delay   the ticks to wait before running the task
 	 * @param period  the ticks to wait between runs
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTaskTimer(RegistrarBase, long, long, CallableTask)
@@ -144,7 +154,9 @@ public abstract class RunnableTask implements CallableTask
 	 * @param creator the reference to the plugin scheduling task
 	 * @param delay   the ticks to wait before running the task for the first time
 	 * @param period  the ticks to wait between runs
+	 *
 	 * @return a ChioriTask that contains the id number
+	 *
 	 * @throws IllegalArgumentException if plugin is null
 	 * @throws IllegalStateException    if this was already scheduled
 	 * @see Tasks#runTaskTimerAsynchronously(RegistrarBase, long, long, CallableTask)

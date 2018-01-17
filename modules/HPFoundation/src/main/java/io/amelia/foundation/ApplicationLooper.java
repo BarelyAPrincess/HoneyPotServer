@@ -55,7 +55,7 @@ public class ApplicationLooper extends AbstractLooper<DefaultQueue> implements L
 	@Override
 	protected void quit( boolean removePendingMessages )
 	{
-		if ( Foundation.getRunlevel() != Runlevel.DISPOSED )
+		if ( Foundation.getRunlevel().intValue() > 100 )
 			throw ApplicationException.runtime( "Application Looper is not permitted to quit." );
 
 		super.quit( removePendingMessages );

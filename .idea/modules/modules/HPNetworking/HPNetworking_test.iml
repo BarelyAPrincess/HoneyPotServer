@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id=":HPNetworking:test" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPNetworking" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="null.null.null-git+H0ec7a98" type="JAVA_MODULE" version="4">
+<module external.linked.project.id=":HPNetworking:test" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPNetworking" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="null.null.null-git+H71e781d" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output-test url="file://$MODULE_DIR$/../../../../modules/HPNetworking/out/test/classes" />
     <exclude-output />

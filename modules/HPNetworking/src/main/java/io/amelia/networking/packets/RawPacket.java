@@ -1,6 +1,11 @@
 package io.amelia.networking.packets;
 
-import com.sun.istack.internal.NotNull;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.NetworkException;
 import io.amelia.lang.ReportingLevel;
@@ -12,10 +17,6 @@ import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Provides a raw byte-based packet
@@ -125,7 +126,7 @@ public abstract class RawPacket
 		return payload;
 	}
 
-	public void setPayload( @NotNull ByteBuf payload )
+	public void setPayload( @Nonnull ByteBuf payload )
 	{
 		this.payload = payload == null ? null : payload.slice();
 	}

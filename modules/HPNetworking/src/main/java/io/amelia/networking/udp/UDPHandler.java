@@ -10,7 +10,14 @@
 package io.amelia.networking.udp;
 
 import com.google.common.collect.Queues;
-import com.sun.istack.internal.NotNull;
+
+import java.net.InetSocketAddress;
+import java.util.Queue;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+
+import javax.annotation.Nonnull;
+
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.networking.NetworkLoader;
@@ -21,11 +28,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.concurrent.GenericFutureListener;
-
-import java.net.InetSocketAddress;
-import java.util.Queue;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
 
 public class UDPHandler extends SimpleChannelInboundHandler<RawPacket>
 {
@@ -40,6 +42,22 @@ public class UDPHandler extends SimpleChannelInboundHandler<RawPacket>
 	public UDPHandler( InetSocketAddress inetSocketAddress )
 	{
 		this.inetSocketAddress = inetSocketAddress;
+	}
+
+	@Override
+	public void channelActive( ChannelHandlerContext ctx ) throws Exception
+	{
+		super.channelActive( ctx );
+
+		channel = ctx.channel();
+		setClusterRole( ClusterRole.MONITOR );
+	}
+
+	@Override
+	public void channelInactive( ChannelHandlerContext ctx ) throws Exception
+	{
+		super.channelInactive( ctx );
+		closeChannel( "End of Stream" );
 	}
 
 	public void closeChannel( String reason )// String reason )
@@ -71,22 +89,6 @@ public class UDPHandler extends SimpleChannelInboundHandler<RawPacket>
 		closeChannel( cause instanceof TimeoutException ? "Stream Timeout" : "Stream Exception: " + cause.getMessage() );
 	}
 
-	@Override
-	public void channelActive( ChannelHandlerContext ctx ) throws Exception
-	{
-		super.channelActive( ctx );
-
-		channel = ctx.channel();
-		setClusterRole( ClusterRole.MONITOR );
-	}
-
-	@Override
-	public void channelInactive( ChannelHandlerContext ctx ) throws Exception
-	{
-		super.channelInactive( ctx );
-		closeChannel( "End of Stream" );
-	}
-
 	private void flushOutboundQueue()
 	{
 		if ( channel != null && channel.isOpen() )
@@ -107,7 +109,7 @@ public class UDPHandler extends SimpleChannelInboundHandler<RawPacket>
 		return packetHandler;
 	}
 
-	public void setPacketHandler( @NotNull UDPPacketHandler packetHandler )
+	public void setPacketHandler( @Nonnull UDPPacketHandler packetHandler )
 	{
 		Objs.notNull( packetHandler );
 		NetworkLoader.L.fine( "Set packet handler of %s to %s", this, packetHandler );

@@ -1,12 +1,12 @@
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 /**
  * Manipulates arrays typically using Java 8 Streams
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @SuppressWarnings( "unchecked" )
 public class Arrs
 {
-	public static <T> T[] append( @NotNull T[] arr, T first )
+	public static <T> T[] append( @Nonnull T[] arr, T first )
 	{
 		return ( T[] ) Stream.concat( Arrays.stream( arr ), Stream.of( first ) ).toArray();
 	}
@@ -132,33 +132,33 @@ public class Arrs
 		return leftSum.compareTo( rightSum );
 	}
 
-	public static <T> T[] concat( @NotNull T[]... arr )
+	public static <T> T[] concat( @Nonnull T[]... arr )
 	{
 		Objs.notNegativeOrZero( arr.length );
 		return Arrays.stream( arr ).flatMap( Arrays::stream ).toArray( size -> Arrays.copyOf( arr[0], size ) );
 	}
 
-	public static <T> T[] limit( @NotNull T[] arr, int limit )
+	public static <T> T[] limit( @Nonnull T[] arr, int limit )
 	{
 		return Arrays.stream( arr ).limit( limit ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
 
-	public static <T> T[] pop( @NotNull T[] arr )
+	public static <T> T[] pop( @Nonnull T[] arr )
 	{
 		return trimEnd( arr, 1 );
 	}
 
-	public static <T> T[] prepend( @NotNull T[] arr, T first )
+	public static <T> T[] prepend( @Nonnull T[] arr, T first )
 	{
 		return Stream.concat( Stream.of( first ), Arrays.stream( arr ) ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
 
-	public static <T> T[] push( @NotNull T[] arr, @NotNull T obj )
+	public static <T> T[] push( @Nonnull T[] arr, @Nonnull T obj )
 	{
 		return ( obj == null ? arr : Stream.concat( Arrays.stream( arr ), Stream.of( obj ) ).toArray( size -> Arrays.copyOf( arr, size ) ) );
 	}
 
-	public static <T> T[] skip( @NotNull T[] arr, int skip )
+	public static <T> T[] skip( @Nonnull T[] arr, int skip )
 	{
 		return Arrays.stream( arr ).skip( skip ).toArray( size -> Arrays.copyOf( arr, size ) );
 	}
@@ -206,17 +206,17 @@ public class Arrs
 		return list.toArray( new Long[0] );
 	}
 
-	public static <T> T[] trim( @NotNull T[] arr, int start, int end )
+	public static <T> T[] trim( @Nonnull T[] arr, int start, int end )
 	{
 		return arr.length == 0 ? arr : ( T[] ) Arrays.stream( arr ).limit( arr.length - end ).skip( start ).toArray();
 	}
 
-	public static <T> T[] trimEnd( @NotNull T[] arr, int inx )
+	public static <T> T[] trimEnd( @Nonnull T[] arr, int inx )
 	{
 		return arr.length == 0 ? arr : ( T[] ) Arrays.stream( arr ).limit( arr.length - inx ).toArray();
 	}
 
-	public static <T> T[] trimStart( @NotNull T[] arr, int inx )
+	public static <T> T[] trimStart( @Nonnull T[] arr, int inx )
 	{
 		return arr.length == 0 ? arr : ( T[] ) Arrays.stream( arr ).skip( inx ).toArray();
 	}

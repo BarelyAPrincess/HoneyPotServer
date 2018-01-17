@@ -1,7 +1,5 @@
 package io.amelia.foundation;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -248,22 +246,22 @@ public class Kernel
 		return new ArrayList<>( APP_PATHS.keySet() );
 	}
 
-	public static void handleExceptions( @NotNull Throwable throwable )
+	public static void handleExceptions( @Nonnull Throwable throwable )
 	{
 		handleExceptions( Lists.newArrayList( throwable ) );
 	}
 
-	public static void handleExceptions( @NotNull List<? extends Throwable> throwables )
+	public static void handleExceptions( @Nonnull List<? extends Throwable> throwables )
 	{
 		handleExceptions( throwables, true );
 	}
 
-	public static void handleExceptions( @NotNull Throwable throwable, boolean crashOnError )
+	public static void handleExceptions( @Nonnull Throwable throwable, boolean crashOnError )
 	{
 		handleExceptions( Lists.newArrayList( throwable ), crashOnError );
 	}
 
-	public static void handleExceptions( @NotNull List<? extends Throwable> throwables, boolean crashOnError )
+	public static void handleExceptions( @Nonnull List<? extends Throwable> throwables, boolean crashOnError )
 	{
 		ExceptionReport report = new ExceptionReport();
 

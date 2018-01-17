@@ -9,10 +9,10 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 /**
  * Used to compare semantic versioning strings with support for optional release stage and/or build number.
@@ -91,12 +91,12 @@ public class Version implements Comparable<Version>
 			patch = Integer.parseInt( parts[2] );
 	}
 
-	public boolean compareTo( @NotNull String regex )
+	public boolean compareTo( @Nonnull String regex )
 	{
 		return toString().matches( regex );
 	}
 
-	public boolean compareTo( @NotNull Operator operator, @NotNull Version that )
+	public boolean compareTo( @Nonnull Operator operator, @Nonnull Version that )
 	{
 		Objs.notNull( that );
 		if ( operator == Operator.LATER )
@@ -111,7 +111,7 @@ public class Version implements Comparable<Version>
 	}
 
 	@Override
-	public int compareTo( @NotNull Version that )
+	public int compareTo( @Nonnull Version that )
 	{
 		Objs.notNull( that );
 

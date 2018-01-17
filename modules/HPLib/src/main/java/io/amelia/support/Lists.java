@@ -9,8 +9,6 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +24,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 public class Lists
 {
@@ -168,7 +168,7 @@ public class Lists
 		return new ArrayList<>( Arrays.asList( elements ) );
 	}
 
-	public static <T> List<T> subList( @NotNull List<T> list, int start, int length )
+	public static <T> List<T> subList( @Nonnull List<T> list, int start, int length )
 	{
 		Objs.notNull( list );
 		Objs.notNegative( start );

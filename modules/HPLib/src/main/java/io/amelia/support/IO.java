@@ -53,6 +53,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.amelia.foundation.Kernel;
 import io.amelia.injection.Libraries;
@@ -1071,17 +1072,21 @@ public class IO
 		return readStreamToByteArray( is ).toByteArray();
 	}
 
-	public static List<String> readStreamToLines( @Nonnull InputStream is, @Nonnull String ignorePrefix )
+	public static List<String> readStreamToLines( @Nonnull InputStream is )
+	{
+		return readStreamToLines( is, null );
+	}
+
+	public static List<String> readStreamToLines( @Nonnull InputStream is, @Nullable String ignorePrefix )
 	{
 		return readStreamToStream( is, ignorePrefix ).collect( Collectors.toList() );
 	}
 
-	public static Stream<String> readStreamToStream( @Nonnull InputStream is, @Nonnull String ignorePrefix )
+	public static Stream<String> readStreamToStream( @Nonnull InputStream is, @Nullable String ignorePrefix )
 	{
 		Objs.notNull( is );
-		Objs.notNull( ignorePrefix );
 
-		return new BufferedReader( new InputStreamReader( is ) ).lines().filter( s -> !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
+		return new BufferedReader( new InputStreamReader( is ) ).lines().filter( s -> ignorePrefix == null || !s.toLowerCase().startsWith( ignorePrefix.toLowerCase() ) );
 	}
 
 	public static Stream<String> readStreamToStream( @Nonnull InputStream is ) throws FileNotFoundException

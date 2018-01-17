@@ -77,7 +77,8 @@ public enum Runlevel
 			case NETWORKING:
 				return currentRunlevel == MAINLOOP;
 			case STARTED:
-				return currentRunlevel == NETWORKING;
+				// Going from MAINLOOP to STARTUP is only acceptable if application implements NetworkedApplication
+				return currentRunlevel == NETWORKING || currentRunlevel == MAINLOOP;
 			case RELOAD:
 			case SHUTDOWN:
 				return currentRunlevel == STARTED;

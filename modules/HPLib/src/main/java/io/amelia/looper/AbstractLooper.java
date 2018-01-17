@@ -321,7 +321,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 	 *
 	 * @see #quitSafely
 	 */
-	public final void quitAndDestroy()
+	public final void quitUnsafe()
 	{
 		quit( true );
 	}
@@ -426,7 +426,7 @@ public abstract class AbstractLooper<Q extends AbstractQueue>
 			if ( exceptionHandler == null )
 			{
 				Kernel.handleExceptions( exception );
-				quitAndDestroy();
+				quitUnsafe();
 			}
 			else
 				exceptionHandler.accept( exception );

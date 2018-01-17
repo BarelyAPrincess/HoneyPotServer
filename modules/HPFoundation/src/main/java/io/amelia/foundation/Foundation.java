@@ -140,7 +140,8 @@ public final class Foundation
 	{
 		Events.callEventWithException( new RunlevelEvent( previousRunlevel, currentRunlevel ) );
 
-		getApplication().onRunlevelChange( previousRunlevel, currentRunlevel );
+		if ( app != null )
+			app.onRunlevelChange( previousRunlevel, currentRunlevel );
 
 		// Internal runlevel changes happen after this point. Generally progressing the application from each runlevel to the next.
 
@@ -151,22 +152,17 @@ public final class Foundation
 
 		// Indicates the application has begun the main loop
 		if ( currentRunlevel == Runlevel.MAINLOOP )
-			setRunlevelLater( Runlevel.NETWORKING );
+			if ( app instanceof NetworkedApplication )
+				setRunlevelLater( Runlevel.NETWORKING );
+			else
+				setRunlevelLater( Runlevel.STARTED );
 
 		// Indicates the application has started all and any networking
 		if ( currentRunlevel == Runlevel.NETWORKING )
 			setRunlevelLater( Runlevel.STARTED );
 
-		// Indicates the application is now started
-		if ( currentRunlevel == Runlevel.STARTED )
-			L.info( EnumColor.join( EnumColor.GOLD, EnumColor.NEGATIVE ) + "Now Running! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
-
-
-		if ( currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.SHUTDOWN )
-			L.notice( currentRunlevelReason );
-
-		if ( currentRunlevel == Runlevel.CRASHED )
-			app.quitUnsafe();
+		// if ( currentRunlevel == Runlevel.CRASHED || currentRunlevel == Runlevel.RELOAD || currentRunlevel == Runlevel.SHUTDOWN )
+		// L.notice( currentRunlevelReason );
 
 		// TODO Implement the RELOAD runlevel!
 		if ( currentRunlevel == Runlevel.RELOAD )
@@ -175,6 +171,8 @@ public final class Foundation
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 			app.quitSafely();
 
+		if ( currentRunlevel == Runlevel.CRASHED )
+			app.quitUnsafe();
 
 		if ( currentRunlevel == Runlevel.DISPOSED )
 		{
@@ -183,11 +181,9 @@ public final class Foundation
 			app.dispose();
 			app = null;
 
-			L.info( EnumColor.GOLD + "" + EnumColor.NEGATIVE + "Shutdown Completed! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
-
 			try
 			{
-				Thread.sleep( 500 );
+				Thread.sleep( 100 );
 			}
 			catch ( InterruptedException e )
 			{
@@ -256,40 +252,48 @@ public final class Foundation
 			setRunlevelLater( level, reason );
 	}
 
-	private synchronized static void setRunlevel0( Runlevel level, String reason )
+	private synchronized static void setRunlevel0( Runlevel runlevel, String reason )
 	{
 		try
 		{
 			if ( getLooper().isThreadJoined() && !getLooper().isHeldByCurrentThread() )
 				throw ApplicationException.error( "Runlevel can only be set from the application looper thread. Be more careful next time." );
-			if ( currentRunlevel == level )
-				throw ApplicationException.error( "Runlevel is already set to " + level.name() + ". This might be a severe race bug." );
-			if ( !level.checkRunlevelOrder( currentRunlevel ) )
-				throw ApplicationException.error( "RunLevel " + level.name() + " was set out of order. The is likely a severe race bug." );
+			if ( currentRunlevel == runlevel )
+				throw ApplicationException.error( "Runlevel is already set to " + runlevel.name() + ". This might be a severe race bug." );
+			if ( !runlevel.checkRunlevelOrder( currentRunlevel ) )
+				throw ApplicationException.error( "RunLevel " + runlevel.name() + " was set out of order. The is likely a severe race bug." );
 
 			if ( Objs.isEmpty( reason ) )
 			{
 				String instanceId = getApplication().getEnv().getString( "instance-id" );
 
-				if ( level == Runlevel.RELOAD )
+				if ( runlevel == Runlevel.RELOAD )
 					reason = String.format( "Server %s is restarting. Be back soon. :D", instanceId );
-				else if ( level == Runlevel.CRASHED )
+				else if ( runlevel == Runlevel.CRASHED )
 					reason = String.format( "Server %s has crashed. Sorry about that. :(", instanceId );
-				else if ( level == Runlevel.SHUTDOWN )
+				else if ( runlevel == Runlevel.SHUTDOWN )
 					reason = String.format( "Server %s is shutting down. Good bye. :|", instanceId );
 				else
 					reason = "No reason was provided.";
 			}
 
-			currentRunlevelReason = reason;
-			previousRunlevel = currentRunlevel = level;
-
 			Timing.start( runlevelTimingObject );
+
+			previousRunlevel = currentRunlevel;
+			currentRunlevel = runlevel;
+			currentRunlevelReason = reason;
+
+			if ( runlevel == Runlevel.RELOAD || runlevel == Runlevel.SHUTDOWN || runlevel == Runlevel.CRASHED )
+				L.info( EnumColor.join( EnumColor.GOLD, EnumColor.NEGATIVE ) + "" + EnumColor.NEGATIVE + "Application is entering runlevel " + runlevel.name() + ", for reason: " + reason );
 
 			onRunlevelChange();
 
-			if ( level != Runlevel.DISPOSED && level != Runlevel.STARTED )
-				L.info( "The runlevel has been changed to " + level.name() + "! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+			if ( currentRunlevel == Runlevel.DISPOSED )
+				L.info( EnumColor.join( EnumColor.GOLD, EnumColor.NEGATIVE ) + "" + EnumColor.NEGATIVE + "Application has successfully shutdown! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+			else if ( currentRunlevel == Runlevel.STARTED )
+				L.info( EnumColor.join( EnumColor.GOLD, EnumColor.NEGATIVE ) + "Application has successfully started! It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
+			else
+				L.info( EnumColor.AQUA + "Application has entered runlevel " + runlevel.name() + ". It took " + Timing.finish( runlevelTimingObject ) + "ms!" );
 		}
 		catch ( ApplicationException.Error e )
 		{
@@ -308,9 +312,9 @@ public final class Foundation
 		getLooper().postTask( () -> setRunlevel0( level, reason ) );
 	}
 
-	public static void shutdown() throws ApplicationException.Error
+	public static void shutdown( String reason )
 	{
-		setRunlevel( Runlevel.SHUTDOWN );
+		setRunlevel( Runlevel.SHUTDOWN, reason );
 	}
 
 	/**
@@ -324,10 +328,11 @@ public final class Foundation
 		requirePrimaryThread();
 		requireRunlevel( Runlevel.INITIALIZATION, "Start() must be called at runlevel INITIALIZATION" );
 
+		if ( !app.hasArgument( "no-banner" ) )
+			app.showBanner( L );
+
 		// Call to make sure the INITIALIZATION Runlevel is acknowledged by the application.
 		onRunlevelChange();
-
-		L.info( "Starting " + Kernel.getDevMeta().getProductName() + " version " + Kernel.getDevMeta().getVersionDescribe() );
 
 		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
@@ -362,6 +367,16 @@ public final class Foundation
 		 * </pre>
 		 */
 		public static final String BINDINGS_FACADES = "bindings.facades";
+
+		/**
+		 * Specifies a config key for disabling a application metrics.
+		 *
+		 * <pre>
+		 * app:
+		 *   disableMetrics: false
+		 * </pre>
+		 */
+		public static final String DISABLE_METRICS = "app.disableMetrics";
 
 		private ConfigKeys()
 		{

@@ -9,8 +9,6 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-
 import org.joda.time.Duration;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -18,7 +16,6 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.IDN;
@@ -281,12 +278,12 @@ public class Strs
 		return cnt;
 	}
 
-	public static byte[] decodeDefault( @NotNull String str )
+	public static byte[] decodeDefault( @Nonnull String str )
 	{
 		return str.getBytes( Charset.defaultCharset() );
 	}
 
-	public static byte[] decodeUtf8( @NotNull String str )
+	public static byte[] decodeUtf8( @Nonnull String str )
 	{
 		return str.getBytes( StandardCharsets.UTF_8 );
 	}
@@ -376,37 +373,37 @@ public class Strs
 		return str.toUpperCase().equals( str );
 	}
 
-	public static String join( @NotNull Map<String, String> args, @NotNull String glue )
+	public static String join( @Nonnull Map<String, String> args, @Nonnull String glue )
 	{
 		return join( args, glue, "=" );
 	}
 
-	public static String join( @NotNull Map<String, String> args )
+	public static String join( @Nonnull Map<String, String> args )
 	{
 		return join( args, ", ", "=" );
 	}
 
-	public static String join( @NotNull Map<String, String> args, @NotNull String glue, @NotNull String keyValueSeparator )
+	public static String join( @Nonnull Map<String, String> args, @Nonnull String glue, @Nonnull String keyValueSeparator )
 	{
 		return args.entrySet().stream().map( e -> e.getKey() + keyValueSeparator + e.getValue() ).collect( Collectors.joining( glue ) );
 	}
 
-	public static String join( @NotNull Collection<String> args )
+	public static String join( @Nonnull Collection<String> args )
 	{
 		return join( args, ", " );
 	}
 
-	public static String join( @NotNull Collection<String> args, @NotNull String glue )
+	public static String join( @Nonnull Collection<String> args, @Nonnull String glue )
 	{
 		return args.stream().collect( Collectors.joining( glue ) );
 	}
 
-	public static String join( @NotNull String[] args )
+	public static String join( @Nonnull String[] args )
 	{
 		return join( args, ", " );
 	}
 
-	public static String join( @NotNull String[] args, @NotNull String glue )
+	public static String join( @Nonnull String[] args, @Nonnull String glue )
 	{
 		return Arrays.stream( args ).collect( Collectors.joining( glue ) );
 	}
@@ -617,21 +614,21 @@ public class Strs
 		return trimAll( str, glue.charAt( 0 ) );
 	}
 
-	public static Stream<String> split( String str, @NotNull String delimiter, int limit )
+	public static Stream<String> split( String str, @Nonnull String delimiter, int limit )
 	{
 		if ( Objs.isEmpty( str ) )
 			return Stream.empty();
 		return Arrays.stream( str.split( delimiter, limit ) );
 	}
 
-	public static Stream<String> split( String str, @NotNull String delimiter )
+	public static Stream<String> split( String str, @Nonnull String delimiter )
 	{
 		if ( Objs.isEmpty( str ) )
 			return Stream.empty();
 		return Arrays.stream( str.split( delimiter ) );
 	}
 
-	public static Stream<String> split( String str, @NotNull Pattern delimiter )
+	public static Stream<String> split( String str, @Nonnull Pattern delimiter )
 	{
 		if ( Objs.isEmpty( str ) )
 			return Stream.empty();
@@ -649,7 +646,7 @@ public class Strs
 	 *
 	 * @throws NullPointerException if prefix is null
 	 */
-	public static boolean startsWithIgnoreCase( @NotNull final String string, @NotNull final String... prefixes ) throws NullPointerException
+	public static boolean startsWithIgnoreCase( @Nonnull final String string, @Nonnull final String... prefixes ) throws NullPointerException
 	{
 		Objs.notNull( string, "Cannot check a null string for a match" );
 		for ( String prefix : prefixes )

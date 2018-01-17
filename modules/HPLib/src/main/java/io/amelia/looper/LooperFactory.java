@@ -36,7 +36,7 @@ public final class LooperFactory<L extends AbstractLooper>
 		AbstractLooper looper = peek();
 		if ( looper != null )
 		{
-			looper.quitAndDestroy();
+			looper.quitUnsafe();
 			return true;
 		}
 		else

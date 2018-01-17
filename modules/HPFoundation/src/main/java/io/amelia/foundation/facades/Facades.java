@@ -1,7 +1,5 @@
 package io.amelia.foundation.facades;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,10 +11,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import io.amelia.foundation.events.Events;
+import javax.annotation.Nonnull;
+
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Foundation;
+import io.amelia.foundation.events.Events;
 import io.amelia.foundation.facades.events.FacadeRegisterEvent;
 import io.amelia.lang.ApplicationException;
 import io.amelia.support.Objs;
@@ -39,7 +39,7 @@ public class Facades
 	 * @return provider registration or null
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Optional<RegisteredFacade<? extends FacadeService>> getFacadeRegistration( @NotNull Class<T> facade )
+	public static <T extends FacadeService> Optional<RegisteredFacade<? extends FacadeService>> getFacadeRegistration( @Nonnull Class<T> facade )
 	{
 		synchronized ( providers )
 		{
@@ -56,7 +56,7 @@ public class Facades
 	 * @return a stream of registrations
 	 */
 	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Stream<RegisteredFacade<T>> getFacadeRegistrations( @NotNull Class<T> facade )
+	public static <T extends FacadeService> Stream<RegisteredFacade<T>> getFacadeRegistrations( @Nonnull Class<T> facade )
 	{
 		synchronized ( providers )
 		{
@@ -65,7 +65,7 @@ public class Facades
 	}
 
 	@SuppressWarnings( "unchecked" )
-	public static <T extends FacadeService> Stream<T> getFacades( @NotNull Class<?> service ) throws ClassCastException
+	public static <T extends FacadeService> Stream<T> getFacades( @Nonnull Class<?> service ) throws ClassCastException
 	{
 		synchronized ( providers )
 		{
@@ -115,7 +115,7 @@ public class Facades
 	 *
 	 * @return true if and only if the facade is registered
 	 */
-	public static <T> boolean isFacadeRegistered( @NotNull Class<T> service )
+	public static <T> boolean isFacadeRegistered( @Nonnull Class<T> service )
 	{
 		synchronized ( providers )
 		{
@@ -152,7 +152,7 @@ public class Facades
 		private final Supplier<T> supplier;
 		private T instance = null;
 
-		public RegisteredFacade( @NotNull Class<T> facadeClass, @NotNull FacadePriority priority, @NotNull Supplier<T> supplier )
+		public RegisteredFacade( @Nonnull Class<T> facadeClass, @Nonnull FacadePriority priority, @Nonnull Supplier<T> supplier )
 		{
 			this.facadeClass = facadeClass;
 			this.supplier = supplier;

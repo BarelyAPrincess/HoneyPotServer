@@ -9,8 +9,6 @@
  */
 package io.amelia.support;
 
-import com.sun.istack.internal.NotNull;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -218,7 +216,7 @@ public class Maps
 		return Arrays.stream( maps ).flatMap( m -> m.entrySet().stream() ).collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue ) );
 	}
 
-	public static <K, V> K keyOf( Map<K, V> map, @NotNull V val )
+	public static <K, V> K keyOf( Map<K, V> map, @Nonnull V val )
 	{
 		if ( map == null )
 			return null;
@@ -374,7 +372,7 @@ public class Maps
 			return new ConcurrentHashMap<>( map );
 		}
 
-		public <K, V> MapBuilder<K, V> fill( @NotNull List<K> keys )
+		public <K, V> MapBuilder<K, V> fill( @Nonnull List<K> keys )
 		{
 			return new MapBuilder<>( map, keys.stream().collect( Collectors.toMap( v -> v, null ) ) );
 		}
@@ -389,7 +387,7 @@ public class Maps
 			return new HashMap<>( map );
 		}
 
-		public <V> MapBuilder<Integer, V> increment( @NotNull List<V> values )
+		public <V> MapBuilder<Integer, V> increment( @Nonnull List<V> values )
 		{
 			AtomicInteger i = new AtomicInteger( 0 );
 			Map<Integer, V> newMap = new TreeMap<>();

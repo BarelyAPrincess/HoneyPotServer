@@ -9,7 +9,7 @@
  */
 package io.amelia.lang;
 
-import com.sun.istack.internal.NotNull;
+import javax.annotation.Nonnull;
 
 import io.amelia.networking.packets.RawPacket;
 
@@ -159,19 +159,19 @@ public class NetworkException
 	{
 		private final RawPacket packet;
 
-		public PacketValidation( @NotNull RawPacket packet, @NotNull String message )
+		public PacketValidation( @Nonnull RawPacket packet, @Nonnull String message )
 		{
 			super( message );
 			this.packet = packet;
 		}
 
-		public PacketValidation( @NotNull RawPacket packet, @NotNull String message, @NotNull Throwable cause )
+		public PacketValidation( @Nonnull RawPacket packet, @Nonnull String message, @Nonnull Throwable cause )
 		{
 			super( message, cause );
 			this.packet = packet;
 		}
 
-		public PacketValidation( @NotNull RawPacket packet, @NotNull Throwable cause )
+		public PacketValidation( @Nonnull RawPacket packet, @Nonnull Throwable cause )
 		{
 			super( cause );
 			this.packet = packet;

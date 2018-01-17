@@ -15,8 +15,9 @@ import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
+import io.amelia.logcompat.Logger;
 import io.amelia.support.Encrypt;
-import io.amelia.support.IO;
+import io.amelia.support.EnumColor;
 import io.amelia.support.Objs;
 import io.amelia.support.Runlevel;
 import joptsimple.OptionParser;
@@ -42,6 +43,8 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 		optionParser.accepts( "env-file", "The env file" ).withRequiredArg().ofType( String.class ).defaultsTo( ".env" );
 		optionParser.accepts( "env", "Overrides env values" ).withRequiredArg().ofType( String.class );
+
+		optionParser.accepts( "no-banner", "Disables the app banner" );
 
 		for ( String pathKey : Kernel.getPathSlugs() )
 			optionParser.accepts( "dir-" + pathKey, "Sets the " + pathKey + " directory." ).withRequiredArg().ofType( String.class );
@@ -205,11 +208,19 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	void quitSafely()
 	{
 		router.quit( true );
+		looper.quitSafely();
 	}
 
-	public void quitUnsafe()
+	void quitUnsafe()
 	{
 		router.quit( false );
+		looper.quitUnsafe();
+	}
+
+	public void showBanner( Logger logger )
+	{
+		logger.info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + "Starting " + Kernel.getDevMeta().getProductName() + " version " + Kernel.getDevMeta().getVersionDescribe() );
+		logger.info( EnumColor.NEGATIVE + "" + EnumColor.GOLD + Kernel.getDevMeta().getProductCopyright() );
 	}
 
 	public void throwStartupException( Exception e ) throws StartupException

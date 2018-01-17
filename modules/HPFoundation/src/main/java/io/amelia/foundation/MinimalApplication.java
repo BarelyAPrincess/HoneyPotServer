@@ -4,6 +4,7 @@ import io.amelia.foundation.parcel.ParcelCarrier;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.ParcelException;
+import io.amelia.logcompat.Logger;
 import io.amelia.support.Runlevel;
 
 public class MinimalApplication extends ApplicationInterface
