@@ -2,44 +2,45 @@ package io.amelia.foundation.binding;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.foundation.facades.FacadeService;
-
 interface ReadableBinding
 {
 	String getBaseNamespace();
 
 	/**
-	 * Looks for an instance that implements the {@link FacadeService}.
+	 * Looks for an instance that implements the {@link FacadeBinding}.
 	 * <p>
 	 * On top of checking the provided namespace, we also append `facade` and `instance`.
 	 *
-	 * @param namespace          The namespace to check
-	 * @param facadeServiceClass The expected {@link FacadeService} subclass to be return.
-	 * @param <T>                The {@link FacadeService} subclass.
+	 * @param namespace The namespace to check
+	 * @param <T>       The {@link FacadeBinding} subclass.
 	 *
 	 * @return The FacadeService instance, null otherwise.
 	 */
 	@SuppressWarnings( "unchecked" )
-	default <T extends FacadeService> T getFacade( String namespace, Class<T> facadeServiceClass )
+	default <T extends FacadeBinding> T getFacadeBinding( @Nonnull String namespace )
 	{
-		Object obj = getObject( namespace, facadeServiceClass );
-
-		if ( obj == null )
-			obj = getObject( namespace + ".facade", facadeServiceClass );
-
-		if ( obj == null )
-			obj = getObject( namespace + ".instance", facadeServiceClass );
-
-		return ( T ) obj;
+		try
+		{
+			FacadeRegistration facadeRegistration = getFacadeBindingRegistration( namespace );
+			return facadeRegistration == null ? null : facadeRegistration.getHighestPriority();
+		}
+		catch ( ClassCastException e )
+		{
+			return null;
+		}
 	}
 
-	/**
-	 * @throws ClassCastException If the found instance can't be cast to the expected FacadeService.
-	 */
-	@SuppressWarnings( "unchecked" )
-	default <T extends FacadeService> T getFacade( String namespace ) throws ClassCastException
+	default FacadeRegistration<? extends FacadeBinding> getFacadeBindingRegistration( @Nonnull String namespace )
 	{
-		return ( T ) getFacade( namespace, FacadeService.class );
+		FacadeRegistration facadeRegistration = getObject( namespace, FacadeRegistration.class );
+
+		if ( facadeRegistration == null )
+			facadeRegistration = getObject( namespace + ".facade", FacadeRegistration.class );
+
+		if ( facadeRegistration == null )
+			facadeRegistration = getObject( namespace + ".instance", FacadeRegistration.class );
+
+		return facadeRegistration;
 	}
 
 	default <T> T getObject( @Nonnull String namespace, @Nonnull Class<T> objectClass )
@@ -62,7 +63,7 @@ interface ReadableBinding
 	}
 
 	@SuppressWarnings( "unchecked" )
-	default <T> T getObjectWithException( String namespace, Class<T> objectClass ) throws BindingException.Error
+	default <T> T getObjectWithException( @Nonnull String namespace, @Nonnull Class<T> objectClass ) throws BindingException.Error
 	{
 		String baseNamespace = getBaseNamespace();
 		namespace = Bindings.normalizeNamespace( namespace );

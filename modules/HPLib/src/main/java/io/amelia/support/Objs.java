@@ -487,6 +487,11 @@ public class Objs
 		ifPresent( Optional.ofNullable( value ), consumer );
 	}
 
+	public static <T, R, E extends Exception> R ifPresentGet( T obj, FunctionWithException<T, R, E> ifPresentFunction ) throws E
+	{
+		return obj == null ? null : ifPresentFunction.apply( obj );
+	}
+
 	public static <T> T initClass( @Nonnull Class<T> clz, Object... args ) throws UncaughtException
 	{
 		try

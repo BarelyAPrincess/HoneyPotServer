@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,14 @@ public class Lists
 
 		list.add( obj );
 		return obj;
+	}
+
+	public static <E> E compute( Collection<E> collection, Predicate<E> selectorPredicate )
+	{
+		for ( E element : collection )
+			if ( selectorPredicate.test( element ) )
+				return element;
+		return null;
 	}
 
 	public static <T> List<T> copy( List<?> list )
@@ -75,6 +84,7 @@ public class Lists
 	 * @param list     The original list
 	 * @param function The matching function
 	 * @param <V>      Contained list type
+	 *
 	 * @return The matching value
 	 */
 	public static <V> V findAndReplace( List<V> list, Function<? super V, ? extends V> function )

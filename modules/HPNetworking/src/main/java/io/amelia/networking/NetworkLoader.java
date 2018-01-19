@@ -14,9 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
+import io.amelia.foundation.binding.Bindings;
+import io.amelia.foundation.binding.FacadePriority;
+import io.amelia.foundation.binding.WritableSharedNamespace;
+import io.amelia.lang.ApplicationException;
 import io.amelia.lang.NetworkException;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
 import io.amelia.networking.packets.RawPacket;
 import io.amelia.networking.udp.UDPWorker;
 import io.amelia.support.Objs;
@@ -25,9 +27,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 public class NetworkLoader
 {
-	public static final Logger L = LogBuilder.get( NetworkLoader.class );
 	public static final EventLoopGroup IO_LOOP_GROUP = new NioEventLoopGroup( 0, Executors.newCachedThreadPool( new ThreadFactoryBuilder().setNameFormat( "Netty Client IO #%d" ).setDaemon( true ).build() ) );
+
 	private static final Map<Class<? extends NetworkWorker>, NetworkWorker> networkWorkers = new ConcurrentHashMap<>();
+
 	private static final PacketCollection registeredPackets = new PacketCollection();
 
 	static
@@ -80,6 +83,16 @@ public class NetworkLoader
 		for ( NetworkWorker worker : networkWorkers.values() )
 			if ( worker.isStarted() )
 				worker.heartbeat();
+	}
+
+	public static void init() throws ApplicationException.Error
+	{
+		// Initialize networking registration and so forth.
+		WritableSharedNamespace namespace = Bindings.getSystemNamespace( NetworkLoader.class );
+
+		assert namespace != null;
+
+		namespace.registerFacadeBinding( "facade", NetworkingService.class, NetworkingService::new, FacadePriority.STRICT );
 	}
 
 	public static <N extends NetworkWorker> N initWorker( Class<N> workerClass )

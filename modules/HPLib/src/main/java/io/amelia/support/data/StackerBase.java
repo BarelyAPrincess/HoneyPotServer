@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -217,6 +218,11 @@ public abstract class StackerBase<BaseClass extends StackerBase<BaseClass>>
 	public final BaseClass getChild( @Nonnull String key )
 	{
 		return findChild( key, false );
+	}
+
+	public final Stream<BaseClass> getChild( @Nonnull Predicate<BaseClass> predicate )
+	{
+		return children.stream().flatMap( child -> child.getChild( predicate ) );
 	}
 
 	public void getChildIfPresent( String key, Consumer<BaseClass> consumer )

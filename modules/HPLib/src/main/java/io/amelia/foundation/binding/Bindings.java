@@ -13,11 +13,11 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
 import io.amelia.support.Maps;
 import io.amelia.support.Namespace;
@@ -97,6 +97,19 @@ public class Bindings implements WritableBinding
 		}
 	}
 
+	public static <T> Stream<T> findValues( Class<T> valueClass )
+	{
+		readLock.lock();
+		try
+		{
+			return bindings.findValues( valueClass ).map( ref -> ( T ) ref.getValue().get() );
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
 	static BindingReference getChild( @Nonnull String namespace )
 	{
 		return bindings.getChild( namespace );
@@ -163,6 +176,26 @@ public class Bindings implements WritableBinding
 	public static SharedNamespace getSystemNamespace()
 	{
 		return systemNamespace;
+	}
+
+	/**
+	 * Returns a {@link WritableBinding} for the provided class.
+	 *
+	 * @param aClass The class needing the binding.
+	 *
+	 * @return The namespace.
+	 */
+	public static WritableSharedNamespace getSystemNamespace( Class<?> aClass )
+	{
+		// For now we'll assign system namespaces based on the class package, however, in the future we might want to do some additional checking to make sure someone isn't trying to spoof the protected io.amelia package.
+
+		Package pack = aClass.getPackage();
+		if ( pack == null )
+			return null;
+		String packName = pack.getName();
+		if ( !packName.startsWith( "io.amelia." ) )
+			return null;
+		return new WritableSharedNamespace( packName );
 	}
 
 	public static <T> T invokeFields( @Nonnull Object declaringObject, @Nonnull Predicate<Field> fieldPredicate )
@@ -238,8 +271,10 @@ public class Bindings implements WritableBinding
 		return resolvers.contains( bindingResolver );
 	}
 
-	static String normalizeNamespace( @Nonnull String namespace )
+	static String normalizeNamespace( @Nullable String namespace )
 	{
+		if ( namespace == null )
+			return null;
 		return Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii().getString();
 	}
 

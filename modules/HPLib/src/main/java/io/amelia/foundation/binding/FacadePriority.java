@@ -7,7 +7,7 @@
  * <p>
  * All Rights Reserved.
  */
-package io.amelia.foundation.facades;
+package io.amelia.foundation.binding;
 
 public enum FacadePriority
 {
@@ -15,10 +15,5 @@ public enum FacadePriority
 	LOW,
 	NORMAL,
 	HIGH,
-	HIGHEST,
-	/**
-	 * Prevent new facades from overriding this facade.
-	 * Internal use only!
-	 */
-	STRICT
+	HIGHEST
 }

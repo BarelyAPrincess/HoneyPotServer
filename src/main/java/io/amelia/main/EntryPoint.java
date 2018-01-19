@@ -33,8 +33,6 @@ public class EntryPoint
 
 		Foundation.setApplication( app );
 
-		final String instanceId = app.getEnv().getString( "instance-id" );
-
 		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP();
 

@@ -1,35 +1,7 @@
-package io.amelia.foundation.facades;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
-import io.amelia.foundation.ConfigMap;
-import io.amelia.foundation.ConfigRegistry;
-import io.amelia.foundation.Foundation;
-import io.amelia.foundation.events.Events;
-import io.amelia.foundation.facades.events.FacadeRegisterEvent;
-import io.amelia.lang.ApplicationException;
-import io.amelia.support.Objs;
+package io.amelia.foundation.binding;
 
 public class Facades
 {
-	private static final Map<Class<? extends FacadeService>, List<RegisteredFacade<? extends FacadeService>>> providers = new HashMap<>();
-
-	public static <T extends FacadeService> T getFacade( Class<T> serviceClass )
-	{
-		return getFacadeRegistration( serviceClass ).map( registeredFacade -> ( T ) registeredFacade.getInstance() ).orElse( null );
-	}
-
 	/**
 	 * Queries for a facade registration. This will return if no facade has been registered.
 	 *
@@ -37,7 +9,7 @@ public class Facades
 	 * @param facade The facade interface
 	 *
 	 * @return provider registration or null
-	 */
+	 /
 	@SuppressWarnings( "unchecked" )
 	public static <T extends FacadeService> Optional<RegisteredFacade<? extends FacadeService>> getFacadeRegistration( @Nonnull Class<T> facade )
 	{
@@ -54,7 +26,7 @@ public class Facades
 	 * @param facade The facade class
 	 *
 	 * @return a stream of registrations
-	 */
+	 /
 	@SuppressWarnings( "unchecked" )
 	public static <T extends FacadeService> Stream<RegisteredFacade<T>> getFacadeRegistrations( @Nonnull Class<T> facade )
 	{
@@ -86,7 +58,7 @@ public class Facades
 	public static void init()
 	{
 		// Load Builtin Facades First
-		// registerFacade( FacadeService.class, FacadePriority.STRICT, FacadeService::new );
+		// registerFacadeBinding( FacadeService.class, FacadePriority.STRICT, FacadeService::new );
 
 		// Load Facades from Config
 		ConfigMap facades = ConfigRegistry.getChild( Foundation.ConfigKeys.BINDINGS_FACADES );
@@ -98,7 +70,7 @@ public class Facades
 				FacadePriority priority = c.getEnum( "priority", FacadePriority.class ).orElse( FacadePriority.NORMAL );
 
 				if ( facadeClass != null )
-					registerFacade( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
+					registerFacadeBinding( facadeClass, priority, () -> Objs.initClass( facadeClass ) );
 				else
 					Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + c.getName() );
 			}
@@ -114,7 +86,7 @@ public class Facades
 	 * @param service facade to check
 	 *
 	 * @return true if and only if the facade is registered
-	 */
+	 /
 	public static <T> boolean isFacadeRegistered( @Nonnull Class<T> service )
 	{
 		synchronized ( providers )
@@ -123,7 +95,7 @@ public class Facades
 		}
 	}
 
-	public static <T extends FacadeService> void registerFacade( Class<T> facadeClass, FacadePriority priority, Supplier<T> serviceSupplier )
+	public static <T extends FacadeService> void registerFacadeBinding( Class<T> facadeClass, FacadePriority priority, Supplier<T> serviceSupplier )
 	{
 		RegisteredFacade<T> registeredFacade = new RegisteredFacade<>( facadeClass, priority, serviceSupplier );
 
@@ -142,9 +114,6 @@ public class Facades
 		Events.callEvent( new FacadeRegisterEvent<T>( registeredFacade ) );
 	}
 
-	/**
-	 * @param <T> Facade Interface
-	 */
 	public static class RegisteredFacade<T extends FacadeService> implements Comparable<RegisteredFacade<?>>
 	{
 		private final Class<T> facadeClass;
@@ -172,7 +141,7 @@ public class Facades
 		{
 			// TODO Run exception through exception handler
 			if ( instance != null )
-				instance.onDestory();
+				instance.destroy();
 			instance = null;
 		}
 
@@ -188,9 +157,9 @@ public class Facades
 			return priority;
 		}
 
-		public Class<T> getServiceClass()
+		public Class<T> getBindingClass()
 		{
 			return facadeClass;
 		}
-	}
+	}*/
 }

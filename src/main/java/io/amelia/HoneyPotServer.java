@@ -25,6 +25,7 @@ import sun.misc.SignalHandler;
 
 import static io.amelia.support.Runlevel.INITIALIZATION;
 import static io.amelia.support.Runlevel.MAINLOOP;
+import static io.amelia.support.Runlevel.NETWORKING;
 import static io.amelia.support.Runlevel.SHUTDOWN;
 
 public class HoneyPotServer extends DefaultApplication implements NetworkedApplication
@@ -91,14 +92,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 
 			if ( Sys.isUnixLikeOS() )
 			{
-				SignalHandler signalHandler = new SignalHandler()
-				{
-					@Override
-					public void handle( Signal signal )
-					{
-						Foundation.shutdown( "Received SIGTERM - Terminate" );
-					}
-				};
+				SignalHandler signalHandler = signal -> Foundation.shutdown( "Received SIGTERM - Terminate" );
 
 				Signal.handle( new Signal( "TERM" ), signalHandler );
 				Signal.handle( new Signal( "INT" ), signalHandler );
@@ -108,14 +102,20 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			getLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
 		if ( currentRunlevel == SHUTDOWN )
 		{
-			LogBuilder.get().info( "Shutting Down Plugin Manager..." );
+
+
+			// LogBuilder.get().info( "Shutting Down Plugin Manager..." );
 			// PluginManager.shutdown();
 
-			LogBuilder.get().info( "Shutting Down Permission Manager..." );
+			// LogBuilder.get().info( "Shutting Down Permission Manager..." );
 			// PermissionDispatcher.shutdown();
 
-			LogBuilder.get().info( "Shutting Down Account Manager..." );
+			// LogBuilder.get().info( "Shutting Down Account Manager..." );
 			// AccountManager.shutdown();
+		}
+		if ( currentRunlevel == NETWORKING )
+		{
+			NetworkLoader.init();
 		}
 	}
 
@@ -134,5 +134,23 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 				LogBuilder.get().info( EnumColor.GOLD + line );
 
 		super.showBanner( logger );
+	}
+
+	public static class ConfigKeys
+	{
+		/**
+		 * Specifies a config key for disabling a application metrics.
+		 *
+		 * <pre>
+		 * app:
+		 *   disableMetrics: false
+		 * </pre>
+		 */
+		public static final String DISABLE_METRICS = "app.disableMetrics";
+
+		private ConfigKeys()
+		{
+			// Static Access
+		}
 	}
 }

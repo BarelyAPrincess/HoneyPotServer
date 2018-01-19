@@ -38,6 +38,7 @@ import io.amelia.lang.NetworkException;
 import io.amelia.lang.StartupException;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.NetworkWorker;
+import io.amelia.networking.Networking;
 import io.amelia.networking.packets.PacketRequest;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
@@ -50,8 +51,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-
-import static io.amelia.networking.NetworkLoader.L;
 
 public class UDPWorker implements NetworkWorker
 {
@@ -163,14 +162,14 @@ public class UDPWorker implements NetworkWorker
 		if ( config.getBoolean( "disable" ).orElse( false ) || port <= 0 )
 			throw new StartupException( "UDP Service is disabled!" );
 
-		L.info( "Starting UDP Service!" );
+		Networking.L.info( "Starting UDP Service!" );
 
 		InetSocketAddress broadcast = new InetSocketAddress( dest, port );
 
 		if ( Sys.isPrivilegedPort( port ) )
 		{
-			L.warning( "It would seem that you are trying to start the UDP Service on a privileged port without root access." );
-			L.warning( "We will attempt to still start the service but we can't guarantee it's success. http://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html" );
+			Networking.L.warning( "It would seem that you are trying to start the UDP Service on a privileged port without root access." );
+			Networking.L.warning( "We will attempt to still start the service but we can't guarantee it's success. http://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html" );
 		}
 
 		NetworkInterface iface;
@@ -247,7 +246,7 @@ public class UDPWorker implements NetworkWorker
 					e.printStackTrace();
 				}
 
-				L.info( "The UDP service has shutdown!" );
+				Networking.L.info( "The UDP service has shutdown!" );
 			} );
 		}
 		catch ( NullPointerException e )

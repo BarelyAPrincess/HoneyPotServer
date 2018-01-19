@@ -12,140 +12,140 @@ apply from: project.file( 'etc/publish.gradle' )
 defaultTasks 'clean', 'build'
 
 buildscript {
-	repositories {
-		jcenter()
-		mavenCentral()
-	}
+    repositories {
+	   jcenter()
+	   mavenCentral()
+    }
 
-	dependencies {
-		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:1.3'
-	}
+    dependencies {
+	   classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+	   classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:1.3'
+    }
 }
 
 allprojects {
-	repositories {
-		jcenter()
-		mavenCentral()
-		maven {url 'https://jitpack.io'}
-	}
+    repositories {
+	   jcenter()
+	   mavenCentral()
+	   maven {url 'https://jitpack.io'}
+    }
 
-	apply plugin: 'java'
-	apply plugin: 'idea'
-	apply plugin: 'eclipse'
-	apply plugin: 'license'
-	apply plugin: 'checkstyle'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+    apply plugin: 'license'
+    apply plugin: 'checkstyle'
 
-	defaultTasks 'clean', 'build'
+    defaultTasks 'clean', 'build'
 
-	compileJava {options.encoding = 'UTF-8'}
+    compileJava {options.encoding = 'UTF-8'}
 
-	javadoc {options.encoding = "UTF-8"}
+    javadoc {options.encoding = "UTF-8"}
 
-	// compileGroovy {options.encoding = "UTF-8"}
+    // compileGroovy {options.encoding = "UTF-8"}
 
-	license {
-		header rootProject.file( 'etc/HEADER' )
-		ignoreFailures true
-		strictCheck true
-		mapping 'yaml', 'SCRIPT_STYLE'
-		mapping 'yml', 'SCRIPT_STYLE'
-		excludes( ['**/*.archive',
-		           '**/*.md5',
-		           '**/*.txt',
-		           '**/*.bmp',
-		           '**/*.png',
-		           '**/*.jpg',
-		           '**/*.yaml',
-		           '**/*.yml',
-		           '**/*.properties',
-		           '**/less-rhino-1.7.4.js',
-		           '**/coffee-script.js',
-		           '**/banner.txt',
-		           '**/config.yaml'] )
-		ext.year = Calendar.getInstance().get( Calendar.YEAR )
-		ext.name = 'Amelia DeWitt'
-		ext.email = 'me@ameliadewitt.com'
-	}
+    license {
+	   header rootProject.file( 'etc/HEADER' )
+	   ignoreFailures true
+	   strictCheck true
+	   mapping 'yaml', 'SCRIPT_STYLE'
+	   mapping 'yml', 'SCRIPT_STYLE'
+	   excludes( ['**/*.archive',
+	              '**/*.md5',
+	              '**/*.txt',
+	              '**/*.bmp',
+	              '**/*.png',
+	              '**/*.jpg',
+	              '**/*.yaml',
+	              '**/*.yml',
+	              '**/*.properties',
+	              '**/less-rhino-1.7.4.js',
+	              '**/coffee-script.js',
+	              '**/banner.txt',
+	              '**/config.yaml'] )
+	   ext.year = Calendar.getInstance().get( Calendar.YEAR )
+	   ext.name = 'Amelia DeWitt'
+	   ext.email = 'me@ameliadewitt.com'
+    }
 
-	checkstyle {
-		configFile = rootProject.file( 'etc/checkstyle.xml' )
-		configProperties = ["basedir": project.projectDir]
-	}
+    checkstyle {
+	   configFile = rootProject.file( 'etc/checkstyle.xml' )
+	   configProperties = ["basedir": project.projectDir]
+    }
 }
 
 subprojects {
-	libsDirName = '../../build/dist'
-	artifacts {archives jar}
+    libsDirName = '../../build/dist'
+    artifacts {archives jar}
 }
 
 dependencies {
-	testCompile( group: 'junit', name: 'junit', version: '4.12' ) {
-		exclude group: 'org.hamcrest'
-	}
-	testCompile 'org.hamcrest:hamcrest-library:1.3'
+    testCompile( group: 'junit', name: 'junit', version: '4.12' ) {
+	   exclude group: 'org.hamcrest'
+    }
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
 
-	compile project( ':HPLib' )
-	compile project( ':HPFoundation' )
-	compile project( ':HPScripting' )
-	// compile project( ':HPPermissions' )
-	compile project( ':HPNetworking' )
+    compile project( ':HPLib' )
+    compile project( ':HPFoundation' )
+    compile project( ':HPScripting' )
+    // compile project( ':HPPermissions' )
+    compile project( ':HPNetworking' )
 
-	// SSL Dependencies
-	// compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.53'
-	// compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'
-	// compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.5.1'
+    // SSL Dependencies
+    // compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.53'
+    // compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'
+    // compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.5.1'
 
-	// Used for Console ANSI Color Codes
-	// compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
+    // Used for Console ANSI Color Codes
+    // compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
 
-	// Used to Parse Console Input
-	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
+    // Used to Parse Console Input
+    compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 
-	// Used to evaluate GroovyScripts server-side
-	// compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
+    // Used to evaluate GroovyScripts server-side
+    // compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
 
-	// Used for easy reflections, e.g., find all classes within package for imports
-	// compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
+    // Used for easy reflections, e.g., find all classes within package for imports
+    // compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 
-	// Used for Networking HTTP and TCP
-	// compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
+    // Used for Networking HTTP and TCP
+    // compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
 
-	// Used to Make Database Connections
-	// compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
-	// compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
-	// compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
-	// compile group: 'com.h2database', name: 'h2', version: '1.4.187'
+    // Used to Make Database Connections
+    // compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
+    // compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.35'
+    // compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+    // compile group: 'com.h2database', name: 'h2', version: '1.4.187'
 
-	// Used for Programming Convenience
-	// compile group: 'com.google.guava', name: 'guava', version: '18.0'
-	// compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
-	// compile group: 'commons-io', name: 'commons-io', version: '2.4'
-	// compile group: 'commons-net', name: 'commons-net', version: '3.3'
-	// compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
+    // Used for Programming Convenience
+    // compile group: 'com.google.guava', name: 'guava', version: '18.0'
+    // compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
+    // compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    // compile group: 'commons-net', name: 'commons-net', version: '3.3'
+    // compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 
-	// Used to load configs
-	// compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
+    // Used to load configs
+    // compile group: 'org.yaml', name: 'snakeyaml', version: '1.13'
 
-	// Used by JS Minimizer
-	// compile group: 'com.google.javascript', name: 'closure-compiler', version: 'r2388'
-	// compile group: 'org.mozilla', name: 'rhino', version: '1.7R4'
+    // Used by JS Minimizer
+    // compile group: 'com.google.javascript', name: 'closure-compiler', version: 'r2388'
+    // compile group: 'org.mozilla', name: 'rhino', version: '1.7R4'
 
-	// Used by Less Preprocessor
-	// compile group: 'com.asual.lesscss', name: 'lesscss-engine', version: '1.3.0'
+    // Used by Less Preprocessor
+    // compile group: 'com.asual.lesscss', name: 'lesscss-engine', version: '1.3.0'
 
-	// Used to format Time and Dates
-	// compile group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '3.2.5.Final'
+    // Used to format Time and Dates
+    // compile group: 'org.ocpsoft.prettytime', name: 'prettytime', version: '3.2.5.Final'
 
-	// Used to format Phone Numbers
-	// compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '7.0.4'
+    // Used to format Phone Numbers
+    // compile group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '7.0.4'
 
-	// Used for serialization
-	// compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
-	// compile group: 'org.json', name: 'json', version: '20160810'
+    // Used for serialization
+    // compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
+    // compile group: 'org.json', name: 'json', version: '20160810'
 
-	// Used by MavenUtils and some scripts
-	// compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.3.5'
+    // Used by MavenUtils and some scripts
+    // compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.3.5'
 }
 
 sourceCompatibility = '1.8'
@@ -165,121 +165,121 @@ libsDirName = 'dist'
 
 if ( System.getenv( "RELEASE" ) != null )
 {
-	version = getVersionNumber() + "-" + System.getenv( "RELEASE" )
+    version = getVersionNumber() + "-" + System.getenv( "RELEASE" )
 }
 else if ( jenkins_build != null )
 {
-	version = rawVersion + '-jenkins+B' + jenkins_build
-	buildNumber = jenkins_build
+    version = rawVersion + '-jenkins+B' + jenkins_build
+    buildNumber = jenkins_build
 }
 else if ( travis_build != null )
 {
-	version = rawVersion + '-travis+B' + travis_build
-	buildNumber = travis_build
+    version = rawVersion + '-travis+B' + travis_build
+    buildNumber = travis_build
 }
 else
 {
-	version = rawVersion + '-git+H' + gitDescribe()
+    version = rawVersion + '-git+H' + gitDescribe()
 }
 
 def gitDescribe()
 {
-	try
-	{
-		def stdout = new ByteArrayOutputStream()
-		exec {
-			commandLine 'git', 'rev-parse', '--short', 'HEAD'
-			standardOutput = stdout
-		}
-		return stdout.toString().trim()
-	}
-	catch ( Throwable e )
-	{
-		return "unknown"
-	}
+    try
+    {
+	   def stdout = new ByteArrayOutputStream()
+	   exec {
+		  commandLine 'git', 'rev-parse', '--short', 'HEAD'
+		  standardOutput = stdout
+	   }
+	   return stdout.toString().trim()
+    }
+    catch ( Throwable e )
+    {
+	   return "unknown"
+    }
 }
 
 def getVersionNumber()
 {
-	try
-	{
-		Properties props = new Properties()
-		props.load( new FileInputStream( new File( "./src/main/resources/build.properties" ) ) )
+    try
+    {
+	   Properties props = new Properties()
+	   props.load( new FileInputStream( new File( "./src/main/resources/build.properties" ) ) )
 
-		return props.getProperty( "project.versionMajor" ) + "." + props.getProperty( "project.versionMinor" ) + "." + props.getProperty( "project.versionRevision" )
-	}
-	catch ( Throwable e )
-	{
-		return 0
-	}
+	   return props.getProperty( "project.versionMajor" ) + "." + props.getProperty( "project.versionMinor" ) + "." + props.getProperty( "project.versionRevision" )
+    }
+    catch ( Throwable e )
+    {
+	   return 0
+    }
 }
 
 eclipse {
-	project {name = 'HoneyPotServer'}
+    project {name = 'HoneyPotServer'}
 }
 
 jar {
-	manifest {
-		attributes 'Implementation-Title': 'Honey Pot Server'
-		attributes 'Implementation-Version': version
-		attributes 'Implementation-Vendor': 'Amelia DeWitt'
-		attributes 'Implementation-Vendor-Id': 'me@ameliadewitt.com'
-		attributes 'Main-Class': 'io.amelia.EntryPoint'
-	}
+    manifest {
+	   attributes 'Implementation-Title': 'Honey Pot Server'
+	   attributes 'Implementation-Version': version
+	   attributes 'Implementation-Vendor': 'Amelia DeWitt'
+	   attributes 'Implementation-Vendor-Id': 'me@ameliadewitt.com'
+	   attributes 'Main-Class': 'io.amelia.EntryPoint'
+    }
 }
 
 task sourcesArchive( type: Zip ) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 task javadocArchive( type: Zip, dependsOn: 'javadoc' ) {
-	classifier = 'javadoc'
-	from javadoc.destinationDir
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 /**
  * Writes the project dependencies to a resource file for dependency injection within the application
  **/
 task writeDependenciesFile {
-	doFirst {
-		def allDependencies = []
-		rootProject.getAllprojects().each {
-			allDependencies += it.getConfigurations().getByName( "runtime" ).getAllDependencies().withType( ExternalModuleDependency )
-		}
+    doFirst {
+	   def allDependencies = []
+	   rootProject.getAllprojects().each {
+		  allDependencies += it.getConfigurations().getByName( "runtime" ).getAllDependencies().withType( ExternalModuleDependency )
+	   }
 
-		def output = ""
-		allDependencies.unique().each {
-			output += it.group + ":" + it.name + ":" + it.version + "\n"
-		}
+	   def output = ""
+	   allDependencies.unique().each {
+		  output += it.group + ":" + it.name + ":" + it.version + "\n"
+	   }
 
-		def file = file( "src/main/resources/dependencies.txt" )
-		file.parentFile.mkdirs()
-		def fos = new FileOutputStream( file )
-		fos.write( ( byte[] ) output.getBytes() )
-		fos.close()
-	}
+	   def file = file( "src/main/resources/dependencies.txt" )
+	   file.parentFile.mkdirs()
+	   def fos = new FileOutputStream( file )
+	   fos.write( ( byte[] ) output.getBytes() )
+	   fos.close()
+    }
 }
 
 task writePropertiesFile {
-	doFirst {
-		SimpleDateFormat sdf = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" )
+    doFirst {
+	   SimpleDateFormat sdf = new SimpleDateFormat( "EEE, d MMM yyyy HH:mm:ss Z" )
 
-		Properties props = new Properties()
-		props.load( new FileInputStream( file( "src/main/resources/build.properties" ) ) )
-		props.setProperty( "project.builtOn", sdf.format( new Date() ) )
-		props.setProperty( "project.build", buildNumber )
-		props.setProperty( "project.version", version )
+	   Properties props = new Properties()
+	   props.load( new FileInputStream( file( "src/main/resources/build.properties" ) ) )
+	   props.setProperty( "project.builtOn", sdf.format( new Date() ) )
+	   props.setProperty( "project.build", buildNumber )
+	   props.setProperty( "project.version", version )
 
-		File f2 = file( "build/dist/build.properties" )
-		File f3 = file( "build/resources/main/build.properties" )
-		f2.parentFile.mkdirs()
-		f3.parentFile.mkdirs()
-		OutputStream out2 = new FileOutputStream( f2 )
-		OutputStream out3 = new FileOutputStream( f3 )
-		props.store( out2, "Build Properties File" )
-		props.store( out3, "Build Properties File" )
-	}
+	   File f2 = file( "build/dist/build.properties" )
+	   File f3 = file( "build/resources/main/build.properties" )
+	   f2.parentFile.mkdirs()
+	   f3.parentFile.mkdirs()
+	   OutputStream out2 = new FileOutputStream( f2 )
+	   OutputStream out3 = new FileOutputStream( f3 )
+	   props.store( out2, "Build Properties File" )
+	   props.store( out3, "Build Properties File" )
+    }
 }
 
 task wrapper( type: Wrapper ) {gradleVersion = '3.3'}
