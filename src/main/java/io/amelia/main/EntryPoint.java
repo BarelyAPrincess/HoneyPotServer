@@ -28,10 +28,10 @@ public class EntryPoint
 			return;
 		}
 
+		Foundation.setApplication( app );
+
 		/* Prepare the environment by downloading and applying the builtin libraries required */
 		Foundation.prepare();
-
-		Foundation.setApplication( app );
 
 		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP();

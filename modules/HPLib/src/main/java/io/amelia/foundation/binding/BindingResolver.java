@@ -183,7 +183,7 @@ public abstract class BindingResolver
 
 	public boolean isRegistered()
 	{
-		return Bindings.isRegistered0( this );
+		return Bindings.resolvers.contains( this );
 	}
 
 	protected void setDefault( String defaultKey )

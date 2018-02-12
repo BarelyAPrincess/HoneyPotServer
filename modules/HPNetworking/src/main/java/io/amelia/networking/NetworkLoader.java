@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 import io.amelia.foundation.binding.Bindings;
 import io.amelia.foundation.binding.FacadePriority;
-import io.amelia.foundation.binding.WritableSharedNamespace;
+import io.amelia.foundation.binding.WritableBinding;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.packets.RawPacket;
@@ -88,11 +88,11 @@ public class NetworkLoader
 	public static void init() throws ApplicationException.Error
 	{
 		// Initialize networking registration and so forth.
-		WritableSharedNamespace namespace = Bindings.getSystemNamespace( NetworkLoader.class );
+		WritableBinding namespace = Bindings.getSystemNamespace( NetworkLoader.class );
 
 		assert namespace != null;
 
-		namespace.registerFacadeBinding( "facade", NetworkingService.class, NetworkingService::new, FacadePriority.STRICT );
+		namespace.registerFacadeBinding( "facade", NetworkingService.class, NetworkingService::new, FacadePriority.NORMAL );
 	}
 
 	public static <N extends NetworkWorker> N initWorker( Class<N> workerClass )

@@ -7,6 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import io.amelia.foundation.binding.BindingException;
+import io.amelia.foundation.binding.Bindings;
+import io.amelia.foundation.binding.FacadeBinding;
+import io.amelia.foundation.binding.FacadePriority;
+import io.amelia.foundation.binding.WritableBinding;
 import io.amelia.foundation.parcel.ParcelInterface;
 import io.amelia.foundation.parcel.ParcelReceiver;
 import io.amelia.lang.ApplicationException;
@@ -198,6 +203,48 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			env.computeValue( "applicationId", Encrypt::hash, true );
 
 			ConfigRegistry.init( env );
+			Bindings.init();
+
+			/*
+			 * Register facades from configuration:
+			 *
+			 * {
+			 *   class: "io.amelia.facades.permissionBinding",
+			 *   namespace: "io.amelia.permissions.facade",
+			 *   priority: NORMAL
+			 * }
+			 */
+			ConfigMap facades = ConfigRegistry.getChild( Foundation.ConfigKeys.BINDINGS_FACADES );
+			if ( facades != null )
+				facades.getChildren().forEach( each -> {
+					if ( each.hasChild( "class" ) )
+					{
+						Class<FacadeBinding> facadeClass = each.getStringAsClass( "class", FacadeBinding.class ).orElse( null );
+						FacadePriority priority = each.getEnum( "priority", FacadePriority.class ).orElse( FacadePriority.NORMAL );
+
+						if ( facadeClass == null )
+							Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + each.getName() );
+						else
+						{
+							WritableBinding binding;
+							if ( each.hasChild( "namespace" ) && each.isType( "namespace", String.class ) )
+								binding = Bindings.getNamespace( each.getString( "namespace" ).orElseThrow( RuntimeException::new ) ).writable();
+							else
+								binding = Bindings.getSystemNamespace( facadeClass ).writable();
+
+							try
+							{
+								binding.registerFacadeBinding( facadeClass, () -> Objs.initClass( facadeClass ), priority );
+							}
+							catch ( BindingException.Error e )
+							{
+								Foundation.L.severe( "Failed to register facade from config for key -> " + each.getName(), e );
+							}
+						}
+					}
+					else
+						Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + each.getName() );
+				} );
 		}
 		catch ( Exception e )
 		{

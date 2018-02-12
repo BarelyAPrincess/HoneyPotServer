@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -490,6 +491,20 @@ public class Objs
 	public static <T, R, E extends Exception> R ifPresentGet( T obj, FunctionWithException<T, R, E> ifPresentFunction ) throws E
 	{
 		return obj == null ? null : ifPresentFunction.apply( obj );
+	}
+
+	/**
+	 * Takes any nullable object, if obj is not null, it's passed into the the provided predicate test function.
+	 *
+	 * @param obj                The nullable object
+	 * @param ifPresentPredicate The testing predicate
+	 * @param <T>                Object type
+	 *
+	 * @return The object if not null and predicate returns true
+	 */
+	public static <T> T ifPresentTest( T obj, Predicate<T> ifPresentPredicate )
+	{
+		return obj == null ? null : ifPresentPredicate.test( obj ) ? obj : null;
 	}
 
 	public static <T> T initClass( @Nonnull Class<T> clz, Object... args ) throws UncaughtException

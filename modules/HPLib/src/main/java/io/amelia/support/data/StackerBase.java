@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.amelia.foundation.Kernel;
 import io.amelia.lang.ApplicationException;
@@ -147,6 +148,7 @@ public abstract class StackerBase<BaseClass extends StackerBase<BaseClass>>
 		return empty( "" );
 	}
 
+	@Nullable
 	protected BaseClass findChild( @Nonnull String key, boolean create )
 	{
 		disposeCheck();
@@ -215,6 +217,7 @@ public abstract class StackerBase<BaseClass extends StackerBase<BaseClass>>
 		consumer.accept( findChild( key, false ) );
 	}
 
+	@Nullable
 	public final BaseClass getChild( @Nonnull String key )
 	{
 		return findChild( key, false );
@@ -232,6 +235,7 @@ public abstract class StackerBase<BaseClass extends StackerBase<BaseClass>>
 			consumer.accept( child );
 	}
 
+	@Nonnull
 	public <R> R getChildOrCreate( String key, Function<BaseClass, R> function )
 	{
 		return function.apply( findChild( key, true ) );

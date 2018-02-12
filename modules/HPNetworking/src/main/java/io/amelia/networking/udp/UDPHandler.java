@@ -18,9 +18,9 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.foundation.Kernel;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ReportingLevel;
-import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.packets.RawPacket;
 import io.amelia.support.Objs;
 import io.netty.channel.Channel;
@@ -112,7 +112,7 @@ public class UDPHandler extends SimpleChannelInboundHandler<RawPacket>
 	public void setPacketHandler( @Nonnull UDPPacketHandler packetHandler )
 	{
 		Objs.notNull( packetHandler );
-		NetworkLoader.L.fine( "Set packet handler of %s to %s", this, packetHandler );
+		Kernel.L.fine( "Set packet handler of %s to %s", this, packetHandler );
 		this.packetHandler = packetHandler;
 	}
 

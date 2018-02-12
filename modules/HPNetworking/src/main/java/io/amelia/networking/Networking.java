@@ -1,7 +1,7 @@
 package io.amelia.networking;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.binding.Facades;
+import io.amelia.foundation.binding.Bindings;
 
 public class Networking
 {
@@ -9,7 +9,7 @@ public class Networking
 
 	public static NetworkingService i()
 	{
-		return Facades.getFacade( NetworkingService.class );
+		return Bindings.getSystemNamespace().getFacadeBinding( "", NetworkingService.class );
 	}
 
 	public static class HTTP

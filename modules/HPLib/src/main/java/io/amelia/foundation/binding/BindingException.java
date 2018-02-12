@@ -9,6 +9,29 @@ public class BindingException
 
 	}
 
+	public static class Denied extends ApplicationException.Ignorable
+	{
+		public Denied()
+		{
+			super();
+		}
+
+		public Denied( String message )
+		{
+			super( message );
+		}
+
+		public Denied( String message, Throwable cause )
+		{
+			super( message, cause );
+		}
+
+		public Denied( Throwable cause )
+		{
+			super( cause );
+		}
+	}
+
 	public static class Error extends ApplicationException.Error
 	{
 		public Error()

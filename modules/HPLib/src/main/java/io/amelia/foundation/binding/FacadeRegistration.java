@@ -39,9 +39,9 @@ public class FacadeRegistration<T extends FacadeBinding>
 		return Lists.compute( registrations, reg -> reg.getPriority() == facadePriority );
 	}
 
-	public FacadeBinding getHighestPriority()
+	public <R extends FacadeBinding> R getHighestPriority()
 	{
-		return Objs.ifPresentGet( registrations.last(), Entry::getBinding );
+		return Objs.ifPresentGet( registrations.last(), entry -> ( R ) entry.getBinding() );
 	}
 
 	public FacadeBinding getLowestPriority()
@@ -94,7 +94,7 @@ public class FacadeRegistration<T extends FacadeBinding>
 				return priority.ordinal() < other.getPriority().ordinal() ? 1 : -1;
 		}
 
-		public void destory()
+		public void destroy()
 		{
 			try
 			{

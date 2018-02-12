@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
 
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
-import io.amelia.support.Strs;
 import io.amelia.support.OptionalBoolean;
+import io.amelia.support.Strs;
 
 /**
  * Provides common methods for converting an unknown value to (and from) {@link Object} using the Java 8 {@link Optional} feature.
@@ -226,5 +226,11 @@ public interface ValueTypesTrait
 	default boolean isTrue( String key )
 	{
 		return getValue( key ).map( Objs::isTrue ).orElse( false );
+	}
+
+	default boolean isType( @Nonnull String key, @Nonnull Class<?> type )
+	{
+		Optional<?> result = getValue( key );
+		return result.isPresent() && type.isAssignableFrom( result.get().getClass() );
 	}
 }

@@ -1,123 +1,48 @@
 package io.amelia.foundation.binding;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.support.Maps;
+import io.amelia.support.BiFunctionWithException;
+import io.amelia.support.FunctionWithException;
 import io.amelia.support.Namespace;
 import io.amelia.support.Objs;
+import io.amelia.support.QuadFunctionWithException;
+import io.amelia.support.Strs;
+import io.amelia.support.TriFunctionWithException;
 
-public class Bindings implements WritableBinding
+public class Bindings
 {
 	public static final Kernel.Logger L = Kernel.getLogger( Bindings.class );
-	/**
-	 * Privately bound SELF that allows internal code to make changes to the bindings without restrictions.
-	 * Public access to restricted to the static methods contained.
-	 */
-	private static final Bindings SELF = new Bindings();
-	private static final BindingReference bindings = new BindingReference( "" );
-	private static final Map<String, WeakReference<BoundNamespace>> boundNamespaces = new HashMap<>();
-	private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	private static final Lock readLock = lock.readLock();
-	private static final List<BindingResolver> resolvers = new ArrayList<>();
-	private static final SharedNamespace systemNamespace = new SharedNamespace( "io.amelia" );
-	private static final Lock writeLock = lock.writeLock();
+	protected static final BindingMap bindings = new BindingMap( "" );
+	protected static final List<BindingResolver> resolvers = new ArrayList<>();
+	protected static final WritableBinding root = new WritableBinding( "" );
 
-	/**
-	 * Returns a {@link BoundNamespace} for the requested namespace.
-	 * Bindings can only be updated using the returned instance.
-	 * Binding the namespace allows for only the requesting code to make changes to requested namespace bindings.
-	 * <p>
-	 * Be sure not to keep reference to the returned binding or the binding could and will be automatically unbound and disposed of at any moment.
-	 * <p>
-	 * Setter:
-	 * <pre>
-	 * {
-	 *      NamespaceBinding nb = Bindings.bindNamespace("com.google.somePlugin");
-	 *      nb.setObject("facade", new SomeFacadeService());
-	 *      nb.setObject("obj", new Object());
-	 * }
-	 * </pre>
-	 * <p>
-	 * Getter:
-	 * <pre>
-	 * {
-	 *      // When getting a facade service; we look at the namespace, then the namespace plus "facade" for an object that extends the FacadeService interface.
-	 *      Bindings.getFacade("com.google.somePlugin");
-	 *      // You can also define the expected facade class to ensure not just any facade is returned. This ensures you receive null instead of a ClassCastException.
-	 *      Bindings.getFacade("com.google.somePlugin", SomeFacadeService.class);
-	 *      // Any object can be set and retrieved from the bindings.
-	 *      Bindings.getObject("com.google.somePlugin.obj");
-	 * }
-	 * </pre>
-	 *
-	 * @param namespace The namespace you wish to bind.
-	 *
-	 * @return The namespace binder.
-	 */
-	public static BoundNamespace bindNamespace( @Nonnull String namespace ) throws BindingException.Error
-	{
-		readLock.lock();
-		try
-		{
-			Namespace ns = Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii();
-			if ( ns.startsWith( "io.amelia" ) )
-				throw new BindingException.Error( "Namespace \"io.amelia\" is reserved for internal use only." );
-			if ( ns.getNodeCount() < 3 )
-				throw new BindingException.Error( "Namespaces can only be bound with no less than 3 nodes." );
-			namespace = ns.getString();
-
-			for ( Map.Entry<String, WeakReference<BoundNamespace>> entry : boundNamespaces.entrySet() )
-				if ( namespace.startsWith( entry.getKey() ) && entry.getValue().get() != null )
-					throw new BindingException.Error( "That namespace (or parent there of) is already bound!" );
-
-			BoundNamespace boundNamespace = new BoundNamespace( namespace );
-			boundNamespaces.put( namespace, new WeakReference<>( boundNamespace ) );
-			return boundNamespace;
-		}
-		finally
-		{
-			readLock.unlock();
-		}
-	}
-
-	public static <T> Stream<T> findValues( Class<T> valueClass )
-	{
-		readLock.lock();
-		try
-		{
-			return bindings.findValues( valueClass ).map( ref -> ( T ) ref.getValue().get() );
-		}
-		finally
-		{
-			readLock.unlock();
-		}
-	}
-
-	static BindingReference getChild( @Nonnull String namespace )
+	static BindingMap getChild( @Nonnull String namespace )
 	{
 		return bindings.getChild( namespace );
 	}
 
-	static BindingReference getChildOrCreate( @Nonnull String namespace )
+	static BindingMap getChildOrCreate( @Nonnull String namespace )
 	{
 		return bindings.getChildOrCreate( namespace );
+	}
+
+	public static ReadableBinding getNamespace( String namespace )
+	{
+		return new ReadableBinding( namespace );
 	}
 
 	private static List<BindingResolver> getResolvers()
@@ -127,75 +52,61 @@ public class Bindings implements WritableBinding
 
 	private static List<BindingResolver> getResolvers( String namespace )
 	{
-		readLock.lock();
-		try
-		{
+		return Lock.callWithReadLock( namespace0 -> {
 			List<BindingResolver> list = new ArrayList<>();
-			namespace = normalizeNamespace( namespace );
+			namespace0 = normalizeNamespace( namespace0 );
 
-			for ( Map.Entry<String, WeakReference<BoundNamespace>> entry : boundNamespaces.entrySet() )
+			/*for ( Map.Entry<String, WeakReference<BoundNamespace>> entry : boundNamespaces.entrySet() )
 				if ( ( namespace == null || namespace.startsWith( entry.getKey() ) ) && entry.getValue().get() != null )
 				{
 					BindingResolver bindingResolver = entry.getValue().get().getResolver();
 					if ( bindingResolver != null )
 						list.add( bindingResolver );
-				}
+				}*/
 
 			resolvers.sort( new BindingResolver.Comparator() );
 
 			for ( BindingResolver bindingResolver : resolvers )
-				if ( namespace == null || namespace.startsWith( bindingResolver.baseNamespace ) )
+				if ( namespace0 == null || namespace0.startsWith( bindingResolver.baseNamespace ) )
 					list.add( bindingResolver );
 
 			return list;
-		}
-		finally
-		{
-			readLock.unlock();
-		}
+		}, namespace );
 	}
 
-	public static SharedNamespace getSharedNamespace( @Nonnull String namespace )
+	public static ReadableBinding getSystemNamespace()
 	{
-		readLock.lock();
-		try
-		{
-			namespace = Namespace.parseString( namespace ).fixInvalidChars().getString();
-
-			// TODO Check if the namespace is allowed to be publicly writable.
-			if ( true )
-				return new WritableSharedNamespace( namespace );
-			return new SharedNamespace( namespace );
-		}
-		finally
-		{
-			readLock.unlock();
-		}
-	}
-
-	public static SharedNamespace getSystemNamespace()
-	{
-		return systemNamespace;
+		return getNamespace( "io.amelia" );
 	}
 
 	/**
-	 * Returns a {@link WritableBinding} for the provided class.
+	 * Returns a {@link WritableBinding} for the provided system class.
+	 *
+	 * The concept is that any class that exists under the io.amelia namespace has a binding accessible to the entire system.
 	 *
 	 * @param aClass The class needing the binding.
 	 *
 	 * @return The namespace.
 	 */
-	public static WritableSharedNamespace getSystemNamespace( Class<?> aClass )
+	public static WritableBinding getSystemNamespace( Class<?> aClass )
 	{
 		// For now we'll assign system namespaces based on the class package, however, in the future we might want to do some additional checking to make sure someone isn't trying to spoof the protected io.amelia package.
 
 		Package pack = aClass.getPackage();
 		if ( pack == null )
-			return null;
+			throw new BindingException.Denied( "We had a problem obtaining the package from class \"" + aClass.getName() + "\"." );
 		String packName = pack.getName();
-		if ( !packName.startsWith( "io.amelia." ) )
-			return null;
-		return new WritableSharedNamespace( packName );
+		// if ( !packName.startsWith( "io.amelia." ) )
+		// throw new BindingException.Denied( "Only internal class starting with \"io.amelia\" can be got through this method." );
+		return new WritableBinding( packName );
+	}
+
+	public static void init()
+	{
+		// TODO Is this needed now or ever?
+
+		// Load Builtin Facades First
+		// registerFacadeBinding( FacadeService.class, FacadePriority.STRICT, FacadeService::new );
 	}
 
 	public static <T> T invokeFields( @Nonnull Object declaringObject, @Nonnull Predicate<Field> fieldPredicate )
@@ -213,7 +124,7 @@ public class Bindings implements WritableBinding
 					T obj = ( T ) field.get( declaringObject );
 
 					if ( !field.isAnnotationPresent( DynamicBinding.class ) && !Objs.isEmpty( namespace ) )
-						bindings.getChildOrCreate( namespace ).setValue( obj );
+						bindings.getChildOrCreate( namespace ).set( obj );
 
 					return obj;
 				}
@@ -246,7 +157,7 @@ public class Bindings implements WritableBinding
 				T obj = ( T ) method.invoke( declaringObject, resolveParameters( method.getParameters() ) );
 
 				if ( !method.isAnnotationPresent( DynamicBinding.class ) && !Objs.isEmpty( namespace ) )
-					bindings.getChildOrCreate( namespace ).setValue( obj );
+					bindings.getChildOrCreate( namespace ).set( obj );
 
 				return obj;
 			}
@@ -258,24 +169,24 @@ public class Bindings implements WritableBinding
 		return null;
 	}
 
-	static boolean isBound0( @Nonnull BoundNamespace boundNamespace )
-	{
-		for ( WeakReference<BoundNamespace> ref : boundNamespaces.values() )
-			if ( ref.get() == boundNamespace )
-				return true;
-		return false;
-	}
-
-	static boolean isRegistered0( @Nonnull BindingResolver bindingResolver )
-	{
-		return resolvers.contains( bindingResolver );
-	}
-
 	static String normalizeNamespace( @Nullable String namespace )
 	{
 		if ( namespace == null )
 			return null;
-		return Namespace.parseString( namespace ).fixInvalidChars().normalizeAscii().getString();
+		return Strs.toAscii( namespace.replaceAll( "[^a-z0-9_.]", "" ) );
+	}
+
+	public static String normalizeNamespace( @Nonnull String baseNamespace, @Nullable String namespace )
+	{
+		Objs.notNull( baseNamespace );
+
+		baseNamespace = normalizeNamespace( baseNamespace );
+		namespace = namespace == null ? "" : normalizeNamespace( namespace );
+
+		if ( !namespace.startsWith( baseNamespace ) )
+			namespace = baseNamespace + "." + namespace;
+
+		return Strs.trimAll( namespace, '.' ).replaceAll( "\\.{2,}", "." );
 	}
 
 	/**
@@ -341,7 +252,7 @@ public class Bindings implements WritableBinding
 			if ( parameter.isAnnotationPresent( BindingNamespace.class ) )
 			{
 				String ns = parameter.getAnnotation( BindingNamespace.class ).value();
-				obj = SELF.getObject( ns );
+				obj = root.getObject( ns );
 			}
 
 			if ( obj == null && parameter.isAnnotationPresent( BindingClass.class ) )
@@ -360,19 +271,126 @@ public class Bindings implements WritableBinding
 		return parameterObjects;
 	}
 
-	static void unbind0( BoundNamespace boundNamespace )
-	{
-		Maps.removeIf( boundNamespaces, ( key, value ) -> value.get() == boundNamespace );
-	}
-
 	private Bindings()
 	{
 		// Private Access
 	}
 
-	@Override
-	public String getBaseNamespace()
+	protected static class Lock
 	{
-		return "";
+		private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+		private static final java.util.concurrent.locks.Lock readLock = lock.readLock();
+		private static final java.util.concurrent.locks.Lock writeLock = lock.writeLock();
+
+		protected static <T1, T2, T3, R, E extends Exception> R callWithReadLock( TriFunctionWithException<T1, T2, T3, R, E> function, T1 arg0, T2 arg1, T3 arg2 ) throws E
+		{
+			readLock.lock();
+			try
+			{
+				return function.apply( arg0, arg1, arg2 );
+			}
+			finally
+			{
+				readLock.unlock();
+			}
+		}
+
+		protected static <T1, T2, R, E extends Exception> R callWithReadLock( BiFunctionWithException<T1, T2, R, E> function, T1 arg0, T2 arg1 ) throws E
+		{
+			readLock.lock();
+			try
+			{
+				return function.apply( arg0, arg1 );
+			}
+			finally
+			{
+				readLock.unlock();
+			}
+		}
+
+		protected static <T, R, E extends Exception> R callWithReadLock( FunctionWithException<T, R, E> function, T arg0 ) throws E
+		{
+			readLock.lock();
+			try
+			{
+				return function.apply( arg0 );
+			}
+			finally
+			{
+				readLock.unlock();
+			}
+		}
+
+		protected static <T1, T2, T3, T4, R, E extends Exception> R callWithWriteLock( QuadFunctionWithException<T1, T2, T3, T4, R, E> function, T1 arg0, T2 arg1, T3 arg2, T4 arg3 ) throws E
+		{
+			writeLock.lock();
+			try
+			{
+				return function.apply( arg0, arg1, arg2, arg3 );
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+
+		protected static <T1, T2, T3, R, E extends Exception> R callWithWriteLock( TriFunctionWithException<T1, T2, T3, R, E> function, T1 arg0, T2 arg1, T3 arg2 ) throws E
+		{
+			writeLock.lock();
+			try
+			{
+				return function.apply( arg0, arg1, arg2 );
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+
+		protected static <T1, T2, R, E extends Exception> R callWithWriteLock( BiFunctionWithException<T1, T2, R, E> function, T1 arg0, T2 arg1 ) throws E
+		{
+			writeLock.lock();
+			try
+			{
+				return function.apply( arg0, arg1 );
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+
+		protected static <T, R, E extends Exception> R callWithWriteLock( FunctionWithException<T, R, E> function, T arg0 ) throws E
+		{
+			writeLock.lock();
+			try
+			{
+				return function.apply( arg0 );
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+
+		public void readLock()
+		{
+			readLock.lock();
+		}
+
+		public void readUnlock()
+		{
+			readLock.unlock();
+		}
+
+		public void writeLock()
+		{
+			writeLock.lock();
+		}
+
+		public void writeUnlock()
+		{
+			writeLock.unlock();
+		}
 	}
 }
