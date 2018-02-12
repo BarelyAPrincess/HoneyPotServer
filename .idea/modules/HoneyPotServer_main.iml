@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="HoneyPotServer:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="null.null.null-git+H90961c1" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="HoneyPotServer:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="10.0.0-git+H2ab9b03" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../out/production/classes" />
     <exclude-output />
+    <content url="file://$MODULE_DIR$/../../HPPermissions/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../HPPermissions/src/main/java" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../modules/HPFoundation/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/HPFoundation/src/main/java" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../modules/HPLib/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/HPLib/src/main/java" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../modules/HPLog/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/HPLog/src/main/java" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../modules/HPNetworking/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/HPNetworking/src/main/java" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../modules/HPScripting/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/HPScripting/src/main/java" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$/../../src/main">
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
