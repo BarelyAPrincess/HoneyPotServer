@@ -20,5 +20,9 @@ dependencies {
 	compile project( ':HPFoundation' )
 
 	compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
+
+	// SSL Dependencies
+	compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.53'
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'
+	// compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.5.1'
 }

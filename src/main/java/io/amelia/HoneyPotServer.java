@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia;
 
 import java.io.InputStream;
@@ -79,7 +88,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 				if ( !env.isValueSet( "instance-id" ) )
 					env.set( "instance-id", Encrypt.uuid(), true );
 
-				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ) ) );
+				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ).orElse( true ) ) );
 			}
 			catch ( Exception e )
 			{

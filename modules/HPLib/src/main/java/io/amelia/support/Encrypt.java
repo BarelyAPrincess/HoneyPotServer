@@ -2,15 +2,12 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
- * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
 package io.amelia.support;
-
-import com.google.common.collect.Sets;
-import com.google.common.primitives.Chars;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -66,7 +64,7 @@ public class Encrypt
 
 	static
 	{
-		Set<Character> newRandomCharMap = Sets.newHashSet();
+		Set<Character> newRandomCharMap = new HashSet<>();
 
 		for ( int i = 33; i < 48; i++ )
 			newRandomCharMap.add( ( char ) i );
@@ -80,26 +78,24 @@ public class Encrypt
 		for ( int i = 123; i < 128; i++ )
 			newRandomCharMap.add( ( char ) i );
 
-		newRandomCharMap.addAll( Sets.newHashSet( Arrays.asList( new Character[] {128, 131, 134, 135, 138, 140, 142, 156, 158, 159, 161, 162, 163, 165, 167, 176, 181, 191} ) ) );
+		newRandomCharMap.addAll( new HashSet<>( Arrays.asList( new Character[] {128, 131, 134, 135, 138, 140, 142, 156, 158, 159, 161, 162, 163, 165, 167, 176, 181, 191} ) ) );
 
 		for ( int i = 192; i < 256; i++ )
 			newRandomCharMap.add( ( char ) i );
 
-		randomCharMap = Chars.toArray( newRandomCharMap );
-		newRandomCharMap = null;
+		randomCharMap = Arrs.toCharArray( newRandomCharMap );
 
-		Set<Character> newAllowedCharMap = Sets.newHashSet();
+		Set<Character> newAllowedCharMap = new HashSet<>();
 
 		for ( int i = 33; i < 127; i++ )
 			newAllowedCharMap.add( ( char ) i );
 
-		newAllowedCharMap.addAll( Sets.newHashSet( Arrays.asList( new Character[] {128, 131, 134, 135, 138, 140, 142, 156, 158, 159, 161, 162, 163, 165, 167, 176, 181, 191} ) ) );
+		newAllowedCharMap.addAll( new HashSet<>( Arrays.asList( new Character[] {128, 131, 134, 135, 138, 140, 142, 156, 158, 159, 161, 162, 163, 165, 167, 176, 181, 191} ) ) );
 
 		for ( int i = 192; i < 256; i++ )
 			newAllowedCharMap.add( ( char ) i );
 
-		allowedCharMap = Chars.toArray( newAllowedCharMap );
-		newAllowedCharMap = null;
+		allowedCharMap = Arrs.toCharArray( newAllowedCharMap );
 	}
 
 	public static byte[] base64Decode( String str )
@@ -129,7 +125,9 @@ public class Encrypt
 	 *                  href="http://java.sun.com/j2se/1.3/docs/guide/security/CryptoSpec.html#AppA">Appendix A in the Java
 	 *                  Cryptography Architecture API Specification & Reference</a> for information about standard algorithm
 	 *                  names.
+	 *
 	 * @return A digest instance.
+	 *
 	 * @throws IllegalArgumentException when a {@link NoSuchAlgorithmException} is caught.
 	 * @see MessageDigest#getInstance(String)
 	 */
@@ -261,6 +259,7 @@ public class Encrypt
 	 *            <i>a-z</i> will result in a random lowercase character<br>
 	 *            <i>0-9</i> will result in a random number character<br>
 	 *            <i>All others will result in a random symbol or accented character</i>
+	 *
 	 * @return Randomized character based on the original
 	 */
 	public static char randomize( char chr )
@@ -273,6 +272,7 @@ public class Encrypt
 	 *
 	 * @param start The minimum character to select
 	 * @param end   The maximum character to select
+	 *
 	 * @return The randomly selected character
 	 */
 	public static char randomize( int start, int end )
@@ -336,6 +336,7 @@ public class Encrypt
 	 *             <i>a-z</i> will result in a random lowercase character<br>
 	 *             <i>0-9</i> will result in a random number character<br>
 	 *             <i>All others will result in a random symbol or accented character</i>
+	 *
 	 * @return String randomized using your original base string
 	 */
 	public static String randomize( String base )

@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.monitor;
 
 import io.amelia.foundation.Foundation;
@@ -28,7 +37,7 @@ public class EntryPoint
 		app.addArgument( "stop", "Stops the daemon" );
 		app.addArgument( "status", "Prints the active daemon list" );
 
-		final String instanceId = app.getEnv().getString( "instance-id" );
+		final String instanceId = app.getEnv().getString( "instance-id" ).orElse( null );
 
 		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP();

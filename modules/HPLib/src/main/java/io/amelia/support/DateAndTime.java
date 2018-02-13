@@ -2,8 +2,8 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
- * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
@@ -60,6 +60,13 @@ public class DateAndTime
 	public static long epoch()
 	{
 		return System.currentTimeMillis() / 1000;
+	}
+
+	public static String formatDuration( long l )
+	{
+		Duration duration = new Duration( l );
+		PeriodFormatter formatter = new PeriodFormatterBuilder().appendDays().appendSuffix( " Day(s) " ).appendHours().appendSuffix( " Hour(s) " ).appendMinutes().appendSuffix( " Minute(s) " ).appendSeconds().appendSuffix( " Second(s)" ).toFormatter();
+		return formatter.print( duration.toPeriod() );
 	}
 
 	public static int getSecondsIn( String type )
@@ -213,6 +220,7 @@ public class DateAndTime
 	 * Converts the input value into a human readable string, e.g., 0 Day(s) 3 Hour(s) 13 Minutes(s) 42 Second(s).
 	 *
 	 * @param seconds The duration in seconds
+	 *
 	 * @return Human readable duration string
 	 */
 	public static String readoutDuration( Number seconds )

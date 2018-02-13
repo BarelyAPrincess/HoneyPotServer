@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.looper.queue;
 
 import java.lang.ref.WeakReference;
@@ -167,7 +176,7 @@ public class DefaultQueue extends AbstractQueue
 
 	AbstractLooper<DefaultQueue> getLooper()
 	{
-		return looperControl.get().getLooper();
+		return looperControl == null || looperControl.get() == null ? null : looperControl.get().getLooper();
 	}
 
 	AbstractLooper<DefaultQueue>.LooperControl getLooperControl()

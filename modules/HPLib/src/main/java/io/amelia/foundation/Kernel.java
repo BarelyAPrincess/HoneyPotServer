@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.foundation;
 
 import java.io.File;
@@ -26,6 +35,7 @@ import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.Arrs;
+import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.Lists;
 import io.amelia.support.Objs;
@@ -363,7 +373,7 @@ public class Kernel
 
 	public static String uptimeDescribe()
 	{
-		return Strs.formatDuration( System.currentTimeMillis() - startTime );
+		return DateAndTime.formatDuration( System.currentTimeMillis() - startTime );
 	}
 
 	private Kernel()

@@ -1,8 +1,18 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.support;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -161,6 +171,30 @@ public class Arrs
 	public static <T> T[] skip( @Nonnull T[] arr, int skip )
 	{
 		return Arrays.stream( arr ).skip( skip ).toArray( size -> Arrays.copyOf( arr, size ) );
+	}
+
+	/**
+	 * Copies a collection of {@code Character} instances into a new array of primitive {@code char}
+	 * values.
+	 *
+	 * <p>Elements are copied from the argument collection as if by {@code
+	 * collection.toArray()}. Calling this method is as thread-safe as calling that method.
+	 *
+	 * @param collection a collection of {@code Character} objects
+	 *
+	 * @return an array containing the same values as {@code collection}, in the same order, converted
+	 * to primitives
+	 *
+	 * @throws NullPointerException if {@code collection} or any of its elements is null
+	 */
+	public static char[] toCharArray( Collection<Character> collection )
+	{
+		Object[] boxedArray = collection.toArray();
+		int len = boxedArray.length;
+		char[] array = new char[len];
+		for ( int i = 0; i < len; i++ )
+			array[i] = ( Character ) Objs.notNull( boxedArray[i] );
+		return array;
 	}
 
 	public static Long[] toLongArray( Object obj )

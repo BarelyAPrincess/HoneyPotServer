@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.foundation;
 
 import java.io.IOException;
@@ -280,7 +289,7 @@ public final class Foundation
 
 			if ( Objs.isEmpty( reason ) )
 			{
-				String instanceId = getApplication().getEnv().getString( "instance-id" );
+				String instanceId = getApplication().getEnv().getString( "instance-id" ).orElse( null );
 
 				if ( runlevel == Runlevel.RELOAD )
 					reason = String.format( "Server %s is restarting. Be back soon. :D", instanceId );
@@ -350,7 +359,7 @@ public final class Foundation
 		{
 			// Send Metrics
 
-			final String instanceId = app.getEnv().getString( "instance-id" );
+			final String instanceId = app.getEnv().getString( "instance-id" ).orElse( null );
 		}
 
 		// Join this thread to the main looper.

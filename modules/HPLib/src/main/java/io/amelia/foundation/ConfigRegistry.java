@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.foundation;
 
 import java.io.File;
@@ -76,7 +85,7 @@ public class ConfigRegistry
 
 	public static void init( Env env ) throws ConfigException.Error
 	{
-		Kernel.setAppPath( IO.buildFile( false, env.getString( "app-dir" ) ) );
+		Kernel.setAppPath( IO.buildFile( false, env.getString( "app-dir" ).orElse( null ) ) );
 		// for ( String key : new String[] {"webroot", "config", "plugins", "updates", "database", "storage", "sessions", "cache", "logs"} )
 		// setPath( key, Strs.split( env.getString( "dir-" + key ), "/" ).toArray( String[]::new ) );
 

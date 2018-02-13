@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.foundation;
 
 import java.io.File;
@@ -49,7 +58,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		optionParser.accepts( "env-file", "The env file" ).withRequiredArg().ofType( String.class ).defaultsTo( ".env" );
 		optionParser.accepts( "env", "Overrides env values" ).withRequiredArg().ofType( String.class );
 
-		optionParser.accepts( "no-banner", "Disables the app banner" );
+		optionParser.accepts( "no-banner", "Disables the banner" );
 
 		for ( String pathKey : Kernel.getPathSlugs() )
 			optionParser.accepts( "dir-" + pathKey, "Sets the " + pathKey + " directory." ).withRequiredArg().ofType( String.class );
@@ -91,7 +100,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public String getId()
 	{
-		return env.getString( "applicationId" );
+		return env.getString( "applicationId" ).orElse( null );
 	}
 
 	public ApplicationLooper getLooper()

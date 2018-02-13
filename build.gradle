@@ -84,8 +84,11 @@ allprojects {
 	task dependenyBundler {
 		doFirst {
 			def depend = configurations.required.collect {it.isDirectory() ? it : zipTree( it )}
-			println 'Bundled required libs into jar: ' + depend
-			rootProject.jar.from( depend )
+			if ( depend.size > 0 )
+			{
+				println 'Bundled required libs into jar: ' + depend
+				rootProject.jar.from( depend )
+			}
 		}
 	}
 
@@ -122,15 +125,6 @@ dependencies {
 	// compile project( ':HPPermissions' )
 	compile project( ':HPNetworking' )
 
-	// SSL Dependencies
-	// compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.53'
-	// compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'
-	// compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.5.1'
-
-	// Used for Console ANSI Color Codes
-	// compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
-
-	// Used to Parse Console Input
 	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 
 	// Used to evaluate GroovyScripts server-side
@@ -287,13 +281,15 @@ task javadocArchive( type: Zip, dependsOn: 'javadoc' ) {
 }
 
 /**
- * Writes the project dependencies to a resource file for dependency injection within the application
- **/
+ * Writes the project dependencies to a resource file for dependency injection within the application*/
 task writeDependenciesFile {
 	doFirst {
 		def allDependencies = []
 		rootProject.getAllprojects().each {
 			allDependencies += it.getConfigurations().getByName( "runtime" ).getAllDependencies().withType( ExternalModuleDependency )
+
+			// Remove all dependencies that were already bundled into the jar file
+			allDependencies.removeAll( it.getConfigurations().getByName( "required" ).getAllDependencies().withType( ExternalModuleDependency ) )
 		}
 
 		def output = ""

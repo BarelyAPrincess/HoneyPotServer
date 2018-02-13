@@ -32,5 +32,5 @@ dependencies {
 	compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.53'
 
 	/* Console ANSI Colors */
-	compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
+	required group: 'org.fusesource.jansi', name: 'jansi', version: '1.11'
 }

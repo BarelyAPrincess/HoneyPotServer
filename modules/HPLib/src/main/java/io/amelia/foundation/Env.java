@@ -1,3 +1,12 @@
+/**
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ * <p>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * <p>
+ * All Rights Reserved.
+ */
 package io.amelia.foundation;
 
 import java.io.File;
@@ -8,6 +17,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -15,6 +25,7 @@ import java.util.stream.Stream;
 import io.amelia.lang.UncaughtException;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
+import io.amelia.support.OptionalBoolean;
 import io.amelia.support.Pair;
 
 public class Env
@@ -53,14 +64,14 @@ public class Env
 		return ( T ) env.computeIfAbsent( key, k -> valueSupplier.get() );
 	}
 
-	public boolean getBoolean( String key )
+	public OptionalBoolean getBoolean( String key )
 	{
 		return Objs.isTrue( getObject( key ) );
 	}
 
-	public Object getObject( String key )
+	public Optional<Object> getObject( String key )
 	{
-		return env.get( key );
+		return Optional.ofNullable( env.get( key ) );
 	}
 
 	public Stream<Object> getStream()
@@ -73,9 +84,9 @@ public class Env
 		return env.entrySet().stream().map( e -> new Pair<>( e.getKey(), e.getValue() ) );
 	}
 
-	public String getString( String key )
+	public Optional<String> getString( String key )
 	{
-		return Objs.castToStringWithException( getObject( key ) );
+		return getObject( key ).map( Objs::castToStringWithException );
 	}
 
 	public Stream<String> getStrings()

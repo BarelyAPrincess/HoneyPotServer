@@ -2,8 +2,8 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2017 Joel Greene <joel.greene@penoaks.com>
- * Copyright (c) 2017 Penoaks Publishing LLC <development@penoaks.com>
+ * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
@@ -593,6 +593,13 @@ public class Objs
 			if ( isNull( obj ) )
 				return true;
 		return false;
+	}
+
+	public static OptionalBoolean isTrue( Optional<?> bool )
+	{
+		if ( !bool.isPresent() )
+			return OptionalBoolean.empty();
+		return OptionalBoolean.ofNullable( isTrue( bool.get() ) );
 	}
 
 	public static <T> boolean isTrue( T bool )
