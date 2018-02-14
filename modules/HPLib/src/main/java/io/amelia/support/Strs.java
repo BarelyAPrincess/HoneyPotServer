@@ -362,19 +362,24 @@ public class Strs
 		return str.toUpperCase().equals( str );
 	}
 
-	public static String join( @Nonnull Map<String, String> args, @Nonnull String glue )
+	public static String join( @Nonnull Map<String, Object> args, @Nonnull String glue )
 	{
 		return join( args, glue, "=" );
 	}
 
-	public static String join( @Nonnull Map<String, String> args )
+	public static String join( @Nonnull Map<String, Object> args )
 	{
 		return join( args, ", ", "=" );
 	}
 
-	public static String join( @Nonnull Map<String, String> args, @Nonnull String glue, @Nonnull String keyValueSeparator )
+	public static String join( @Nonnull Map<String, Object> args, @Nonnull String glue, @Nonnull String keyValueSeparator )
 	{
-		return args.entrySet().stream().map( e -> e.getKey() + keyValueSeparator + e.getValue() ).collect( Collectors.joining( glue ) );
+		return args.entrySet().stream().map( e -> e.getKey() + keyValueSeparator + Objs.castToString( e.getValue() ) ).collect( Collectors.joining( glue ) );
+	}
+
+	public static String join( @Nonnull Map<String, Object> args, @Nonnull String glue, @Nonnull String keyValueSeparator, @Nonnull String nullValue )
+	{
+		return args.entrySet().stream().map( e -> e.getKey() + keyValueSeparator + ( e.getValue() == null ? nullValue : Objs.castToString( e.getValue() ) ) ).collect( Collectors.joining( glue ) );
 	}
 
 	public static String join( @Nonnull Collection<String> args )

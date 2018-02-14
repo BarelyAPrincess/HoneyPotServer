@@ -120,6 +120,30 @@ public class NIO
 		return getInterfaceAssigned( address ) != null;
 	}
 
+	/**
+	 * Only effects Unix-like OS'es (Linux and Mac OS X)
+	 * It's possible to give non-root users access to privileged ports but it's very complicated
+	 * for java and a technically a security risk if malicious code was ran
+	 * but it would be in our interest to find a way to detect such workaround
+	 *
+	 * @param port The port run we would like to check
+	 *
+	 * @return True if the port is under 1024 and we are not running on the root account
+	 */
+	public static boolean isPrivilegedPort( int port )
+	{
+		// Privileged Ports only exist on Linux, Unix, and Mac OS X (I might be missing some)
+		if ( !Sys.isUnixLikeOS() )
+			return false;
+
+		// Privileged Port range from 1 to 1024
+		if ( port <= 0 || port > 1024 )
+			return false;
+
+		// If we are trying to use a privileged port, We need to be running as root
+		return !Sys.isAdminUser();
+	}
+
 	public static boolean isValidIPv4( String ip )
 	{
 		if ( ip == null )

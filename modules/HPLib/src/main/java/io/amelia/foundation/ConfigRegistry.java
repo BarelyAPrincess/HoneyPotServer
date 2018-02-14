@@ -32,7 +32,7 @@ public class ConfigRegistry
 	 */
 	static
 	{
-		config.setValue( "app.developmentMode", false );
+		config.setValueIfAbsent( ConfigKeys.DEVELOPMENT_MODE, false );
 	}
 
 	public static void clearCache( @Nonnull File path, @Nonnegative long keepHistory )
@@ -196,7 +196,10 @@ public class ConfigRegistry
 
 	public static class ConfigKeys
 	{
-		public static final String WARN_ON_OVERLOAD = "general.warnOnOverload";
+		public static final String APPLICATION_BASE = "app";
+		public static final String WARN_ON_OVERLOAD = APPLICATION_BASE + ".warnOnOverload";
+		public static final String DEVELOPMENT_MODE = APPLICATION_BASE + ".developmentMode";
+		public static final String CONFIGURATION_BASE = "conf";
 
 		private ConfigKeys()
 		{

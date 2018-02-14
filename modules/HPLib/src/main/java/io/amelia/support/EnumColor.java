@@ -311,6 +311,7 @@ public enum EnumColor
 			}
 		return new String( b );
 	}
+
 	private final char code;
 	private final int intCode;
 	private final boolean isFormat;

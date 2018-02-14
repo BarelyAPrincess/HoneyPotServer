@@ -103,6 +103,8 @@ public final class Foundation
 
 		if ( !app.hasArgument( "no-banner" ) )
 			app.showBanner( L );
+
+		L.info( "Application Instance Identity: " + app.getId() );
 	}
 
 	public static String getCurrentRunlevelReason()

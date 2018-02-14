@@ -19,15 +19,6 @@ import javax.annotation.Nonnull;
 public interface ExceptionContext
 {
 	/**
-	 * Returns the {@link Throwable} associated with this {@link ExceptionContext} or
-	 * itself if this interface is implemented on an subclass of {@link Throwable}
-	 *
-	 * @return The associated throwable.
-	 */
-	@Nonnull
-	Throwable getThrowable();
-
-	/**
 	 * Returns the message associated with this {@link ExceptionContext}
 	 *
 	 * @return The string message.
@@ -43,6 +34,15 @@ public interface ExceptionContext
 	 * @return The {@link ReportingLevel}
 	 */
 	ReportingLevel getReportingLevel();
+
+	/**
+	 * Returns the {@link Throwable} associated with this {@link ExceptionContext} or
+	 * itself if this interface is implemented on an subclass of {@link Throwable}
+	 *
+	 * @return The associated throwable.
+	 */
+	@Nonnull
+	Throwable getThrowable();
 
 	/**
 	 * Called to properly add exception information to the ExceptionReport which is then used to generate a script trace or {@link ApplicationCrashReport}

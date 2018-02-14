@@ -127,9 +127,6 @@ dependencies {
 
 	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 
-	// Used to evaluate GroovyScripts server-side
-	// compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
-
 	// Used for easy reflections, e.g., find all classes within package for imports
 	// compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 

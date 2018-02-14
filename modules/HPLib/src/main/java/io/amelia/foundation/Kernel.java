@@ -322,7 +322,7 @@ public class Kernel
 	 */
 	public static boolean isDevelopment()
 	{
-		return devMeta != null && "0".equals( devMeta.getBuildNumber() ) || ConfigRegistry.config.getBoolean( "app.developmentMode" ).orElse( false );
+		return devMeta != null && "0".equals( devMeta.getBuildNumber() ) || ConfigRegistry.config.getBoolean( ConfigRegistry.ConfigKeys.DEVELOPMENT_MODE ).orElse( false );
 	}
 
 	public static void panic( String reason )

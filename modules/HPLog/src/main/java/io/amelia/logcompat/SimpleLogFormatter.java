@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import io.amelia.support.EnumColor;
+
 public class SimpleLogFormatter extends Formatter
 {
 	public static boolean debugMode = false;
@@ -32,12 +34,19 @@ public class SimpleLogFormatter extends Formatter
 	public String format( LogRecord record )
 	{
 		StringBuilder msg = new StringBuilder();
+		msg.append( EnumColor.RESET );
+		msg.append( EnumColor.GRAY );
 		msg.append( dateFormat.format( record.getMillis() ) );
 		msg.append( " " );
 		msg.append( timeFormat.format( record.getMillis() ) );
 		msg.append( " [" );
+		msg.append( EnumColor.fromLevel( record.getLevel() ) );
+		msg.append( EnumColor.BOLD );
 		msg.append( record.getLevel().getLocalizedName().toUpperCase() );
+		msg.append( EnumColor.RESET );
+		msg.append( EnumColor.GRAY );
 		msg.append( "] " );
+		msg.append( EnumColor.fromLevel( record.getLevel() ) );
 		msg.append( formatMessage( record ) );
 
 		if ( !msg.toString().endsWith( "\r" ) )
@@ -51,6 +60,6 @@ public class SimpleLogFormatter extends Formatter
 			msg.append( writer );
 		}
 
-		return msg.toString();
+		return EnumColor.transAltColors( msg.toString() );
 	}
 }

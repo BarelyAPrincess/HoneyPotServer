@@ -201,7 +201,7 @@ public class DefaultQueue extends AbstractQueue
 	@Override
 	public boolean isQuitting()
 	{
-		return getLooper().isQuitting();
+		return getLooper() == null || getLooper().isQuitting();
 	}
 
 	@Override

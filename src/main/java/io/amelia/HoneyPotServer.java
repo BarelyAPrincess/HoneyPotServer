@@ -58,6 +58,8 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
+		addIntegerArgument( "http-port", "Override Unsecure HTTP port number found in configuration" );
+		addIntegerArgument( "https-port", "Override Secure HTTPS port number found in configuration" );
 	}
 
 	@Override
@@ -83,10 +85,6 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			try
 			{
 				Env env = getEnv();
-
-				/* Check instance-id */
-				if ( !env.isValueSet( "instance-id" ) )
-					env.set( "instance-id", Encrypt.uuid(), true );
 
 				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ).orElse( true ) ) );
 			}

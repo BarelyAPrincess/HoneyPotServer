@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
+import io.amelia.foundation.Kernel;
 import io.amelia.foundation.binding.Bindings;
 import io.amelia.foundation.binding.FacadePriority;
 import io.amelia.foundation.binding.WritableBinding;
@@ -36,6 +37,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 public class NetworkLoader
 {
+	public static final Kernel.Logger L = Kernel.getLogger( NetworkLoader.class );
+
 	public static final EventLoopGroup IO_LOOP_GROUP = new NioEventLoopGroup( 0, Executors.newCachedThreadPool( new ThreadFactoryBuilder().setNameFormat( "Netty Client IO #%d" ).setDaemon( true ).build() ) );
 
 	private static final Map<Class<? extends NetworkWorker>, NetworkWorker> networkWorkers = new ConcurrentHashMap<>();
@@ -117,6 +120,17 @@ public class NetworkLoader
 	private NetworkLoader()
 	{
 		// Static Class
+	}
+
+	public static class ConfigKeys
+	{
+		public static final String HTTP_PORT = "networking.http.port";
+		public static final String HTTPS_PORT = "networking.https.port";
+
+		private ConfigKeys()
+		{
+			// Static Access
+		}
 	}
 
 	/**

@@ -65,4 +65,12 @@ public final class ConfigMap extends StackerWithValue<ConfigMap, Object> impleme
 	{
 		throw new ConfigException.Ignorable( this, message );
 	}
+
+	@Override
+	protected void updateValue( Object value )
+	{
+		if ( getNamespace().getNodeCount() < 2 )
+			throw new ConfigException.Ignorable( this, "You can't set configuration values on the top-level config node. Minimum depth is two!" );
+		super.updateValue( value );
+	}
 }

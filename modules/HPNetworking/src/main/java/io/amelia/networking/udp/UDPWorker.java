@@ -43,7 +43,6 @@ import io.amelia.networking.packets.PacketRequest;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.IO;
 import io.amelia.support.NIO;
-import io.amelia.support.Sys;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -166,7 +165,7 @@ public class UDPWorker implements NetworkWorker
 
 		InetSocketAddress broadcast = new InetSocketAddress( dest, port );
 
-		if ( Sys.isPrivilegedPort( port ) )
+		if ( NIO.isPrivilegedPort( port ) )
 		{
 			Networking.L.warning( "It would seem that you are trying to start the UDP Service on a privileged port without root access." );
 			Networking.L.warning( "We will attempt to still start the service but we can't guarantee it's success. http://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html" );

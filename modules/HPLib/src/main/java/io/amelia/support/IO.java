@@ -510,7 +510,7 @@ public class IO
 		if ( nativesExtracted.size() > 0 )
 		{
 			if ( !foundArchMatchingNative )
-				L.warning( EnumColor.DARK_GRAY + "We found native libraries contained within jar '" + libFile.getAbsolutePath() + "' but according to conventions none of them had the required architecture, the dependency may fail to load the required native if our theory is correct." );
+				L.warning( "We found native libraries contained within jar '" + libFile.getAbsolutePath() + "' but according to conventions none of them had the required architecture, the dependency may fail to load the required native if our theory is correct." );
 
 			String path = baseDir.getAbsolutePath().contains( " " ) ? "\"" + baseDir.getAbsolutePath() + "\"" : baseDir.getAbsolutePath();
 			System.setProperty( "java.library.path", System.getProperty( "java.library.path" ) + ":" + path );
@@ -523,7 +523,7 @@ public class IO
 			}
 			catch ( NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e )
 			{
-				L.severe( "We could not force the ClassAppLoader to reinitalize the LD_LIBRARY_PATH variable. You may need to set '-Djava.library.path=" + baseDir.getAbsolutePath() + "' on next load because one or more dependencies may fail to load their native libraries.", e );
+				L.severe( "We could not force the ClassAppLoader to reinitialize the LD_LIBRARY_PATH variable. You may need to set '-Djava.library.path=" + baseDir.getAbsolutePath() + "' on next load because one or more dependencies may fail to load their native libraries.", e );
 			}
 		}
 

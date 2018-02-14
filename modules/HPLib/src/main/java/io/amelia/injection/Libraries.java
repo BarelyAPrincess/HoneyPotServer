@@ -170,7 +170,7 @@ public class Libraries implements LibrarySource
 				}
 			}
 
-			L.info( EnumColor.DARK_GRAY + "Loading the library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
+			L.info( "Loading library `" + lib.toString() + "` from file `" + mavenLocalJar + "`..." );
 
 			LibraryClassLoader.addPath( mavenLocalJar );
 		}

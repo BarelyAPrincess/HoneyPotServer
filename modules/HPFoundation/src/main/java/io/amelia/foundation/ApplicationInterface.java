@@ -69,6 +69,11 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		optionParser.accepts( arg, desc );
 	}
 
+	public void addIntegerArgument( String arg, String desc )
+	{
+		optionParser.accepts( arg, desc ).withRequiredArg().ofType( Integer.class );
+	}
+
 	public void addStringArgument( String arg, String desc )
 	{
 		optionParser.accepts( arg, desc ).withRequiredArg().ofType( String.class );
@@ -100,7 +105,12 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public String getId()
 	{
-		return env.getString( "applicationId" ).orElse( null );
+		return env.getString( "instance-id" ).orElse( null );
+	}
+
+	public Optional<Integer> getIntegerArgument( String arg )
+	{
+		return Optional.ofNullable( optionSet.valuesOf( arg ) ).filter( l -> l.size() > 0 ).map( l -> ( Integer ) l.get( 0 ) );
 	}
 
 	public ApplicationLooper getLooper()
@@ -126,7 +136,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	public Optional<String> getStringArgument( String arg )
 	{
-		return Optional.ofNullable( optionSet.valuesOf( arg ) ).map( l -> ( String ) l.get( 0 ) );
+		return Optional.ofNullable( optionSet.valuesOf( arg ) ).filter( l -> l.size() > 0 ).map( l -> ( String ) l.get( 0 ) );
 	}
 
 	public Optional<List<String>> getStringListArgument( String arg )
@@ -209,7 +219,8 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 							env.set( optionKey, optionSpec.value( optionSet ), false );
 					}
 
-			env.computeValue( "applicationId", Encrypt::hash, true );
+			// XXX Use Encrypt::hash as an alternative to Encrypt::uuid
+			env.computeValue( "instance-id", Encrypt::uuid, true );
 
 			ConfigRegistry.init( env );
 			Bindings.init();

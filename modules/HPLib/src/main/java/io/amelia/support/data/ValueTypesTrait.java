@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -23,6 +22,7 @@ import javax.annotation.Nonnull;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.OptionalBoolean;
+import io.amelia.support.OptionalLongExt;
 import io.amelia.support.Strs;
 
 /**
@@ -107,14 +107,14 @@ public interface ValueTypesTrait
 		return getValue( key ).filter( v -> v instanceof List ).map( v -> Objs.castList( ( List<?> ) v, expectedObjectClass ) );
 	}
 
-	default OptionalLong getLong()
+	default OptionalLongExt getLong()
 	{
 		return getLong( "" );
 	}
 
-	default OptionalLong getLong( @Nonnull String key )
+	default OptionalLongExt getLong( @Nonnull String key )
 	{
-		return OptionalLong.of( getValue( key ).map( Objs::castToLong ).orElse( -1L ) );
+		return OptionalLongExt.of( getValue( key ).map( Objs::castToLong ).orElse( -1L ) );
 	}
 
 	default Optional<String> getString()

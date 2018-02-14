@@ -15,4 +15,9 @@ dependencies {
 		exclude group: 'org.hamcrest'
 	}
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
+
+	compile project( ":HPLib" )
+
+	// Used for Groovy Scripting
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
 }

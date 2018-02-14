@@ -574,6 +574,28 @@ public class Objs
 		}
 	}
 
+	public static OptionalBoolean isFalse( Optional<?> bool )
+	{
+		if ( !bool.isPresent() )
+			return OptionalBoolean.empty();
+		return OptionalBoolean.ofNullable( !isTrue( bool.get() ) );
+	}
+
+	public static <T> boolean isFalse( T bool )
+	{
+		return !isTrue( bool );
+	}
+
+	public static <T> boolean isNotEmpty( T obj )
+	{
+		return !isEmpty( obj );
+	}
+
+	public static <T> boolean isNotNull( T obj )
+	{
+		return !isNull( obj );
+	}
+
 	public static <T> boolean isNull( T obj )
 	{
 		try
@@ -643,6 +665,18 @@ public class Objs
 			return invokeMethodSafe( methodSize, obj, -1 );
 
 		return -1;
+	}
+
+	public static <T> T nonEmpty( T value )
+	{
+		notEmpty( value );
+		return value;
+	}
+
+	public static <T> T nonNull( T value )
+	{
+		notNull( value );
+		return value;
 	}
 
 	public static <T extends CharSequence> T notEmpty( final T chars, final String message, final Object... values )

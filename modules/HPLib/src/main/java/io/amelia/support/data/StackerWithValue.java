@@ -201,12 +201,12 @@ public abstract class StackerWithValue<BaseClass extends StackerWithValue<BaseCl
 		return child.asObject( cls );
 	}
 
-	public <MT extends ValueType> Map<String, MT> getChildrenAsMap()
+	public <ExpectedValueType extends ValueType> Map<String, ExpectedValueType> getChildrenAsMap()
 	{
-		return children.stream().collect( Collectors.toMap( StackerBase::getName, c -> ( MT ) c.value ) );
+		return children.stream().collect( Collectors.toMap( StackerBase::getName, c -> ( ExpectedValueType ) c.value ) );
 	}
 
-	public <MT extends ValueType> Map<String, MT> getChildrenAsMap( String key )
+	public <ExpectedValueType extends ValueType> Map<String, ExpectedValueType> getChildrenAsMap( String key )
 	{
 		BaseClass child = getChild( key );
 		if ( child == null )
@@ -214,7 +214,7 @@ public abstract class StackerWithValue<BaseClass extends StackerWithValue<BaseCl
 		return child.getChildrenAsMap();
 	}
 
-	public <MT extends ValueType> Stream<Pair<String, MT>> getChildrenWithKeys()
+	public <ExpectedValueType extends ValueType> Stream<Pair<String, ExpectedValueType>> getChildrenWithKeys()
 	{
 		return children.stream().map( c -> new Pair( c.getName(), c.value ) );
 	}
@@ -312,6 +312,17 @@ public abstract class StackerWithValue<BaseClass extends StackerWithValue<BaseCl
 	public void setValue( String key, ValueType value )
 	{
 		getChildOrCreate( key ).setValue( value );
+	}
+
+	public void setValueIfAbsent( ValueType value )
+	{
+		if ( !hasValue() )
+			setValue( value );
+	}
+
+	public void setValueIfAbsent( String key, ValueType value )
+	{
+		getChildOrCreate( key ).setValueIfAbsent( value );
 	}
 
 	/**
