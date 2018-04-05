@@ -2,3 +2,11 @@
 	path = modules/AmeliaStorageLib
 	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
 	branch = storage
+[submodule "AmeliaScriptingLib"]
+	path = modules/AmeliaScriptingLib
+	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
+	branch = scripting
+[submodule "AmeliaCommonLib"]
+	path = modules/AmeliaCommonLib
+	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
+	branch = common

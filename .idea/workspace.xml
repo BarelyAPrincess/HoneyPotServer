@@ -2,108 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7684425a-3f41-4c96-b67d-2b02523c4713" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_all_4_0_33_Final.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_main.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_test.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_main.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_test.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/settings.gradle" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/BindingProvider.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptBinding.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptTraceElement.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingContext.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingEngine.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingEvents.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingFactory.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingRegistry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/ScriptingResult.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/StackFactory.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/YieldBuffer.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PostEvalEvent.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PostImageProcessor.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PostJSMinProcessor.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PreCoffeeProcessor.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PreEvalEvent.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/event/PreLessProcessor.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/EmbeddedGroovyEngine.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/GroovyEngine.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/GroovyImportCustomizer.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/GroovyRegistry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/GroovySandbox.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/NestedScript.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/src/main/java/io/amelia/scripting/groovy/ScriptingBaseHttp.groovy" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/settings.gradle" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/lang/StorageException.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/Storage.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/IODriver.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/MySQLDriver.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/StorageDriver.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/BaseEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/BytesEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/DirectoryEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/JsonEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/ListEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/PropEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/StringEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/YamlEntry.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/DirectoryMethod.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/HomeDirectoryStorageMethod.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/StorageMethod.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib" />
       <change beforePath="$PROJECT_DIR$/.gitmodules" afterPath="$PROJECT_DIR$/.gitmodules" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_main.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_test.iml" afterPath="" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/docs/README.md" afterPath="$PROJECT_DIR$/docs/README.md" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibCommon" afterPath="$PROJECT_DIR$/modules/AmeliaLibCommon" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibCommon/README.md" afterPath="$PROJECT_DIR$/modules/AmeliaLibCommon/README.md" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibCommon/build.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaLibCommon/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibCommon/settings.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaLibCommon/settings.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibScripting" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibScripting/README.md" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/README.md" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaLibScripting/build.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaLibScripting/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/README.md" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/README.md" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/build.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/HPPlugins/build.gradle" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/build.gradle" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/lang/StorageException.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/Storage.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/IODriver.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/MySQLDriver.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/StorageDriver.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/BaseEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/BytesEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/DirectoryEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/JsonEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/ListEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/PropEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/StringEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/driver/entries/YamlEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/method/DirectoryMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/method/HomeDirectoryStorageMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/method/RawMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPStorage/src/main/java/io/amelia/storage/method/StorageMethod.java" afterPath="" />
       <change beforePath="$PROJECT_DIR$/settings.gradle" afterPath="$PROJECT_DIR$/settings.gradle" />
     </list>
     <ignored path="$PROJECT_DIR$/modules/HPLib/.gradle/" />
@@ -5013,7 +4916,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/etc/checkstyle.xml" />
   </component>
   <component name="RecentsManager">
@@ -5620,7 +5523,7 @@
       <workItem from="1518372053378" duration="84485000" />
       <workItem from="1520475516381" duration="5185000" />
       <workItem from="1522873383091" duration="11217000" />
-      <workItem from="1522937968454" duration="19934000" />
+      <workItem from="1522937968454" duration="20507000" />
     </task>
     <task id="LOCAL-00001" summary="Commit 12/17/2017">
       <created>1513534172648</created>
@@ -5633,7 +5536,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1283214000" />
+    <option name="totallyTimeSpent" value="1283787000" />
   </component>
   <component name="TodoView" selected-index="4">
     <todo-panel id="selected-file">
@@ -5658,7 +5561,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3292615" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2025178" sideWeight="0.7039828" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2025178" sideWeight="0.7039828" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286638" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -5724,6 +5627,10 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/modules/AmeliaLibCommon" />
+      <path value="$PROJECT_DIR$/modules/AmeliaLibScripting" />
+    </ignored-roots>
     <MESSAGE value="Commit 12/17/2017" />
     <option name="LAST_COMMIT_MESSAGE" value="Commit 12/17/2017" />
   </component>
@@ -6075,9 +5982,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
           <caret line="19" column="5" lean-forward="false" selection-start-line="19" selection-start-column="5" selection-end-line="19" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>

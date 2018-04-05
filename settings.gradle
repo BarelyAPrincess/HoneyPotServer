@@ -1,6 +1,6 @@
-include ':AmeliaLibCommon', ':AmeliaLibScripting', ':AmeliaStorageLib', ':HPFoundation', ':HPLog', ':HPNetworking', ':HPPermissions'
-project( ':AmeliaLibCommon' ).projectDir = new File( 'modules/AmeliaLibCommon' )
-project( ':AmeliaLibScripting' ).projectDir = new File( 'modules/AmeliaLibScripting' )
+include ':AmeliaCommonLib', ':AmeliaScriptingLib', ':AmeliaStorageLib', ':HPFoundation', ':HPLog', ':HPNetworking', ':HPPermissions'
+project( ':AmeliaCommonLib' ).projectDir = new File( 'modules/AmeliaCommonLib' )
+project( ':AmeliaScriptingLib' ).projectDir = new File( 'modules/AmeliaScriptingLib' )
 project( ':AmeliaStorageLib' ).projectDir = new File( 'modules/AmeliaStorageLib' )
 
 project( ':HPFoundation' ).projectDir = new File( 'modules/HPFoundation' )
