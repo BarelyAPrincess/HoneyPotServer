@@ -6,8 +6,12 @@
       <module name="AmeliaLibCommon_test" target="1.8" />
       <module name="AmeliaLibScripting_main" target="1.8" />
       <module name="AmeliaLibScripting_test" target="1.8" />
+      <module name="AmeliaStorageLib_main" target="1.8" />
+      <module name="AmeliaStorageLib_test" target="1.8" />
       <module name="HoneyPotServer-HPPermissions_main" target="1.8" />
       <module name="HoneyPotServer-HPPermissions_test" target="1.8" />
+      <module name="HoneyPotServer-HPStorage_main" target="1.8" />
+      <module name="HoneyPotServer-HPStorage_test" target="1.8" />
       <module name="HoneyPotServer_main" target="1.8" />
       <module name="HoneyPotServer_test" target="1.8" />
       <module name="HPConfig_main" target="1.8" />
