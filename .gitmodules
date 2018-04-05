@@ -1,0 +1,8 @@
+[submodule "AmeliaLibCommon"]
+	path = modules/AmeliaLibCommon
+	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
+	branch = common
+[submodule "AmeliaLibScripting"]
+	path = modules/AmeliaLibScripting
+	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
+	branch = scripting

@@ -2,6 +2,10 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="AmeliaLibCommon_main" target="1.8" />
+      <module name="AmeliaLibCommon_test" target="1.8" />
+      <module name="AmeliaLibScripting_main" target="1.8" />
+      <module name="AmeliaLibScripting_test" target="1.8" />
       <module name="HoneyPotServer-HPPermissions_main" target="1.8" />
       <module name="HoneyPotServer-HPPermissions_test" target="1.8" />
       <module name="HoneyPotServer_main" target="1.8" />
@@ -30,6 +34,8 @@
       <module name="HPScripting_test" target="1.8" />
       <module name="HPServices_main" target="1.8" />
       <module name="HPServices_test" target="1.8" />
+      <module name="HPStorage_main" target="1.8" />
+      <module name="HPStorage_test" target="1.8" />
       <module name="HPTasks_main" target="1.8" />
       <module name="HPTasks_test" target="1.8" />
     </bytecodeTargetLevel>

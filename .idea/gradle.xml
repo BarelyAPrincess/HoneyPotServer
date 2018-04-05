@@ -10,11 +10,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/HPPermissions" />
+            <option value="$PROJECT_DIR$/modules/AmeliaLibCommon" />
+            <option value="$PROJECT_DIR$/modules/AmeliaLibScripting" />
             <option value="$PROJECT_DIR$/modules/HPFoundation" />
-            <option value="$PROJECT_DIR$/modules/HPLib" />
             <option value="$PROJECT_DIR$/modules/HPLog" />
             <option value="$PROJECT_DIR$/modules/HPNetworking" />
-            <option value="$PROJECT_DIR$/modules/HPScripting" />
+            <option value="$PROJECT_DIR$/modules/HPStorage" />
           </set>
         </option>
         <option name="useAutoImport" value="true" />

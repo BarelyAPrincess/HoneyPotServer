@@ -9,14 +9,39 @@
  */
 package io.amelia.logcompat;
 
+import java.util.logging.Level;
+
 import io.netty.util.internal.logging.InternalLogLevel;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
-import java.util.logging.Level;
-
 public class DefaultLogFactory extends InternalLoggerFactory
 {
+	public Level level( InternalLogLevel level )
+	{
+		switch ( level )
+		{
+			case DEBUG:
+				return Level.FINE;
+			case ERROR:
+				return Level.SEVERE;
+			case INFO:
+				return Level.INFO;
+			case TRACE:
+				return Level.CONFIG;
+			case WARN:
+				return Level.WARNING;
+			default:
+				return Level.INFO;
+		}
+	}
+
+	@Override
+	protected InternalLogger newInstance( String name )
+	{
+		return new DefaultLog( name );
+	}
+
 	private class DefaultLog implements InternalLogger
 	{
 		Logger l;
@@ -285,30 +310,5 @@ public class DefaultLogFactory extends InternalLoggerFactory
 			l.warning( "Encountered Exception", t );
 		}
 
-	}
-
-	public Level level( InternalLogLevel level )
-	{
-		switch ( level )
-		{
-			case DEBUG:
-				return Level.FINE;
-			case ERROR:
-				return Level.SEVERE;
-			case INFO:
-				return Level.INFO;
-			case TRACE:
-				return Level.CONFIG;
-			case WARN:
-				return Level.WARNING;
-			default:
-				return Level.INFO;
-		}
-	}
-
-	@Override
-	protected InternalLogger newInstance( String name )
-	{
-		return new DefaultLog( name );
 	}
 }

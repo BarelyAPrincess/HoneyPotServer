@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import io.amelia.foundation.Foundation;
 import io.amelia.logcompat.LogBuilder;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 
 public class NIO
@@ -220,6 +221,26 @@ public class NIO
 	public static String readByteBufferToString( ByteBuffer buffer )
 	{
 		return Strs.bytesToStringUTF( readByteBufferToBytes( buffer ) );
+	}
+
+	public static ByteBuf readStreamToByteBuf( InputStream inputStream ) throws IOException
+	{
+		try
+		{
+			ByteBuf buffer = Unpooled.buffer( inputStream.available() );
+
+			int nRead;
+			byte[] data = new byte[16384];
+
+			while ( ( nRead = inputStream.read( data, 0, data.length ) ) != -1 )
+				buffer.writeBytes( data, 0, nRead );
+
+			return buffer;
+		}
+		finally
+		{
+			IO.closeQuietly( inputStream );
+		}
 	}
 
 	/**

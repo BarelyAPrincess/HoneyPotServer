@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":HPStorage" external.linked.project.path="$MODULE_DIR$/../../../../modules/HPStorage" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.version="10.0.0-git+H62c7a6c" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../../modules/HPStorage">
+      <excludeFolder url="file://$MODULE_DIR$/../../../../modules/HPStorage/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../modules/HPStorage/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../modules/HPStorage/out" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

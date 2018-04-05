@@ -2,21 +2,24 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon.iml" group="AmeliaLibCommon" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_main.iml" group="AmeliaLibCommon" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_test.iml" group="AmeliaLibCommon" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting.iml" group="AmeliaLibScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" group="AmeliaLibScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" group="AmeliaLibScripting" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" group="HPFoundation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" group="HPFoundation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" group="HPFoundation" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib.iml" group="HPLib" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_main.iml" group="HPLib" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLib/HPLib_test.iml" group="HPLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" group="HPLog" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" group="HPLog" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" group="HPLog" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" group="HPNetworking" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" group="HPNetworking" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" group="HPNetworking" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting.iml" group="HPScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_main.iml" group="HPScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPScripting/HPScripting_test.iml" group="HPScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage.iml" group="HPStorage" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_main.iml" group="HPStorage" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPStorage/HPStorage_test.iml" group="HPStorage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions.iml" filepath="$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions.iml" group="HPPermissions" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_main.iml" group="HPPermissions" />
