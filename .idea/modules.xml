@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon.iml" group="AmeliaLibCommon" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_main.iml" group="AmeliaLibCommon" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_test.iml" group="AmeliaLibCommon" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting.iml" group="AmeliaLibScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" group="AmeliaLibScripting" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" group="AmeliaLibScripting" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib.iml" group="AmeliaCommonLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_main.iml" group="AmeliaCommonLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_test.iml" group="AmeliaCommonLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib.iml" group="AmeliaScriptingLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_main.iml" group="AmeliaScriptingLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_test.iml" group="AmeliaScriptingLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib.iml" group="AmeliaStorageLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_main.iml" group="AmeliaStorageLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_test.iml" group="AmeliaStorageLib" />
@@ -24,9 +24,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions.iml" filepath="$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions.iml" group="HPPermissions" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_main.iml" group="HPPermissions" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HPPermissions/HoneyPotServer-HPPermissions_test.iml" group="HPPermissions" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage.iml" filepath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage.iml" group="HPStorage" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_main.iml" group="HPStorage" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_test.iml" group="HPStorage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" group="HoneyPotServer" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" group="HoneyPotServer" />
     </modules>

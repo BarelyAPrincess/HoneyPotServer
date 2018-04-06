@@ -30,6 +30,7 @@ import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.logcompat.Logger;
+import io.amelia.storage.ConfigStorageLoader;
 import io.amelia.support.Encrypt;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Objs;
@@ -222,7 +223,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			// XXX Use Encrypt::hash as an alternative to Encrypt::uuid
 			env.computeValue( "instance-id", Encrypt::uuid, true );
 
-			ConfigRegistry.init( env );
+			ConfigRegistry.init( env, new ConfigStorageLoader() );
 			Bindings.init();
 
 			/*

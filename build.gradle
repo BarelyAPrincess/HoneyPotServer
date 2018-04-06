@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'license'
+apply plugin: "com.github.hierynomus.license"
 apply plugin: 'checkstyle'
 apply plugin: 'application'
 apply plugin: 'ch.raffael.pegdown-doclet'
@@ -15,10 +15,13 @@ buildscript {
 	repositories {
 		jcenter()
 		mavenCentral()
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
 	}
 
 	dependencies {
-		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+		classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
 		classpath 'ch.raffael.pegdown-doclet:pegdown-doclet:1.3'
 	}
 }
@@ -119,12 +122,12 @@ dependencies {
 	}
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
 
-	compile project( ':AmeliaLibCommon' )
-	compile project( ':AmeliaLibScripting' )
+	compile project( ':AmeliaCommonLib' )
+	compile project( ':AmeliaScriptingLib' )
+	compile project( ':AmeliaStorageLib' )
 
 	compile project( ':HPFoundation' )
 	compile project( ':HPNetworking' )
-	compile project( ':HPStorage' )
 	// compile project( ':HPAuth' )
 
 	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'

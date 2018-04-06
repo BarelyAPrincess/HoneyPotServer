@@ -16,11 +16,11 @@ dependencies {
 	}
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
 
-	compile project( ':AmeliaLibCommon' )
-	compile project( ':AmeliaLibScripting' )
+	compile project( ':AmeliaCommonLib' )
+	compile project( ':AmeliaScriptingLib' )
+	compile project( ':AmeliaStorageLib' )
 
 	compile project( ':HPFoundation' )
-	compile project( ':HPStorage' )
 
 	compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
 

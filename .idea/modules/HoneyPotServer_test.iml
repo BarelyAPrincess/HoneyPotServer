@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="HoneyPotServer:test" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="10.0.0-git+H7005808" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="HoneyPotServer:test" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="10.0.0-git+H586fa00" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output-test url="file://$MODULE_DIR$/../../out/test/classes" />
     <exclude-output />
@@ -10,8 +10,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="HoneyPotServer_main" />
-    <orderEntry type="module" module-name="AmeliaLibCommon_main" />
-    <orderEntry type="module" module-name="AmeliaLibScripting_main" />
+    <orderEntry type="module" module-name="AmeliaCommonLib_main" />
+    <orderEntry type="module" module-name="AmeliaScriptingLib_main" />
+    <orderEntry type="module" module-name="AmeliaStorageLib_main" />
     <orderEntry type="module" module-name="HPFoundation_main" />
     <orderEntry type="module" module-name="HPNetworking_main" />
     <orderEntry type="library" name="Gradle: net.sf.jopt-simple:jopt-simple:4.7" level="project" />

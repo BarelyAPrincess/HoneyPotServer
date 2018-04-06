@@ -16,5 +16,5 @@ dependencies {
 	}
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
 
-	compile project( ':AmeliaLibCommon' )
+	compile project( ':AmeliaCommonLib' )
 }

@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="HoneyPotServer:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="10.0.0-git+H7005808" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="HoneyPotServer:main" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="io.amelia" external.system.module.type="sourceSet" external.system.module.version="10.0.0-git+H586fa00" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../out/production/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../HPPermissions/src/main/java">
       <sourceFolder url="file://$MODULE_DIR$/../../HPPermissions/src/main/java" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../HPStorage/src/main/java">
-      <sourceFolder url="file://$MODULE_DIR$/../../HPStorage/src/main/java" isTestSource="false" />
+    <content url="file://$MODULE_DIR$/../../modules/AmeliaCommonLib/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/AmeliaCommonLib/src/main/java" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../modules/AmeliaLibCommon/src/main/java">
-      <sourceFolder url="file://$MODULE_DIR$/../../modules/AmeliaLibCommon/src/main/java" isTestSource="false" />
-    </content>
-    <content url="file://$MODULE_DIR$/../../modules/AmeliaLibScripting/src/main/java">
-      <sourceFolder url="file://$MODULE_DIR$/../../modules/AmeliaLibScripting/src/main/java" isTestSource="false" />
+    <content url="file://$MODULE_DIR$/../../modules/AmeliaScriptingLib/src/main/java">
+      <sourceFolder url="file://$MODULE_DIR$/../../modules/AmeliaScriptingLib/src/main/java" isTestSource="false" />
     </content>
     <content url="file://$MODULE_DIR$/../../modules/AmeliaStorageLib/src/main/java">
       <sourceFolder url="file://$MODULE_DIR$/../../modules/AmeliaStorageLib/src/main/java" isTestSource="false" />
@@ -33,8 +30,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="AmeliaLibCommon_main" />
-    <orderEntry type="module" module-name="AmeliaLibScripting_main" />
+    <orderEntry type="module" module-name="AmeliaCommonLib_main" />
+    <orderEntry type="module" module-name="AmeliaScriptingLib_main" />
+    <orderEntry type="module" module-name="AmeliaStorageLib_main" />
     <orderEntry type="module" module-name="HPFoundation_main" />
     <orderEntry type="module" module-name="HPNetworking_main" />
     <orderEntry type="library" name="Gradle: net.sf.jopt-simple:jopt-simple:4.7" level="project" />

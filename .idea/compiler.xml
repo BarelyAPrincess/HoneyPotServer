@@ -2,10 +2,14 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="AmeliaCommonLib_main" target="1.8" />
+      <module name="AmeliaCommonLib_test" target="1.8" />
       <module name="AmeliaLibCommon_main" target="1.8" />
       <module name="AmeliaLibCommon_test" target="1.8" />
       <module name="AmeliaLibScripting_main" target="1.8" />
       <module name="AmeliaLibScripting_test" target="1.8" />
+      <module name="AmeliaScriptingLib_main" target="1.8" />
+      <module name="AmeliaScriptingLib_test" target="1.8" />
       <module name="AmeliaStorageLib_main" target="1.8" />
       <module name="AmeliaStorageLib_test" target="1.8" />
       <module name="HoneyPotServer-HPPermissions_main" target="1.8" />
