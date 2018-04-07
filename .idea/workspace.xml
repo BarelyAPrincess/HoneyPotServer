@@ -2,142 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7684425a-3f41-4c96-b67d-2b02523c4713" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_main.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaCommonLib/AmeliaCommonLib_test.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_main.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_test.iml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/NIO.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/DefaultStorageMapper.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContainerTrait.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContext.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryObject.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageManager.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMethod.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageContext.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageDriver.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/zip/ZipStorageContext.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/zip/ZipStorageDriver.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/modules/HPFoundation/src/main/java/io/amelia/foundation/ConfigRegistryLoader.java" />
-      <change beforePath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/cache.properties.lock" afterPath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/cache.properties.lock" />
-      <change beforePath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/fileHashes.bin" />
-      <change beforePath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/fileSnapshots.bin" />
-      <change beforePath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/.gradle/3.1/taskArtifacts/taskArtifacts.bin" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_all_4_0_33_Final.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_main.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HPStorage/HoneyPotServer-HPStorage_test.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/HoneyPotServer_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_main.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibCommon/AmeliaLibCommon_test.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_main.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLibScripting/AmeliaLibScripting_test.iml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/AmeliaStorageLib/AmeliaStorageLib_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" afterPath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeStorageEntry.java" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" afterPath="$PROJECT_DIR$/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/foundation/ConfigMap.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/foundation/ConfigMap.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/foundation/ConfigRegistry.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/foundation/ConfigRegistry.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/lang/ConfigException.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/lang/ConfigException.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/IO.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/IO.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/Objs.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/Objs.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/OptionalLongExt.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/OptionalLongExt.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/Sys.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/Sys.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/WeakReferenceList.java" afterPath="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/WeakReferenceList.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/build.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/BindingProvider.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/BindingProvider.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptBinding.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptBinding.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptTraceElement.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptTraceElement.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingContext.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingContext.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingEngine.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingEngine.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingEvents.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingEvents.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingFactory.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingFactory.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingRegistry.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingRegistry.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingResult.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingResult.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/StackFactory.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/StackFactory.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/YieldBuffer.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/YieldBuffer.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostEvalEvent.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostEvalEvent.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostImageProcessor.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostImageProcessor.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostJSMinProcessor.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PostJSMinProcessor.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreCoffeeProcessor.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreCoffeeProcessor.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreEvalEvent.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreEvalEvent.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreLessProcessor.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/event/PreLessProcessor.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/EmbeddedGroovyEngine.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/EmbeddedGroovyEngine.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyEngine.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyEngine.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyImportCustomizer.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyImportCustomizer.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyRegistry.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovyRegistry.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovySandbox.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/GroovySandbox.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/NestedScript.java" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/NestedScript.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/ScriptingBaseHttp.groovy" afterPath="$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/groovy/ScriptingBaseHttp.groovy" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/build.gradle" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/lang/StorageException.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/lang/StorageException.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/Storage.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/IODriver.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/MySQLDriver.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/StorageDriver.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageDriver.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/BaseEntry.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntry.java" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/BytesEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/DirectoryEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/JsonEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/ListEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/PropEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/StringEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/entries/YamlEntry.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/DirectoryMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/HomeDirectoryStorageMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/method/StorageMethod.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPFoundation/build.gradle" afterPath="$PROJECT_DIR$/modules/HPFoundation/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/HPFoundation/src/main/java/io/amelia/foundation/ApplicationInterface.java" afterPath="$PROJECT_DIR$/modules/HPFoundation/src/main/java/io/amelia/foundation/ApplicationInterface.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPLog/build.gradle" afterPath="$PROJECT_DIR$/modules/HPLog/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/build.gradle" afterPath="$PROJECT_DIR$/modules/HPNetworking/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HTTPWorker.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HTTPWorker.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HostStorageMethod.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HostStorageMethod.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpError.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpError.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpHandler.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpHandler.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpInitializer.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpInitializer.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpRequestWrapper.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpRequestWrapper.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpResponseStage.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpResponseStage.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpResponseWrapper.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/HttpResponseWrapper.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/WebrootStorage.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/WebrootStorage.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/MemoryDatastore.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/MemoryDatastore.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/Session.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/Session.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionAdapterImpl.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionAdapterImpl.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionContext.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionContext.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionData.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionData.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionPersistenceMethod.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionPersistenceMethod.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionWrapper.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/SessionWrapper.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/Sessions.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/Sessions.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/adapters/FileAdapter.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/adapters/FileAdapter.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/adapters/SqlAdapter.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/http/session/adapters/SqlAdapter.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/lang/SessionException.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/lang/SessionException.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/ContentTypes.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/ContentTypes.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/NIO.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/TableBuilder.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/support/TableBuilder.java" />
-      <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/Webroot.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/Webroot.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/DefaultStorageMapper.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/DefaultStorageMapper.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java" />
+      <change beforePath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java" afterPath="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java" />
       <change beforePath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/WebrootManager.java" afterPath="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/WebrootManager.java" />
     </list>
     <ignored path="$PROJECT_DIR$/modules/HPLib/.gradle/" />
@@ -250,7 +123,71 @@
     <favorites_list name="HoneyPotServer" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Webroot.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/Webroot.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="126">
+              <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="WebrootManager.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/WebrootManager.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="25" column="40" lean-forward="true" selection-start-line="25" selection-start-column="40" selection-end-line="25" selection-end-column="40" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HomeContainerMethod.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="360">
+              <caret line="39" column="26" lean-forward="true" selection-start-line="39" selection-start-column="26" selection-end-line="39" selection-end-column="26" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HomeStorageEntry.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeStorageEntry.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="198">
+              <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+              <folding>
+                <element signature="e#290#291#0" expanded="true" />
+                <element signature="e#320#321#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ContainerToStackerMethod.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="303">
+              <caret line="60" column="16" lean-forward="false" selection-start-line="60" selection-start-column="16" selection-end-line="60" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConfigStorageLoader.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="342">
+              <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -288,12 +225,12 @@
       <find>groovy</find>
       <find>MT</find>
       <find>ConfigRegistry.i()</find>
-      <find>git</find>
       <find>Limestone</find>
       <find>license</find>
       <find>storageMapper</find>
       <find>StorageException</find>
       <find>ParcelException</find>
+      <find>git</find>
     </findStrings>
     <replaceStrings>
       <replace>queue.postQueueEntry</replace>
@@ -4793,9 +4730,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/README.md" />
-        <option value="$PROJECT_DIR$/modules/AmeliaScriptingLib/build.gradle" />
-        <option value="$PROJECT_DIR$/modules/HPLog/build.gradle" />
         <option value="$PROJECT_DIR$/modules/HPNetworking/build.gradle" />
         <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/driver/StorageDriver.java" />
@@ -4817,7 +4751,6 @@
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageContext.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/zip/ZipStorageContext.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/IO.java" />
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/DefaultStorageMapper.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageDriver.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntry.java" />
@@ -4832,18 +4765,22 @@
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeDirectoryMethod.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageOutline.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContainer.java" />
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/zip/ZipStorageDriver.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageManager.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContainerImpl.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageDriver.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryObject.java" />
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToParcelMethod.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/lang/ConfigException.java" />
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java" />
-        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java" />
         <option value="$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/foundation/ConfigMap.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java" />
+        <option value="$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/WebrootManager.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeStorageContext.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java" />
+        <option value="$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeStorageEntry.java" />
       </list>
     </option>
   </component>
@@ -4855,7 +4792,7 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="960" />
-    <option name="y" value="1083" />
+    <option name="y" value="1080" />
     <option name="width" value="1871" />
     <option name="height" value="1053" />
   </component>
@@ -5267,6 +5204,46 @@
               <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="AmeliaScriptingLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="AmeliaScriptingLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="AmeliaScriptingLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="AmeliaScriptingLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
+              <item name="AmeliaScriptingLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="scripting" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="modules" type="462c0819:PsiDirectoryNode" />
               <item name="AmeliaStorageLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
@@ -5313,18 +5290,6 @@
               <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="amelia" type="462c0819:PsiDirectoryNode" />
               <item name="storage" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
-              <item name="AmeliaStorageLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-              <item name="storage" type="462c0819:PsiDirectoryNode" />
-              <item name="file" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
@@ -5342,26 +5307,6 @@
               <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="modules" type="462c0819:PsiDirectoryNode" />
-              <item name="AmeliaStorageLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-              <item name="storage" type="462c0819:PsiDirectoryNode" />
-              <item name="zip" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
-              <item name="AmeliaStorageLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
               <item name="HPNetworking" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
             </path>
             <path>
@@ -5397,17 +5342,6 @@
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="amelia" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="modules" type="462c0819:PsiDirectoryNode" />
-              <item name="HPNetworking" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-              <item name="support" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
@@ -5419,50 +5353,6 @@
               <item name="java" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="amelia" type="462c0819:PsiDirectoryNode" />
               <item name="webroot" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="HoneyPotServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="HoneyPotServer" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="amelia" type="462c0819:PsiDirectoryNode" />
-              <item name="monitor" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -5523,11 +5413,11 @@
       <recent name="io.amelia.lang" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="io.amelia.storage.methods" />
       <recent name="io.amelia.foundation" />
       <recent name="io.amelia.storage" />
       <recent name="io.amelia.storage.driver.entries" />
       <recent name="io.amelia.storage.driver" />
-      <recent name="io.amelia.storage.driver.abilities" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -6092,7 +5982,7 @@
       <workItem from="1518372053378" duration="84485000" />
       <workItem from="1520475516381" duration="5185000" />
       <workItem from="1522873383091" duration="11217000" />
-      <workItem from="1522937968454" duration="49386000" />
+      <workItem from="1522937968454" duration="53242000" />
     </task>
     <task id="LOCAL-00001" summary="Commit 12/17/2017">
       <created>1513534172648</created>
@@ -6105,7 +5995,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1312666000" />
+    <option name="totallyTimeSpent" value="1316522000" />
   </component>
   <component name="TodoView" selected-index="4">
     <todo-panel id="selected-file">
@@ -6117,7 +6007,8 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="960" y="1083" width="1871" height="1053" extended-state="0" />
+    <frame x="960" y="1080" width="1871" height="1053" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32979852" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -6130,7 +6021,7 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3292615" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2025178" sideWeight="0.70474136" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2025178" sideWeight="0.70474136" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3286638" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -6212,75 +6103,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/zip/ZipConstants.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="33" column="10" lean-forward="false" selection-start-line="33" selection-start-column="10" selection-end-line="33" selection-end-column="10" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/zip/ZipEntry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="34" column="3" lean-forward="true" selection-start-line="34" selection-start-column="3" selection-end-line="34" selection-end-column="3" />
-          <folding>
-            <element signature="e#12836#12837#0" expanded="false" />
-            <element signature="e#12865#12866#0" expanded="false" />
-            <element signature="e#17235#17236#0" expanded="false" />
-            <element signature="e#17263#17264#0" expanded="false" />
-            <element signature="e#18198#18199#0" expanded="false" />
-            <element signature="e#18239#18240#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/Enumeration.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="755">
-          <caret line="77" column="6" lean-forward="false" selection-start-line="77" selection-start-column="6" selection-end-line="77" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/zip/ZipFile.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="623">
-          <caret line="550" column="43" lean-forward="false" selection-start-line="550" selection-start-column="43" selection-end-line="550" selection-end-column="43" />
-          <folding>
-            <element signature="e#19201#19202#0" expanded="false" />
-            <element signature="e#19246#19247#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaCommonLib/src/main/java/io/amelia/support/Objs.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="449" column="58" lean-forward="false" selection-start-line="449" selection-start-column="58" selection-end-line="449" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/util/zip/ZipInputStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="78" column="11" lean-forward="false" selection-start-line="78" selection-start-column="11" selection-end-line="78" selection-end-column="11" />
-          <folding>
-            <element signature="e#1733#1734#0" expanded="false" />
-            <element signature="e#1781#1782#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageEntry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="17" column="1" lean-forward="false" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/zip/ZipStorageEntry.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="72">
@@ -6362,14 +6184,6 @@
           <folding>
             <element signature="imports" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="99" lean-forward="true" selection-start-line="6" selection-start-column="99" selection-end-line="6" selection-end-column="99" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -6469,23 +6283,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="45" column="0" lean-forward="false" selection-start-line="45" selection-start-column="0" selection-end-line="45" selection-end-column="0" />
-          <folding>
-            <element signature="e#833#834#0" expanded="false" />
-            <element signature="e#876#877#0" expanded="false" />
-            <element signature="e#909#910#0" expanded="false" />
-            <element signature="e#985#986#0" expanded="false" />
-            <element signature="e#1091#1092#0" expanded="false" />
-            <element signature="e#1129#1130#0" expanded="false" />
-            <element signature="e#1174#1175#0" expanded="false" />
-            <element signature="e#1221#1222#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/HPFoundation/src/main/java/io/amelia/foundation/ConfigRegistryLoader.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
@@ -6531,7 +6328,7 @@
         <state relative-caret-position="252">
           <caret line="73" column="10" lean-forward="false" selection-start-line="73" selection-start-column="10" selection-end-line="73" selection-end-column="10" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6541,17 +6338,6 @@
         <state relative-caret-position="36">
           <caret line="2" column="16" lean-forward="false" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="33" column="0" lean-forward="true" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
-          <folding>
-            <element signature="e#873#874#0" expanded="true" />
-            <element signature="e#976#977#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -6576,11 +6362,11 @@
         <state relative-caret-position="447">
           <caret line="64" column="0" lean-forward="true" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
           <folding>
-            <element signature="e#1332#1364#0" expanded="true" />
-            <element signature="e#1474#1475#0" expanded="true" />
-            <element signature="e#1609#1610#0" expanded="true" />
-            <element signature="e#1669#1670#0" expanded="true" />
-            <element signature="e#1759#1760#0" expanded="true" />
+            <element signature="e#1332#1364#0" expanded="false" />
+            <element signature="e#1474#1475#0" expanded="false" />
+            <element signature="e#1609#1610#0" expanded="false" />
+            <element signature="e#1669#1670#0" expanded="false" />
+            <element signature="e#1759#1760#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6593,74 +6379,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="24" column="77" lean-forward="true" selection-start-line="24" selection-start-column="77" selection-end-line="24" selection-end-column="77" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContainerTrait.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
-          <folding>
-            <element signature="e#579#580#0" expanded="true" />
-            <element signature="e#633#634#0" expanded="true" />
-            <element signature="e#683#684#0" expanded="true" />
-            <element signature="e#736#737#0" expanded="true" />
-            <element signature="e#1016#1017#0" expanded="true" />
-            <element signature="e#1078#1079#0" expanded="true" />
-            <element signature="e#1168#1169#0" expanded="true" />
-            <element signature="e#1244#1245#0" expanded="true" />
-            <element signature="e#1366#1367#0" expanded="true" />
-            <element signature="e#1429#1430#0" expanded="true" />
-            <element signature="e#1582#1583#0" expanded="true" />
-            <element signature="e#1659#1660#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageDriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
-          <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding>
-            <element signature="e#961#962#0" expanded="true" />
-            <element signature="e#1017#1018#0" expanded="true" />
-            <element signature="e#3068#3069#0" expanded="true" />
-            <element signature="e#3146#3147#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryObject.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="15" column="6" lean-forward="false" selection-start-line="15" selection-start-column="6" selection-end-line="15" selection-end-column="6" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="32" column="14" lean-forward="true" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="14" />
-          <folding>
-            <element signature="e#978#979#0" expanded="true" />
-            <element signature="e#996#997#0" expanded="true" />
-            <element signature="e#1095#1096#0" expanded="true" />
-            <element signature="e#1158#1159#0" expanded="true" />
-            <element signature="e#1320#1321#0" expanded="true" />
-            <element signature="e#1402#1403#0" expanded="true" />
-            <element signature="e#1510#1511#0" expanded="true" />
-            <element signature="e#1582#1583#0" expanded="true" />
-            <element signature="e#1721#1722#0" expanded="true" />
-            <element signature="e#1807#1808#0" expanded="true" />
-            <element signature="e#1978#1979#0" expanded="true" />
-            <element signature="e#2069#2070#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -6677,51 +6400,43 @@
         <state relative-caret-position="-954">
           <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding>
-            <element signature="e#456#457#0" expanded="true" />
-            <element signature="e#503#504#0" expanded="true" />
-            <element signature="e#584#585#0" expanded="true" />
-            <element signature="e#640#641#0" expanded="true" />
-            <element signature="e#738#739#0" expanded="true" />
-            <element signature="e#801#802#0" expanded="true" />
-            <element signature="e#883#884#0" expanded="true" />
-            <element signature="e#937#938#0" expanded="true" />
-            <element signature="e#1010#1011#0" expanded="true" />
-            <element signature="e#1061#1062#0" expanded="true" />
-            <element signature="e#1150#1151#0" expanded="true" />
-            <element signature="e#1210#1211#0" expanded="true" />
-            <element signature="e#1316#1317#0" expanded="true" />
-            <element signature="e#1383#1384#0" expanded="true" />
-            <element signature="e#1473#1474#0" expanded="true" />
-            <element signature="e#1531#1532#0" expanded="true" />
-            <element signature="e#1686#1687#0" expanded="true" />
-            <element signature="e#1708#1709#0" expanded="true" />
-            <element signature="e#1762#1763#0" expanded="true" />
-            <element signature="e#1793#1794#0" expanded="true" />
-            <element signature="e#1864#1865#0" expanded="true" />
-            <element signature="e#1902#1903#0" expanded="true" />
-            <element signature="e#1957#1958#0" expanded="true" />
-            <element signature="e#1986#1987#0" expanded="true" />
-            <element signature="e#2026#2027#0" expanded="true" />
-            <element signature="e#2060#2061#0" expanded="true" />
-            <element signature="e#2177#2178#0" expanded="true" />
-            <element signature="e#2199#2200#0" expanded="true" />
-            <element signature="e#2257#2258#0" expanded="true" />
-            <element signature="e#2288#2289#0" expanded="true" />
-            <element signature="e#2363#2364#0" expanded="true" />
-            <element signature="e#2401#2402#0" expanded="true" />
-            <element signature="e#2460#2461#0" expanded="true" />
-            <element signature="e#2489#2490#0" expanded="true" />
-            <element signature="e#2529#2530#0" expanded="true" />
-            <element signature="e#2563#2564#0" expanded="true" />
+            <element signature="e#456#457#0" expanded="false" />
+            <element signature="e#503#504#0" expanded="false" />
+            <element signature="e#584#585#0" expanded="false" />
+            <element signature="e#640#641#0" expanded="false" />
+            <element signature="e#738#739#0" expanded="false" />
+            <element signature="e#801#802#0" expanded="false" />
+            <element signature="e#883#884#0" expanded="false" />
+            <element signature="e#937#938#0" expanded="false" />
+            <element signature="e#1010#1011#0" expanded="false" />
+            <element signature="e#1061#1062#0" expanded="false" />
+            <element signature="e#1150#1151#0" expanded="false" />
+            <element signature="e#1210#1211#0" expanded="false" />
+            <element signature="e#1316#1317#0" expanded="false" />
+            <element signature="e#1383#1384#0" expanded="false" />
+            <element signature="e#1473#1474#0" expanded="false" />
+            <element signature="e#1531#1532#0" expanded="false" />
+            <element signature="e#1686#1687#0" expanded="false" />
+            <element signature="e#1708#1709#0" expanded="false" />
+            <element signature="e#1762#1763#0" expanded="false" />
+            <element signature="e#1793#1794#0" expanded="false" />
+            <element signature="e#1864#1865#0" expanded="false" />
+            <element signature="e#1902#1903#0" expanded="false" />
+            <element signature="e#1957#1958#0" expanded="false" />
+            <element signature="e#1986#1987#0" expanded="false" />
+            <element signature="e#2026#2027#0" expanded="false" />
+            <element signature="e#2060#2061#0" expanded="false" />
+            <element signature="e#2177#2178#0" expanded="false" />
+            <element signature="e#2199#2200#0" expanded="false" />
+            <element signature="e#2257#2258#0" expanded="false" />
+            <element signature="e#2288#2289#0" expanded="false" />
+            <element signature="e#2363#2364#0" expanded="false" />
+            <element signature="e#2401#2402#0" expanded="false" />
+            <element signature="e#2460#2461#0" expanded="false" />
+            <element signature="e#2489#2490#0" expanded="false" />
+            <element signature="e#2529#2530#0" expanded="false" />
+            <element signature="e#2563#2564#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -6741,14 +6456,144 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingFactory.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="36" column="36" lean-forward="true" selection-start-line="36" selection-start-column="36" selection-end-line="36" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingResult.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="36" column="0" lean-forward="true" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaScriptingLib/src/main/java/io/amelia/scripting/ScriptingContext.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="50" column="13" lean-forward="false" selection-start-line="50" selection-start-column="13" selection-end-line="50" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/ConfigStorageLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/Webroot.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/HPNetworking/src/main/java/io/amelia/webroot/WebrootManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="25" column="40" lean-forward="true" selection-start-line="25" selection-start-column="40" selection-end-line="25" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageContainerTrait.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="684">
+          <caret line="58" column="48" lean-forward="false" selection-start-line="58" selection-start-column="48" selection-end-line="58" selection-end-column="48" />
+          <folding>
+            <element signature="e#1582#1583#0" expanded="false" />
+            <element signature="e#1659#1660#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/ContainerToStackerMethod.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="713">
-          <caret line="96" column="11" lean-forward="true" selection-start-line="96" selection-start-column="11" selection-end-line="96" selection-end-column="11" />
+        <state relative-caret-position="303">
+          <caret line="60" column="16" lean-forward="false" selection-start-line="60" selection-start-column="16" selection-end-line="60" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeContainerMethod.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="39" column="26" lean-forward="true" selection-start-line="39" selection-start-column="26" selection-end-line="39" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntry.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="16" column="22" lean-forward="false" selection-start-line="16" selection-start-column="22" selection-end-line="16" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageEntryContainer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="18" column="50" lean-forward="true" selection-start-line="18" selection-start-column="50" selection-end-line="18" selection-end-column="50" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#864#865#0" expanded="true" />
-            <element signature="e#911#912#0" expanded="true" />
+            <element signature="e#632#633#0" expanded="false" />
+            <element signature="e#662#663#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/file/FileStorageDriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="71" column="45" lean-forward="true" selection-start-line="71" selection-start-column="45" selection-end-line="71" selection-end-column="45" />
+          <folding>
+            <element signature="e#961#962#0" expanded="false" />
+            <element signature="e#1017#1018#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="26" column="67" lean-forward="true" selection-start-line="26" selection-start-column="67" selection-end-line="26" selection-end-column="67" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/StorageMapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="25" lean-forward="false" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="208" column="33" lean-forward="false" selection-start-line="208" selection-start-column="30" selection-end-line="208" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AmeliaStorageLib/src/main/java/io/amelia/storage/methods/HomeStorageEntry.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding>
+            <element signature="e#290#291#0" expanded="true" />
+            <element signature="e#320#321#0" expanded="true" />
           </folding>
         </state>
       </provider>

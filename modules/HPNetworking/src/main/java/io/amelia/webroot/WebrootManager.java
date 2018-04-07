@@ -10,21 +10,19 @@
 package io.amelia.webroot;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.storage.driver.IODriver;
-import io.amelia.storage.entry.DirectoryEntry;
-import io.amelia.storage.entry.BaseEntry;
-import io.amelia.storage.methods.HomeDirectoryStorageMethod;
+import io.amelia.storage.file.FileStorageDriver;
+import io.amelia.storage.methods.HomeContainerMethod;
 
 public class WebrootManager
 {
 	public static final String PATH_WEBROOT = "__webroot";
-	private static volatile HomeDirectoryStorageMethod storage;
 
 	static
 	{
 		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_STORAGE, "webroot" );
 
-		IODriver<DirectoryEntry> driver = new IODriver<>( Kernel.getPath( PATH_WEBROOT ), DirectoryEntry::new );
-		storage = new HomeDirectoryStorageMethod<IODriver<BaseEntry>>( driver, "(.*)(?:\\\\|\\/)config.yaml" );
+		FileStorageDriver driver = new FileStorageDriver( Kernel.getPath( PATH_WEBROOT ) );
+
+		new HomeContainerMethod().getEntries( driver, "(.*)(?:\\\\|\\/)config.yaml" );
 	}
 }
