@@ -9,13 +9,16 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.annotation.Nonnull;
 
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
@@ -82,18 +85,18 @@ public abstract class Plugin extends PluginBase
 	}
 
 	private ClassLoader classLoader = null;
-	private File configFile = null;
-	private File dataFolder = null;
-	private File file = null;
+	private Path configPath = null;
+	private Path dataPath = null;
 	private boolean isEnabled = false;
 	private PluginLoader loader = null;
 	private PluginMeta meta = null;
 	private boolean naggable = true;
 	private Parcel newConfig = null;
+	private Path pluginPath = null;
 
 	/*
-	 * protected Plugin( final PluginLoader loader, final PluginDescriptionFile description, final File dataFolder, final File file ) { final ClassLoader classLoader = this.getClass().getClassLoader(); if ( classLoader instanceof PluginClassLoader ) {
-	 * throw new IllegalStateException( "Cannot use initialization constructor at runtime" ); } init( loader, description, dataFolder, file, classLoader ); }
+	 * protected Plugin( final PluginLoader loader, final PluginDescriptionFile description, final File dataPath, final File pluginPath ) { final ClassLoader classLoader = this.getClass().getClassLoader(); if ( classLoader instanceof PluginClassLoader ) {
+	 * throw new IllegalStateException( "Cannot use initialization constructor at runtime" ); } init( loader, description, dataPath, pluginPath, classLoader ); }
 	 */
 
 	public Plugin()
@@ -126,15 +129,15 @@ public abstract class Plugin extends PluginBase
 		return newConfig;
 	}
 
-	@Override
-	public File getConfigFile()
-	{
-		return configFile;
-	}
-
 	public ConfigMap getConfigNode()
 	{
 		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
+	}
+
+	@Override
+	public Path getConfigPath()
+	{
+		return configPath;
 	}
 
 	/**
@@ -143,9 +146,9 @@ public abstract class Plugin extends PluginBase
 	 * @return The folder.
 	 */
 	@Override
-	public File getDataFolder()
+	public Path getDataPath()
 	{
-		return dataFolder;
+		return dataPath;
 	}
 
 	/**
@@ -153,9 +156,9 @@ public abstract class Plugin extends PluginBase
 	 *
 	 * @return File containing this plugin
 	 */
-	protected final File getFile()
+	protected final Path getFile()
 	{
-		return file;
+		return pluginPath;
 	}
 
 	public final Logger getLogger()
@@ -164,9 +167,9 @@ public abstract class Plugin extends PluginBase
 	}
 
 	/**
-	 * Returns the plugin.yaml file containing the details for this plugin
+	 * Returns the plugin.yaml pluginPath containing the details for this plugin
 	 *
-	 * @return Contents of the plugin.yaml file
+	 * @return Contents of the plugin.yaml pluginPath
 	 */
 	@Override
 	public final PluginMeta getMeta()
@@ -191,14 +194,13 @@ public abstract class Plugin extends PluginBase
 	}
 
 	@Override
-	public final InputStream getResource( String filename )
+	public final InputStream getResource( @Nonnull String localName )
 	{
-		if ( filename == null )
-			throw new IllegalArgumentException( "Filename cannot be null" );
+		Objs.notEmpty( localName );
 
 		try
 		{
-			URL url = getClassLoader().getResource( filename );
+			URL url = getClassLoader().getResource( localName );
 
 			if ( url == null )
 				return null;
@@ -218,14 +220,14 @@ public abstract class Plugin extends PluginBase
 		return Strs.toCamelCase( getName() );
 	}
 
-	final void init( PluginLoader loader, PluginMeta meta, File dataFolder, File file, ClassLoader classLoader )
+	final void init( PluginLoader loader, PluginMeta meta, Path dataPath, Path pluginPath, ClassLoader classLoader )
 	{
 		this.loader = loader;
-		this.file = file;
+		this.pluginPath = this.pluginPath;
 		this.meta = meta;
-		this.dataFolder = dataFolder;
+		this.dataPath = dataPath;
 		this.classLoader = classLoader;
-		this.configFile = new File( dataFolder, "config.yaml" );
+		this.configPath = Paths.get( "config.yml" ).resolve( dataPath );
 	}
 
 	/**
@@ -288,7 +290,7 @@ public abstract class Plugin extends PluginBase
 	@Override
 	public void reloadConfig() throws IOException
 	{
-		newConfig = ParcelLoader.decodeYaml( configFile );
+		newConfig = ParcelLoader.decodeYaml( configPath );
 
 		InputStream defConfigStream = getResource( "config.yaml" );
 
@@ -307,18 +309,20 @@ public abstract class Plugin extends PluginBase
 	{
 		try
 		{
-			IO.writeStringToFile( configFile, ParcelLoader.encodeYaml( getConfig() ) );
+			OutputStream out = Files.newOutputStream( configPath );
+			out.write( Strs.decodeDefault( ParcelLoader.encodeYaml( getConfig() ) ) );
+			IO.closeQuietly( out );
 		}
 		catch ( IOException ex )
 		{
-			getLogger().severe( "Could not save config to " + configFile, ex );
+			getLogger().severe( "Could not save config to " + configPath, ex );
 		}
 	}
 
 	@Override
 	public void saveDefaultConfig()
 	{
-		if ( !configFile.exists() )
+		if ( !Files.isRegularFile( configPath ) )
 			try
 			{
 				saveResource( "config.yaml", false );
@@ -338,20 +342,18 @@ public abstract class Plugin extends PluginBase
 		resourcePath = resourcePath.replace( '\\', '/' );
 		InputStream in = getResource( resourcePath );
 		if ( in == null )
-			throw new IllegalArgumentException( "The embedded resource '" + resourcePath + "' cannot be found in " + file );
+			throw new IllegalArgumentException( "The embedded resource '" + resourcePath + "' cannot be found in " + pluginPath );
 
-		File outFile = new File( dataFolder, resourcePath );
-		int lastIndex = resourcePath.lastIndexOf( '/' );
-		File outDir = new File( dataFolder, resourcePath.substring( 0, lastIndex >= 0 ? lastIndex : 0 ) );
-
-		if ( !outDir.exists() )
-			outDir.mkdirs();
+		Path outPath = Paths.get( resourcePath ).resolve( dataPath );
 
 		try
 		{
-			if ( !outFile.exists() || replace )
+			IO.forceCreateDirectory( outPath.getParent() );
+
+			if ( !Files.isRegularFile( outPath ) || replace )
 			{
-				OutputStream out = new FileOutputStream( outFile );
+				IO.deleteIfExists( outPath );
+				OutputStream out = Files.newOutputStream( outPath );
 				byte[] buf = new byte[1024];
 				int len;
 				while ( ( len = in.read( buf ) ) > 0 )
@@ -360,11 +362,11 @@ public abstract class Plugin extends PluginBase
 				in.close();
 			}
 			else
-				getLogger().warning( "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists." );
+				getLogger().warning( "Could not save " + resourcePath + " to " + IO.relPath( outPath ) + " because it already exists." );
 		}
 		catch ( IOException ex )
 		{
-			getLogger().severe( "Could not save " + outFile.getName() + " to " + outFile, ex );
+			getLogger().severe( "Could not save " + resourcePath + " to " + IO.relPath( outPath ), ex );
 		}
 	}
 

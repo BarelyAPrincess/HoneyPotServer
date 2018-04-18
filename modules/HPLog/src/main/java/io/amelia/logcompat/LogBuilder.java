@@ -9,11 +9,12 @@
  */
 package io.amelia.logcompat;
 
-import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,9 +23,11 @@ import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import io.amelia.foundation.Kernel;
 import io.amelia.support.IO;
+import io.amelia.support.Streams;
 
 /**
  * Builder for Loggers
@@ -52,18 +55,18 @@ public class LogBuilder
 	{
 		try
 		{
-			File log = new File( Kernel.getPath( Kernel.PATH_LOGS ), filename + ".log" );
+			Path logPath = Paths.get( filename + ".log" ).resolve( Kernel.getPath( Kernel.PATH_LOGS ) );
 
-			if ( log.exists() )
+			if ( Files.exists( logPath ) )
 			{
 				if ( archiveLimit > 0 )
-					IO.gzFile( log, new File( Kernel.getPath( Kernel.PATH_LOGS ), new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ) );
-				log.delete();
+					IO.gzFile( logPath, Paths.get( new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + filename + ".log.gz" ).resolve( Kernel.getPath( Kernel.PATH_LOGS ) ) );
+				Files.delete( logPath );
 			}
 
 			cleanupLogs( "-" + filename + ".log.gz", archiveLimit );
 
-			FileHandler fileHandler = new FileHandler( log.getAbsolutePath() );
+			FileHandler fileHandler = new FileHandler( logPath.toString() );
 			fileHandler.setLevel( level );
 			fileHandler.setFormatter( new DefaultLogFormatter( useColor ) );
 
@@ -80,37 +83,15 @@ public class LogBuilder
 		rootLogger.addHandler( h );
 	}
 
-	private static void cleanupLogs( final String suffix, int limit )
+	private static void cleanupLogs( final String suffix, int limit ) throws IOException
 	{
-		File[] files = Kernel.getPath( Kernel.PATH_LOGS ).listFiles( new FilenameFilter()
-		{
-			public boolean accept( File dir, String name )
-			{
-				return name.toLowerCase().endsWith( suffix );
-			}
-		} );
-
-		if ( files == null || files.length < 1 )
-			return;
+		Stream<Path> result = Files.list( Kernel.getPath( Kernel.PATH_LOGS ) ).filter( path -> path.toString().toLowerCase().endsWith( suffix.toLowerCase() ) );
 
 		// Delete all logs, no archiving!
 		if ( limit < 1 )
-		{
-			for ( File f : files )
-				f.delete();
-			return;
-		}
-
-		IO.SortableFile[] sfiles = new IO.SortableFile[files.length];
-
-		for ( int i = 0; i < files.length; i++ )
-			sfiles[i] = new IO.SortableFile( files[i] );
-
-		Arrays.sort( sfiles );
-
-		if ( sfiles.length > limit )
-			for ( int i = 0; i < sfiles.length - limit; i++ )
-				sfiles[i].f.delete();
+			Streams.forEachWithException( result, IO::deleteIfExists );
+		else
+			Streams.forEachWithException( result.sorted( new IO.PathComparatorByCreated() ).limit( limit ), IO::deleteIfExists );
 	}
 
 	public static Logger get()

@@ -9,9 +9,9 @@
  */
 package io.amelia.foundation.plugins;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
@@ -49,14 +49,14 @@ public abstract class PluginBase implements RegistrarBase
 	 */
 	public abstract Parcel getConfig();
 
-	public abstract File getConfigFile();
+	public abstract Path getConfigPath();
 
 	/**
 	 * Returns the folder that the plugin data's files are located in. The folder may not yet exist.
 	 *
 	 * @return The folder
 	 */
-	public abstract File getDataFolder();
+	public abstract Path getDataPath();
 
 	/**
 	 * Returns the plugin.yaml file containing the details for this plugin

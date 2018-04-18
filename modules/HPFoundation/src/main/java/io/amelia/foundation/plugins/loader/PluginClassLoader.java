@@ -9,10 +9,10 @@
  */
 package io.amelia.foundation.plugins.loader;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,28 +41,28 @@ public final class PluginClassLoader extends URLClassLoader
 		if ( loader.initialized )
 			throw new IllegalArgumentException( "Plugin already initialized: '" + javaPlugin.getClass().getName() + "'." );
 
-		javaPlugin.init( loader.loader, loader.description, loader.dataFolder, loader.file, loader );
+		javaPlugin.init( loader.loader, loader.description, loader.dataPath, loader.pluginPath, loader );
 		loader.initialized = true;
 	}
 
 	final Plugin plugin;
 	private final Map<String, Class<?>> classes = new HashMap<String, Class<?>>();
-	private final File dataFolder;
+	private final Path dataPath;
 	private final PluginMeta description;
-	private final File file;
 	private final JavaPluginLoader loader;
+	private final Path pluginPath;
 	private boolean initialized = false;
 
-	PluginClassLoader( final JavaPluginLoader loader, final ClassLoader parent, final PluginMeta description, final File dataFolder, final File file ) throws PluginInvalidException, MalformedURLException
+	PluginClassLoader( final JavaPluginLoader loader, final ClassLoader parent, final PluginMeta description, final Path dataPath, final Path pluginPath ) throws PluginInvalidException, MalformedURLException
 	{
-		super( new URL[] {file.toURI().toURL()}, parent );
+		super( new URL[] {pluginPath.toUri().toURL()}, parent );
 
 		Objs.notNull( loader, "Loader cannot be null" );
 
 		this.loader = loader;
 		this.description = description;
-		this.dataFolder = dataFolder;
-		this.file = file;
+		this.dataPath = dataPath;
+		this.pluginPath = pluginPath;
 
 		try
 		{

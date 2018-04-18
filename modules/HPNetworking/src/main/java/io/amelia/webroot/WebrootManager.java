@@ -10,7 +10,8 @@
 package io.amelia.webroot;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.storage.file.FileStorageDriver;
+import io.amelia.storage.StorageContainerPolicy;
+import io.amelia.storage.file.FileStorageBackend;
 import io.amelia.storage.methods.HomeContainerMethod;
 
 public class WebrootManager
@@ -21,8 +22,27 @@ public class WebrootManager
 	{
 		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_STORAGE, "webroot" );
 
-		FileStorageDriver driver = new FileStorageDriver( Kernel.getPath( PATH_WEBROOT ) );
+		FileStorageBackend driver = new FileStorageBackend( Kernel.getPath( PATH_WEBROOT ) );
 
-		new HomeContainerMethod().getEntries( driver, "(.*)(?:\\\\|\\/)config.yaml" );
+		StorageContainerPolicy policy = new StorageContainerPolicy();
+
+		// Language Files
+		policy.setLayoutContainer( "lang", StorageContainerPolicy.Strategy.CREATE );
+		// Public Files
+		policy.setLayoutContainer( "public", StorageContainerPolicy.Strategy.OPTIONAL );
+		// Resources
+		policy.setLayoutContainer( "resource", StorageContainerPolicy.Strategy.CREATE );
+		// SSL Certificates and Keys
+		policy.setLayoutContainer( "ssl", StorageContainerPolicy.Strategy.CREATE );
+		// .env
+		policy.setLayoutObject( ".env", StorageContainerPolicy.Strategy.CREATE );
+		// config.yaml
+		policy.setLayoutObject( "config.yaml", StorageContainerPolicy.Strategy.CREATE );
+		// .htaccess
+		policy.setLayoutObject( "htaccess.json", StorageContainerPolicy.Strategy.CREATE );
+		// Routes file
+		policy.setLayoutObject( "routes.json", StorageContainerPolicy.Strategy.CREATE );
+
+		new HomeContainerMethod( policy ).getEntries( driver, "(.*)(?:\\\\|\\/)config.yaml" );
 	}
 }

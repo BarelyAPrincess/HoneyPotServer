@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +33,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
 
 import io.amelia.foundation.events.AbstractEvent;
 import io.amelia.foundation.events.EventException;
@@ -272,16 +277,16 @@ public final class JavaPluginLoader implements PluginLoader
 	}
 
 	@Override
-	public PluginMeta getPluginMeta( File file ) throws PluginMetaException
+	public PluginMeta getPluginMeta( Path path ) throws PluginMetaException
 	{
-		Objs.notNull( file, "File cannot be null" );
+		Objs.notNull( path, "File cannot be null" );
 
 		JarFile jar = null;
 		InputStream stream = null;
 
 		try
 		{
-			jar = new JarFile( file );
+			jar = new JarFile( path.toFile() );
 			JarEntry entry = jar.getJarEntry( "plugin.yaml" );
 
 			if ( entry == null )
@@ -310,24 +315,22 @@ public final class JavaPluginLoader implements PluginLoader
 	}
 
 	@Override
-	public Plugin loadPlugin( File file ) throws PluginInvalidException
+	public Plugin loadPlugin( @Nonnull Path pluginPath ) throws PluginInvalidException
 	{
-		Objs.notNull( file, "File cannot be null" );
-
-		if ( !file.exists() )
-			throw new PluginInvalidException( new FileNotFoundException( file.getPath() + " does not exist" ) );
+		if ( !Files.isRegularFile( pluginPath ) )
+			throw new PluginInvalidException( new FileNotFoundException( pluginPath.toString() + " does not exist or is not a regular file" ) );
 
 		PluginMeta pluginMeta;
 		try
 		{
-			pluginMeta = getPluginMeta( file );
+			pluginMeta = getPluginMeta( pluginPath );
 		}
 		catch ( PluginMetaException ex )
 		{
 			throw new PluginInvalidException( ex );
 		}
 
-		File dataFolder = new File( file.getParentFile(), pluginMeta.getName().replaceAll( "\\W", "" ) );
+		Path dataPath = Paths.get( pluginMeta.getName().replaceAll( "\\W", "" ) ).resolve( pluginPath.getParent() );
 
 		List<String> depend = pluginMeta.getDepend();
 		if ( depend == null )
@@ -346,7 +349,7 @@ public final class JavaPluginLoader implements PluginLoader
 		PluginClassLoader loader;
 		try
 		{
-			loader = new PluginClassLoader( this, getClass().getClassLoader(), pluginMeta, dataFolder, file );
+			loader = new PluginClassLoader( this, getClass().getClassLoader(), pluginMeta, dataPath, pluginPath );
 		}
 		catch ( PluginInvalidException ex )
 		{
@@ -362,15 +365,15 @@ public final class JavaPluginLoader implements PluginLoader
 		if ( pluginMeta.getNatives().size() > 0 )
 			try
 			{
-				IO.extractNatives( pluginMeta.getNatives(), file, dataFolder );
+				IO.extractNatives( pluginMeta.getNatives(), pluginPath, dataPath );
 			}
 			catch ( IOException e )
 			{
-				Plugins.L.severe( "We had a problem trying to extract native libraries from plugin file '" + file + "':", e );
+				Plugins.L.severe( "We had a problem trying to extract native libraries from plugin file '" + pluginPath + "':", e );
 			}
 
 		// Attempts to extract bundled library files
-		IO.extractLibraries( file, dataFolder );
+		IO.extractLibraries( pluginPath, dataPath );
 
 		return loader.plugin;
 	}

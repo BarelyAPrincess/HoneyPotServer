@@ -9,8 +9,10 @@
  */
 package io.amelia.foundation.plugins;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
 
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
@@ -73,14 +77,20 @@ public class Plugins
 		} );
 	}
 
-	private static void checkUpdate( File file )
+	private static void checkUpdate( @Nonnull Path path )
 	{
-		if ( !Kernel.getPath( Kernel.PATH_UPDATES ).isDirectory() )
-			return;
-
-		File updateFile = new File( Kernel.getPath( Kernel.PATH_UPDATES ), file.getName() );
-		if ( updateFile.isFile() && IO.copy( updateFile, file ) )
-			updateFile.delete();
+		try
+		{
+			Path updatePath = Kernel.getPath( Kernel.PATH_UPDATES );
+			IO.forceCreateDirectory( updatePath );
+			Path updateFile = path.getFileName().resolve( updatePath );
+			if ( Files.isRegularFile( updateFile ) && IO.copy( updateFile, path ) )
+				Files.delete( updateFile );
+		}
+		catch ( IOException e )
+		{
+			// Do Nothing
+		}
 	}
 
 	public static void clearPlugins()
@@ -293,32 +303,30 @@ public class Plugins
 	 * File must be valid according to the current enabled Plugin interfaces
 	 * <p>
 	 *
-	 * @param file File containing the plugin to load
+	 * @param pluginPath File containing the plugin to load
 	 *
 	 * @return The Plugin instance
 	 *
 	 * @throws PluginInvalidException           Thrown when the specified file is not a valid plugin
 	 * @throws PluginDependencyUnknownException If a required dependency could not be found
 	 */
-	public static synchronized Plugin loadPlugin( File file ) throws PluginInvalidException, PluginDependencyUnknownException
+	public static synchronized Plugin loadPlugin( @Nonnull Path pluginPath ) throws PluginInvalidException, PluginDependencyUnknownException
 	{
-		Objs.notNull( file, "File cannot be null" );
-
-		checkUpdate( file );
+		checkUpdate( pluginPath );
 
 		Set<Pattern> filters = fileAssociations.keySet();
 		Plugin result = null;
 
 		for ( Pattern filter : filters )
 		{
-			String name = file.getName();
+			String name = pluginPath.getFileName().toString();
 			Matcher match = filter.matcher( name );
 
 			if ( match.find() )
 			{
 				PluginLoader loader = fileAssociations.get( filter );
 
-				result = loader.loadPlugin( file );
+				result = loader.loadPlugin( pluginPath );
 			}
 		}
 
@@ -343,78 +351,73 @@ public class Plugins
 		}
 	}
 
-	public static void loadPlugins() throws PluginException.Error
+	public static void loadPlugins() throws PluginException.Error, IOException
 	{
 		registerInterface( JavaPluginLoader.class );
 		// registerInterface( GroovyPluginLoader.class );
 
-		File pluginFolder = Kernel.getPath( Kernel.PATH_PLUGINS );
-		if ( pluginFolder.exists() )
-		{
-			Plugin[] plugins = loadPlugins( pluginFolder );
-			for ( Plugin plugin : plugins )
-				try
-				{
-					String message = String.format( "Loading %s", plugin.getMeta().getDisplayName() );
-					L.info( message );
-					plugin.onLoad();
-				}
-				catch ( Throwable ex )
-				{
-					L.log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
-				}
-		}
-		else
-			pluginFolder.mkdir();
+		Path pluginPath = Kernel.getPath( Kernel.PATH_PLUGINS );
+		IO.forceCreateDirectory( pluginPath );
+
+		Plugin[] plugins = loadPlugins( pluginPath );
+		for ( Plugin plugin : plugins )
+			try
+			{
+				String message = String.format( "Loading %s", plugin.getMeta().getDisplayName() );
+				L.info( message );
+				plugin.onLoad();
+			}
+			catch ( Throwable ex )
+			{
+				L.log( Level.SEVERE, ex.getMessage() + " initializing " + plugin.getMeta().getDisplayName() + " (Is it up to date?)", ex );
+			}
 	}
 
 	/**
 	 * Loads the plugins contained within the specified directory
 	 * <p>
 	 *
-	 * @param directory Directory to check for plugins
+	 * @param pluginPath Directory to check for plugins
 	 *
 	 * @return A list of all plugins loaded
 	 */
-	public static Plugin[] loadPlugins( File directory )
+	public static Plugin[] loadPlugins( @Nonnull Path pluginPath ) throws IOException
 	{
-		Objs.notNull( directory, "Directory cannot be null" );
-		Objs.notFalse( directory.isDirectory(), "Directory must be a directory" );
+		Objs.notFalse( Files.isDirectory( pluginPath ), "Directory must be a directory" );
 
-		List<Plugin> result = new ArrayList<Plugin>();
+		List<Plugin> result = new ArrayList<>();
 		Set<Pattern> filters = fileAssociations.keySet();
 
-		Map<String, File> plugins = new HashMap<String, File>();
+		Map<String, Path> plugins = new HashMap<>();
 		Map<String, Collection<MavenReference>> libraries = new HashMap<>();
 		Map<String, Collection<String>> dependencies = new HashMap<>();
 		Map<String, Collection<String>> softDependencies = new HashMap<>();
 
 		// This is where it figures out all possible plugins
-		for ( File file : directory.listFiles() )
-		{
+		Files.list( pluginPath ).forEach( pluginFile -> {
 			PluginLoader loader = null;
 			for ( Pattern filter : filters )
 			{
-				Matcher match = filter.matcher( file.getName() );
+				Matcher match = filter.matcher( pluginFile.getFileName().toString() );
 				if ( match.find() )
 					loader = fileAssociations.get( filter );
 			}
 
 			if ( loader == null )
-				continue;
+				return;
 
 			PluginMeta description = null;
 			try
 			{
-				description = loader.getPluginMeta( file );
+				description = loader.getPluginMeta( pluginFile );
 			}
 			catch ( PluginMetaException ex )
 			{
-				L.log( Level.SEVERE, "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
-				continue;
+				L.log( Level.SEVERE, "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "'", ex );
+				return;
 			}
 
-			plugins.put( description.getName(), file );
+			plugins.put( description.getName(), pluginFile );
 
 			Collection<String> softDependencySet = description.getSoftDepend();
 			if ( softDependencySet != null )
@@ -444,7 +447,7 @@ public class Plugins
 						shortSoftDependency.add( description.getName() );
 						softDependencies.put( loadBeforeTarget, shortSoftDependency );
 					}
-		}
+		} );
 
 		while ( !plugins.isEmpty() )
 		{
@@ -468,13 +471,13 @@ public class Plugins
 						else if ( !Libraries.loadLibrary( library ) )
 						{
 							missingDependency = false;
-							File file = plugins.get( plugin );
+							Path pluginFile = plugins.get( plugin );
 							pluginIterator.remove();
 							libraries.remove( plugin );
 							softDependencies.remove( plugin );
 							dependencies.remove( plugin );
 
-							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "' due to issue with library '" + library + "'." );
+							L.severe( "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "' due to issue with library '" + library + "'." );
 							break;
 						}
 					}
@@ -494,13 +497,13 @@ public class Plugins
 						else if ( !plugins.containsKey( dependency ) )
 						{
 							missingDependency = false;
-							File file = plugins.get( plugin );
+							Path pluginFile = plugins.get( plugin );
 							pluginIterator.remove();
 							libraries.remove( plugin );
 							softDependencies.remove( plugin );
 							dependencies.remove( plugin );
 
-							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", new PluginDependencyUnknownException( dependency ) );
+							L.severe( "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "'", new PluginDependencyUnknownException( dependency ) );
 							break;
 						}
 					}
@@ -519,19 +522,19 @@ public class Plugins
 				if ( !( dependencies.containsKey( plugin ) || softDependencies.containsKey( plugin ) ) && plugins.containsKey( plugin ) )
 				{
 					// We're clear to load, no more soft or hard dependencies left
-					File file = plugins.get( plugin );
+					Path pluginFile = plugins.get( plugin );
 					pluginIterator.remove();
 					missingDependency = false;
 
 					try
 					{
-						result.add( loadPlugin( file ) );
+						result.add( loadPlugin( pluginFile ) );
 						loadedPlugins.add( plugin );
 						continue;
 					}
 					catch ( PluginInvalidException ex )
 					{
-						L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
+						L.severe( "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "'", ex );
 					}
 				}
 			}
@@ -550,18 +553,18 @@ public class Plugins
 					{
 						softDependencies.remove( plugin );
 						missingDependency = false;
-						File file = plugins.get( plugin );
+						Path pluginFile = plugins.get( plugin );
 						pluginIterator.remove();
 
 						try
 						{
-							result.add( loadPlugin( file ) );
+							result.add( loadPlugin( pluginFile ) );
 							loadedPlugins.add( plugin );
 							break;
 						}
 						catch ( PluginInvalidException ex )
 						{
-							L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "'", ex );
+							L.severe( "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "'", ex );
 						}
 					}
 				}
@@ -570,13 +573,13 @@ public class Plugins
 				{
 					softDependencies.clear();
 					dependencies.clear();
-					Iterator<File> failedPluginIterator = plugins.values().iterator();
+					Iterator<Path> failedPluginIterator = plugins.values().iterator();
 
 					while ( failedPluginIterator.hasNext() )
 					{
-						File file = failedPluginIterator.next();
+						Path pluginFile = failedPluginIterator.next();
 						failedPluginIterator.remove();
-						L.severe( "Could not load '" + file.getPath() + "' in folder '" + directory.getPath() + "': circular dependency detected" );
+						L.severe( "Could not load '" + pluginFile.toString() + "' in folder '" + pluginPath.toString() + "': circular dependency detected" );
 					}
 				}
 			}

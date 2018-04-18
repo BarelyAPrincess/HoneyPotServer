@@ -6,9 +6,7 @@
     <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/java">
       <sourceFolder url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/java" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources">
-      <sourceFolder url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources" type="java-resource" />
-    </content>
+    <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.1" level="project" />
