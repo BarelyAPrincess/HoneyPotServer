@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/HPPermissions" />
             <option value="$PROJECT_DIR$/modules/AmeliaCommonLib" />
+            <option value="$PROJECT_DIR$/modules/AmeliaEventsLib" />
             <option value="$PROJECT_DIR$/modules/AmeliaScriptingLib" />
             <option value="$PROJECT_DIR$/modules/AmeliaStorageLib" />
             <option value="$PROJECT_DIR$/modules/HPFoundation" />

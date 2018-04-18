@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.amelia.foundation.events.Events;
+import io.amelia.events.Events;
 import io.amelia.permission.event.PermissibleEntityEvent;
 import io.amelia.permission.lang.PermissionException;
 import io.amelia.support.DateAndTime;

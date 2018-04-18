@@ -4,6 +4,8 @@
     <bytecodeTargetLevel>
       <module name="AmeliaCommonLib_main" target="1.8" />
       <module name="AmeliaCommonLib_test" target="1.8" />
+      <module name="AmeliaEventsLib_main" target="1.8" />
+      <module name="AmeliaEventsLib_test" target="1.8" />
       <module name="AmeliaLibCommon_main" target="1.8" />
       <module name="AmeliaLibCommon_test" target="1.8" />
       <module name="AmeliaLibScripting_main" target="1.8" />

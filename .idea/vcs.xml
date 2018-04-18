@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/modules/AmeliaCommonLib" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/modules/AmeliaEventsLib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/modules/AmeliaScriptingLib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/modules/AmeliaStorageLib" vcs="Git" />
   </component>

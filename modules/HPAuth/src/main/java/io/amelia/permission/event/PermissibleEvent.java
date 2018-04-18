@@ -9,7 +9,7 @@
  */
 package io.amelia.permission.event;
 
-import io.amelia.foundation.events.AbstractEvent;
+import io.amelia.events.AbstractEvent;
 
 public abstract class PermissibleEvent extends AbstractEvent
 {

@@ -11,7 +11,7 @@ package io.amelia.foundation;
 
 /**
  * Represents Applications that implement some form of TCP/IP networking.
- * Foundation is independent from the form of networking used.
+ * Foundation is independent from the method of networking implemented.
  */
 public interface NetworkedApplication
 {

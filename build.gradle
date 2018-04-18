@@ -125,6 +125,7 @@ dependencies {
 	compile project( ':AmeliaCommonLib' )
 	compile project( ':AmeliaScriptingLib' )
 	compile project( ':AmeliaStorageLib' )
+	compile project( ':AmeliaEventsLib' )
 
 	compile project( ':HPFoundation' )
 	compile project( ':HPNetworking' )
