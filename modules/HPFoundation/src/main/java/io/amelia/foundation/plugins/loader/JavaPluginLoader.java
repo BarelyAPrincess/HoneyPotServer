@@ -36,13 +36,13 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.events.AbstractEvent;
-import io.amelia.events.EventException;
-import io.amelia.events.EventHandler;
-import io.amelia.events.Events;
-import io.amelia.events.RegisteredListener;
-import io.amelia.events.builtin.PluginDisableEvent;
-import io.amelia.events.builtin.PluginEnableEvent;
+import io.amelia.foundation.events.AbstractEvent;
+import io.amelia.foundation.events.EventException;
+import io.amelia.foundation.events.EventHandler;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.RegisteredListener;
+import io.amelia.foundation.events.PluginDisableEvent;
+import io.amelia.foundation.events.PluginEnableEvent;
 import io.amelia.foundation.plugins.PluginMeta;
 import io.amelia.foundation.plugins.Plugins;
 import io.amelia.lang.DeprecatedDetail;
@@ -53,7 +53,7 @@ import io.amelia.lang.PluginMetaException;
 import io.amelia.lang.ReportingLevel;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
-import io.amelia.support.data.ParcelLoader;
+import io.amelia.data.parcel.ParcelLoader;
 
 /**
  * Represents a Java plugin loader, allowing plugins in the form of .jar

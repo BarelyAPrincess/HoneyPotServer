@@ -10,6 +10,8 @@
       <module name="AmeliaLibCommon_test" target="1.8" />
       <module name="AmeliaLibScripting_main" target="1.8" />
       <module name="AmeliaLibScripting_test" target="1.8" />
+      <module name="AmeliaLogLib_main" target="1.8" />
+      <module name="AmeliaLogLib_test" target="1.8" />
       <module name="AmeliaScriptingLib_main" target="1.8" />
       <module name="AmeliaScriptingLib_test" target="1.8" />
       <module name="AmeliaStorageLib_main" target="1.8" />

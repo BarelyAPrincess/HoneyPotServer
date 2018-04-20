@@ -31,8 +31,8 @@ import io.amelia.logcompat.Logger;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
-import io.amelia.support.data.Parcel;
-import io.amelia.support.data.ParcelLoader;
+import io.amelia.data.parcel.Parcel;
+import io.amelia.data.parcel.ParcelLoader;
 
 public abstract class Plugin extends PluginBase
 {

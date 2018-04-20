@@ -10,21 +10,24 @@
 package io.amelia.foundation;
 
 import java.io.IOException;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.amelia.foundation.binding.FacadePriority;
-import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.builtin.RunlevelEvent;
+import io.amelia.data.TypeBase;
+import io.amelia.events.Events;
+import io.amelia.foundation.bindings.FacadeRegistration;
+import io.amelia.foundation.events.RunlevelEvent;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
 import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.StartupException;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
+import io.amelia.looper.LooperRouter;
+import io.amelia.looper.MainLooper;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
@@ -90,14 +93,13 @@ public final class Foundation
 	 */
 	public static void setApplication( @Nonnull ApplicationInterface app ) throws ApplicationException.Error
 	{
-		Objs.notNull( app );
-
 		if ( isRunlevel( Runlevel.DISPOSED ) )
 			throw ApplicationException.error( "The application has been DISPOSED!" );
 		if ( Foundation.app != null )
 			throw ApplicationException.error( "The application instance has already been set!" );
 
-		Kernel.setExceptionContext( app );
+		LooperRouter.setMainLooper( new FoundationLooper( app ) );
+		Kernel.setExceptionRegistrar( app );
 
 		Foundation.app = app;
 
@@ -115,16 +117,6 @@ public final class Foundation
 	public static Runlevel getLastRunlevel()
 	{
 		return previousRunlevel;
-	}
-
-	public static ApplicationLooper getLooper()
-	{
-		return app.getLooper();
-	}
-
-	public static ApplicationRouter getRouter()
-	{
-		return app.getRouter();
 	}
 
 	public static Runlevel getRunlevel()
@@ -270,7 +262,7 @@ public final class Foundation
 	public static void setRunlevel( @Nonnull Runlevel level, @Nullable String reason )
 	{
 		Objs.notNull( level );
-		ApplicationLooper mainLooper = getLooper();
+		MainLooper mainLooper = LooperRouter.getMainLooper();
 		// If we confirm that the current thread is the one used by the ApplicationLooper, we make the runlevel change immediate instead of posting it for later.
 		if ( !mainLooper.isThreadJoined() && app.isPrimaryThread() || mainLooper.isHeldByCurrentThread() )
 			setRunlevel0( level, reason );
@@ -282,7 +274,7 @@ public final class Foundation
 	{
 		try
 		{
-			if ( getLooper().isThreadJoined() && !getLooper().isHeldByCurrentThread() )
+			if ( LooperRouter.getMainLooper().isThreadJoined() && !LooperRouter.getMainLooper().isHeldByCurrentThread() )
 				throw ApplicationException.error( "Runlevel can only be set from the application looper thread. Be more careful next time." );
 			if ( currentRunlevel == runlevel )
 				throw ApplicationException.error( "Runlevel is already set to " + runlevel.name() + ". This might be a severe race bug." );
@@ -323,7 +315,7 @@ public final class Foundation
 		}
 		catch ( ApplicationException.Error e )
 		{
-			Kernel.handleExceptions( e );
+			ExceptionReport.handleSingleException( e );
 		}
 	}
 
@@ -335,7 +327,7 @@ public final class Foundation
 	public static void setRunlevelLater( @Nonnull Runlevel level, @Nullable String reason )
 	{
 		Objs.notNull( level );
-		getLooper().postTask( () -> setRunlevel0( level, reason ) );
+		LooperRouter.getMainLooper().postTask( () -> setRunlevel0( level, reason ) );
 	}
 
 	public static void shutdown( String reason )
@@ -357,15 +349,17 @@ public final class Foundation
 		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
 
-		if ( !ConfigRegistry.config.getBoolean( ConfigKeys.DISABLE_METRICS ).orElse( false ) )
+		if ( !ConfigRegistry.config.getBoolean( Config.DISABLE_METRICS ) )
 		{
+			// TODO Implement!
+
 			// Send Metrics
 
 			final String instanceId = app.getEnv().getString( "instance-id" ).orElse( null );
 		}
 
 		// Join this thread to the main looper.
-		getLooper().joinLoop();
+		LooperRouter.getMainLooper().joinLoop();
 
 		// Sets the application to the disposed state once the joinLoop method returns exception free.
 		setRunlevel( Runlevel.DISPOSED );
@@ -376,10 +370,10 @@ public final class Foundation
 		// Static Access
 	}
 
-	public static class ConfigKeys
+	public static class Config
 	{
 		/**
-		 * Specifies built-in facades which can be registered here or by calling {@link io.amelia.foundation.binding.BoundNamespace#registerFacadeBinding(String, Class, Supplier, FacadePriority)}; {@see Bindings#bindNamespace(String)}}.
+		 * Specifies built-in facades which can be registered here or by calling {@link io.amelia.foundation.bindings.FacadeRegistration#add(FacadeRegistration.Entry)} {@see Bindings#bindNamespace(String)}}.
 		 * Benefits of using configuration for facade registration is it adds the ability for end-users to disable select facades, however, this should be used if the facade is used by scripts.
 		 *
 		 * <pre>
@@ -393,7 +387,7 @@ public final class Foundation
 		 *       priority: NORMAL
 		 * </pre>
 		 */
-		public static final String BINDINGS_FACADES = "bindings.facades";
+		public static final TypeBase BINDINGS_FACADES = new TypeBase( "bindings.facades" );
 
 		/**
 		 * Specifies a config key for disabling a application metrics.
@@ -403,9 +397,9 @@ public final class Foundation
 		 *   disableMetrics: false
 		 * </pre>
 		 */
-		public static final String DISABLE_METRICS = "app.disableMetrics";
+		public static final TypeBase.TypeBoolean DISABLE_METRICS = new TypeBase.TypeBoolean( ConfigRegistry.Config.APPLICATION_BASE, "disableMetrics", false );
 
-		private ConfigKeys()
+		private Config()
 		{
 			// Static Access
 		}

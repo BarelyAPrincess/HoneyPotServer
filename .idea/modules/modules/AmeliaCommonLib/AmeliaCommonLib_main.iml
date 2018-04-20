@@ -6,7 +6,9 @@
     <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/java">
       <sourceFolder url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/java" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources" />
+    <content url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources">
+      <sourceFolder url="file://$MODULE_DIR$/../../../../modules/AmeliaCommonLib/src/main/resources" type="java-resource" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.1" level="project" />
@@ -14,13 +16,14 @@
     <orderEntry type="library" name="Gradle: joda-time:joda-time:2.7" level="project" />
     <orderEntry type="library" name="Gradle: xmlpull:xmlpull:1.1.3.4d_b4_min" level="project" />
     <orderEntry type="library" name="Gradle: org.yaml:snakeyaml:1.13" level="project" />
-    <orderEntry type="library" name="Gradle: io.netty:netty-all:5.0.0.Alpha2" level="project" />
+    <orderEntry type="library" name="Gradle: io.netty:netty-buffer:4.1.24.Final" level="project" />
     <orderEntry type="library" name="Gradle: org.bouncycastle:bcpkix-jdk15on:1.53" level="project" />
     <orderEntry type="library" name="Gradle: org.fusesource.jansi:jansi:1.11" level="project" />
     <orderEntry type="library" name="Gradle: com.google.code.findbugs:jsr305:1.3.9" level="project" />
     <orderEntry type="library" name="Gradle: com.google.errorprone:error_prone_annotations:2.0.18" level="project" />
     <orderEntry type="library" name="Gradle: com.google.j2objc:j2objc-annotations:1.1" level="project" />
     <orderEntry type="library" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.14" level="project" />
+    <orderEntry type="library" name="Gradle: io.netty:netty-common:4.1.24.Final" level="project" />
     <orderEntry type="library" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.53" level="project" />
   </component>
 </module>

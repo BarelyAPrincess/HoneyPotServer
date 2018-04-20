@@ -16,13 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-import io.amelia.foundation.binding.BindingException;
-import io.amelia.foundation.binding.Bindings;
-import io.amelia.foundation.binding.FacadeBinding;
-import io.amelia.foundation.binding.FacadePriority;
-import io.amelia.foundation.binding.WritableBinding;
-import io.amelia.foundation.parcel.ParcelInterface;
-import io.amelia.foundation.parcel.ParcelReceiver;
+import io.amelia.data.parcel.ParcelInterface;
+import io.amelia.data.parcel.ParcelReceiver;
+import io.amelia.foundation.bindings.BindingException;
+import io.amelia.foundation.bindings.Bindings;
+import io.amelia.foundation.bindings.FacadeBinding;
+import io.amelia.foundation.bindings.FacadePriority;
+import io.amelia.foundation.bindings.WritableBinding;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ExceptionRegistrar;
 import io.amelia.lang.ExceptionReport;
@@ -30,6 +30,7 @@ import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.logcompat.Logger;
+import io.amelia.looper.LooperRouter;
 import io.amelia.storage.ConfigStorageLoader;
 import io.amelia.support.Encrypt;
 import io.amelia.support.EnumColor;
@@ -39,20 +40,19 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+/**
+ * When a {@link ApplicationInterface} is instigated, its main thread is dedicated to
+ * running a looper that takes care of managing the top-level application tasks and parcels.
+ */
 public abstract class ApplicationInterface implements VendorRegistrar, ExceptionRegistrar, ParcelInterface, ParcelReceiver
 {
 	public final Thread primaryThread = Thread.currentThread();
-	private final ApplicationLooper looper;
 	private final OptionParser optionParser = new OptionParser();
-	private final ApplicationRouter router;
 	private Env env = null;
 	private OptionSet optionSet = null;
 
 	public ApplicationInterface()
 	{
-		router = new ApplicationRouter();
-		looper = new ApplicationLooper();
-
 		optionParser.acceptsAll( Arrays.asList( "?", "h", "help" ), "Show the help" );
 		optionParser.acceptsAll( Arrays.asList( "v", "version" ), "Show the version" );
 
@@ -88,7 +88,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void dispose()
 	{
-		router.dispose();
+		LooperRouter.dispose();
 	}
 
 	@Override
@@ -114,11 +114,6 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		return Optional.ofNullable( optionSet.valuesOf( arg ) ).filter( l -> l.size() > 0 ).map( l -> ( Integer ) l.get( 0 ) );
 	}
 
-	public ApplicationLooper getLooper()
-	{
-		return looper;
-	}
-
 	public OptionParser getOptionParser()
 	{
 		return optionParser;
@@ -128,11 +123,6 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		checkOptionSet();
 		return optionSet;
-	}
-
-	public ApplicationRouter getRouter()
-	{
-		return router;
 	}
 
 	public Optional<String> getStringArgument( String arg )
@@ -235,7 +225,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			 *   priority: NORMAL
 			 * }
 			 */
-			ConfigMap facades = ConfigRegistry.getChild( Foundation.ConfigKeys.BINDINGS_FACADES );
+			ConfigMap facades = ConfigRegistry.config.getChild( Foundation.Config.BINDINGS_FACADES );
 			if ( facades != null )
 				facades.getChildren().forEach( each -> {
 					if ( each.hasChild( "class" ) )
@@ -275,14 +265,12 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 
 	void quitSafely()
 	{
-		router.quit( true );
-		looper.quitSafely();
+		LooperRouter.quitSafely();
 	}
 
 	void quitUnsafe()
 	{
-		router.quit( false );
-		looper.quitUnsafe();
+		LooperRouter.quitUnsafely();
 	}
 
 	public void showBanner( Logger logger )

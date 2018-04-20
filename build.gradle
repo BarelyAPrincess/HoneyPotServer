@@ -126,6 +126,7 @@ dependencies {
 	compile project( ':AmeliaScriptingLib' )
 	compile project( ':AmeliaStorageLib' )
 	compile project( ':AmeliaEventsLib' )
+	compile project( ':AmeliaLogLib' )
 
 	compile project( ':HPFoundation' )
 	compile project( ':HPNetworking' )
@@ -137,6 +138,7 @@ dependencies {
 	// compile group: 'org.reflections', name: 'reflections', version: '0.9.9'
 
 	// Used for Networking HTTP and TCP
+	// compile group: 'io.netty', name: 'netty-all', version: '4.1.23.Final'
 	// compile group: 'io.netty', name: 'netty-all', version: '5.0.0.Alpha2'
 
 	// Used to Make Database Connections

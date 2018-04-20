@@ -10,11 +10,11 @@
 package io.amelia.permission;
 
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.events.EventDispatcher;
-import io.amelia.events.EventHandler;
-import io.amelia.events.EventPriority;
+import io.amelia.foundation.events.EventDispatcher;
+import io.amelia.foundation.events.EventHandler;
+import io.amelia.foundation.events.EventPriority;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.foundation.binding.AppBindings;
+import io.amelia.foundation.bindings.AppBindings;
 import io.amelia.foundation.facades.interfaces.PermissionService;
 import io.amelia.foundation.service.IPermission;
 import io.amelia.foundation.service.IWhitelist;

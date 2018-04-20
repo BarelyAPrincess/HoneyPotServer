@@ -11,20 +11,20 @@ package io.amelia;
 
 import java.io.InputStream;
 
+import io.amelia.data.parcel.ParcelCarrier;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.NetworkedApplication;
 import io.amelia.foundation.PropDevMeta;
-import io.amelia.foundation.parcel.ParcelCarrier;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ParcelException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
+import io.amelia.looper.LooperRouter;
 import io.amelia.networking.NetworkLoader;
-import io.amelia.support.Encrypt;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.Runlevel;
@@ -106,7 +106,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			}
 		}
 		if ( currentRunlevel == MAINLOOP )
-			getLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
+			LooperRouter.getMainLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
 		if ( currentRunlevel == SHUTDOWN )
 		{
 

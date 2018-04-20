@@ -8,6 +8,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib.iml" group="AmeliaEventsLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib_main.iml" group="AmeliaEventsLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaEventsLib/AmeliaEventsLib_test.iml" group="AmeliaEventsLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib.iml" group="AmeliaLogLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib_main.iml" group="AmeliaLogLib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaLogLib/AmeliaLogLib_test.iml" group="AmeliaLogLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib.iml" group="AmeliaScriptingLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_main.iml" group="AmeliaScriptingLib" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/AmeliaScriptingLib/AmeliaScriptingLib_test.iml" group="AmeliaScriptingLib" />
@@ -17,9 +20,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation.iml" group="HPFoundation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_main.iml" group="HPFoundation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPFoundation/HPFoundation_test.iml" group="HPFoundation" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog.iml" group="HPLog" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_main.iml" group="HPLog" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPLog/HPLog_test.iml" group="HPLog" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking.iml" group="HPNetworking" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_main.iml" group="HPNetworking" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" filepath="$PROJECT_DIR$/.idea/modules/modules/HPNetworking/HPNetworking_test.iml" group="HPNetworking" />

@@ -31,10 +31,10 @@ import javax.annotation.Nonnull;
 
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
-import io.amelia.events.EventHandlers;
-import io.amelia.events.EventPriority;
-import io.amelia.events.Events;
-import io.amelia.events.builtin.RunlevelEvent;
+import io.amelia.foundation.events.EventHandlers;
+import io.amelia.foundation.events.EventPriority;
+import io.amelia.foundation.events.Events;
+import io.amelia.foundation.events.RunlevelEvent;
 import io.amelia.foundation.plugins.loader.JavaPluginLoader;
 import io.amelia.foundation.plugins.loader.Plugin;
 import io.amelia.foundation.plugins.loader.PluginClassLoader;

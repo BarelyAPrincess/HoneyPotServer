@@ -10,12 +10,11 @@
 package io.amelia.main;
 
 import io.amelia.HoneyPotServer;
+import io.amelia.events.Events;
 import io.amelia.foundation.Foundation;
-import io.amelia.foundation.events.Events;
-import io.amelia.foundation.events.builtin.RunlevelEvent;
+import io.amelia.foundation.events.RunlevelEvent;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.networking.NetworkLoader;
-import io.amelia.http.HTTPWorker;
 import io.amelia.networking.udp.UDPWorker;
 import io.amelia.support.Runlevel;
 
@@ -64,7 +63,7 @@ public class EntryPoint
 			// Make sure I'm the only process with my instanceId running
 			if ( event.getRunLevel() == Runlevel.NETWORKING )
 			{
-				new HTTPWorker();
+				// new HTTPWorker();
 			}
 		} );
 

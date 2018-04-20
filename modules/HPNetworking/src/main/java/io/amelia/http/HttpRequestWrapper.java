@@ -17,16 +17,12 @@ import com.chiorichan.account.lang.AccountException;
 import com.chiorichan.account.lang.AccountResult;
 import com.chiorichan.net.NetworkManager;
 import com.chiorichan.session.Session;
-import com.chiorichan.session.SessionContext;
 import com.chiorichan.session.SessionModule;
-import com.chiorichan.session.SessionWrapper;
 import com.chiorichan.site.DomainMapping;
 import com.chiorichan.site.Site;
 import com.chiorichan.site.SiteModule;
-import com.chiorichan.tasks.Timings;
 import com.chiorichan.utils.UtilHttp;
 import com.chiorichan.utils.UtilMaps;
-import com.chiorichan.utils.UtilNet;
 import com.chiorichan.utils.UtilObjects;
 import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Charsets;
@@ -37,6 +33,7 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
+import java.net.HttpCookie;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -55,11 +52,19 @@ import java.util.stream.Stream;
 
 import io.amelia.ServerLoader;
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.http.session.SessionContext;
+import io.amelia.http.session.SessionWrapper;
 import io.amelia.lang.EnumColor;
-import io.amelia.lang.HttpError;
-import io.amelia.logging.experimental.LogEvent;
+import io.amelia.logging.LogEvent;
 import io.amelia.messaging.MessageSender;
+import io.amelia.support.DateAndTime;
+import io.amelia.support.Http;
+import io.amelia.support.HttpRequestContext;
+import io.amelia.support.NIO;
+import io.amelia.support.Objs;
 import io.amelia.support.Versioning;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.WebrootManager;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.Cookie;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -70,6 +75,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.ssl.SslHandler;
+import sun.net.www.protocol.http.HttpAuthenticator;
 
 /**
  * Wraps the Netty HttpRequest and provides shortcut methods
@@ -91,90 +97,72 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	}
 
 	/**
-	 * The original Netty Channel
-	 */
-	private final Channel channel;
-
-	/**
-	 * The size of the posted content
-	 */
-	int contentSize = 0;
-
-	/**
 	 * Cookie Cache
 	 */
 	final Set<HttpCookie> cookies = new HashSet<>();
-
 	/**
 	 * The Get Map
 	 */
 	final Map<String, String> getMap = new TreeMap<>();
-
 	/**
 	 * The {@link HttpHandler} for this request
 	 */
 	final HttpHandler handler;
-
-	/**
-	 * The original Netty Http Request
-	 */
-	private final HttpRequest http;
-
 	/**
 	 * Instance of LogEvent used by this request
 	 */
 	final LogEvent log;
-
 	/**
 	 * The Post Map
 	 */
 	final Map<String, String> postMap = new TreeMap<>();
-
 	/**
 	 * The time of this request
 	 */
 	final long requestTime;
-
 	/**
 	 * The paired HttpResponseWrapper
 	 */
 	final HttpResponseWrapper response;
-
 	/**
 	 * The URI Rewrite Map
 	 */
 	final Map<String, String> rewriteMap = new TreeMap<>();
-
 	/**
 	 * Server Cookie Cache
 	 */
 	final Set<HttpCookie> serverCookies = new HashSet<>();
-
-	/**
-	 * Server Variables
-	 */
-	HttpVariableMapper vars = new HttpVariableMapper();
-
 	/**
 	 * Is this a SSL request
 	 */
 	final boolean ssl;
-
 	/**
 	 * Files uploaded with this request
 	 */
 	final Map<String, UploadedFile> uploadedFiles = new HashMap<>();
-
+	/**
+	 * The original Netty Channel
+	 */
+	private final Channel channel;
+	/**
+	 * The original Netty Http Request
+	 */
+	private final HttpRequest http;
+	/**
+	 * The size of the posted content
+	 */
+	int contentSize = 0;
+	/**
+	 * Server Variables
+	 */
+	HttpVariableMapper vars = new HttpVariableMapper();
+	private HttpAuthenticator auth = null;
+	private DomainMapping domainMapping;
+	private boolean nonceProcessed = false;
 	/**
 	 * The requested URI
 	 */
 	private String uri = null;
-
-	private boolean nonceProcessed = false;
-
-	private HttpAuthenticator auth = null;
-
-	private DomainMapping domainMapping;
 
 	HttpRequestWrapper( Channel channel, HttpRequest http, HttpHandler handler, boolean ssl, LogEvent log ) throws IOException, HttpError
 	{
@@ -187,18 +175,18 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		putRequest( this );
 
 		// Set Time of this Request
-		requestTime = Timings.epoch();
+		requestTime = DateAndTime.epoch();
 
 		// Create a matching HttpResponseWrapper
 		response = new HttpResponseWrapper( this, log );
 
-		String host = UtilHttp.normalize( getHostDomain() );
+		String host = Http.hostnameNormalize( getHostDomain() );
 
-		if ( UtilObjects.isEmpty( host ) )
-			this.domainMapping = SiteModule.i().getDefaultSite().getDefaultMapping();
-		else if ( UtilNet.isValidIPv4( host ) || UtilNet.isValidIPv6( host ) )
+		if ( Objs.isEmpty( host ) )
+			this.domainMapping = WebrootManager.getDefaultWebroot().getDefaultMapping();
+		else if ( NIO.isValidIPv4( host ) || NIO.isValidIPv6( host ) )
 		{
-			Stream<DomainMapping> domains = SiteModule.i().getDomainMappingsByIp( host );
+			Stream<DomainMapping> domains = WebrootManager.getDomainMappingsByIp( host );
 			domainMapping = domains.count() == 0 ? null : domains.findFirst().orElse( null );
 		}
 		else
@@ -228,7 +216,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			}
 		}
 
-		// log.log( Level.INFO, "SiteId: " + site.getSiteId() + ", ParentDomain: " + rootDomain + ", ChildDomain: " + childDomain );
+		// log.log( Level.INFO, "SiteId: " + webroot.getSiteId() + ", ParentDomain: " + rootDomain + ", ChildDomain: " + childDomain );
 
 		try
 		{
@@ -281,6 +269,28 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	protected void finish0()
 	{
 		// Do Nothing
+	}
+
+	public boolean forceNoTrailingSlash()
+	{
+		if ( uri.endsWith( "/" ) )
+		{
+			NetworkManager.getLogger().fine( "Forcing URL redirect to have NO trailing slash." );
+			getResponse().sendRedirect( getFullDomain() + uri.substring( uri.length() - 1 ), HttpCode.HTTP_MOVED_PERM );
+			return true;
+		}
+		return false;
+	}
+
+	public boolean forceTrailingSlash()
+	{
+		if ( !UtilObjects.isEmpty( uri ) && !uri.endsWith( "/" ) )
+		{
+			NetworkManager.getLogger().fine( "Forcing URL redirect to have trailing slash." );
+			getResponse().sendRedirect( getFullDomain() + uri + "/", HttpCode.HTTP_MOVED_PERM );
+			return true;
+		}
+		return false;
 	}
 
 	public String getArgument( String key )
@@ -357,6 +367,11 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return channel;
 	}
 
+	public String getChildDomain()
+	{
+		return domainMapping.getChildDomain();
+	}
+
 	public int getContentLength()
 	{
 		return contentSize;
@@ -377,19 +392,15 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return Collections.unmodifiableSet( cookies );
 	}
 
-	public Set<HttpCookie> getServerCookies()
-	{
-		return Collections.unmodifiableSet( serverCookies );
-	}
-
 	public DomainMapping getDomainMapping()
 	{
 		return domainMapping;
 	}
 
-	public String getRootDomain()
+	void setDomainMapping( DomainMapping domainMapping )
 	{
-		return domainMapping.getRootDomain();
+		UtilObjects.notNull( domainMapping );
+		this.domainMapping = domainMapping;
 	}
 
 	public String getFullDomain()
@@ -415,31 +426,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public String getFullDomain( String subdomain, String prefix )
 	{
 		return prefix + ( UtilObjects.isEmpty( subdomain ) ? getHostDomain() : subdomain + "." + getRootDomain() ) + "/";
-	}
-
-	public String getTopDomain()
-	{
-		return getFullDomain( null, ssl );
-	}
-
-	public String getTopDomain( boolean ssl )
-	{
-		return getFullDomain( null, ssl );
-	}
-
-	public String getTopDomain( String subdomain )
-	{
-		return getFullDomain( subdomain, ssl );
-	}
-
-	public String getTopDomain( String subdomain, boolean ssl )
-	{
-		return getTopDomain( subdomain, ssl ? "https://" : "http://" );
-	}
-
-	public String getTopDomain( String subdomain, String prefix )
-	{
-		return prefix + ( UtilObjects.isEmpty( subdomain ) ? "" : subdomain + "." ) + getRootDomain() + "/";
 	}
 
 	public String getFullUrl()
@@ -525,6 +511,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	 * Similar to {@link #getInetAddr(boolean)}
 	 *
 	 * @param detectCDN Try to detect the use of CDNs, e.g., CloudFlare, IP headers when set to false.
+	 *
 	 * @return the remote connections IP address
 	 */
 	public InetAddress getInetAddr( boolean detectCDN )
@@ -541,11 +528,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			}
 
 		return ( ( InetSocketAddress ) channel.remoteAddress() ).getAddress();
-	}
-
-	public WebInterpreter getInterpreter()
-	{
-		return handler.getInterpreter();
 	}
 
 	/**
@@ -565,6 +547,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	 * https://support.cloudflare.com/hc/en-us/articles/200170786-Why-do-my-server-logs-show-CloudFlare-s-IPs-using-CloudFlare-
 	 *
 	 * @param detectCDN Try to detect the use of CDNs, e.g., CloudFlare, IP headers when set to false.
+	 *
 	 * @return the remote connections IP address as a string
 	 */
 	public String getIpAddress( boolean detectCDN )
@@ -592,7 +575,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	}
 
 	@Override
-	public Site getLocation()
+	public Webroot getLocation()
 	{
 		return domainMapping.getSite();
 	}
@@ -632,6 +615,11 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public int getRemotePort()
 	{
 		return ( ( InetSocketAddress ) channel.remoteAddress() ).getPort();
+	}
+
+	public HttpRequestContext getRequestContext()
+	{
+		return handler.getInterpreter();
 	}
 
 	public String getRequestHost()
@@ -675,6 +663,11 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return rewriteMap;
 	}
 
+	public String getRootDomain()
+	{
+		return domainMapping.getRootDomain();
+	}
+
 	public HttpVariableMapper getServer()
 	{
 		return vars;
@@ -686,14 +679,39 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return serverCookies.stream().filter( c -> c.getKey().equals( key ) ).findFirst().orElse( null );
 	}
 
+	public Set<HttpCookie> getServerCookies()
+	{
+		return Collections.unmodifiableSet( serverCookies );
+	}
+
 	public Site getSite()
 	{
 		return getLocation();
 	}
 
-	public String getChildDomain()
+	public String getTopDomain()
 	{
-		return domainMapping.getChildDomain();
+		return getFullDomain( null, ssl );
+	}
+
+	public String getTopDomain( boolean ssl )
+	{
+		return getFullDomain( null, ssl );
+	}
+
+	public String getTopDomain( String subdomain )
+	{
+		return getFullDomain( subdomain, ssl );
+	}
+
+	public String getTopDomain( String subdomain, boolean ssl )
+	{
+		return getTopDomain( subdomain, ssl ? "https://" : "http://" );
+	}
+
+	public String getTopDomain( String subdomain, String prefix )
+	{
+		return prefix + ( UtilObjects.isEmpty( subdomain ) ? "" : subdomain + "." ) + getRootDomain() + "/";
 	}
 
 	public Map<String, UploadedFile> getUploadedFiles()
@@ -747,6 +765,11 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return uri;
 	}
 
+	void setUri( String uri )
+	{
+		this.uri = uri.startsWith( "/" ) ? uri : "/" + uri;
+	}
+
 	public String getUserAgent()
 	{
 		return getHeader( "User-Agent" );
@@ -766,28 +789,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		if ( auth == null && getHeader( HttpHeaderNames.AUTHORIZATION ) != null )
 			auth = new HttpAuthenticator( this );
-	}
-
-	public boolean forceNoTrailingSlash()
-	{
-		if ( uri.endsWith( "/" ) )
-		{
-			NetworkManager.getLogger().fine( "Forcing URL redirect to have NO trailing slash." );
-			getResponse().sendRedirect( getFullDomain() + uri.substring( uri.length() - 1 ), HttpCode.HTTP_MOVED_PERM );
-			return true;
-		}
-		return false;
-	}
-
-	public boolean forceTrailingSlash()
-	{
-		if ( !UtilObjects.isEmpty( uri ) && !uri.endsWith( "/" ) )
-		{
-			NetworkManager.getLogger().fine( "Forcing URL redirect to have trailing slash." );
-			getResponse().sendRedirect( getFullDomain() + uri + "/", HttpCode.HTTP_MOVED_PERM );
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -1012,6 +1013,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	 * Second checks if the present accounts has the specified permission.
 	 *
 	 * @param permission
+	 *
 	 * @throws IOException
 	 */
 	public void requireLogin( String permission ) throws IOException
@@ -1041,17 +1043,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		getBinding().setVariable( "request", this );
 		getBinding().setVariable( "response", getResponse() );
-	}
-
-	void setDomainMapping( DomainMapping domainMapping )
-	{
-		UtilObjects.notNull( domainMapping );
-		this.domainMapping = domainMapping;
-	}
-
-	void setUri( String uri )
-	{
-		this.uri = uri.startsWith( "/" ) ? uri : "/" + uri;
 	}
 
 	protected boolean validateLogins() throws HttpError
@@ -1153,7 +1144,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		// Will we ever be using a session on more than one domains?
 		if ( !getRootDomain().isEmpty() && session.getSessionCookie() != null && !session.getSessionCookie().getDomain().isEmpty() )
 			if ( !session.getSessionCookie().getDomain().endsWith( getRootDomain() ) )
-				NetworkManager.getLogger().warning( "The site `" + getSite().getId() + "` specifies the session cookie domain as `" + session.getSessionCookie().getDomain() + "` but the request was made on domain `" + getRootDomain() + "`. The session will not remain persistent." );
+				NetworkManager.getLogger().warning( "The webroot `" + getSite().getId() + "` specifies the session cookie domain as `" + session.getSessionCookie().getDomain() + "` but the request was made on domain `" + getRootDomain() + "`. The session will not remain persistent." );
 
 		return false;
 	}

@@ -12,6 +12,7 @@ package io.amelia.foundation;
 import io.amelia.foundation.tasks.Tasks;
 import io.amelia.lang.ApplicationException;
 import io.amelia.logcompat.LogBuilder;
+import io.amelia.looper.LooperRouter;
 import io.amelia.support.Runlevel;
 
 /**
@@ -41,7 +42,7 @@ public abstract class DefaultApplication extends ApplicationInterface
 	public void onRunlevelChange( Runlevel previousRunlevel, Runlevel currentRunlevel ) throws ApplicationException.Error
 	{
 		if ( currentRunlevel == Runlevel.MAINLOOP )
-			getLooper().postTaskRepeatingLater( () -> Tasks.heartbeat( Foundation.getLooper().getLastPolledMillis() ), 50L, 50L );
+			LooperRouter.getMainLooper().postTaskRepeatingLater( () -> Tasks.heartbeat( LooperRouter.getMainLooper().getLastPolledMillis() ), 50L, 50L );
 		if ( currentRunlevel == Runlevel.SHUTDOWN )
 		{
 			LogBuilder.get().info( "Shutting Down Task Manager..." );

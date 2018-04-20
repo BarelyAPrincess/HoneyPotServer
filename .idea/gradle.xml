@@ -12,10 +12,10 @@
             <option value="$PROJECT_DIR$/HPPermissions" />
             <option value="$PROJECT_DIR$/modules/AmeliaCommonLib" />
             <option value="$PROJECT_DIR$/modules/AmeliaEventsLib" />
+            <option value="$PROJECT_DIR$/modules/AmeliaLogLib" />
             <option value="$PROJECT_DIR$/modules/AmeliaScriptingLib" />
             <option value="$PROJECT_DIR$/modules/AmeliaStorageLib" />
             <option value="$PROJECT_DIR$/modules/HPFoundation" />
-            <option value="$PROJECT_DIR$/modules/HPLog" />
             <option value="$PROJECT_DIR$/modules/HPNetworking" />
           </set>
         </option>

@@ -17,7 +17,7 @@ import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
-import io.amelia.support.data.Parcel;
+import io.amelia.data.parcel.Parcel;
 
 public abstract class PluginBase implements RegistrarBase
 {

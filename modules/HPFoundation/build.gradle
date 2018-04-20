@@ -18,7 +18,8 @@ dependencies {
 
 	compile project( ':AmeliaCommonLib' )
 	compile project( ':AmeliaStorageLib' )
-	compile project( ':HPLog' )
+	compile project( ':AmeliaEventsLib' )
+	compile project( ':AmeliaLogLib' )
 
 	required group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 

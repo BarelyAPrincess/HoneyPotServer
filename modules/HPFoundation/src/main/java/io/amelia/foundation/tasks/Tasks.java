@@ -25,12 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 
-import io.amelia.foundation.Foundation;
+import io.amelia.foundation.Kernel;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
+import io.amelia.looper.Delays;
+import io.amelia.looper.LooperRouter;
 import io.amelia.support.Objs;
 
 /**
@@ -38,8 +37,7 @@ import io.amelia.support.Objs;
  */
 public class Tasks
 {
-	public static final Logger L = LogBuilder.get( Tasks.class );
-
+	public static final Kernel.Logger L = Kernel.getLogger( Tasks.class );
 	private static final long RECENT_TICKS = 20L;
 	/**
 	 * Holds tasks that are awaiting for there owners to be enabled
@@ -53,7 +51,7 @@ public class Tasks
 	/**
 	 * Main thread logic only
 	 */
-	private static final PriorityQueue<Task> pending = new PriorityQueue<Task>( 10, new Comparator<Task>()
+	private static final PriorityQueue<Task> pending = new PriorityQueue<>( 10, new Comparator<Task>()
 	{
 		@Override
 		public int compare( final Task o1, final Task o2 )
@@ -68,7 +66,7 @@ public class Tasks
 	/**
 	 * Main thread logic only
 	 */
-	private static final List<Task> temp = new ArrayList<Task>();
+	private static final List<Task> temp = new ArrayList<>();
 	private static volatile long currentTick = -1;
 	private static AsyncTaskDebugger debugHead = new AsyncTaskDebugger( -1, null, null )
 	{
@@ -87,6 +85,14 @@ public class Tasks
 	 * Tail of a linked-list. AtomicReference only matters when adding to queue
 	 */
 	private static final AtomicReference<Task> tail = new AtomicReference<>( head );
+
+	static
+	{
+		// XXX Temporary workaround to make the Tasks work once again - be sure to use the new Looper feature to replace the deprecated Tasks.
+		LooperRouter.getMainLooper().postTaskRepeatingNext( () -> {
+			heartbeat( LooperRouter.getMainLooper().getLastPolledMillis() );
+		}, Delays.MILLIS_50 );
+	}
 
 	private static void addTask( final Task task )
 	{
@@ -317,13 +323,13 @@ public class Tasks
 	 */
 	public static void heartbeat( final long currentTick )
 	{
-		if ( !Foundation.isPrimaryThread() )
-			throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
+		// if ( !Foundation.isPrimaryThread() )
+		// throw new IllegalStateException( "We detected that the heartbeat method was called on a thread other than the primary thread. This is a really bad thing and could cause concurrency issues if left unchecked." );
 
 		Tasks.currentTick = currentTick;
 		final List<Task> temp = Tasks.temp;
 		parsePending();
-		while ( isReady( currentTick ) )
+		for ( ; isReady( currentTick ); )
 		{
 			final Task task = pending.remove();
 			if ( task.getPeriod() < -1L )
@@ -341,7 +347,7 @@ public class Tasks
 				}
 				catch ( final Throwable throwable )
 				{
-					L.log( Level.WARNING, String.format( "Task #%s for %s generated an exception", task.getTaskId(), task.getRegistrar().getName() ), throwable );
+					L.warning( String.format( "Task #%s for %s generated an exception", task.getTaskId(), task.getRegistrar().getName() ), throwable );
 				}
 				parsePending();
 			}
@@ -349,8 +355,7 @@ public class Tasks
 			{
 				debugTail = debugTail.setNext( new AsyncTaskDebugger( currentTick + RECENT_TICKS, task.getRegistrar(), task.getTaskClass() ) );
 				executor.execute( task );
-				// We don't need to parse pending
-				// (async tasks must live with race-conditions if they attempt to cancel between these few lines of code)
+				// We don't need to parse pending (async tasks must live with race-conditions if they attempt to cancel between these few lines of code)
 			}
 			final long period = task.getPeriod(); // State consistency
 			if ( period > 0 )
@@ -466,7 +471,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTask( RegistrarBase creator, CallableTask callable )
@@ -486,7 +491,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTaskAsynchronously( RegistrarBase creator, CallableTask callable )
@@ -505,7 +510,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTaskLater( RegistrarBase creator, long delay, CallableTask callable )
@@ -526,7 +531,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTaskLaterAsynchronously( RegistrarBase creator, long delay, CallableTask callable )
@@ -546,7 +551,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTaskTimer( RegistrarBase creator, long delay, long period, CallableTask callable )
@@ -582,7 +587,7 @@ public class Tasks
 	 *
 	 * @throws IllegalArgumentException if creator is null
 	 * @throws IllegalArgumentException if task is null
-	 * @deprecated Use {@link io.amelia.foundation.ApplicationRouter} instead.
+	 * @deprecated Use {@link LooperRouter} instead.
 	 */
 	@Deprecated
 	public static Task runTaskTimerAsynchronously( RegistrarBase creator, long delay, long period, CallableTask callable )

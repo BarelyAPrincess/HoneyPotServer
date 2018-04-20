@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.xml.ws.BindingProvider;
-
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.lang.SessionException;
 import io.amelia.messaging.MessageSender;
