@@ -217,13 +217,13 @@ public class HttpRequestContext extends FileContext
 
 			if ( selectedFile != null )
 			{
-				request.forceTrailingSlash();
+				request.enforceTrailingSlash();
 				uri = uri + "/" + selectedFile.getName();
 				dest = new File( request.getDomainMapping().directory(), uri );
 			}
 			else if ( AppConfig.get().getBoolean( "server.allowDirectoryListing" ) )
 			{
-				request.forceTrailingSlash();
+				request.enforceTrailingSlash();
 				isDirectoryRequest = true;
 				return;
 			}
@@ -301,7 +301,7 @@ public class HttpRequestContext extends FileContext
 		if ( dest.exists() && !dest.isDirectory() )
 		{
 			if ( Objs.isEmpty( action ) && dest.getName().contains( ".controller." ) )
-				request.forceTrailingSlash();
+				request.enforceTrailingSlash();
 			readFromFile( dest );
 		}
 		else

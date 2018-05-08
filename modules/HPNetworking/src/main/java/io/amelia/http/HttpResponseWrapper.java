@@ -9,20 +9,8 @@
  */
 package io.amelia.http;
 
-import com.chiorichan.event.EventDispatcher;
-import com.chiorichan.event.http.HttpErrorEvent;
-import com.chiorichan.event.http.HttpExceptionEvent;
-import com.chiorichan.factory.ScriptingContext;
-import com.chiorichan.factory.api.Builtin;
-import com.chiorichan.net.NetworkManager;
-import com.chiorichan.session.Session;
-import com.chiorichan.session.SessionException;
-import com.chiorichan.utils.UtilObjects;
-import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,11 +24,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
+import io.amelia.events.Events;
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.lang.EnumColor;
-import io.amelia.lang.HttpError;
-import io.amelia.logging.experimental.LogEvent;
-import io.amelia.support.Versioning;
+import io.amelia.http.apache.ApacheHandler;
+import io.amelia.logging.LogEvent;
+import io.amelia.scripting.api.Web;
+import io.amelia.support.Objs;
+import io.amelia.support.Strs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -65,15 +55,15 @@ import io.netty.handler.stream.ChunkedStream;
  */
 public class HttpResponseWrapper
 {
-	Charset encoding = Charsets.UTF_8;
+	final Map<String, String> annotations = Maps.newHashMap();
 	final Map<String, String> headers = Maps.newHashMap();
+	final LogEvent log;
+	final HttpRequestWrapper request;
+	Charset encoding = Charsets.UTF_8;
 	ApacheHandler htaccess = null;
 	String httpContentType = "text/html";
 	HttpResponseStatus httpStatus = HttpResponseStatus.OK;
-	final LogEvent log;
 	ByteBuf output = Unpooled.buffer();
-	final Map<String, String> annotations = Maps.newHashMap();
-	final HttpRequestWrapper request;
 	HttpResponseStage stage = HttpResponseStage.READING;
 
 	protected HttpResponseWrapper( HttpRequestWrapper request, LogEvent log )
@@ -109,6 +99,16 @@ public class HttpResponseWrapper
 	public String getAnnotation( String key )
 	{
 		return annotations.get( key );
+	}
+
+	public Charset getEncoding()
+	{
+		return encoding;
+	}
+
+	public void setEncoding( String encoding )
+	{
+		this.encoding = Charset.forName( encoding );
 	}
 
 	public int getHttpCode()
@@ -159,6 +159,7 @@ public class HttpResponseWrapper
 	 * Prints a single string of text to the buffered output
 	 *
 	 * @param var string of text.
+	 *
 	 * @throws IOException if there was a problem with the output buffer.
 	 */
 	public void print( String var ) throws IOException
@@ -167,10 +168,42 @@ public class HttpResponseWrapper
 			write( var.getBytes( encoding ) );
 	}
 
+	private void printMap( Map<String, ?> map ) throws IOException
+	{
+		ArrayList<Object> tbl = new ArrayList<Object>()
+		{{
+			if ( Objs.isEmpty( map ) )
+				add( "(empty)" );
+			else
+				for ( Entry<String, ?> e : map.entrySet() )
+					if ( !Objs.isNull( e.getKey() ) )
+						add( new ArrayList<Object>()
+						{{
+							add( "<b>" + Strs.escapeHtml( e.getKey() ) + "</b>" );
+							try
+							{
+								if ( Objs.isNull( e.getValue() ) )
+									add( "(null)" );
+								else if ( e.getKey().toLowerCase().contains( "password" ) )
+									add( "(hidden)" );
+								else
+									add( Strs.escapeHtml( Objs.castToString( e.getValue() ) ) );
+							}
+							catch ( ClassCastException e )
+							{
+								add( "(non-string)" );
+							}
+						}} );
+		}};
+
+		println( Web.createTable( tbl, "debug-getTable" ) );
+	}
+
 	/**
 	 * Prints a single string of text with a line return to the buffered output
 	 *
 	 * @param var string of text.
+	 *
 	 * @throws IOException if there was a problem with the output buffer.
 	 */
 	public void println( String var ) throws IOException
@@ -186,7 +219,7 @@ public class HttpResponseWrapper
 
 	public void sendError( Exception e ) throws IOException
 	{
-		UtilObjects.notNull( e );
+		Objs.notNull( e );
 
 		if ( e instanceof HttpError && e.getCause() == null )
 			sendError( ( ( HttpError ) e ).getHttpCode(), ( ( HttpError ) e ).getReason(), e.getMessage() );
@@ -233,7 +266,7 @@ public class HttpResponseWrapper
 
 		// Trigger an internal Error Event to notify plugins of a possible problem.
 		HttpErrorEvent event = new HttpErrorEvent( request, statusCode, statusReason, ConfigRegistry.i().getBoolean( "server.developmentMode" ) );
-		EventDispatcher.i().callEvent( event );
+		Events.callEvent( event );
 
 		statusCode = event.getHttpCode();
 		statusReason = event.getHttpReason();
@@ -299,10 +332,10 @@ public class HttpResponseWrapper
 							for ( UploadedFile file : files )
 								add( new ArrayList<Object>()
 								{{
-									add( file.getOrigFileName() );
+									add( file.getFileName() );
 									add( file.getFileSize() );
 									add( file.getMimeType() );
-									add( file.getMD5() );
+									add( file.getMD5Hash() );
 								}} );
 					}};
 					List<String> cols = new ArrayList<String>()
@@ -360,40 +393,9 @@ public class HttpResponseWrapper
 		}
 	}
 
-	private void printMap( Map<String, ?> map ) throws IOException
-	{
-		ArrayList<Object> tbl = new ArrayList<Object>()
-		{{
-			if ( UtilObjects.isEmpty( map ) )
-				add( "(empty)" );
-			else
-				for ( Entry<String, ?> e : map.entrySet() )
-					if ( !UtilObjects.isNull( e.getKey() ) )
-						add( new ArrayList<Object>()
-						{{
-							add( "<b>" + UtilStrings.escapeHtml( e.getKey() ) + "</b>" );
-							try
-							{
-								if ( UtilObjects.isNull( e.getValue() ) )
-									add( "(null)" );
-								else if ( e.getKey().toLowerCase().contains( "password" ) )
-									add( "(hidden)" );
-								else
-									add( UtilStrings.escapeHtml( UtilObjects.castToString( e.getValue() ) ) );
-							}
-							catch ( ClassCastException e )
-							{
-								add( "(non-string)" );
-							}
-						}} );
-		}};
-
-		println( Builtin.createTable( tbl, "debug-getTable" ) );
-	}
-
 	public void sendException( Throwable cause ) throws IOException
 	{
-		UtilObjects.notNull( cause );
+		Objs.notNull( cause );
 
 		if ( stage == HttpResponseStage.CLOSED )
 			throw new IllegalStateException( "You can't access sendException method within this HttpResponse because the connection has been closed." );
@@ -411,7 +413,7 @@ public class HttpResponseWrapper
 
 		if ( Versioning.isDevelopment() )
 		{
-			if ( UtilObjects.isEmpty( event.getErrorHtml() ) )
+			if ( Objs.isEmpty( event.getErrorHtml() ) )
 			{
 				if ( cause == null )
 					sendError( httpCode, null, "No Stacktrace Available!" );
@@ -735,19 +737,9 @@ public class HttpResponseWrapper
 		this.encoding = encoding;
 	}
 
-	public void setEncoding( String encoding )
-	{
-		this.encoding = Charset.forName( encoding );
-	}
-
-	public Charset getEncoding()
-	{
-		return encoding;
-	}
-
 	public void setHeader( String key, Object val )
 	{
-		headers.put( key, UtilObjects.castToStringWithException( val ) );
+		headers.put( key, Objs.castToStringWithException( val ) );
 	}
 
 	public void setStatus( HttpResponseStatus httpStatus )
@@ -803,6 +795,7 @@ public class HttpResponseWrapper
 	 * Writes a byte array to the buffered output.
 	 *
 	 * @param bytes byte array to print
+	 *
 	 * @throws IOException if there was a problem with the output buffer.
 	 */
 	public void write( byte[] bytes ) throws IOException
@@ -817,6 +810,7 @@ public class HttpResponseWrapper
 	 * Writes a ByteBuf to the buffered output
 	 *
 	 * @param buf byte buffer to print
+	 *
 	 * @throws IOException if there was a problem with the output buffer.
 	 */
 	public void write( ByteBuf buf ) throws IOException

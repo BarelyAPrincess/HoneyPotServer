@@ -31,7 +31,7 @@ import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
-import io.amelia.storage.ConfigStorageLoader;
+import io.amelia.support.ConfigStorageLoader;
 import io.amelia.support.Encrypt;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Objs;

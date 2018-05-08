@@ -37,17 +37,17 @@ import io.amelia.support.Timing;
 
 /**
  * Used for accessing majority of the HP Foundation API.<br />
- * The first call to of this class MUST be the thread that will initiate the main loop.
+ * The first call to this class MUST be the thread that will initiate the main loop.
  * <p>
  * <p>
  * Your main() should look like this:
  * <code>
- * App.prepare();
+ * Foundation.prepare();
  * ...
  * ImplementedApplication app = new ImplementedApplication();
- * App.setApplication( app );
+ * Foundation.setApplication( app );
  * ...
- * App.start();
+ * Foundation.start();
  * </code>
  */
 public final class Foundation

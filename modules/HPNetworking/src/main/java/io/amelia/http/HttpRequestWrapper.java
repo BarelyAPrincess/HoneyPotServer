@@ -9,22 +9,6 @@
  */
 package io.amelia.http;
 
-import com.chiorichan.account.Account;
-import com.chiorichan.account.AccountManager;
-import com.chiorichan.account.auth.AccountAuthenticator;
-import com.chiorichan.account.lang.AccountDescriptiveReason;
-import com.chiorichan.account.lang.AccountException;
-import com.chiorichan.account.lang.AccountResult;
-import com.chiorichan.net.NetworkManager;
-import com.chiorichan.session.Session;
-import com.chiorichan.session.SessionModule;
-import com.chiorichan.site.DomainMapping;
-import com.chiorichan.site.Site;
-import com.chiorichan.site.SiteModule;
-import com.chiorichan.utils.UtilHttp;
-import com.chiorichan.utils.UtilMaps;
-import com.chiorichan.utils.UtilObjects;
-import com.chiorichan.utils.UtilStrings;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
@@ -41,6 +25,7 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,21 +35,23 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
-import io.amelia.ServerLoader;
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.ImplDevMeta;
+import io.amelia.foundation.Kernel;
+import io.amelia.http.mappings.DomainMapping;
+import io.amelia.http.session.Session;
 import io.amelia.http.session.SessionContext;
 import io.amelia.http.session.SessionWrapper;
-import io.amelia.lang.EnumColor;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.WebrootManager;
 import io.amelia.logging.LogEvent;
-import io.amelia.messaging.MessageSender;
+import io.amelia.networking.NetworkLoader;
 import io.amelia.support.DateAndTime;
+import io.amelia.support.EnumColor;
 import io.amelia.support.Http;
 import io.amelia.support.HttpRequestContext;
 import io.amelia.support.NIO;
 import io.amelia.support.Objs;
-import io.amelia.support.Versioning;
-import io.amelia.http.webroot.Webroot;
-import io.amelia.http.webroot.WebrootManager;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.Cookie;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -75,7 +62,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.ssl.SslHandler;
-import sun.net.www.protocol.http.HttpAuthenticator;
 
 /**
  * Wraps the Netty HttpRequest and provides shortcut methods
@@ -155,7 +141,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	/**
 	 * Server Variables
 	 */
-	HttpVariableMapper vars = new HttpVariableMapper();
+	HttpVariableMap vars = new HttpVariableMap();
 	private HttpAuthenticator auth = null;
 	private DomainMapping domainMapping;
 	private boolean nonceProcessed = false;
@@ -194,20 +180,20 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			if ( "localhost".equals( host ) && !getIpAddress().startsWith( "127" ) && !getIpAddress().equals( getLocalIpAddress() ) )
 				throw new HttpError( 418 );
 
-			this.domainMapping = SiteModule.i().getDomainMapping( host );
+			this.domainMapping = WebrootManager.getDomainMapping( host );
 		}
 
 		if ( domainMapping == null )
-			domainMapping = SiteModule.i().getDefaultSite().getMappings( "" ).findFirst().orElse( null );
+			domainMapping = WebrootManager.getDefaultSite().getMappings( "" ).findFirst().orElse( null );
 
-		if ( getUri().startsWith( "/~" ) && domainMapping.getSite() == SiteModule.i().getDefaultSite() )
+		if ( getUri().startsWith( "/~" ) && domainMapping.getSite() == WebrootManager.getDefaultSite() )
 		{
 			String uri = getUri();
 			int inx = uri.indexOf( "/", 2 );
 			String siteId = uri.substring( 2, inx == -1 ? uri.length() - 2 : inx );
 			String newUri = inx == -1 ? "/" : uri.substring( inx );
 
-			Site siteTmp = SiteModule.i().getSiteById( siteId );
+			Site siteTmp = WebrootManager.getSiteById( siteId );
 			if ( !siteId.equals( "wisp" ) && siteTmp != null )
 			{
 				/* Get the declared default domain mapping, the first if otherwise */
@@ -237,8 +223,8 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		}
 
 		// Decode Cookies
-		// String var1 = URLDecoder.decode( http.headers().getAndConvert( "Cookie" ), Charsets.UTF_8.displayName() );
-		String var1 = http.headers().getAndConvert( "Cookie" );
+		// String var1 = URLDecoder.decode( http.headers().get( "Cookie" ), Charsets.UTF_8.displayName() );
+		String var1 = http.headers().get( "Cookie" );
 
 		// TODO Find a way to fix missing invalid stuff
 
@@ -265,32 +251,30 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		initServerVars();
 	}
 
+	public void enforceTrailingSlash( boolean enforce )
+	{
+		if ( enforce )
+		{
+			if ( !Objs.isEmpty( uri ) && !uri.endsWith( "/" ) )
+			{
+				NetworkLoader.L.fine( "Forcing URL redirect to have trailing slash." );
+				getResponse().sendRedirect( getFullDomain() + uri + "/", HttpCode.HTTP_MOVED_PERM );
+			}
+		}
+		else
+		{
+			if ( uri.endsWith( "/" ) )
+			{
+				NetworkLoader.L.fine( "Forcing URL redirect to have NO trailing slash." );
+				getResponse().sendRedirect( getFullDomain() + uri.substring( uri.length() - 1 ), HttpCode.HTTP_MOVED_PERM );
+			}
+		}
+	}
+
 	@Override
 	protected void finish0()
 	{
 		// Do Nothing
-	}
-
-	public boolean forceNoTrailingSlash()
-	{
-		if ( uri.endsWith( "/" ) )
-		{
-			NetworkManager.getLogger().fine( "Forcing URL redirect to have NO trailing slash." );
-			getResponse().sendRedirect( getFullDomain() + uri.substring( uri.length() - 1 ), HttpCode.HTTP_MOVED_PERM );
-			return true;
-		}
-		return false;
-	}
-
-	public boolean forceTrailingSlash()
-	{
-		if ( !UtilObjects.isEmpty( uri ) && !uri.endsWith( "/" ) )
-		{
-			NetworkManager.getLogger().fine( "Forcing URL redirect to have trailing slash." );
-			getResponse().sendRedirect( getFullDomain() + uri + "/", HttpCode.HTTP_MOVED_PERM );
-			return true;
-		}
-		return false;
 	}
 
 	public String getArgument( String key )
@@ -315,19 +299,19 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public boolean getArgumentBoolean( String key )
 	{
 		String rtn = getArgument( key, "0" ).toLowerCase();
-		return UtilObjects.isTrue( rtn );
+		return Objs.isTrue( rtn );
 	}
 
 	public double getArgumentDouble( String key )
 	{
 		Object obj = getArgument( key, "-1.0" );
-		return UtilObjects.castToDouble( obj );
+		return Objs.castToDouble( obj );
 	}
 
 	public int getArgumentInt( String key )
 	{
 		Object obj = getArgument( key, "-1" );
-		return UtilObjects.castToInt( obj );
+		return Objs.castToInt( obj );
 	}
 
 	public Set<String> getArgumentKeys()
@@ -342,7 +326,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public long getArgumentLong( String key )
 	{
 		Object obj = getArgument( key, "-1" );
-		return UtilObjects.castToLong( obj );
+		return Objs.castToLong( obj );
 	}
 
 	public HttpAuthenticator getAuth()
@@ -399,7 +383,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	void setDomainMapping( DomainMapping domainMapping )
 	{
-		UtilObjects.notNull( domainMapping );
+		Objs.notNull( domainMapping );
 		this.domainMapping = domainMapping;
 	}
 
@@ -425,7 +409,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public String getFullDomain( String subdomain, String prefix )
 	{
-		return prefix + ( UtilObjects.isEmpty( subdomain ) ? getHostDomain() : subdomain + "." + getRootDomain() ) + "/";
+		return prefix + ( Objs.isEmpty( subdomain ) ? getHostDomain() : subdomain + "." + getRootDomain() ) + "/";
 	}
 
 	public String getFullUrl()
@@ -467,7 +451,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		try
 		{
-			return http.headers().getAndConvert( key );
+			return http.headers().get( key );
 		}
 		catch ( NullPointerException | IndexOutOfBoundsException e )
 		{
@@ -482,13 +466,13 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public String getHost()
 	{
-		return UtilHttp.normalize( http.headers().getAndConvert( "Host" ) );
+		return Http.hostnameNormalize( http.headers().get( "Host" ) );
 	}
 
 	public String getHostDomain()
 	{
 		if ( http.headers().contains( "Host" ) )
-			return http.headers().getAndConvert( "Host" ).split( "\\:" )[0];
+			return http.headers().get( "Host" ).split( "\\:" )[0];
 		return null;
 	}
 
@@ -519,7 +503,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		if ( detectCDN && http.headers().contains( "CF-Connecting-IP" ) )
 			try
 			{
-				return InetAddress.getByName( http.headers().getAndConvert( "CF-Connecting-IP" ) );
+				return InetAddress.getByName( http.headers().get( "CF-Connecting-IP" ) );
 			}
 			catch ( UnknownHostException e )
 			{
@@ -554,7 +538,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		// TODO Implement other CDNs
 		if ( detectCDN && http.headers().contains( "CF-Connecting-IP" ) )
-			return http.headers().getAndConvert( "CF-Connecting-IP" );
+			return http.headers().get( "CF-Connecting-IP" );
 
 		return ( ( InetSocketAddress ) channel.remoteAddress() ).getAddress().getHostAddress();
 	}
@@ -577,7 +561,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	@Override
 	public Webroot getLocation()
 	{
-		return domainMapping.getSite();
+		return domainMapping.getWebroot();
 	}
 
 	public HttpRequest getOriginal()
@@ -619,7 +603,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public HttpRequestContext getRequestContext()
 	{
-		return handler.getInterpreter();
+		return handler.getRequestContext();
 	}
 
 	public String getRequestHost()
@@ -668,7 +652,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return domainMapping.getRootDomain();
 	}
 
-	public HttpVariableMapper getServer()
+	public HttpVariableMap getServer()
 	{
 		return vars;
 	}
@@ -682,11 +666,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public Set<HttpCookie> getServerCookies()
 	{
 		return Collections.unmodifiableSet( serverCookies );
-	}
-
-	public Site getSite()
-	{
-		return getLocation();
 	}
 
 	public String getTopDomain()
@@ -711,7 +690,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public String getTopDomain( String subdomain, String prefix )
 	{
-		return prefix + ( UtilObjects.isEmpty( subdomain ) ? "" : subdomain + "." ) + getRootDomain() + "/";
+		return prefix + ( Objs.isEmpty( subdomain ) ? "" : subdomain + "." ) + getRootDomain() + "/";
 	}
 
 	public Map<String, UploadedFile> getUploadedFiles()
@@ -759,7 +738,8 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			if ( uri.contains( "?" ) )
 				uri = uri.substring( 0, uri.indexOf( "?" ) );
 
-			uri = UtilStrings.trimFront( uri, '/' );
+			if ( uri.startsWith( "/" ) )
+				uri = uri.substring( 1 );
 		}
 
 		return uri;
@@ -775,9 +755,14 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return getHeader( "User-Agent" );
 	}
 
+	public Webroot getWebRoot()
+	{
+		return getLocation();
+	}
+
 	public String getWebSocketLocation( HttpObject req )
 	{
-		return ( isSecure() ? "wss://" : "ws://" ) + getHost() + "/wisp/websocket";
+		return ( isSecure() ? "wss://" : "ws://" ) + getHost() + "/~wisp/ws";
 	}
 
 	public boolean hasArgument( String key )
@@ -796,45 +781,47 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	 */
 	private void initServerVars()
 	{
-		vars.put( ServerVars.SERVER_SOFTWARE, Versioning.getProduct() );
-		vars.put( ServerVars.SERVER_VERSION, Versioning.getVersion() );
-		vars.put( ServerVars.SERVER_ADMIN, ConfigRegistry.i().getString( "server.admin", "me@chiorichan.com" ) );
-		vars.put( ServerVars.SERVER_SIGNATURE, Versioning.getProduct() + " Version " + Versioning.getVersion() );
-		vars.put( ServerVars.HTTP_VERSION, http.protocolVersion() );
-		vars.put( ServerVars.HTTP_ACCEPT, getHeader( "Accept" ) );
-		vars.put( ServerVars.HTTP_USER_AGENT, getUserAgent() );
-		vars.put( ServerVars.HTTP_CONNECTION, getHeader( "Connection" ) );
-		vars.put( ServerVars.HTTP_HOST, getLocalHostName() );
-		vars.put( ServerVars.HTTP_ACCEPT_ENCODING, getHeader( "Accept-Encoding" ) );
-		vars.put( ServerVars.HTTP_ACCEPT_LANGUAGE, getHeader( "Accept-Language" ) );
-		vars.put( ServerVars.HTTP_X_REQUESTED_WITH, getHeader( "X-requested-with" ) );
-		vars.put( ServerVars.REMOTE_HOST, getRemoteHostname() );
-		vars.put( ServerVars.REMOTE_ADDR, getIpAddress() );
-		vars.put( ServerVars.REMOTE_PORT, getRemotePort() );
-		vars.put( ServerVars.REQUEST_TIME, getRequestTime() );
-		vars.put( ServerVars.REQUEST_URI, getUri() );
-		vars.put( ServerVars.CONTENT_LENGTH, getContentLength() );
-		vars.put( ServerVars.SERVER_IP, getLocalIpAddress() );
-		vars.put( ServerVars.SERVER_NAME, Versioning.getProductSimple() );
-		vars.put( ServerVars.SERVER_PORT, getLocalPort() );
-		vars.put( ServerVars.HTTPS, isSecure() );
-		vars.put( ServerVars.DOCUMENT_ROOT, ServerLoader.getWebRoot() );
-		vars.put( ServerVars.SESSION, this );
+		ImplDevMeta meta = Kernel.getDevMeta();
+
+		vars.put( HttpServerKey.SERVER_SOFTWARE, meta.getProductName() );
+		vars.put( HttpServerKey.SERVER_VERSION, meta.getVersionString() );
+		vars.put( HttpServerKey.SERVER_ADMIN, meta.getDeveloperEmail() );
+		vars.put( HttpServerKey.SERVER_SIGNATURE, meta.getProductSignature() );
+		vars.put( HttpServerKey.HTTP_VERSION, http.protocolVersion() );
+		vars.put( HttpServerKey.HTTP_ACCEPT, getHeader( "Accept" ) );
+		vars.put( HttpServerKey.HTTP_USER_AGENT, getUserAgent() );
+		vars.put( HttpServerKey.HTTP_CONNECTION, getHeader( "Connection" ) );
+		vars.put( HttpServerKey.HTTP_HOST, getLocalHostName() );
+		vars.put( HttpServerKey.HTTP_ACCEPT_ENCODING, getHeader( "Accept-Encoding" ) );
+		vars.put( HttpServerKey.HTTP_ACCEPT_LANGUAGE, getHeader( "Accept-Language" ) );
+		vars.put( HttpServerKey.HTTP_X_REQUESTED_WITH, getHeader( "X-requested-with" ) );
+		vars.put( HttpServerKey.REMOTE_HOST, getRemoteHostname() );
+		vars.put( HttpServerKey.REMOTE_ADDR, getIpAddress() );
+		vars.put( HttpServerKey.REMOTE_PORT, getRemotePort() );
+		vars.put( HttpServerKey.REQUEST_TIME, getRequestTime() );
+		vars.put( HttpServerKey.REQUEST_URI, getUri() );
+		vars.put( HttpServerKey.CONTENT_LENGTH, getContentLength() );
+		vars.put( HttpServerKey.SERVER_IP, getLocalIpAddress() );
+		vars.put( HttpServerKey.SERVER_NAME, meta.getProductName() );
+		vars.put( HttpServerKey.SERVER_PORT, getLocalPort() );
+		vars.put( HttpServerKey.HTTPS, isSecure() );
+		vars.put( HttpServerKey.DOCUMENT_ROOT, ServerLoader.getWebRoot() );
+		vars.put( HttpServerKey.SESSION, this );
 
 		if ( getAuth() != null )
 		{
 			// Implement authorization as an optional builtin manageable feature, e.g., .htdigest.
 
 			if ( auth.isDigest() )
-				vars.put( ServerVars.AUTH_DIGEST, getAuth().getDigest() );
+				vars.put( HttpServerKey.AUTH_DIGEST, auth.getDigest() );
 
 			if ( auth.isBasic() )
 			{
-				vars.put( ServerVars.AUTH_USER, getAuth().getUsername() );
-				vars.put( ServerVars.AUTH_PW, getAuth().getPassword() );
+				vars.put( HttpServerKey.AUTH_USER, auth.getUsername() );
+				vars.put( HttpServerKey.AUTH_PW, auth.getPassword() );
 			}
 
-			vars.put( ServerVars.AUTH_TYPE, getAuth().getType() );
+			vars.put( HttpServerKey.AUTH_TYPE, auth.getType() );
 		}
 	}
 
@@ -863,7 +850,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public boolean isWebsocketRequest()
 	{
-		return "/fw/websocket".equals( getUri() );
+		return "/~wisp/ws".equals( getUri() );
 	}
 
 	public HttpMethod method()
@@ -916,7 +903,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 					if ( key == null || key.isEmpty() )
 						key = "1";
 
-					Map<String, String> hash = Maps.newLinkedHashMap();
+					Map<String, String> hash = new LinkedHashMap<>();
 					hash.put( "0", ( String ) o );
 					hash.put( key, val );
 					result.put( var, hash );
@@ -931,7 +918,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 						int cnt = 0;
 						while ( map.containsKey( cnt ) )
 							cnt++;
-						key = "" + cnt;
+						key = Integer.toString( cnt );
 					}
 
 					map.put( key, val );
@@ -943,7 +930,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 					if ( key.isEmpty() )
 						key = "0";
 
-					Map<String, String> hash = Maps.newLinkedHashMap();
+					Map<String, String> hash = new LinkedHashMap<>();
 					hash.put( key, val );
 					result.put( var, hash );
 				}
@@ -956,7 +943,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 				if ( key.isEmpty() )
 					key = "0";
 
-				Map<String, String> hash = Maps.newLinkedHashMap();
+				Map<String, String> hash = new LinkedHashMap<>();
 				hash.put( key, val );
 				result.put( var, hash );
 			}
@@ -1107,12 +1094,12 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 				if ( Versioning.isDevelopment() && result.getDescriptiveReason() == AccountDescriptiveReason.INTERNAL_ERROR )
 					throw new HttpError( e, msg );
 
-				AccountManager.getLogger().warning( EnumColor.RED + "Failed Login [id='" + username + "',hasPassword='" + !UtilObjects.isEmpty( password ) + "',authenticator='plaintext',reason='" + msg + "']" );
+				AccountManager.getLogger().warning( EnumColor.RED + "Failed Login [id='" + username + "',hasPassword='" + !Objs.isEmpty( password ) + "',authenticator='plaintext',reason='" + msg + "']" );
 				getResponse().sendLoginPage( result.getMessage(), null, target );
 			}
 			catch ( Throwable t )
 			{
-				if ( Versioning.isDevelopment() )
+				if ( Kernel.isDevelopment() )
 					throw new HttpError( t, AccountDescriptiveReason.INTERNAL_ERROR.getMessage() );
 
 				AccountManager.getLogger().severe( "Login has thrown an internal server error", t );
@@ -1144,7 +1131,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		// Will we ever be using a session on more than one domains?
 		if ( !getRootDomain().isEmpty() && session.getSessionCookie() != null && !session.getSessionCookie().getDomain().isEmpty() )
 			if ( !session.getSessionCookie().getDomain().endsWith( getRootDomain() ) )
-				NetworkManager.getLogger().warning( "The webroot `" + getSite().getId() + "` specifies the session cookie domain as `" + session.getSessionCookie().getDomain() + "` but the request was made on domain `" + getRootDomain() + "`. The session will not remain persistent." );
+				NetworkLoader.L.warning( "The webroot `" + getSite().getId() + "` specifies the session cookie domain as `" + session.getSessionCookie().getDomain() + "` but the request was made on domain `" + getRootDomain() + "`. The session will not remain persistent." );
 
 		return false;
 	}

@@ -29,20 +29,51 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.net.ssl.SSLException;
 
+import io.amelia.data.apache.ApacheConfiguration;
 import io.amelia.data.parcel.Parcel;
+import io.amelia.database.Database;
+import io.amelia.database.elegant.ElegantQueryTable;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Env;
+import io.amelia.foundation.Kernel;
 import io.amelia.http.localization.Localization;
 import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.mappings.DomainNode;
+import io.amelia.http.routes.Routes;
 import io.amelia.http.session.SessionPersistenceMethod;
+import io.amelia.lang.WebrootException;
 import io.amelia.scripting.ScriptBinding;
 import io.amelia.scripting.ScriptingFactory;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
+import io.amelia.support.StoragePolicy;
 import io.netty.handler.ssl.SslContext;
 
 public class Webroot
 {
+	// Storage Policy for Webroot Directories
+	private final static StoragePolicy STORAGE_POLICY = new StoragePolicy();
+
+	static
+	{
+		// Language Files
+		STORAGE_POLICY.setLayoutDirectory( "lang", StoragePolicy.Strategy.CREATE );
+		// Public Files
+		STORAGE_POLICY.setLayoutDirectory( "public", StoragePolicy.Strategy.OPTIONAL );
+		// Resources
+		STORAGE_POLICY.setLayoutDirectory( "resource", StoragePolicy.Strategy.CREATE );
+		// SSL Certificates and Keys
+		STORAGE_POLICY.setLayoutDirectory( "ssl", StoragePolicy.Strategy.CREATE );
+		// .env
+		STORAGE_POLICY.setLayoutFile( ".env", StoragePolicy.Strategy.CREATE );
+		// config.parcel
+		STORAGE_POLICY.setLayoutFile( "config.yaml", StoragePolicy.Strategy.CREATE );
+		// .htaccess
+		STORAGE_POLICY.setLayoutFile( "htaccess.json", StoragePolicy.Strategy.CREATE );
+		// Routes file
+		STORAGE_POLICY.setLayoutFile( "routes.json", StoragePolicy.Strategy.CREATE );
+	}
+
 	/* Domain Mappings */
 	protected final List<DomainMapping> mappings = new ArrayList<>();
 	/* Environment variables */
@@ -54,20 +85,18 @@ public class Webroot
 	/* Scripting variables binding */
 	private final ScriptBinding binding = new ScriptBinding();
 	private final List<String> cachePatterns = new ArrayList<>();
+	/* Configuration file */
+	private final Path configFile;
 	/* Root directory */
-	private final File directory;
+	private final Path directory;
 	/* ScriptingFactory instance, for interpreting script files */
 	private final ScriptingFactory factory = ScriptingFactory.create( binding );
-	/* Configuration file */
-	private final Path file;
 	/* Listening IP addresses */
 	private final List<String> ips;
-	/* SiteManager instance */
-	private final SiteModule mgr;
 	/* URL routes */
 	private final Routes routes;
 	/* Id */
-	private final String siteId;
+	private final String webrootId;
 	/* Site Database */
 	private Database database;
 	private String defDomain = null;
@@ -76,66 +105,64 @@ public class Webroot
 	/* Session persistence methods */
 	private SessionPersistenceMethod sessionPersistence = SessionPersistenceMethod.COOKIE;
 	/* Title */
-	private String siteTitle;
+	private String webrootTitle;
 
-	Webroot( @Nonnull SiteModule mgr, @Nonnull String siteId )
+	Webroot( @Nonnull String webrootId )
 	{
-		this.mgr = mgr;
-		this.siteId = siteId;
+		this.webrootId = webrootId;
 
-		file = null;
-		parcel = new YamlConfiguration();
+		configFile = null;
+		parcel = new Parcel();
 		ips = new ArrayList<>();
-		siteTitle = Versioning.getProduct();
-		database = StorageModule.i().getDatabase();
+		webrootTitle = Kernel.getDevMeta().getProductName();
+		database = Database.getDatabase();
 
-		directory = SiteModule.checkSiteRoot( siteId );
-		localization = new Localization( directoryLang() );
+		directory = WebrootManager.checkSiteRoot( webrootId );
+		localization = new Localization( getLangDirectory() );
 		routes = new Routes( this );
 		env = new Env();
 	}
 
-	Webroot( @Nonnull SiteModule mgr, @Nonnull File file, @Nonnull Parcel parcel, @Nonnull Env env ) throws ApplicationException
+	Webroot( @Nonnull Path path, @Nonnull Parcel parcel, @Nonnull Env env ) throws WebrootException.Error
 	{
 		// parcel.setEnvironmentVariables( env.getProperties() );
 
-		this.mgr = mgr;
-		this.file = file;
+		this.configFile = configFile;
 		this.parcel = parcel;
 		this.env = env;
 
 		if ( !parcel.has( "webroot.id" ) )
-			throw new SiteException( "Site id is missing!" );
+			throw new WebrootException.Error( "Site id is missing!" );
 
-		siteId = parcel.getString( "webroot.id" ).toLowerCase();
-		siteTitle = parcel.getString( "webroot.title", ConfigRegistry.i().getString( "framework.sites.defaultTitle", "Unnamed Site" ) );
+		webrootId = parcel.getString( "webroot.id" ).toLowerCase();
+		webrootTitle = parcel.getString( "webroot.title", ConfigRegistry.i().getString( "framework.sites.defaultTitle", "Unnamed Site" ) );
 
 		ips = parcel.getAsList( "webroot.listen", new ArrayList<>() );
 
 		for ( String ip : ips )
 			if ( !UtilNet.isValidIPv4( ip ) && !UtilNet.isValidIPv6( ip ) )
-				mgr.getLogger().warning( String.format( "Site '%s' is set to listen on ip '%s', but the ip does not match the valid IPv4 or IPv6 regex formula.", siteId, ip ) );
+				mgr.getLogger().warning( String.format( "Site '%s' is set to listen on ip '%s', but the ip does not match the valid IPv4 or IPv6 regex formula.", webrootId, ip ) );
 			else if ( !UtilNet.isAddressAssigned( ip ) )
-				mgr.getLogger().warning( String.format( "Site '%s' is set to listen on ip '%s', but that address is not assigned to any network interfaces.", siteId, ip ) );
+				mgr.getLogger().warning( String.format( "Site '%s' is set to listen on ip '%s', but that address is not assigned to any network interfaces.", webrootId, ip ) );
 
 		if ( ips.contains( "localhost" ) )
 			throw new SiteException( "Sites are not permitted to listen on hostname 'localhost', this hostname is reserved for the default webroot." );
 
-		if ( SiteModule.i().getSiteById( siteId ) != null )
-			throw new SiteException( String.format( "There already exists a webroot by the provided webroot id '%s'", siteId ) );
+		if ( WebrootManager.i().getSiteById( webrootId ) != null )
+			throw new SiteException( String.format( "There already exists a webroot by the provided webroot id '%s'", webrootId ) );
 
-		StorageModule.getLogger().info( String.format( "Loading webroot '%s' with title '%s' from YAML file.", siteId, siteTitle ) );
+		StorageModule.getLogger().info( String.format( "Loading webroot '%s' with title '%s' from YAML file.", webrootId, webrootTitle ) );
 
-		directory = SiteModule.checkSiteRoot( siteId );
+		directory = WebrootManager.checkSiteRoot( webrootId );
 
-		this.localization = new Localization( directoryLang() );
+		this.localization = new Localization( getLangDirectory() );
 
 		if ( !parcel.has( "webroot.web-allowed-origin" ) )
 			parcel.set( "webroot.web-allowed-origin", "*" );
 
 		mapDomain( parcel.getConfigurationSection( "webroot.domains", true ) );
 
-		File ssl = directory( "ssl" );
+		File ssl = getDirectory( "ssl" );
 		IO.forceCreateDirectory( ssl );
 
 		String sslCertFile = parcel.getString( "webroot.sslCert" );
@@ -153,14 +180,14 @@ public class Webroot
 			}
 			catch ( SSLException | FileNotFoundException | CertificateException e )
 			{
-				mgr.getLogger().severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", siteId, UtilIO.relPath( sslCert ), UtilIO.relPath( sslKey ), sslSecret != null && !sslSecret.isEmpty() ), e );
+				mgr.getLogger().severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", webrootId, UtilIO.relPath( sslCert ), UtilIO.relPath( sslKey ), sslSecret != null && !sslSecret.isEmpty() ), e );
 			}
 		}
 
 		try
 		{
 			if ( EventDispatcher.i().callEventWithException( new SiteLoadEvent( this ) ).isCancelled() )
-				throw new SiteException( String.format( "Loading of webroot '%s' was cancelled by an internal event.", siteId ) );
+				throw new SiteException( String.format( "Loading of webroot '%s' was cancelled by an internal event.", webrootId ) );
 		}
 		catch ( EventException e )
 		{
@@ -187,15 +214,15 @@ public class Webroot
 				if ( result.hasExceptions() )
 				{
 					if ( result.hasException( FileNotFoundException.class ) )
-						mgr.getLogger().severe( String.format( "Failed to eval onLoadScript '%s' for webroot '%s' because the file was not found.", script, siteId ) );
+						mgr.getLogger().severe( String.format( "Failed to eval onLoadScript '%s' for webroot '%s' because the file was not found.", script, webrootId ) );
 					else
 					{
-						mgr.getLogger().severe( String.format( "Exception caught while evaluate onLoadScript '%s' for webroot '%s'", script, siteId ) );
+						mgr.getLogger().severe( String.format( "Exception caught while evaluate onLoadScript '%s' for webroot '%s'", script, webrootId ) );
 						ExceptionReport.printExceptions( result.getExceptions() );
 					}
 				}
 				else
-					mgr.getLogger().info( String.format( "Finished evaluate onLoadScript '%s' for webroot '%s' with result: %s", script, siteId, result.getString( true ) ) );
+					mgr.getLogger().info( String.format( "Finished evaluate onLoadScript '%s' for webroot '%s' with result: %s", script, webrootId, result.getString( true ) ) );
 			}
 
 		ConfigurationSection archive = parcel.getConfigurationSection( "archive", true );
@@ -245,20 +272,20 @@ public class Webroot
 				long nextRun = archive.getLong( "lastRun" ) < 1L ? 600L : lastRun > timer ? 600L : timer - lastRun;
 				final Site site = this;
 
-				mgr.getLogger().info( String.format( "%s%sScheduled webroot archive for %s {nextRun: %s, interval: %s}", EnumColor.AQUA, EnumColor.NEGATIVE, siteId, nextRun, timer ) );
+				mgr.getLogger().info( String.format( "%s%sScheduled webroot archive for %s {nextRun: %s, interval: %s}", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, nextRun, timer ) );
 
-				TaskManager.instance().scheduleSyncRepeatingTask( SiteModule.i(), nextRun, timer, () -> {
+				TaskManager.instance().scheduleSyncRepeatingTask( WebrootManager.i(), nextRun, timer, () -> {
 					Logger l = mgr.getLogger();
-					l.info( String.format( "%s%sRunning archive for webroot %s...", EnumColor.AQUA, EnumColor.NEGATIVE, siteId ) );
+					l.info( String.format( "%s%sRunning archive for webroot %s...", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId ) );
 
-					SiteModule.cleanupBackups( siteId, ".zip", archive.getInt( "keep", 3 ) );
+					WebrootManager.cleanupBackups( webrootId, ".zip", archive.getInt( "keep", 3 ) );
 					archive.set( "lastRun", Timings.epoch() );
 
 					File dir = ConfigRegistry.i().getDirectory( "archive", "archive" );
-					dir = new File( dir, siteId );
+					dir = new File( dir, webrootId );
 					dir.mkdirs();
 
-					File zip = new File( dir, new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + siteId + ".zip" );
+					File zip = new File( dir, new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + webrootId + ".zip" );
 
 					try
 					{
@@ -266,15 +293,15 @@ public class Webroot
 					}
 					catch ( IOException e )
 					{
-						l.severe( String.format( "%s%sFailed archiving webroot %s to %s", EnumColor.RED, EnumColor.NEGATIVE, siteId, zip.getAbsolutePath() ), e );
+						l.severe( String.format( "%s%sFailed archiving webroot %s to %s", EnumColor.RED, EnumColor.NEGATIVE, webrootId, zip.getAbsolutePath() ), e );
 						return;
 					}
 
-					l.info( String.format( "%s%sFinished archiving webroot %s to %s", EnumColor.AQUA, EnumColor.NEGATIVE, siteId, zip.getAbsolutePath() ) );
+					l.info( String.format( "%s%sFinished archiving webroot %s to %s", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, zip.getAbsolutePath() ) );
 				} );
 			}
 			else
-				mgr.getLogger().warning( String.format( "Failed to initialize webroot backup for webroot %s, interval did not match regex '[0-9]+[dhmsDHMS]?'.", siteId ) );
+				mgr.getLogger().warning( String.format( "Failed to initialize webroot backup for webroot %s, interval did not match regex '[0-9]+[dhmsDHMS]?'.", webrootId ) );
 		}
 	}
 
@@ -284,52 +311,8 @@ public class Webroot
 			cachePatterns.add( pattern.toLowerCase() );
 	}
 
-	/**
-	 * @return The webroot main directory
-	 */
-	public File directory()
-	{
-		Objs.notNull( directory );
-		return directory;
-	}
-
-	/**
-	 * @param sub The subdirectory name
-	 *
-	 * @return The subdirectory of the webroot main directory
-	 */
-	public File directory( String sub )
-	{
-		return new File( directory, sub );
-	}
-
-	public File directoryLang()
-	{
-		return directory( "lang" );
-	}
-
-	public File directoryPublic()
-	{
-		return directory( "public" );
-	}
-
-	public File directoryResource()
-	{
-		return directory( "resource" );
-	}
-
-	public File directoryTemp()
-	{
-		return ConfigRegistry.i().getDirectoryCache( getId() );
-	}
-
-	public File directoryTemp( String append )
-	{
-		return ConfigRegistry.i().getDirectoryCache( getId() + File.pathSeparator + append );
-	}
-
 	@Override
-	public File getAccountDirectory()
+	public Path getAccountDirectory()
 	{
 		return null;
 	}
@@ -356,6 +339,11 @@ public class Webroot
 		return binding;
 	}
 
+	public Path getCacheDirectory()
+	{
+		return Kernel.getPath( Kernel.PATH_CACHE ).resolve( getId() );
+	}
+
 	public Path getCachePath()
 	{
 
@@ -369,6 +357,11 @@ public class Webroot
 	public Parcel getConfig()
 	{
 		return parcel;
+	}
+
+	public Path getConfigFile()
+	{
+		return configFile == null ? parcel.loadedFrom() == null ? null : new File( parcel.loadedFrom() ) : configFile;
 	}
 
 	public Database getDatabase()
@@ -399,6 +392,25 @@ public class Webroot
 	}
 
 	/**
+	 * @return The webroot main directory
+	 */
+	public Path getDirectory()
+	{
+		Objs.notNull( directory );
+		return directory;
+	}
+
+	/**
+	 * @param sub The subdirectory name
+	 *
+	 * @return The subdirectory of the webroot main directory
+	 */
+	public Path getDirectory( String sub )
+	{
+		return directory.resolve( sub );
+	}
+
+	/**
 	 * Same as calling {@code SiteManager.instance().getDomain( fullDomain ) } but instead checks the returned node belongs to this webroot.
 	 *
 	 * @param fullDomain The request domain
@@ -421,11 +433,6 @@ public class Webroot
 		return factory;
 	}
 
-	public Path getFile()
-	{
-		return file == null ? parcel.loadedFrom() == null ? null : new File( parcel.loadedFrom() ) : file;
-	}
-
 	public Object getGlobal( String key )
 	{
 		return binding.getVariable( key );
@@ -436,20 +443,20 @@ public class Webroot
 		return binding.getVariables();
 	}
 
-	public String getId()
-	{
-
-	}
-
 	@Override
 	public String getId()
 	{
-		return siteId;
+		return webrootId;
 	}
 
 	public List<String> getIps()
 	{
 		return ips;
+	}
+
+	public Path getLangDirectory()
+	{
+		return getDirectory( "lang" );
 	}
 
 	public Localization getLocalization()
@@ -477,6 +484,16 @@ public class Webroot
 		Objs.notEmpty( fullDomain );
 		Supplier<Stream<DomainMapping>> stream = () -> mappings.stream().filter( d -> d.matches( fullDomain ) );
 		return stream.get().count() == 0 ? Stream.of( new DomainMapping( this, fullDomain ) ) : stream.get();
+	}
+
+	public Path getPublicDirectory()
+	{
+		return getDirectory( "public" );
+	}
+
+	public Path getResourceDirectory()
+	{
+		return getDirectory( "resource" );
 	}
 
 	public Path getResourcePath()
@@ -509,13 +526,18 @@ public class Webroot
 
 	public String getTitle()
 	{
-		return siteTitle;
+		return webrootTitle;
 	}
 
 	public void setTitle( String title )
 	{
-		siteTitle = title;
+		webrootTitle = title;
 		parcel.set( "webroot.title", title );
+	}
+
+	public Path getWebrootPath()
+	{
+
 	}
 
 	public boolean hasDefaultSslContext()
@@ -572,7 +594,7 @@ public class Webroot
 		if ( file.length() == 0 )
 			throw new FileNotFoundException( "File can't be empty!" );
 
-		File root = directoryResource();
+		File root = getResourceDirectory();
 
 		File packFile = new File( root, file );
 
@@ -620,7 +642,7 @@ public class Webroot
 
 	public void save( boolean force ) throws IOException
 	{
-		File file = getFile();
+		File file = getConfigFile();
 		if ( file != null && ( file.exists() || force ) )
 			parcel.save( file );
 	}

@@ -9,14 +9,15 @@
  */
 package io.amelia.http.webroot;
 
+import io.amelia.data.parcel.Parcel;
 import io.amelia.lang.StorageException;
-import io.amelia.storage.methods.HomeDirectoryStorageMethod;
 import io.amelia.storage.Storage;
 import io.amelia.storage.driver.StorageDriver;
+import io.amelia.storage.methods.HomeStorageMethod;
 import io.amelia.support.Strs;
 import io.amelia.support.data.Parcel;
 
-public class WebrootStorage extends HomeDirectoryStorageMethod
+public class WebrootStorage extends HomeStorageMethod
 {
 	public WebrootStorage()
 	{

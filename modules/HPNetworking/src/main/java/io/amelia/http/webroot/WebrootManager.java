@@ -9,41 +9,91 @@
  */
 package io.amelia.http.webroot;
 
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.annotation.Nonnull;
+
+import io.amelia.filesystem.sql.SQLFileSystemProvider;
 import io.amelia.foundation.Kernel;
-import io.amelia.storage.StorageContainerPolicy;
-import io.amelia.storage.file.FileStorageBackend;
-import io.amelia.storage.methods.HomeContainerMethod;
+import io.amelia.lang.StorageException;
+import io.amelia.lang.WebrootException;
+import io.amelia.support.IO;
+import io.amelia.support.StoragePolicy;
 
 public class WebrootManager
 {
 	public static final String PATH_WEBROOT = "__webroot";
+	private static final List<Webroot> WEBROOTS = new CopyOnWriteArrayList<>();
 	public static Kernel.Logger L = Kernel.getLogger( WebrootManager.class );
 
 	static
 	{
+		WEBROOTS.add( new DefaultWebroot() );
+
 		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_STORAGE, "webroot" );
 
-		FileStorageBackend driver = new FileStorageBackend( Kernel.getPath( PATH_WEBROOT ) );
+		FileSystem backend;
+		Path path;
+		switch ( getDefaultBackend() )
+		{
+			case "file":
+				backend = FileSystems.getDefault();
+				path = Kernel.getPath( PATH_WEBROOT );
+				break;
+			case "sql":
+				backend = SQLFileSystemProvider.newFileSystem();
+				path = backend.getPath( "/" );
+				break;
+			default:
+				throw new WebrootException.Runtime( "WebrootManager has no set FileSystem backend." );
+		}
 
-		StorageContainerPolicy policy = new StorageContainerPolicy();
+		try
+		{
+			IO.forceCreateDirectory( path );
 
-		// Language Files
-		policy.setLayoutContainer( "lang", StorageContainerPolicy.Strategy.CREATE );
-		// Public Files
-		policy.setLayoutContainer( "public", StorageContainerPolicy.Strategy.OPTIONAL );
-		// Resources
-		policy.setLayoutContainer( "resource", StorageContainerPolicy.Strategy.CREATE );
-		// SSL Certificates and Keys
-		policy.setLayoutContainer( "ssl", StorageContainerPolicy.Strategy.CREATE );
-		// .env
-		policy.setLayoutObject( ".env", StorageContainerPolicy.Strategy.CREATE );
-		// config.parcel
-		policy.setLayoutObject( "config.yaml", StorageContainerPolicy.Strategy.CREATE );
-		// .htaccess
-		policy.setLayoutObject( "htaccess.json", StorageContainerPolicy.Strategy.CREATE );
-		// Routes file
-		policy.setLayoutObject( "routes.json", StorageContainerPolicy.Strategy.CREATE );
 
-		new HomeContainerMethod( policy ).getEntries( driver, "(.*)(?:\\\\|\\/)config.yaml" );
+
+			Files.list( path ).filter( p -> Files.isDirectory( p ) && Files.isRegularFile( p.resolve( "config.yaml" ) ) ).forEach( p -> {
+				if ( Files.isDirectory( p ) )
+				{
+					try
+					{
+						policy.enforcePolicy( p );
+
+						WEBROOTS.add( new Webroot( p ) );
+					}
+					catch ( StorageException.Error error )
+					{
+						error.printStackTrace();
+					}
+				}
+			} );
+		}
+		catch ( IOException e )
+		{
+			throw new WebrootException.Runtime( e );
+		}
+	}
+
+	private static String getDefaultBackend()
+	{
+		return "file";
+	}
+
+	public static Webroot getDefaultWebroot()
+	{
+		return getWebrootById( "default" );
+	}
+
+	private static Webroot getWebrootById( @Nonnull String id )
+	{
+		return null;
 	}
 }

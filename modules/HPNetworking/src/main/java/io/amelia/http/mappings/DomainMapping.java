@@ -9,7 +9,6 @@
  */
 package io.amelia.http.mappings;
 
-import com.chiorichan.helpers.Namespace;
 import com.chiorichan.net.http.ssl.CertificateWrapper;
 import com.chiorichan.utils.UtilHttp;
 import com.chiorichan.utils.UtilIO;
@@ -30,6 +29,7 @@ import io.amelia.foundation.ConfigRegistry;
 import io.amelia.http.webroot.Webroot;
 import io.amelia.lang.SiteConfigurationException;
 import io.amelia.support.IO;
+import io.amelia.support.Namespace;
 import io.netty.handler.ssl.SslContext;
 
 public class DomainMapping
@@ -76,13 +76,13 @@ public class DomainMapping
 				String directory = getConfig( "directory" );
 				if ( IO.isAbsolute( directory ) )
 				{
-					if ( !ConfigRegistry.i().getBoolean( "sites.allowPublicOutsideWebroot" ) && !directory.startsWith( webroot.directoryPublic().getAbsolutePath() ) )
+					if ( !ConfigRegistry.config.getBoolean( "sites.allowPublicOutsideWebroot" ) && !directory.startsWith( webroot.getPublicDirectory().getAbsolutePath() ) )
 						throw new SiteConfigurationException( String.format( "The public directory [%s] is not allowed outside the webroot.", UtilIO.relPath( new File( directory ) ) ) );
 
 					return new File( directory );
 				}
 
-				return new File( webroot.directoryPublic(), directory );
+				return new File( webroot.getPublicDirectory(), directory );
 			}
 		}
 		catch ( SiteConfigurationException e )
@@ -92,7 +92,7 @@ public class DomainMapping
 				throw e;
 		}
 
-		return new File( webroot.directoryPublic(), getNamespace().replace( "_", "-" ).getString( "_" ) );
+		return new File( webroot.getPublicDirectory(), getNamespace().replace( "_", "-" ).getString( "_" ) );
 	}
 
 	public File directoryWithException() throws SiteConfigurationException
@@ -214,7 +214,7 @@ public class DomainMapping
 
 	private CertificateWrapper initSsl()
 	{
-		File ssl = webroot.directory( "ssl" );
+		File ssl = webroot.getDirectory( "ssl" );
 		UtilIO.setDirectoryAccessWithException( ssl );
 
 		try

@@ -9,31 +9,32 @@
  */
 package io.amelia.http.mappings;
 
-import io.amelia.lang.SiteConfigurationException;
-
 import java.io.File;
+
+import io.amelia.http.webroot.Webroot;
+import io.amelia.lang.SiteConfigurationException;
 
 public final class DefaultDomainMapping extends DomainMapping
 {
-	public DefaultDomainMapping( Site site )
+	public DefaultDomainMapping( Webroot webroot )
 	{
-		super( site, "" );
+		super( webroot, "" );
 	}
 
 	@Override
 	protected File directory0( boolean throwException ) throws SiteConfigurationException
 	{
-		return getSite().directoryPublic();
+		return getWebroot().directoryPublic();
 	}
 
 	@Override
-	public DomainMapping getParentMapping()
+	public DomainMapping getChildMapping( String child )
 	{
 		return null;
 	}
 
 	@Override
-	public DomainMapping getChildMapping( String child )
+	public DomainMapping getParentMapping()
 	{
 		return null;
 	}

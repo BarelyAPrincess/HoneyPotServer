@@ -26,11 +26,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
+import io.amelia.events.EventException;
+import io.amelia.events.Events;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Kernel;
+import io.amelia.http.apache.ApacheHandler;
+import io.amelia.http.events.RequestEvent;
+import io.amelia.http.mappings.DomainMapping;
+import io.amelia.http.session.Session;
+import io.amelia.http.webroot.Webroot;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MultipleException;
 import io.amelia.lang.ReportingLevel;
+import io.amelia.support.HttpRequestContext;
+import io.amelia.support.Objs;
+import io.amelia.support.TriEnum;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -129,17 +139,17 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	 */
 	private final boolean ssl;
 	/**
-	 * The selected site
+	 * The selected Webroot
 	 */
-	private Site currentSite;
+	private Webroot currentWebroot;
 	/**
 	 * The POST body decoder
 	 */
 	private HttpPostRequestDecoder decoder;
 	/**
-	 * The {@link WebInterpreter} used to parse annotations, file encoding, and etc.
+	 * The {@link HttpRequestContext} used to parse annotations, file encoding, and etc.
 	 */
-	private WebInterpreter fi;
+	private HttpRequestContext fi;
 	/**
 	 * The WebSocket handshaker
 	 */
@@ -379,16 +389,6 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	}
 
 	/**
-	 * Gets the {@link WebInterpreter} used to parse annotations, file encoding, and etc.
-	 *
-	 * @return The active interpreter
-	 */
-	public WebInterpreter getInterpreter()
-	{
-		return fi;
-	}
-
-	/**
 	 * Gets the origin HTTP request
 	 *
 	 * @return The HTTP request
@@ -396,6 +396,16 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	public HttpRequestWrapper getRequest()
 	{
 		return request;
+	}
+
+	/**
+	 * Gets the {@link HttpRequestContext} used to parse annotations, file encoding, and etc.
+	 *
+	 * @return The active interpreter
+	 */
+	public HttpRequestContext getRequestContext()
+	{
+		return fi;
 	}
 
 	/**
@@ -419,13 +429,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	}
 
 	/**
-	 * Gets the currently selected Site for this request
+	 * Gets the currently selected Webroot for this request
 	 *
-	 * @return selected Site
+	 * @return selected Webroot
 	 */
-	public Site getSite()
+	public Webroot getWebroot()
 	{
-		return currentSite;
+		return currentWebroot;
 	}
 
 	/**
@@ -438,7 +448,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	 * @throws io.amelia.lang.ScriptingException                  for Scripting Factory Evaluation Exception
 	 * @throws com.chiorichan.session.SessionException            for problems initializing a new or used session
 	 */
-	private void handleHttp() throws Exception // IOException, HttpError, SiteException, PermissionException, MultipleException, ScriptingException, SessionException
+	private void handleHttp() throws Exception // IOException, HttpError, WebrootException, PermissionException, MultipleException, ScriptingException, SessionException
 	{
 		log.log( Level.INFO, request.methodString() + " " + request.getFullUrl() );
 
@@ -453,7 +463,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 
 		try
 		{
-			EventDispatcher.i().callEventWithException( requestEvent );
+			Events.callEventWithException( requestEvent );
 		}
 		catch ( EventException ex )
 		{
@@ -482,18 +492,18 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 			return;
 
 		// Throws IOException and HttpError
-		fi = new WebInterpreter( request );
+		fi = new HttpRequestContext( request );
 
 		response.annotations.putAll( fi.getAnnotations() );
 
-		currentSite = request.getLocation();
-		session.setSite( currentSite );
+		currentWebroot = request.getLocation();
+		session.setWebroot( currentWebroot );
 
 		DomainMapping mapping = request.getDomainMapping();
 
 		if ( mapping == null )
 		{
-			if ( "www".equalsIgnoreCase( request.getChildDomain() ) || ConfigRegistry.i().getBoolean( "sites.redirectMissingSubDomains" ) )
+			if ( "www".equalsIgnoreCase( request.getChildDomain() ) || ConfigRegistry.i().getBoolean( "Webroots.redirectMissingSubDomains" ) )
 			{
 				log.log( Level.SEVERE, "Redirecting non-existent subdomain '%s' to root domain '%s'", request.getChildDomain(), request.getFullUrl( "" ) );
 				response.sendRedirect( request.getFullUrl( "" ) );
@@ -507,7 +517,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		}
 
 		File docRoot = mapping.directory();
-		UtilObjects.notNull( docRoot );
+		Objs.notNull( docRoot );
 
 		if ( !docRoot.exists() )
 			NetworkManager.getLogger().warning( String.format( "The webroot directory [%s] was missing, it will be created.", UtilIO.relPath( docRoot ) ) );
@@ -522,7 +532,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 			log.log( Level.FINE, "Account {id=%s,displayName=%s}", session.getId(), session.getDisplayName() );
 
 		/* Check direct file access annotation: @disallowDirectAccess true */
-		if ( UtilObjects.castToBool( fi.get( "disallowDirectAccess" ) ) && new File( request.getDomainMapping().directory(), UtilStrings.trimAll( request.getUri(), '/' ) ).getAbsolutePath().equals( fi.getFile() ) )
+		if ( Objs.castToBool( fi.get( "disallowDirectAccess" ) ) && new File( request.getDomainMapping().directory(), UtilStrings.trimAll( request.getUri(), '/' ) ).getAbsolutePath().equals( fi.getFile() ) )
 			throw new HttpError( HttpResponseStatus.NOT_FOUND, "Accessing this file by exact file name is disallowed per annotation." );
 
 		/*
@@ -535,13 +545,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		 *   Never: If the uri does end with a trailing slash, a redirect will be made to remove it.
 		 *   Ignore: We don't care one way or other, do nothing! DEFAULT
 		 */
-		switch ( ANIState.parse( fi.get( "trailingSlash" ), ANIState.Ignore ) )
+		switch ( AlwaysNeverIgnore.parse( fi.getValue( "trailingSlash" ), TriEnum.Ignore ) )
 		{
 			case Always:
-				request.forceTrailingSlash();
+				request.enforceTrailingSlash();
 				break;
 			case Never:
-				request.forceNoTrailingSlash();
+				request.enforceNoTrailingSlash();
 				break;
 		}
 		/*
@@ -611,14 +621,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		 * Start: Apache Configuration Section
 		 *
 		 * Loads a Apache configuration and .htaccess files into a common handler, then parsed for directives like access restrictions and basic auth
-		 * TODO Load server-wide Apache Configuration then merge with Site Configuration
+		 * TODO Load server-wide Apache Configuration then merge with Webroot Configuration
 		 */
 		ApacheHandler htaccess = new ApacheHandler();
 		response.setApacheParser( htaccess );
 
 		try
 		{
-			boolean result = htaccess.handleDirectives( currentSite.getApacheConfig(), this );
+			boolean result = htaccess.handleDirectives( currentWebroot.getApacheConfig(), this );
 
 			if ( htaccess.overrideNone() || htaccess.overrideListNone() ) // Ignore .htaccess files
 			{
@@ -656,7 +666,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		response.setContentType( fi.getContentType() );
 		response.setEncoding( fi.getEncoding() );
 
-		request.getServer().put( ServerVars.DOCUMENT_ROOT, docRoot );
+		request.getServer().put( HttpServerKey.DOCUMENT_ROOT, docRoot );
 
 		request.setGlobal( "_SERVER", request.getServer() );
 		request.setGlobal( "_POST", request.getPostMap() );
@@ -722,7 +732,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		{
 			if ( !nonceProvided )
 			{
-				if ( !UtilObjects.isNull( nonce ) )
+				if ( !Objs.isNull( nonce ) )
 					log.log( Level.SEVERE, String.format( "The expected nonce key was %s", nonce.key() ) );
 				response.sendError( HttpResponseStatus.FORBIDDEN, "Request Failed NONCE Validation", "Nonce key is missing or the nonce was not initialized." );
 				return;
@@ -767,10 +777,10 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		ScriptingFactory factory = request.getScriptingFactory();
 		factory.setEncoding( fi.getEncoding() );
 
-		NetworkSecurity.isForbidden( htaccess, currentSite, fi );
+		NetworkSecurity.isForbidden( htaccess, currentWebroot, fi );
 
 		/* This annotation simply requests that the page requester must have a logged in account, the exact permission is not important. */
-		boolean reqLogin = UtilObjects.castToBool( fi.get( "reqLogin" ) );
+		boolean reqLogin = Objs.castToBool( fi.get( "reqLogin" ) );
 
 		if ( reqLogin && !session.hasLogin() )
 			throw new PermissionDeniedException( PermissionDeniedReason.LOGIN_PAGE );
@@ -781,12 +791,12 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		if ( reqPerm == null )
 			reqPerm = "-1";
 
-		session.requirePermission( reqPerm, currentSite.getId() );
+		session.requirePermission( reqPerm, currentWebroot.getId() );
 
 		/* TODO Deprecated but removed for historical reasons
 		if ( fi.hasHTML() )
 		{
-			ScriptingResult result = factory.eval( ScriptingContext.fromSource( fi.getHTML(), "<embedded>" ).request( request ).site( currentSite ) );
+			ScriptingResult result = factory.eval( ScriptingContext.fromSource( fi.getHTML(), "<embedded>" ).request( request ).Webroot( currentWebroot ) );
 
 			if ( result.hasExceptions() )
 				// TODO Print notices to output like PHP does
@@ -827,7 +837,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			ScriptingResult result = factory.eval( ScriptingContext.fromFile( fi ).request( request ).site( currentSite ) );
+			ScriptingResult result = factory.eval( ScriptingContext.fromFile( fi ).request( request ).Webroot( currentWebroot ) );
 
 			if ( result.hasExceptions() )
 				// TODO Print notices to output like PHP does
@@ -846,7 +856,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				if ( result.getObject() != null && !( result.getObject() instanceof NullObject ) )
 					try
 					{
-						rendered.writeBytes( UtilObjects.castToStringWithException( result.getObject() ).getBytes() );
+						rendered.writeBytes( Objs.castToStringWithException( result.getObject() ).getBytes() );
 					}
 					catch ( Exception e )
 					{
@@ -962,9 +972,9 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			Site currentSite = request.getLocation();
+			Webroot currentWebroot = request.getLocation();
 
-			File tmpFileDirectory = currentSite != null ? currentSite.directoryTemp() : ConfigRegistry.i().getDirectoryCache();
+			File tmpFileDirectory = currentWebroot != null ? currentWebroot.getCacheDirectory() : ConfigRegistry.i().getDirectoryCache();
 
 			setTempDirectory( tmpFileDirectory );
 

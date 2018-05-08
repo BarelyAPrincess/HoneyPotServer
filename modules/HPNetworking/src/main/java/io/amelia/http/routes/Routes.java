@@ -39,8 +39,8 @@ public class Routes
 	{
 		this.webroot = webroot;
 
-		File routesJson = new File( webroot.directory(), "routes.json" );
-		File routesYaml = new File( webroot.directory(), "routes.yaml" );
+		File routesJson = new File( webroot.getDirectory(), "routes.json" );
+		File routesYaml = new File( webroot.getDirectory(), "routes.yaml" );
 
 		jsonWatcher = new RouteWatcher( this, routesJson );
 		yamlWatcher = new RouteWatcher( this, routesYaml );

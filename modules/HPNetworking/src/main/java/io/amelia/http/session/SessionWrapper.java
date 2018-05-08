@@ -29,6 +29,7 @@ import java.util.Set;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.lang.SessionException;
 import io.amelia.messaging.MessageSender;
+import io.amelia.scripting.BindingProvider;
 import io.amelia.scripting.ScriptBinding;
 import io.amelia.scripting.ScriptingFactory;
 
