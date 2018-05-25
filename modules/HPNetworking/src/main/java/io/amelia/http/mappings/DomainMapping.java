@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import javax.net.ssl.SSLException;
 
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.lang.SiteConfigurationException;
 import io.amelia.support.IO;
 import io.amelia.support.Namespace;
@@ -36,9 +36,9 @@ public class DomainMapping
 {
 	protected final Map<String, String> config = new TreeMap<>();
 	protected final DomainParser domain;
-	protected final Webroot webroot;
+	protected final BaseWebroot webroot;
 
-	public DomainMapping( Webroot webroot, String fullDomain )
+	public DomainMapping( BaseWebroot webroot, String fullDomain )
 	{
 		this.webroot = webroot;
 		this.domain = new DomainParser( fullDomain );

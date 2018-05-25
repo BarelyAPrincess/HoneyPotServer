@@ -19,17 +19,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.data.TypeBase;
+import io.amelia.data.parcel.Parcel;
+import io.amelia.data.parcel.ParcelLoader;
 import io.amelia.filesystem.sql.SQLFileSystemProvider;
+import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
-import io.amelia.lang.StorageException;
 import io.amelia.lang.WebrootException;
 import io.amelia.support.IO;
-import io.amelia.support.StoragePolicy;
+import io.amelia.support.Streams;
 
 public class WebrootManager
 {
 	public static final String PATH_WEBROOT = "__webroot";
-	private static final List<Webroot> WEBROOTS = new CopyOnWriteArrayList<>();
+	private static final List<BaseWebroot> WEBROOTS = new CopyOnWriteArrayList<>();
 	public static Kernel.Logger L = Kernel.getLogger( WebrootManager.class );
 
 	static
@@ -58,22 +62,10 @@ public class WebrootManager
 		{
 			IO.forceCreateDirectory( path );
 
-
-
-			Files.list( path ).filter( p -> Files.isDirectory( p ) && Files.isRegularFile( p.resolve( "config.yaml" ) ) ).forEach( p -> {
-				if ( Files.isDirectory( p ) )
-				{
-					try
-					{
-						policy.enforcePolicy( p );
-
-						WEBROOTS.add( new Webroot( p ) );
-					}
-					catch ( StorageException.Error error )
-					{
-						error.printStackTrace();
-					}
-				}
+			Streams.forEachWithException( Files.list( path ).filter( directory -> Files.isDirectory( directory ) && Files.isRegularFile( directory.resolve( "config.yaml" ) ) ), directory -> {
+				Parcel configuration = ParcelLoader.decodeYaml( directory.resolve( "config.yaml" ) );
+				Env env = new Env( directory.resolve( ".env" ) );
+				WEBROOTS.add( new BaseWebroot( directory, configuration, env ) );
 			} );
 		}
 		catch ( IOException e )
@@ -87,13 +79,44 @@ public class WebrootManager
 		return "file";
 	}
 
-	public static Webroot getDefaultWebroot()
+	public static BaseWebroot getDefaultWebroot()
 	{
 		return getWebrootById( "default" );
 	}
 
-	private static Webroot getWebrootById( @Nonnull String id )
+	public static BaseWebroot getWebrootById( @Nonnull String id )
 	{
 		return null;
+	}
+
+	static void reload()
+	{
+		unload();
+		// Reload
+	}
+
+	static void unload()
+	{
+		for ( Webroot webroot : WEBROOTS )
+			try
+			{
+				webroot.save();
+			}
+			catch ( IOException e )
+			{
+				L.severe( e );
+			}
+		WEBROOTS.clear();
+	}
+
+	public static class Config
+	{
+		public static final TypeBase WEBROOTS = new TypeBase( ConfigRegistry.Config.APPLICATION_BASE, "webroots" );
+		public static final TypeBase.TypeString WEBROOTS_DEFAULT_TITLE = new TypeBase.TypeString( WEBROOTS, "defaultTitle", "Unnamed Webroot" );
+
+		private Config()
+		{
+			// Static Access
+		}
 	}
 }

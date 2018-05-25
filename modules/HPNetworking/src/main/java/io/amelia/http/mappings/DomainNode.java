@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.support.Lists;
 import io.amelia.support.NIO;
 import io.amelia.support.Namespace;
@@ -25,7 +25,7 @@ public class DomainNode
 	protected final List<DomainNode> children = new ArrayList<>();
 	protected final String nodeName;
 	protected final DomainNode parent;
-	protected Webroot webroot;
+	protected BaseWebroot webroot;
 
 	protected DomainNode( DomainNode parent, String nodeName )
 	{
@@ -143,12 +143,12 @@ public class DomainNode
 		return new DomainParser( getFullDomain() ).getTld().getString();
 	}
 
-	public Webroot getWebroot()
+	public BaseWebroot getWebroot()
 	{
 		return webroot;
 	}
 
-	protected DomainNode setWebroot( Webroot webroot )
+	protected DomainNode setWebroot( BaseWebroot webroot )
 	{
 		return setWebroot( webroot, false );
 	}
@@ -163,7 +163,7 @@ public class DomainNode
 		return parent != null;
 	}
 
-	protected DomainNode setWebroot( Webroot webroot, boolean override )
+	protected DomainNode setWebroot( BaseWebroot webroot, boolean override )
 	{
 		Objs.notNull( webroot );
 

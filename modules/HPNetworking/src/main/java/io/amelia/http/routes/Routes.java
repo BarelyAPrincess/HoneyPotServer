@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.support.Objs;
 import io.netty.util.internal.ConcurrentSet;
 
@@ -31,11 +31,11 @@ public class Routes
 	public static final Kernel.Logger L = Kernel.getLogger( Routes.class );
 
 	protected final Set<Route> routes = new ConcurrentSet<>();
-	protected final Webroot webroot;
+	protected final BaseWebroot webroot;
 	private RouteWatcher jsonWatcher;
 	private RouteWatcher yamlWatcher;
 
-	public Routes( Webroot webroot )
+	public Routes( BaseWebroot webroot )
 	{
 		this.webroot = webroot;
 

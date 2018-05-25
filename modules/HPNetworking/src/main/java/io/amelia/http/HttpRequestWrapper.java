@@ -42,7 +42,7 @@ import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.session.Session;
 import io.amelia.http.session.SessionContext;
 import io.amelia.http.session.SessionWrapper;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.http.webroot.WebrootManager;
 import io.amelia.logging.LogEvent;
 import io.amelia.networking.NetworkLoader;
@@ -559,7 +559,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	}
 
 	@Override
-	public Webroot getLocation()
+	public BaseWebroot getLocation()
 	{
 		return domainMapping.getWebroot();
 	}
@@ -755,7 +755,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return getHeader( "User-Agent" );
 	}
 
-	public Webroot getWebRoot()
+	public BaseWebroot getWebRoot()
 	{
 		return getLocation();
 	}

@@ -11,12 +11,12 @@ package io.amelia.http.mappings;
 
 import java.io.File;
 
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.lang.SiteConfigurationException;
 
 public final class DefaultDomainMapping extends DomainMapping
 {
-	public DefaultDomainMapping( Webroot webroot )
+	public DefaultDomainMapping( BaseWebroot webroot )
 	{
 		super( webroot, "" );
 	}

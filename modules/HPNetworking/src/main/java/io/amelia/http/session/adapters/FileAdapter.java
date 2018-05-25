@@ -154,7 +154,7 @@ public class FileAdapter implements SessionAdapterImpl
 
 			try
 			{
-				IO.writeStringToFile( file, ParcelLoader.encodeJson( parcel ) );
+				IO.writeStringToFile( ParcelLoader.encodeJson( parcel ), file );
 			}
 			catch ( IOException e )
 			{

@@ -20,7 +20,7 @@ import io.amelia.http.HttpHandler;
 import io.amelia.http.HttpRequestWrapper;
 import io.amelia.http.HttpResponseWrapper;
 import io.amelia.http.session.Session;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.netty.buffer.ByteBuf;
 
 public class RenderEvent extends NetworkEvent
@@ -78,7 +78,7 @@ public class RenderEvent extends NetworkEvent
 		this.source = source;
 	}
 
-	public Webroot getWebroot()
+	public BaseWebroot getWebroot()
 	{
 		return handler.getRequest() == null ? null : handler.getRequest().getLocation();
 	}

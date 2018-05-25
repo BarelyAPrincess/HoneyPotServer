@@ -22,7 +22,7 @@ import io.amelia.foundation.Kernel;
 import io.amelia.foundation.plugins.Plugins;
 import io.amelia.http.HttpHandler;
 import io.amelia.http.HttpRequestWrapper;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.support.HttpRequestContext;
 import io.amelia.support.Version;
 
@@ -59,7 +59,7 @@ public class ApacheHandler
 			HttpRequestWrapper request = handler.getRequest();
 			HttpRequestContext context = handler.getRequestContext();
 
-			Webroot site = handler.getWebroot();
+			BaseWebroot site = handler.getWebroot();
 
 			switch ( key )
 			{

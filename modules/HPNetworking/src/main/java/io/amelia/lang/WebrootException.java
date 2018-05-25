@@ -76,6 +76,31 @@ public class WebrootException
 		// Static
 	}
 
+	public static class Configuration extends Error
+	{
+		private static final long serialVersionUID = 5522301956671473324L;
+
+		public Configuration()
+		{
+			super();
+		}
+
+		public Configuration( String message )
+		{
+			super( message );
+		}
+
+		public Configuration( String message, Throwable cause )
+		{
+			super( message, cause );
+		}
+
+		public Configuration( Throwable cause )
+		{
+			super( cause );
+		}
+	}
+
 	public static class Error extends ApplicationException.Error
 	{
 		private static final long serialVersionUID = 5522301956671473324L;

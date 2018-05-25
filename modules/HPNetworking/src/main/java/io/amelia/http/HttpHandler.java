@@ -34,7 +34,7 @@ import io.amelia.http.apache.ApacheHandler;
 import io.amelia.http.events.RequestEvent;
 import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.session.Session;
-import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MultipleException;
 import io.amelia.lang.ReportingLevel;
@@ -141,7 +141,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	/**
 	 * The selected Webroot
 	 */
-	private Webroot currentWebroot;
+	private BaseWebroot currentWebroot;
 	/**
 	 * The POST body decoder
 	 */
@@ -433,7 +433,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	 *
 	 * @return selected Webroot
 	 */
-	public Webroot getWebroot()
+	public BaseWebroot getWebroot()
 	{
 		return currentWebroot;
 	}
@@ -972,7 +972,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			Webroot currentWebroot = request.getLocation();
+			BaseWebroot currentWebroot = request.getLocation();
 
 			File tmpFileDirectory = currentWebroot != null ? currentWebroot.getCacheDirectory() : ConfigRegistry.i().getDirectoryCache();
 
