@@ -2,16 +2,20 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia DeWitt <theameliadewitt@ameliadewitt.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
 package io.amelia.lang;
 
+import com.rethinkdb.gen.ast.Not;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.amelia.networking.packets.RawPacket;
+import io.amelia.support.SupplierWithException;
 
 public class NetworkException
 {
@@ -82,6 +86,26 @@ public class NetworkException
 
 	public static class Error extends ApplicationException.Error
 	{
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn ) throws Error
+		{
+			return tryCatch( fn, null );
+		}
+
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws Error
+		{
+			try
+			{
+				return fn.get();
+			}
+			catch ( Exception e )
+			{
+				if ( detailMessage == null )
+					throw new Error( e );
+				else
+					throw new Error( detailMessage, e );
+			}
+		}
+
 		private static final long serialVersionUID = 5522301956671473324L;
 
 		public Error()
@@ -107,6 +131,26 @@ public class NetworkException
 
 	public static class Ignorable extends ApplicationException.Runtime
 	{
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn ) throws Ignorable
+		{
+			return tryCatch( fn, null );
+		}
+
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws Ignorable
+		{
+			try
+			{
+				return fn.get();
+			}
+			catch ( Exception e )
+			{
+				if ( detailMessage == null )
+					throw new Ignorable( e );
+				else
+					throw new Ignorable( detailMessage, e );
+			}
+		}
+
 		private static final long serialVersionUID = 5522301956671473324L;
 
 		public Ignorable()
@@ -132,6 +176,26 @@ public class NetworkException
 
 	public static class Notice extends ApplicationException.Error
 	{
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn ) throws Notice
+		{
+			return tryCatch( fn, null );
+		}
+
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws Notice
+		{
+			try
+			{
+				return fn.get();
+			}
+			catch ( Exception e )
+			{
+				if ( detailMessage == null )
+					throw new Notice( e );
+				else
+					throw new Notice( detailMessage, e );
+			}
+		}
+
 		private static final long serialVersionUID = 5522301956671473324L;
 
 		public Notice()
@@ -157,6 +221,26 @@ public class NetworkException
 
 	public static class PacketValidation extends Error
 	{
+		public static <Rtn> Rtn tryCatch( @Nonnull RawPacket packet, SupplierWithException<Rtn, Exception> fn ) throws PacketValidation
+		{
+			return tryCatch( packet, fn, null );
+		}
+
+		public static <Rtn> Rtn tryCatch( @Nonnull RawPacket packet, SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws PacketValidation
+		{
+			try
+			{
+				return fn.get();
+			}
+			catch ( Exception e )
+			{
+				if ( detailMessage == null )
+					throw new PacketValidation( packet, e );
+				else
+					throw new PacketValidation( packet, detailMessage, e );
+			}
+		}
+
 		private final RawPacket packet;
 
 		public PacketValidation( @Nonnull RawPacket packet, @Nonnull String message )
@@ -185,6 +269,26 @@ public class NetworkException
 
 	public static class Runtime extends ApplicationException.Runtime
 	{
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn ) throws Runtime
+		{
+			return tryCatch( fn, null );
+		}
+
+		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws Runtime
+		{
+			try
+			{
+				return fn.get();
+			}
+			catch ( Exception e )
+			{
+				if ( detailMessage == null )
+					throw new Runtime( e );
+				else
+					throw new Runtime( detailMessage, e );
+			}
+		}
+
 		private static final long serialVersionUID = 5522301956671473324L;
 
 		public Runtime()

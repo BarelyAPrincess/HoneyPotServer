@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia DeWitt <theameliadewitt@ameliadewitt.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -11,6 +11,8 @@ package io.amelia.foundation;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +97,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	public void fatalError( ExceptionReport report, boolean crashOnError )
 	{
 		if ( crashOnError )
-			Foundation.setRunlevel( Runlevel.CRASHED, "The Application has reached an errored state!" );
+			Foundation.setRunlevel( Runlevel.CRASHED, "The Application has crashed!" );
 	}
 
 	public Env getEnv()
@@ -196,7 +198,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		try
 		{
 			/* Load env file -- Can be set with arg `--env-file=.env` */
-			File envFile = new File( ( String ) optionSet.valueOf( "env-file" ) );
+			Path envFile = Paths.get( ( String ) optionSet.valueOf( "env-file" ) );
 			env = new Env( envFile );
 
 			/* Override defaults and env with command args */

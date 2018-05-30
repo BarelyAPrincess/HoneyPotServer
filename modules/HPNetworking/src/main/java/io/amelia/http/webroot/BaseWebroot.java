@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia DeWitt <theameliadewitt@ameliadewitt.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -169,8 +169,8 @@ class BaseWebroot
 
 			if ( sslCertFile != null && sslKeyFile != null )
 			{
-				File sslCert = new File( ssl.getAbsolutePath(), sslCertFile );
-				File sslKey = new File( ssl.getAbsolutePath(), sslKeyFile );
+				Path sslCert = ssl.resolve( sslCertFile );
+				Path sslKey = ssl.resolve( sslKeyFile );
 
 				try
 				{
