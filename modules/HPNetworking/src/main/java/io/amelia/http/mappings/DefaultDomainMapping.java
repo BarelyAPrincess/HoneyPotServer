@@ -9,7 +9,7 @@
  */
 package io.amelia.http.mappings;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.lang.SiteConfigurationException;
@@ -22,7 +22,7 @@ public final class DefaultDomainMapping extends DomainMapping
 	}
 
 	@Override
-	protected File directory0( boolean throwException ) throws SiteConfigurationException
+	protected Path directory0( boolean throwException ) throws SiteConfigurationException
 	{
 		return getWebroot().directoryPublic();
 	}

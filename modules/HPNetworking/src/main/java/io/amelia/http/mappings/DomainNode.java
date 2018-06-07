@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import io.amelia.http.webroot.BaseWebroot;
+import io.amelia.http.webroot.Webroot;
 import io.amelia.support.Lists;
 import io.amelia.support.NIO;
 import io.amelia.support.Namespace;
@@ -25,7 +25,7 @@ public class DomainNode
 	protected final List<DomainNode> children = new ArrayList<>();
 	protected final String nodeName;
 	protected final DomainNode parent;
-	protected BaseWebroot webroot;
+	protected Webroot webroot;
 
 	protected DomainNode( DomainNode parent, String nodeName )
 	{
@@ -143,12 +143,12 @@ public class DomainNode
 		return new DomainParser( getFullDomain() ).getTld().getString();
 	}
 
-	public BaseWebroot getWebroot()
+	public Webroot getWebroot()
 	{
 		return webroot;
 	}
 
-	protected DomainNode setWebroot( BaseWebroot webroot )
+	protected DomainNode setWebroot( Webroot webroot )
 	{
 		return setWebroot( webroot, false );
 	}
@@ -163,12 +163,12 @@ public class DomainNode
 		return parent != null;
 	}
 
-	protected DomainNode setWebroot( BaseWebroot webroot, boolean override )
+	protected DomainNode setWebroot( Webroot webroot, boolean override )
 	{
 		Objs.notNull( webroot );
 
 		if ( this.webroot != null && this.webroot != webroot && !override )
-			throw new IllegalStateException( String.format( "You can not override the webroot set on domain node [%s], it was already assigned to webroot [%s]", webroot.getId(), this.webroot.getId() ) );
+			throw new IllegalStateException( String.format( "You can not override the webroot set on domain node [%s], it was already assigned to webroot [%s]", webroot.getWebrootId(), this.webroot.getWebrootId() ) );
 		this.webroot = webroot;
 		return this;
 	}

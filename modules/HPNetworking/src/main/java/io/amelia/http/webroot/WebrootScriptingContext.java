@@ -81,7 +81,7 @@ public class WebrootScriptingContext extends ScriptingContext
 		return context;
 	}
 
-	public static WebrootScriptingContext fromWebrootResource( @Nonnull BaseWebroot webroot, @Nonnull Path resourcePath ) throws ScriptingException.Runtime
+	public static WebrootScriptingContext fromWebrootResource( @Nonnull Webroot webroot, @Nonnull Path resourcePath ) throws ScriptingException.Runtime
 	{
 		try
 		{
@@ -123,7 +123,7 @@ public class WebrootScriptingContext extends ScriptingContext
 			}
 
 			if ( finalPath == null )
-				throw new ScriptingException.Runtime( String.format( "Could not find script '%s' from webroot '%s' resource directory '%s'.", IO.relPath( resourcePath ), webroot.getId(), IO.relPath( webroot.getResourcePath() ) ) );
+				throw new ScriptingException.Runtime( String.format( "Could not find script '%s' from webroot '%s' resource directory '%s'.", IO.relPath( resourcePath ), webroot.getWebrootId(), IO.relPath( webroot.getResourcePath() ) ) );
 
 			return fromScriptInterpreter( finalPath );
 		}
@@ -133,13 +133,13 @@ public class WebrootScriptingContext extends ScriptingContext
 		}
 	}
 
-	public static WebrootScriptingContext fromWebrootResource( @Nonnull BaseWebroot webroot, @Nonnull String resourceNamespace ) throws IOException
+	public static WebrootScriptingContext fromWebrootResource( @Nonnull Webroot webroot, @Nonnull String resourceNamespace ) throws IOException
 	{
 		return fromWebrootResource( webroot, Paths.get( resourceNamespace.replace( '.', File.separatorChar ) ) );
 	}
 
 	private HttpRequestWrapper request;
-	private BaseWebroot webroot;
+	private Webroot webroot;
 
 	@Override
 	protected Path getDefaultCachePath()
@@ -159,7 +159,7 @@ public class WebrootScriptingContext extends ScriptingContext
 		return request;
 	}
 
-	public BaseWebroot getWebroot()
+	public Webroot getWebroot()
 	{
 		Objs.notNull( webroot );
 		return webroot;

@@ -15,83 +15,95 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.amelia.data.parcel.Parcel;
+import io.amelia.data.parcel.ParcelLoader;
+import io.amelia.networking.Networking;
 import io.amelia.support.FileWatcher;
+import io.amelia.support.IO;
+import io.amelia.support.Lists;
+import io.amelia.support.Objs;
 
 public class RouteWatcher extends FileWatcher
 {
 	private Routes parent;
 
-	public RouteWatcher( Routes parent, File fileToWatch )
+	public RouteWatcher( Routes parent, Path path )
 	{
-		super( fileToWatch );
+		super( path );
 
 		this.parent = parent;
 	}
 
+	@SuppressWarnings( "unchecked" )
 	@Override
 	public void readChanges()
 	{
-		if ( !fileToWatch.exists() )
+		if ( !Files.isRegularFile( path ) )
 			return;
 
 		Set<Route> routes = parent.routes;
 
-		if ( fileToWatch.getName().endsWith( ".json" ) )
+		if ( path.endsWith( ".json" ) )
 		{
 			routes.clear();
 
-			int line = 0;
+			AtomicInteger line = new AtomicInteger();
 			AtomicInteger inx = new AtomicInteger();
 
-			LogBuilder.get().fine( "Loading Routes from JSON file '" + UtilIO.relPath( fileToWatch ) + "'" );
+			Networking.L.fine( "Loading Routes from JSON file '" + IO.relPath( path ) + "'" );
 
 			try
 			{
-				for ( String l : UtilIO.readFileToLines( fileToWatch ) )
-				{
+				IO.readFileToStream( path ).filter( l -> !l.startsWith( "#" ) && !Objs.isEmpty( l.trim() ) ).forEach( l -> {
 					try
 					{
-						line++;
-						if ( !l.startsWith( "#" ) && !UtilObjects.isEmpty( l.trim() ) )
+						line.addAndGet( 1 );
+
+						Map<String, String> values = new HashMap<>();
+						Map<String, String> rewrites = new HashMap<>();
+
+						JSONObject obj = new JSONObject( l );
+
+						String id = obj.optString( "id" );
+
+						if ( Objs.isEmpty( id ) )
 						{
-							Map<String, String> values = new HashMap<>();
-							Map<String, String> rewrites = new HashMap<>();
-
-							JSONObject obj = new JSONObject( l );
-
-							String id = obj.optString( "id" );
-							if ( UtilObjects.isEmpty( id ) )
+							do
 							{
-								do
-								{
-									id = "route_rule_" + String.format( "%04d", inx.getAndIncrement() );
-								}
-								while ( parent.hasRoute( id ) );
+								id = "route_rule_" + String.format( "%04d", inx.getAndIncrement() );
 							}
-							else if ( parent.hasRoute( id ) )
-							{
-								NetworkManager.getLogger().severe( String.format( "Found duplicate route id '%s' in route file '%s', route will be ignored.", id, UtilIO.relPath( fileToWatch ) ) );
-								continue;
-							}
+							while ( parent.hasRoute( id ) );
+						}
 
-							for ( String sectionKey : obj.keySet() )
+						if ( parent.hasRoute( id ) )
+							Networking.L.severe( String.format( "Found duplicate route id '%s' in route file '%s', route will be ignored.", id, IO.relPath( path ) ) );
+						else
+						{
+							Iterator<String> iterator = obj.keys();
+							while ( iterator.hasNext() )
 							{
+								String sectionKey = iterator.next();
 								Object sectionObject = obj.get( sectionKey );
 
 								if ( sectionObject instanceof JSONObject && "vargs".equals( sectionKey ) )
 								{
-									for ( String argsKey : ( ( JSONObject ) sectionObject ).keySet() )
+									Iterator<String> iteratorArgs = ( ( JSONObject ) sectionObject ).keys();
+									while ( iteratorArgs.hasNext() )
 									{
+										String argsKey = iteratorArgs.next();
 										Object argsObject = ( ( JSONObject ) sectionObject ).get( argsKey );
 										if ( !( argsObject instanceof JSONObject ) && !( argsObject instanceof JSONArray ) )
 											try
 											{
-												rewrites.put( argsKey, UtilObjects.castToStringWithException( argsObject ) );
+												rewrites.put( argsKey, Objs.castToStringWithException( argsObject ) );
 											}
 											catch ( Exception e )
 											{
@@ -103,7 +115,7 @@ public class RouteWatcher extends FileWatcher
 								{
 									try
 									{
-										values.put( sectionKey, UtilObjects.castToStringWithException( sectionObject ) );
+										values.put( sectionKey, Objs.castToStringWithException( sectionObject ) );
 									}
 									catch ( Exception e )
 									{
@@ -117,22 +129,24 @@ public class RouteWatcher extends FileWatcher
 					}
 					catch ( JSONException e )
 					{
-						LogBuilder.get().severe( "Failed to parse '" + UtilIO.relPath( fileToWatch ) + "' file, line " + line + ".", e );
+						Networking.L.severe( "Failed to parse '" + IO.relPath( path ) + "' file, line " + line + ".", e );
 					}
-				}
+				} );
 			}
 			catch ( IOException e )
 			{
-				LogBuilder.get().severe( "Failed to load '" + UtilIO.relPath( fileToWatch ) + "' file.", e );
+				Networking.L.severe( "Failed to load '" + IO.relPath( path ) + "' file.", e );
 			}
 
-			LogBuilder.get().fine( "Finished Loading Routes from JSON file '" + UtilIO.relPath( fileToWatch ) + "'" );
+			Networking.L.fine( "Finished Loading Routes from JSON file '" + IO.relPath( path ) + "'" );
 		}
-		else if ( fileToWatch.getName().endsWith( ".yaml" ) )
+		else if ( path.endsWith( ".yaml" ) )
 		{
-			LogBuilder.get().fine( "Loading Routes from YAML file '" + UtilIO.relPath( fileToWatch ) + "'" );
+			Networking.L.fine( "Loading Routes from YAML file '" + IO.relPath( path ) + "'" );
 
-			YamlConfiguration yaml = YamlConfiguration.loadConfiguration( fileToWatch );
+			Parcel data = ParcelLoader.decodeYaml( path );
+
+			YamlConfiguration yaml = YamlConfiguration.loadConfiguration( path );
 
 			for ( String key : yaml.getKeys() )
 				if ( yaml.isConfigurationSection( key ) )
@@ -147,7 +161,7 @@ public class RouteWatcher extends FileWatcher
 
 					if ( parent.hasRoute( id ) )
 					{
-						NetworkManager.getLogger().severe( String.format( "Found duplicate route id '%s' in route file '%s', route will be ignored.", id, UtilIO.relPath( fileToWatch ) ) );
+						Networking.L.severe( String.format( "Found duplicate route id '%s' in route file '%s', route will be ignored.", id, IO.relPath( path ) ) );
 						continue;
 					}
 
@@ -163,7 +177,7 @@ public class RouteWatcher extends FileWatcher
 								if ( !args.isConfigurationSection( argsKey ) )
 									try
 									{
-										rewrites.put( argsKey, UtilObjects.castToStringWithException( args.get( argsKey ) ) );
+										rewrites.put( argsKey, Objs.castToStringWithException( args.get( argsKey ) ) );
 									}
 									catch ( Exception e )
 									{
@@ -174,7 +188,7 @@ public class RouteWatcher extends FileWatcher
 						{
 							try
 							{
-								values.put( sectionKey, UtilObjects.castToStringWithException( section.get( sectionKey ) ) );
+								values.put( sectionKey, Objs.castToStringWithException( section.get( sectionKey ) ) );
 							}
 							catch ( Exception e )
 							{
@@ -186,7 +200,7 @@ public class RouteWatcher extends FileWatcher
 					routes.add( new Route( id, parent.webroot, values, rewrites ) );
 				}
 
-			LogBuilder.get().fine( "Finished Loading Routes from YAML file '" + UtilIO.relPath( fileToWatch ) + "'" );
+			Networking.L.fine( "Finished Loading Routes from YAML file '" + IO.relPath( path ) + "'" );
 		}
 	}
 }

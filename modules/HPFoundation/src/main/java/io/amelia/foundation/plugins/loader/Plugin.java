@@ -281,7 +281,7 @@ public abstract class Plugin extends PluginBase
 
 	public void publishConfig()
 	{
-		ConfigMap node = getConfigNode().destroyChildThenCreate( "conf" );
+		ConfigMap node = getConfigNode().destroyChildAndCreate( "conf" );
 
 
 

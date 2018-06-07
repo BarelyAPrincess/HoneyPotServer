@@ -269,26 +269,6 @@ public class NetworkException
 
 	public static class Runtime extends ApplicationException.Runtime
 	{
-		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn ) throws Runtime
-		{
-			return tryCatch( fn, null );
-		}
-
-		public static <Rtn> Rtn tryCatch( SupplierWithException<Rtn, Exception> fn, @Nullable String detailMessage ) throws Runtime
-		{
-			try
-			{
-				return fn.get();
-			}
-			catch ( Exception e )
-			{
-				if ( detailMessage == null )
-					throw new Runtime( e );
-				else
-					throw new Runtime( detailMessage, e );
-			}
-		}
-
 		private static final long serialVersionUID = 5522301956671473324L;
 
 		public Runtime()

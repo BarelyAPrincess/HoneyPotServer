@@ -9,7 +9,6 @@
  */
 package io.amelia.foundation;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -227,8 +226,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			 *   priority: NORMAL
 			 * }
 			 */
-			ConfigMap facades = ConfigRegistry.config.getChild( Foundation.Config.BINDINGS_FACADES );
-			if ( facades != null )
+			ConfigRegistry.config.getChild( Foundation.Config.BINDINGS_FACADES ).ifPresent( facades -> {
 				facades.getChildren().forEach( each -> {
 					if ( each.hasChild( "class" ) )
 					{
@@ -258,6 +256,7 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 					else
 						Foundation.L.warning( "We found malformed arguments in the facade config for key -> " + each.getName() );
 				} );
+			} );
 		}
 		catch ( Exception e )
 		{

@@ -43,6 +43,7 @@ import java.util.List;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.Networking;
 import io.amelia.support.Encrypt;
+import io.amelia.support.Exceptions;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.OptionalExt;
@@ -78,8 +79,8 @@ public class CertificateWrapper
 		this.sslKeyFile = sslKeyFile;
 		this.sslSecret = sslSecret;
 
-		CertificateFactory certificateFactory = NetworkException.Runtime.tryCatch( () -> CertificateFactory.getInstance( "X.509" ), "Failed to initialize X.509 certificate factory." );
-		KeyFactory keyFactory = NetworkException.Runtime.tryCatch( () -> KeyFactory.getInstance( "RSA", "BC" ), "Failed to initialize RSA key factory." );
+		CertificateFactory certificateFactory = Exceptions.tryCatch( () -> CertificateFactory.getInstance( "X.509" ), exp -> new NetworkException.Runtime( "Failed to initialize X.509 certificate factory.", exp ) );
+		KeyFactory keyFactory = Exceptions.tryCatch( () -> KeyFactory.getInstance( "RSA", "BC" ), exp -> new NetworkException.Runtime( "Failed to initialize RSA key factory.", exp ) );
 
 		InputStream certInputStream = null;
 		try

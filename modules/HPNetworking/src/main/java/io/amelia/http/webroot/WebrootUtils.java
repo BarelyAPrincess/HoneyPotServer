@@ -24,7 +24,7 @@ public class WebrootUtils
 	{
 		try
 		{
-			Path dir = Kernel.getPath( BaseWebroot.PATH_ARCHIVE ).resolve( siteId );
+			Path dir = Kernel.getPath( Webroot.PATH_ARCHIVE ).resolve( siteId );
 			if ( !Files.isDirectory( dir ) )
 				return;
 			Stream<Path> files = Files.list( dir ).filter( path -> Files.isRegularFile( path ) && path.endsWith( suffix ) );

@@ -16,30 +16,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import io.amelia.data.TypeBase;
-import io.amelia.data.parcel.Parcel;
-import io.amelia.data.parcel.ParcelLoader;
-import io.amelia.filesystem.sql.SQLFileSystemProvider;
+import io.amelia.filesystem.SQLFileSystemProvider;
+import io.amelia.foundation.ConfigMap;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
+import io.amelia.http.mappings.DomainNode;
+import io.amelia.http.mappings.DomainTree;
 import io.amelia.lang.WebrootException;
 import io.amelia.support.IO;
+import io.amelia.support.StorageConversions;
 import io.amelia.support.Streams;
 
 public class WebrootManager
 {
+	public static final String PATH_ARCHIVES = "__archives";
 	public static final String PATH_WEBROOT = "__webroot";
-	private static final List<BaseWebroot> WEBROOTS = new CopyOnWriteArrayList<>();
+	private static final List<Webroot> WEBROOTS = new CopyOnWriteArrayList<>();
 	public static Kernel.Logger L = Kernel.getLogger( WebrootManager.class );
 
 	static
 	{
 		WEBROOTS.add( new DefaultWebroot() );
 
+		Kernel.setPath( PATH_ARCHIVES, Kernel.PATH_STORAGE, "archives" );
 		Kernel.setPath( PATH_WEBROOT, Kernel.PATH_STORAGE, "webroot" );
 
 		FileSystem backend;
@@ -63,15 +68,30 @@ public class WebrootManager
 			IO.forceCreateDirectory( path );
 
 			Streams.forEachWithException( Files.list( path ).filter( directory -> Files.isDirectory( directory ) && Files.isRegularFile( directory.resolve( "config.yaml" ) ) ), directory -> {
-				Parcel configuration = ParcelLoader.decodeYaml( directory.resolve( "config.yaml" ) );
+				ConfigMap configuration = new ConfigMap();
+				StorageConversions.loadToStacker( directory.resolve( "config.yaml" ), configuration );
 				Env env = new Env( directory.resolve( ".env" ) );
-				WEBROOTS.add( new BaseWebroot( directory, configuration, env ) );
+				WEBROOTS.add( new Webroot( directory, configuration, env ) );
 			} );
 		}
-		catch ( IOException e )
+		catch ( Exception e )
 		{
 			throw new WebrootException.Runtime( e );
 		}
+	}
+
+	public static void cleanupBackups( final String webrootId, String suffix, int limit ) throws IOException
+	{
+		Path webrootArchive = Kernel.getPath( PATH_ARCHIVES ).resolve( webrootId );
+		if ( !Files.exists( webrootArchive ) )
+			return;
+		Stream<Path> result = Files.list( webrootArchive ).filter( path -> path.toString().toLowerCase().endsWith( suffix.toLowerCase() ) );
+
+		// Delete all logs, no archiving!
+		if ( limit < 1 )
+			Streams.forEachWithException( result, IO::deleteIfExists );
+		else
+			Streams.forEachWithException( result.sorted( new IO.PathComparatorByCreated() ).limit( limit ), IO::deleteIfExists );
 	}
 
 	private static String getDefaultBackend()
@@ -79,12 +99,22 @@ public class WebrootManager
 		return "file";
 	}
 
-	public static BaseWebroot getDefaultWebroot()
+	public static Webroot getDefaultWebroot()
 	{
 		return getWebrootById( "default" );
 	}
 
-	public static BaseWebroot getWebrootById( @Nonnull String id )
+	public static DomainNode getDomain( String fullDomain )
+	{
+		return DomainTree.parseDomain( fullDomain );
+	}
+
+	public static Stream<DomainNode> getDomainsByWebroot( Webroot webroot )
+	{
+		return DomainTree.getChildren().filter( n -> n.getWebroot() == webroot );
+	}
+
+	public static Webroot getWebrootById( @Nonnull String id )
 	{
 		return null;
 	}

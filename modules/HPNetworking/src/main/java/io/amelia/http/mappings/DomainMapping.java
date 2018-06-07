@@ -9,36 +9,37 @@
  */
 package io.amelia.http.mappings;
 
-import com.chiorichan.net.http.ssl.CertificateWrapper;
-import com.chiorichan.utils.UtilHttp;
-import com.chiorichan.utils.UtilIO;
-import com.chiorichan.utils.UtilObjects;
-
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.net.ssl.SSLException;
-
 import io.amelia.foundation.ConfigRegistry;
-import io.amelia.http.webroot.BaseWebroot;
-import io.amelia.lang.SiteConfigurationException;
+import io.amelia.http.ssl.CertificateWrapper;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.lang.WebrootException;
+import io.amelia.networking.Networking;
+import io.amelia.support.Http;
 import io.amelia.support.IO;
 import io.amelia.support.Namespace;
+import io.amelia.support.Objs;
 import io.netty.handler.ssl.SslContext;
 
 public class DomainMapping
 {
 	protected final Map<String, String> config = new TreeMap<>();
 	protected final DomainParser domain;
-	protected final BaseWebroot webroot;
+	protected final Webroot webroot;
 
-	public DomainMapping( BaseWebroot webroot, String fullDomain )
+	public DomainMapping( Webroot webroot, String fullDomain )
 	{
 		this.webroot = webroot;
 		this.domain = new DomainParser( fullDomain );
@@ -49,25 +50,20 @@ public class DomainMapping
 		config.clear();
 	}
 
-	public File directory()
+	public Path directory()
 	{
 		try
 		{
 			return directory0( false );
 		}
-		catch ( SiteConfigurationException e )
+		catch ( WebrootException.Configuration e )
 		{
 			// IGNORED - NEVER THROWN
 		}
 		return null;
 	}
 
-	public File directory( String subdir ) throws SiteConfigurationException
-	{
-		return new File( directory(), subdir );
-	}
-
-	protected File directory0( boolean throwException ) throws SiteConfigurationException
+	protected Path directory0( boolean throwException ) throws WebrootException.Configuration
 	{
 		try
 		{
@@ -76,26 +72,26 @@ public class DomainMapping
 				String directory = getConfig( "directory" );
 				if ( IO.isAbsolute( directory ) )
 				{
-					if ( !ConfigRegistry.config.getBoolean( "sites.allowPublicOutsideWebroot" ) && !directory.startsWith( webroot.getPublicDirectory().getAbsolutePath() ) )
-						throw new SiteConfigurationException( String.format( "The public directory [%s] is not allowed outside the webroot.", UtilIO.relPath( new File( directory ) ) ) );
+					if ( !ConfigRegistry.config.getBoolean( "webroots.allowPublicOutsideWebroot" ).orElse( false ) && !directory.startsWith( webroot.getPublicDirectory().toString() ) )
+						throw new WebrootException.Configuration( String.format( "The public directory [%s] is not allowed outside the webroot.", IO.relPath( new File( directory ) ) ) );
 
-					return new File( directory );
+					return Paths.get( directory );
 				}
 
-				return new File( webroot.getPublicDirectory(), directory );
+				return webroot.getPublicDirectory().resolve( directory );
 			}
 		}
-		catch ( SiteConfigurationException e )
+		catch ( WebrootException.Configuration e )
 		{
 			/* Should an exception be thrown instead of returning the default directory */
 			if ( throwException )
 				throw e;
 		}
 
-		return new File( webroot.getPublicDirectory(), getNamespace().replace( "_", "-" ).getString( "_" ) );
+		return webroot.getPublicDirectory().resolve( getNamespace().replace( "_", "-" ).setGlue( "_" ).getString() );
 	}
 
-	public File directoryWithException() throws SiteConfigurationException
+	public Path directoryWithException() throws WebrootException.Configuration
 	{
 		return directory0( true );
 	}
@@ -137,7 +133,7 @@ public class DomainMapping
 
 	public String getNamespaceString()
 	{
-		return getNamespace().getString( "_", true );
+		return getNamespace().setGlue( "_" ).getString();
 	}
 
 	public DomainMapping getParentMapping()
@@ -177,17 +173,17 @@ public class DomainMapping
 	public SslContext getSslContext( boolean recursive )
 	{
 		Map<String, DomainMapping> nodes = new TreeMap<>( Collections.reverseOrder() );
-		nodes.putAll( getParentMappings().filter( p -> p.hasSslContext() ).collect( Collectors.toMap( DomainMapping::getFullDomain, p -> p ) ) );
+		nodes.putAll( getParentMappings().filter( DomainMapping::hasSslContext ).collect( Collectors.toMap( DomainMapping::getFullDomain, p -> p ) ) );
 
 		for ( Map.Entry<String, DomainMapping> entry : nodes.entrySet() )
 		{
 			CertificateWrapper wrapper = entry.getValue().initSsl();
-			if ( wrapper != null && ( entry.getValue() == this || UtilHttp.normalize( wrapper.getCommonName() ).equals( getFullDomain() ) || wrapper.getSubjectAltDNSNames().contains( getFullDomain() ) ) )
+			if ( wrapper != null && ( entry.getValue() == this || Http.hostnameNormalize( wrapper.getCommonName().orElse( null ) ).equals( getFullDomain() ) || wrapper.getSubjectAltDNSNames().orElseGet( ArrayList::new ).contains( getFullDomain() ) ) )
 				try
 				{
 					return wrapper.context();
 				}
-				catch ( SSLException | FileNotFoundException | CertificateException e )
+				catch ( IOException | CertificateException e )
 				{
 					e.printStackTrace();
 					// Ignore
@@ -197,7 +193,7 @@ public class DomainMapping
 		return webroot.getDefaultSslContext();
 	}
 
-	public Site getWebroot()
+	public Webroot getWebroot()
 	{
 		return webroot;
 	}
@@ -214,25 +210,25 @@ public class DomainMapping
 
 	private CertificateWrapper initSsl()
 	{
-		File ssl = webroot.getDirectory( "ssl" );
-		UtilIO.setDirectoryAccessWithException( ssl );
-
 		try
 		{
+			Path ssl = webroot.getDirectory( "ssl" );
+			IO.forceCreateDirectory( ssl );
+
 			if ( hasConfig( "sslCert" ) && hasConfig( "sslKey" ) )
 			{
 				String sslCertPath = getConfig( "sslCert" );
 				String sslKeyPath = getConfig( "sslKey" );
 
-				File sslCert = UtilIO.isAbsolute( sslCertPath ) ? new File( sslCertPath ) : new File( ssl, sslCertPath );
-				File sslKey = UtilIO.isAbsolute( sslKeyPath ) ? new File( sslKeyPath ) : new File( ssl, sslKeyPath );
+				Path sslCert = IO.isAbsolute( sslCertPath ) ? Paths.get( sslCertPath ) : ssl.resolve( sslCertPath );
+				Path sslKey = IO.isAbsolute( sslKeyPath ) ? Paths.get( sslKeyPath ) : ssl.resolve( sslKeyPath );
 
 				return new CertificateWrapper( sslCert, sslKey, getConfig( "sslSecret" ) );
 			}
 		}
-		catch ( FileNotFoundException | CertificateException e )
+		catch ( IOException | CertificateException | InvalidKeySpecException e )
 		{
-			SiteModule.getLogger().severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", webroot.getId(), getConfig( "sslCert" ), getConfig( "sslKey" ), hasConfig( "sslSecret" ) ), e );
+			Networking.L.severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", webroot.getWebrootId(), getConfig( "sslCert" ), getConfig( "sslKey" ), hasConfig( "sslSecret" ) ), e );
 		}
 
 		return null;
@@ -240,7 +236,7 @@ public class DomainMapping
 
 	public boolean isDefault()
 	{
-		return hasConfig( "default" ) && UtilObjects.castToBool( getConfig( "default" ) );
+		return hasConfig( "default" ) && Objs.castToBoolean( getConfig( "default" ) );
 	}
 
 	public boolean isMapped()
@@ -254,20 +250,20 @@ public class DomainMapping
 		DomainNode node = getDomainNode();
 		if ( node != null )
 			node.setWebroot( webroot );
-		webroot.mappings.add( this );
+		webroot.addDomainMapping( this );
 		return node;
 	}
 
 	public Boolean matches( String domain )
 	{
-		if ( UtilHttp.needsNormalization( domain ) )
-			domain = UtilHttp.normalize( domain );
-		return UtilHttp.matches( domain, this.domain.getFullDomain().getString() );
+		if ( Http.hostnameNeedsNormalization( domain ) )
+			domain = Http.hostnameNormalize( domain );
+		return Http.matches( domain, this.domain.getFullDomain().getString() );
 	}
 
 	public void putConfig( String key, String value )
 	{
-		UtilObjects.notEmpty( key );
+		Objs.notEmpty( key );
 		key = key.trim().toLowerCase();
 		if ( key.startsWith( "__" ) )
 			key = key.substring( 2 );
@@ -288,7 +284,7 @@ public class DomainMapping
 	@Override
 	public String toString()
 	{
-		return String.format( "DomainMapping{webroot=%s,rootDomain=%s,childDomain=%s,config=[%s]}", webroot.getId(), domain.getTld(), domain.getSub(), config.entrySet().stream().map( e -> e.getKey() + "=\"" + e.getValue() + "\"" ).collect( Collectors.joining( "," ) ) );
+		return String.format( "DomainMapping{webroot=%s,rootDomain=%s,childDomain=%s,config=[%s]}", webroot.getWebrootId(), domain.getTld(), domain.getSub(), config.entrySet().stream().map( e -> e.getKey() + "=\"" + e.getValue() + "\"" ).collect( Collectors.joining( "," ) ) );
 	}
 
 	public void unmap()

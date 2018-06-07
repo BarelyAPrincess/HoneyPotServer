@@ -9,9 +9,9 @@
  */
 package io.amelia.http.routes;
 
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import io.amelia.foundation.Kernel;
-import io.amelia.http.webroot.BaseWebroot;
+import io.amelia.http.webroot.Webroot;
 import io.amelia.support.Objs;
 import io.netty.util.internal.ConcurrentSet;
 
@@ -31,16 +31,16 @@ public class Routes
 	public static final Kernel.Logger L = Kernel.getLogger( Routes.class );
 
 	protected final Set<Route> routes = new ConcurrentSet<>();
-	protected final BaseWebroot webroot;
+	protected final Webroot webroot;
 	private RouteWatcher jsonWatcher;
 	private RouteWatcher yamlWatcher;
 
-	public Routes( BaseWebroot webroot )
+	public Routes( Webroot webroot )
 	{
 		this.webroot = webroot;
 
-		File routesJson = new File( webroot.getDirectory(), "routes.json" );
-		File routesYaml = new File( webroot.getDirectory(), "routes.yaml" );
+		Path routesJson = webroot.getDirectory().resolve( "routes.json" );
+		Path routesYaml = webroot.getDirectory().resolve( "routes.yaml" );
 
 		jsonWatcher = new RouteWatcher( this, routesJson );
 		yamlWatcher = new RouteWatcher( this, routesYaml );
@@ -48,7 +48,7 @@ public class Routes
 
 	public boolean hasRoute( String id )
 	{
-		return routes.stream().filter( r -> id.equalsIgnoreCase( r.getId() ) || id.matches( r.getId() ) ).findAny().isPresent();
+		return routes.stream().anyMatch( r -> id.equalsIgnoreCase( r.getId() ) || id.matches( r.getId() ) );
 	}
 
 	public Route routeUrl( @Nonnull String id )
@@ -61,14 +61,14 @@ public class Routes
 		return routes.stream().filter( r -> id.equalsIgnoreCase( r.getId() ) || id.matches( r.getId() ) ).findFirst().orElse( null );
 	}
 
-	public RouteResult searchRoutes( String uri, String host ) throws IOException
+	public RouteResult searchRoutes( String uri, String host )
 	{
 		jsonWatcher.reviveTask();
 		yamlWatcher.reviveTask();
 
 		AtomicInteger keyInteger = new AtomicInteger();
 
-		Map<String, RouteResult> matches = routes.stream().map( route -> route.match( uri, host ) ).filter( result -> result != null ).collect( Collectors.toMap( result -> result.getWeight() + keyInteger.getAndIncrement(), result -> result ) );
+		Map<String, RouteResult> matches = routes.stream().map( route -> route.match( uri, host ) ).filter( Objs::isNotNull ).collect( Collectors.toMap( result -> result.getWeight() + keyInteger.getAndIncrement(), result -> result ) );
 
 		if ( matches.size() > 0 )
 			return ( RouteResult ) matches.values().toArray()[0];

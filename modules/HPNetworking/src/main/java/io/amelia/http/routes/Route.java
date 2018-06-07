@@ -9,12 +9,7 @@
  */
 package io.amelia.http.routes;
 
-import io.amelia.logging.LogBuilder;
-import com.chiorichan.site.Site;
-import com.chiorichan.utils.UtilObjects;
-import com.chiorichan.utils.UtilStrings;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,17 +17,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.amelia.http.webroot.Webroot;
+import io.amelia.networking.Networking;
+import io.amelia.support.Objs;
+import io.amelia.support.Strs;
+
 public class Route
 {
 	private final String id;
 	private final Map<String, String> params = new HashMap<>();
 	private final Map<String, String> rewrites = new HashMap<>();
-	private final Site site;
+	private final Webroot webroot;
 
-	protected Route( String id, Site site, Map<String, String> params, Map<String, String> rewrites )
+	protected Route( String id, Webroot webroot, Map<String, String> params, Map<String, String> rewrites )
 	{
 		this.id = id;
-		this.site = site;
+		this.webroot = webroot;
 		this.params.putAll( params );
 		this.rewrites.putAll( rewrites );
 	}
@@ -69,7 +69,7 @@ public class Route
 
 	public int httpCode()
 	{
-		return UtilObjects.isEmpty( params.get( "status" ) ) ? 301 : Integer.parseInt( params.get( "status" ) );
+		return Objs.isEmpty( params.get( "status" ) ) ? 301 : Integer.parseInt( params.get( "status" ) );
 	}
 
 	public boolean isRedirect()
@@ -85,8 +85,8 @@ public class Route
 		if ( prop == null )
 			return null; // Ignore, is likely a route url entry
 
-		prop = StringUtils.trimToEmpty( prop );
-		uri = StringUtils.trimToEmpty( uri );
+		prop = prop.trim();
+		uri = uri.trim();
 
 		if ( prop.startsWith( "/" ) )
 		{
@@ -94,20 +94,20 @@ public class Route
 			params.put( "pattern", prop );
 		}
 
-		if ( !UtilObjects.isEmpty( params.get( "host" ) ) && !host.matches( params.get( "host" ) ) )
+		if ( !Objs.isEmpty( params.get( "host" ) ) && !host.matches( params.get( "host" ) ) )
 		{
-			LogBuilder.get().finer( "The host failed validation for route " + this );
+			Networking.L.fine( "The host failed validation for route " + this );
 			return null;
 		}
 
-		if ( UtilObjects.isEmpty( params.get( "host" ) ) )
-			LogBuilder.get().warning( "The Route [" + params.entrySet().stream().map( e -> e.getKey() + "=\"" + e.getValue() + "\"" ).collect( Collectors.joining( "," ) ) + "] has no host (Uses RegEx, e.g., ^example.com$) defined, it's recommended that one is set so that the rule is not used unintentionally." );
+		if ( Objs.isEmpty( params.get( "host" ) ) )
+			Networking.L.warning( "The Route [" + params.entrySet().stream().map( e -> e.getKey() + "=\"" + e.getValue() + "\"" ).collect( Collectors.joining( "," ) ) + "] has no host (Uses RegEx, e.g., ^example.com$) defined, it's recommended that one is set so that the rule is not used unintentionally." );
 
-		String[] propsRaw = prop.split( "[.//]" );
-		String[] urisRaw = uri.split( "[.//]" );
+		String[] propsRaw = prop.split( "[./]" );
+		String[] urisRaw = uri.split( "[./]" );
 
-		ArrayList<String> props = Lists.newArrayList();
-		ArrayList<String> uris = Lists.newArrayList();
+		ArrayList<String> props = new ArrayList<>();
+		ArrayList<String> uris = new ArrayList<>();
 
 		for ( String s : propsRaw )
 			if ( s != null && !s.isEmpty() )
@@ -125,27 +125,27 @@ public class Route
 
 		if ( props.size() > uris.size() )
 		{
-			LogBuilder.get().finer( "The length of elements in route " + this + " is LONGER then the length of elements on the uri; " + uris );
+			Networking.L.fine( "The length of elements in route " + this + " is LONGER then the length of elements on the uri; " + uris );
 			return null;
 		}
 
 		if ( props.size() < uris.size() )
 		{
-			LogBuilder.get().finer( "The length of elements in route " + this + " is SHORTER then the length of elements on the uri; " + uris );
+			Networking.L.fine( "The length of elements in route " + this + " is SHORTER then the length of elements on the uri; " + uris );
 			return null;
 		}
 
-		String weight = StringUtils.repeat( "?", Math.max( props.size(), uris.size() ) );
+		String weight = Strs.repeat( "?", Math.max( props.size(), uris.size() ) );
 
 		boolean match = true;
 		for ( int i = 0; i < Math.max( props.size(), uris.size() ); i++ )
 			try
 			{
-				LogBuilder.get().finest( prop + " --> " + props.get( i ) + " == " + uris.get( i ) );
+				Networking.L.finest( prop + " --> " + props.get( i ) + " == " + uris.get( i ) );
 
 				if ( props.get( i ).matches( "\\[([a-zA-Z0-9]+)=\\]" ) )
 				{
-					weight = UtilStrings.replaceAt( weight, i, "Z" );
+					weight = Strs.replaceAt( weight, i, "Z" );
 
 					String key = props.get( i ).replaceAll( "[\\[\\]=]", "" );
 					String value = uris.get( i );
@@ -153,19 +153,19 @@ public class Route
 					localRewrites.put( key, value );
 
 					// PREG MATCH
-					LogBuilder.get().finer( "Found a PREG match for " + prop + " on route " + this );
+					Networking.L.fine( "Found a PREG match for " + prop + " on route " + this );
 				}
 				else if ( props.get( i ).equals( uris.get( i ) ) )
 				{
-					weight = UtilStrings.replaceAt( weight, i, "A" );
+					weight = Strs.replaceAt( weight, i, "A" );
 
-					LogBuilder.get().finer( "Found a match for " + prop + " on route " + this );
+					Networking.L.fine( "Found a match for " + prop + " on route " + this );
 					// MATCH
 				}
 				else
 				{
 					match = false;
-					LogBuilder.get().finer( "Found no match for " + prop + " on route " + this );
+					Networking.L.fine( "Found no match for " + prop + " on route " + this );
 					break;
 					// NO MATCH
 				}
