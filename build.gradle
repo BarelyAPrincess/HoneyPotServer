@@ -188,7 +188,7 @@ def travis_build = System.getenv( "TRAVIS_BUILD_NUMBER" )
 def buildNumber = '0'
 
 group 'io.amelia'
-description = 'Honey Pot Server is a multi-protocol networking server offering groovy scripting, plugins, ssl, events, orm, and more.'
+description = 'Honey Pot Server is a multi-protocol networking server offering groovy scripting, plugins, ssl, events, orm, and much more.'
 
 distsDirName = 'dist'
 libsDirName = 'dist'
