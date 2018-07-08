@@ -40,13 +40,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.amelia.support.Voluntary;
 import io.amelia.lang.NetworkException;
 import io.amelia.networking.Networking;
 import io.amelia.support.Encrypt;
 import io.amelia.support.Exceptions;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
-import io.amelia.support.OptionalExt;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 
@@ -174,18 +174,18 @@ public class CertificateWrapper
 		return privateKey;
 	}
 
-	public OptionalExt<String, CertificateEncodingException> getCommonName()
+	public Voluntary<String, CertificateEncodingException> getCommonName()
 	{
 		try
 		{
 			X500Name x500name = new JcaX509CertificateHolder( certificate ).getSubject();
 			RDN cn = x500name.getRDNs( BCStyle.CN )[0];
 
-			return OptionalExt.ofNullable( IETFUtils.valueToString( cn.getFirst().getValue() ) );
+			return Voluntary.ofNullable( IETFUtils.valueToString( cn.getFirst().getValue() ) );
 		}
 		catch ( CertificateEncodingException e )
 		{
-			return OptionalExt.withException( e );
+			return Voluntary.withException( e );
 		}
 	}
 
@@ -194,12 +194,12 @@ public class CertificateWrapper
 		return certificate.getEncoded();
 	}
 
-	public OptionalExt<List<String>, CertificateParsingException> getSubjectAltDNSNames()
+	public Voluntary<List<String>, CertificateParsingException> getSubjectAltDNSNames()
 	{
 		return getSubjectAltNames( 2 );
 	}
 
-	public OptionalExt<List<String>, CertificateParsingException> getSubjectAltNames( int type )
+	public Voluntary<List<String>, CertificateParsingException> getSubjectAltNames( int type )
 	{
 		/*
 		 * otherName [0] OtherName,
@@ -233,11 +233,11 @@ public class CertificateWrapper
 					{
 						Networking.L.severe( e.getMessage() );
 					}
-			return OptionalExt.ofNeverNull( result );
+			return Voluntary.of( result );
 		}
 		catch ( CertificateParsingException e )
 		{
-			return OptionalExt.withException( e );
+			return Voluntary.withException( e );
 		}
 	}
 

@@ -9,12 +9,21 @@
  */
 package io.amelia.http.session;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Method used to keep a Session persistent from request to request.
- * 
- * XXX This is an outdated feature from like version 6, not sure if it's still working as of version 9.
+ *
+ * TODO This feature is from since version 6 of CWS, not sure if it's still perperly working as of the latest version.
  */
 public enum SessionPersistenceMethod
 {
-	COOKIE, PARAM
+	COOKIE,
+	PARAM;
+
+	public static Optional<SessionPersistenceMethod> valueOfIgnoreCase( String key )
+	{
+		return Arrays.stream( values() ).filter( e -> e.name().equalsIgnoreCase( key ) ).findAny();
+	}
 }

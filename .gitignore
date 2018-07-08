@@ -7,11 +7,12 @@
 /wedroot/
 /.idea/
 /.env
+/.gradle
 
 /build/
 /**/build/
 /out/
-/bin/
+/bin/ee
 
 *.class
 *.log

@@ -27,10 +27,10 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
 import io.amelia.data.apache.ApacheConfiguration;
-import io.amelia.data.parcel.Parcel;
 import io.amelia.database.Database;
 import io.amelia.database.elegant.ElegantQueryTable;
 import io.amelia.events.Events;
@@ -48,10 +48,13 @@ import io.amelia.http.routes.Routes;
 import io.amelia.http.session.SessionPersistenceMethod;
 import io.amelia.http.session.Sessions;
 import io.amelia.http.ssl.CertificateWrapper;
+import io.amelia.lang.ConfigException;
+import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.WebrootException;
 import io.amelia.scripting.ScriptBinding;
 import io.amelia.scripting.ScriptingContext;
 import io.amelia.scripting.ScriptingFactory;
+import io.amelia.scripting.ScriptingResult;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Exceptions;
@@ -89,15 +92,15 @@ public class Webroot
 		// .htaccess
 		STORAGE_POLICY.setLayoutFile( "htaccess.json", StoragePolicy.Strategy.CREATE );
 
-		// config.parcel
+		// Webroot Config File
 		// STORAGE_POLICY.setLayoutFile( "config.yaml", StoragePolicy.Strategy.CREATE );
-		// Routes file
+		// Routes File
 		// STORAGE_POLICY.setLayoutFile( "routes.json", StoragePolicy.Strategy.CREATE );
 	}
 
 	protected final ScriptBinding binding = new ScriptBinding();
 	protected final List<String> cachePatterns = new ArrayList<>();
-	protected final Path configPath;
+	protected final Path configurationFile;
 	protected final ConfigMap configuration;
 	protected final Path directory;
 	protected final Env env;
@@ -119,8 +122,8 @@ public class Webroot
 		{
 			this.webrootId = webrootId;
 
-			configPath = null;
-			configuration = new ConfigMap();
+			configurationFile = null;
+			configuration = ConfigMap.empty();
 			webrootTitle = Kernel.getDevMeta().getProductName();
 			database = Database.getDatabase();
 
@@ -140,12 +143,12 @@ public class Webroot
 		try
 		{
 			this.directory = directory;
-			this.configPath = directory.resolve( "config" );
+			this.configurationFile = directory.resolve( "config" );
 			this.configuration = configuration;
 			this.env = env;
 
-			StorageConversions.loadToStacker( configPath, configuration );
-			configuration.setEnviromentVariables( env.map() );
+			StorageConversions.loadToStacker( configurationFile, configuration );
+			configuration.setEnvironmentVariables( env.map() );
 
 			webrootId = configuration.getString( "webroot.id" ).orElseThrow( () -> new WebrootException.Error( "Webroot Id is missing!" ) ).toLowerCase();
 			webrootTitle = configuration.getString( "webroot.title" ).orElse( ConfigRegistry.config.getString( WebrootManager.Config.WEBROOTS_DEFAULT_TITLE ) );
@@ -159,7 +162,7 @@ public class Webroot
 					WebrootManager.L.warning( String.format( "Webroot '%s' is set to listen on ip '%s', but that address is not assigned to any network interfaces.", webrootId, ip ) );
 
 			if ( ips.contains( "localhost" ) )
-				throw new WebrootException.Error( "Webroots are not permitted to listen on hostname 'localhost', this hostname is reserved for the default webroot." );
+				throw new WebrootException.Error( "Webroots are not permitted to listen on hostname 'localhost', it is reserved for internal use only." );
 
 			if ( WebrootManager.getWebrootById( webrootId ) != null )
 				throw new WebrootException.Error( String.format( "There already exists a webroot by the provided webroot id '%s'", webrootId ) );
@@ -199,18 +202,13 @@ public class Webroot
 				throw new WebrootException.Error( String.format( "Webroot '%s' was prevented from loading by an internal event.", webrootId ) );
 
 			if ( configuration.hasChild( "database" ) )
-				database = new Database( WebrootStorage.initDatabase( configuration.getChild( "database" ) ) );
+				database = new Database( WebrootStorage.initDatabase( configuration.getChild( "database" ).toParcel() ) );
 
 			routes = new Routes( this );
 
-			if ( configuration.has( "sessions.persistenceMethod" ) )
-				for ( SessionPersistenceMethod method : SessionPersistenceMethod.values() )
-					if ( method.name().equalsIgnoreCase( configuration.getString( "sessions.persistenceMethod" ) ) )
-						sessionPersistence = method;
+			configuration.getString( "sessions.persistenceMethod" ).ifPresent( persistenceMethod -> sessionPersistence = SessionPersistenceMethod.valueOfIgnoreCase( persistenceMethod ).orElse( null ) );
 
-			List<String> onLoadScripts = configuration.getStringList( "scripts.on-load" );
-
-			if ( onLoadScripts != null )
+			configuration.getStringList( "scripts.on-load" ).ifPresent( onLoadScripts -> {
 				for ( String script : onLoadScripts )
 				{
 					ScriptingResult result = factory.eval( ScriptingContext.fromFile( this, script ).shell( "groovy" ).Webroot( this ) );
@@ -228,8 +226,9 @@ public class Webroot
 					else
 						WebrootManager.L.info( String.format( "Finished evaluate onLoadScript '%s' for webroot '%s' with result: %s", script, webrootId, result.getString( true ) ) );
 				}
+			} );
 
-			Parcel archive = configuration.getChildOrCreate( "archive" );
+			ConfigMap archive = configuration.getChildOrCreate( "archive" );
 
 			if ( !archive.hasValue( "enable" ) )
 				archive.setValue( "enable", false );
@@ -364,7 +363,7 @@ public class Webroot
 
 	public Path getConfigFile()
 	{
-		return configFile;
+		return configurationFile;
 	}
 
 	public Database getDatabase()
@@ -569,10 +568,10 @@ public class Webroot
 		return webrootTitle;
 	}
 
-	public void setTitle( String title )
+	public void setTitle( String title ) throws ConfigException.Error
 	{
-		webrootTitle = title;
 		configuration.setValue( "webroot.title", title );
+		webrootTitle = title;
 	}
 
 	public Path getWebrootPath()
@@ -585,12 +584,12 @@ public class Webroot
 		return defaultSslContext != null;
 	}
 
-	private void mapDomain( @Nonnull Parcel domains ) throws WebrootException.Configuration
+	private void mapDomain( @Nonnull ConfigMap domains ) throws WebrootException.Configuration
 	{
 		mapDomain( domains, null, 0 );
 	}
 
-	private void mapDomain( @Nonnull Parcel domains, @Nonnull DomainMapping mapping, @Nonnegative int depth ) throws WebrootException.Configuration
+	private void mapDomain( @Nonnull ConfigMap domains, @Nullable DomainMapping mapping, @Nonnegative int depth ) throws WebrootException.Configuration
 	{
 		for ( String key : domains.getKeys() )
 		{
