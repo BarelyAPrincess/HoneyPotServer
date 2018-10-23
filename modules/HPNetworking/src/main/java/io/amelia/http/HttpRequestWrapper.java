@@ -43,17 +43,21 @@ import io.amelia.http.session.Session;
 import io.amelia.http.session.SessionContext;
 import io.amelia.http.session.SessionWrapper;
 import io.amelia.http.webroot.BaseWebroot;
+import io.amelia.http.webroot.Webroot;
 import io.amelia.http.webroot.WebrootManager;
 import io.amelia.logging.LogEvent;
 import io.amelia.networking.NetworkLoader;
+import io.amelia.networking.Networking;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Http;
 import io.amelia.support.HttpRequestContext;
 import io.amelia.support.NIO;
 import io.amelia.support.Objs;
+import io.amelia.support.Pair;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.Cookie;
+import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -184,20 +188,20 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		}
 
 		if ( domainMapping == null )
-			domainMapping = WebrootManager.getDefaultSite().getMappings( "" ).findFirst().orElse( null );
+			domainMapping = WebrootManager.getDefaultWebroot().getMappings( "" ).findFirst().orElse( null );
 
-		if ( getUri().startsWith( "/~" ) && domainMapping.getSite() == WebrootManager.getDefaultSite() )
+		if ( getUri().startsWith( "/~" ) && domainMapping.getWebroot() == WebrootManager.getDefaultWebroot() )
 		{
 			String uri = getUri();
 			int inx = uri.indexOf( "/", 2 );
 			String siteId = uri.substring( 2, inx == -1 ? uri.length() - 2 : inx );
 			String newUri = inx == -1 ? "/" : uri.substring( inx );
 
-			Site siteTmp = WebrootManager.getSiteById( siteId );
-			if ( !siteId.equals( "wisp" ) && siteTmp != null )
+			Webroot webroot = WebrootManager.getWebrootById( siteId );
+			if ( !siteId.equals( "wisp" ) && webroot != null )
 			{
-				/* Get the declared default domain mapping, the first if otherwise */
-				domainMapping = siteTmp.getDefaultMapping();
+				// Get the declared default domain mapping, the first if otherwise
+				domainMapping = webroot.getDefaultMapping();
 				setUri( newUri );
 			}
 		}
@@ -226,7 +230,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		// String var1 = URLDecoder.decode( http.headers().get( "Cookie" ), Charsets.UTF_8.displayName() );
 		String var1 = http.headers().get( "Cookie" );
 
-		// TODO Find a way to fix missing invalid stuff
+		// TODO fix missing invalid stuff
 
 		if ( var1 != null )
 			try
@@ -240,12 +244,10 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			}
 			catch ( IllegalArgumentException | NullPointerException e )
 			{
-				//NetworkManager.getLogger().debug( var1 );
-
-				NetworkManager.getLogger().severe( "Failed to parse cookie for reason: " + e.getMessage() );
-				// NetworkManager.getLogger().warning( "There was a problem decoding the request cookie.", e );
-				// NetworkManager.getLogger().debug( "Cookie: " + var1 );
-				// NetworkManager.getLogger().debug( "Headers: " + Joiner.on( "," ).withKeyValueSeparator( "=" ).join( http.headers() ) );
+				Networking.L.severe( "Failed to parse cookie for reason: " + e.getMessage() );
+				// Networking.L.warning( "There was a problem decoding the request cookie.", e );
+				// Networking.L.debug( "Cookie: " + var1 );
+				// Networking.L.debug( "Headers: " + Joiner.on( "," ).withKeyValueSeparator( "=" ).join( http.headers() ) );
 			}
 
 		initServerVars();
@@ -312,6 +314,11 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		Object obj = getArgument( key, "-1" );
 		return Objs.castToInt( obj );
+	}
+
+	public Stream<Entry<String, String>> getArguments()
+	{
+		return Stream.concat( Stream.concat( getMap.entrySet().stream(), postMap.entrySet().stream() ), rewriteMap.entrySet().stream() );
 	}
 
 	public Set<String> getArgumentKeys()

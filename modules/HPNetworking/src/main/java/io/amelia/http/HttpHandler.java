@@ -38,6 +38,7 @@ import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MultipleException;
 import io.amelia.lang.ReportingLevel;
+import io.amelia.scripting.ScriptingContext;
 import io.amelia.support.HttpRequestContext;
 import io.amelia.support.Objs;
 import io.amelia.support.TriEnum;
@@ -837,7 +838,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			ScriptingResult result = factory.eval( ScriptingContext.fromFile( fi ).request( request ).Webroot( currentWebroot ) );
+			ScriptingContext scriptingContext = ScriptingContext.fromFile( fi ).request( request ).Webroot( currentWebroot );
+			request.getArguments().forEach( arg -> {
+				scriptingContext.addOption( arg.getKey(), arg.getValue() );
+			} );
+			ScriptingResult result = factory.eval( scriptingContext );
 
 			if ( result.hasExceptions() )
 				// TODO Print notices to output like PHP does

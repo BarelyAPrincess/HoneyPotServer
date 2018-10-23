@@ -129,7 +129,7 @@ public class WebrootScriptingContext extends ScriptingContext
 		}
 		catch ( Throwable cause )
 		{
-			return new ScriptingContext( cause );
+			return new WebrootScriptingContext( cause );
 		}
 	}
 

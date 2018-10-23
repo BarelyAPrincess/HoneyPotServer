@@ -75,6 +75,15 @@ public final class Foundation
 				Strs.split( Strs.getStackTrace( cause ), "\n" ).forEach( str -> L.log( level, str ) );
 			}
 		} );
+
+		Kernel.setImplUtils( new ImplUtils()
+		{
+			@Override
+			public boolean isPrimaryThread()
+			{
+				return Foundation.isPrimaryThread();
+			}
+		} );
 	}
 
 	public static <T extends ApplicationInterface> T getApplication()
@@ -131,7 +140,7 @@ public final class Foundation
 
 	public static boolean isPrimaryThread()
 	{
-		// If app has yet to be set, then it's anyone's guess which thread is primary.
+		// If app has yet to be set, then it's anyone's guess which thread is primary and were not willing to take that risk. :(
 		return app == null || app.isPrimaryThread();
 	}
 
