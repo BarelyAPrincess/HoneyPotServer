@@ -1,6 +1,7 @@
 # Table of contents
 
 * [Welcome](README.md)
+* [License](license.md)
 
 ## Contributors
 
