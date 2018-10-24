@@ -1,63 +1,18 @@
----
-description: The Most Essential Classes You'll Need To Know About
----
+# Welcome
 
-# Essential Classes
+_Honey Pot Server_ is a multi-protocol networking server allowing for both dynamic and static content via a powerful subsystem consisting of modular classes, plugins, and built-in Groovy scripting language. Features also include ORM, events, clustering, users, permissions, enforced access policies, and much more. Nearly everything was designed with an extendable concept in mind and can be extended using the provided API. HPS is intended to provide easy-access to the best of the best Java 8 features without the mess and time constants of traditional Java servers. HPS also honors convention over configuration, most everything will work with little to no additional setup, even its libraries are downloaded directly from Maven. We strive to make the code base as easy to understand as possible by leaving out needless interfaces and classes whenever possible.
 
-## io.amelia.data.parcel.Parcel
+**NOTICE: Honey Pot Server is under extensive heavy-development. It is possible that claims made by this documentation is not yet valid.**
 
-For those who've developed for Android, the Parcel class provides much the same functionality. Think of it like a HashMap except super-sized so that information can be easily serialized and carried not just within the application but also across processes and networks. While parcels can carry nearly any type of value, they are built with the purpose of containing built-in Java types and for serializing more complex classes.
+## Why Honey Pot Server?
 
-Creating a new empty instance is super easy and error free.
+Because Winnie The Pooh loves honey!
 
-```java
-Parcel.empty();
-```
+## License
 
-To serialize and deserialize an object to and from a Parcel is easily done using the `io.amelia.data.parcel.Parcel.Factory` inner-class.
+_Honey Pot Server_ is licensed under the MIT License. If you decide to use our server or use any of our code \(In part or whole\), PLEASE, we would love to hear about it. We don't require this but it's generally cool to hear what others do with our stuff.
 
-```java
-Parcel destParcel = Parcel.Factory.serialize( myObjectInstance );
-Parcel.Factory.serialize( myObjectInstance, destParcel );
-
-MyObject myObjectInstance = Parcel.Factory.deserialize( srcParcel, MyObject.class );
-MyObject myObjectInstance = Parcel.Factory.deserialize( srcParcel );
-```
-
-Classes that are not already implemented \(i.e., Built-in HoneyPotServer classes\) or built-in Java types much implement our `io.amelia.data.parcel.ParcelSerializer` in ensure error-free transmission.
-
-```java
-@Parcelable( ExampleClass.Serializer.class )
-public class ExampleClass
-{
-  private int someSerializableField;
-
-  public static class Serializer implements ParcelSerializer<ExampleClass>;
-  {
-    @Override
-    public ExampleClass readFromParcel( Parcel src ) throws ParcelableException.Error {
-      ExampleClass obj = new ExampleClass();
-      obj.someSerializableField = src.getValue( "someSerializableField" );
-      return obj;
-    }
-
-    @Override
-    public void writeToParcel( ExampleClass obj, Parcel dest ) throws ParcelableException.Error {
-      dest.setValue( "someSerializableField", obj.someSerializableField );
-    }
-  }
-}
-```
-
-If you plan on making your serializer external from the class being serialized, \(e.g., The class shipped with a library.\) be sure to register your serializer using:
-
-```java
-Parcel.Factory.registerClassSerialized( MyNewObject.class, new MyNewObjectSerializer<MyNewObject>() );
-```
-
-You can also check if an object can be serialized with the possibility of throwing an exception using:
-
-```text
-Parcel.Factory.isSerializable( myObjectInstance );
-```
+* Copyright \(c\) 2019 Amelia Sara Greene &lt;BarelyAPrincess@gmail.com&gt;
+* Copyright \(c\) 2019 Penoaks Publishing LLC &lt;development@penoaks.com&gt;
+* All Rights Reserved.
 
