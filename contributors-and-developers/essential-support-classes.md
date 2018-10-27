@@ -2,7 +2,7 @@
 description: The Most Essential Classes You'll Need To Know About
 ---
 
-# Essential Classes
+# Essential Support Classes
 
 
 
@@ -97,7 +97,7 @@ Parcel.Factory.isSerializable( myObjectInstance );
 ```
 
 {% hint style="info" %}
-See `KeyValueTypeTrait` for information on how to retrieve values from `Parcel`.
+See `io.amelia.support.KeyValueTypeTrait` for information on how to retrieve values from `Parcel`.
 {% endhint %}
 
 ## io.amelia.foundation.ConfigData
@@ -111,16 +111,24 @@ ConfigData.empty();
 ```
 
 {% hint style="warning" %}
-Keep in mind that ConfigData prevents values from being set on the root and tld keys. Minimum is depth is two to prevent the collision of values between inner-mechanisms of the software. Ideally you would use reverse domain order to store your values, e.g., `com.example` or `jp.co.nikko`
+Keep in mind that ConfigData prevents values from being set on the root and top-level keys. And a minimum depth of two nodes is enforced to help prevent value collisions.
+
+#### Contributors
+
+The reverse domain `io.amelia` is preserved for storing internal _Honey Pot Server_ config values and is read-only.
+
+#### Developers
+
+For plugins and custom config values, you would ideally use a unique reverse domain, such as, `com.example` or `jp.co.nikko`.
 {% endhint %}
 
 {% hint style="info" %}
-See `KeyValueTypeTrait` for information on how to retrieve values from `ConfigData`.
+See `io.amelia.support.KeyValueTypeTrait` for information on how to retrieve values from `ConfigData`.
 {% endhint %}
 
 ## io.amelia.support.KeyValueTypesTrait
 
-This interface is implemented on both `Parcel` and `ConfigData` to provide value translation for the implementing developer. Values are either returned naively or cast using methods provided by the `Objs` support class. The support class `Voluntary` is always returned and may contain a type cast exception. It's an interface so it can't be directly instigated. The following methods are implemented:
+This interface is implemented on both `Parcel` and `ConfigData` to provide value translation for the implementing developer. Returned values are casted using methods provided by the `Objs` support class. The support class `Voluntary` is always returned and may contain a type cast exception. It's an interface so it can't be directly instigated. The following methods are implemented:
 
 ```java
 VoluntaryBoolean getBoolean()

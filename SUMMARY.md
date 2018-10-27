@@ -14,9 +14,10 @@
 
 ## End Users
 
-* [Untitled](end-users/untitled.md)
+* [Introduction](end-users/untitled.md)
 
-## Plugin and API Developers
+## Contributors and Developers
 
-* [Essential Classes](plugin-and-api-developers/essential-classes.md)
+* [Essential Support Classes](contributors-and-developers/essential-support-classes.md)
+* [Utility Classes](contributors-and-developers/utility-classes.md)
 
