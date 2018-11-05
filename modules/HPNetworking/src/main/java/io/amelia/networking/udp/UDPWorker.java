@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
-import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigData;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
@@ -68,7 +68,7 @@ public class UDPWorker implements NetworkWorker
 	}
 
 	/**
-	 * Returns the KeyPair per configured in the configuration, e.g., server.udp.rsaSecret and server.udp.rsaKey.
+	 * Returns the KeyPair per configured in the data, e.g., server.udp.rsaSecret and server.udp.rsaKey.
 	 *
 	 * @return The KeyPair, null if config is unset or null.
 	 *
@@ -153,7 +153,7 @@ public class UDPWorker implements NetworkWorker
 
 	public UDPWorker start() throws NetworkException.Error
 	{
-		ConfigMap config = getConfig();
+		ConfigData config = getConfig();
 		String dest = config.getString( "broadcast" ).orElse( "239.255.255.255" );
 		int port = config.getInteger( "port" ).orElse( 4855 );
 		String ifs = config.getString( "interface" ).orElse( null );

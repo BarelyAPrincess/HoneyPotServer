@@ -2,13 +2,14 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
 package io.amelia.http.session;
 
+import io.amelia.data.parcel.Parcel;
 import io.amelia.lang.SessionException;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.Strs;
@@ -25,7 +26,7 @@ public abstract class SessionData
 	 * Persistent session variables<br>
 	 * Session variables will live outside of the sessions's life
 	 */
-	protected Parcel data = new Parcel();
+	protected Parcel data = Parcel.empty();
 	protected String ipAddress;
 	protected String sessionId;
 	protected String sessionName;
@@ -47,9 +48,9 @@ public abstract class SessionData
 
 	protected void defaults()
 	{
-		timeout = DateAndTime.epoch() + Sessions.getDefaultTimeout();
+		timeout = DateAndTime.epoch() + SessionRegistry.getDefaultTimeout();
 		ipAddress = null;
-		sessionName = Sessions.getDefaultSessionName();
+		sessionName = SessionRegistry.getDefaultSessionName();
 		sessionId = null;
 		site = "default";
 	}

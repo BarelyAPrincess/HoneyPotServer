@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -58,8 +58,8 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
 		addStringArgument( "instance-id", "Specifies the instance unique identity" );
-		addIntegerArgument( "http-port", "Override Unsecure HTTP port number found in configuration" );
-		addIntegerArgument( "https-port", "Override Secure HTTPS port number found in configuration" );
+		addIntegerArgument( "http-port", "Override Unsecure HTTP port number found in data" );
+		addIntegerArgument( "https-port", "Override Secure HTTPS port number found in data" );
 	}
 
 	@Override

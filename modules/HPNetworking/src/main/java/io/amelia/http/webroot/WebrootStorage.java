@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -47,7 +47,7 @@ public class WebrootStorage extends HomeStorageMethod
 
 				if ( !id.equals( dir ) )
 				{
-					Storage.L.warning( String.format( "We found a webroot configuration file at '%s' but the containing directory did not match the webroot id of '%s', we will now correct this by moving the config to the correct directory.", configFile.getAbsolutePath(), id ) );
+					Storage.L.warning( String.format( "We found a webroot data file at '%s' but the containing directory did not match the webroot id of '%s', we will now correct this by moving the config to the correct directory.", configFile.getAbsolutePath(), id ) );
 					entry.moveTo( id );
 				}
 			}

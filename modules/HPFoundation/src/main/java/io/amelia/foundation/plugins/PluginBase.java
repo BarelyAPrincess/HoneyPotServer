@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigData;
 import io.amelia.foundation.RegistrarBase;
 import io.amelia.foundation.plugins.loader.PluginLoader;
 import io.amelia.lang.PluginException;
@@ -41,7 +41,7 @@ public abstract class PluginBase implements RegistrarBase
 	}
 
 	/**
-	 * Gets a {@link ConfigMap} for this plugin, read through "config.yml"
+	 * Gets a {@link ConfigData} for this plugin, read through "config.yml"
 	 * <p>
 	 * If there is a default config.yml embedded in this plugin, it will be provided as a default for this Configuration.
 	 *
@@ -150,7 +150,7 @@ public abstract class PluginBase implements RegistrarBase
 	public abstract void reloadConfig() throws IOException;
 
 	/**
-	 * Saves the {@link ConfigMap} retrievable by {@link #getConfig()}.
+	 * Saves the {@link ConfigData} retrievable by {@link #getConfig()}.
 	 */
 	public abstract void saveConfig();
 

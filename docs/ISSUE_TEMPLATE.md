@@ -3,10 +3,10 @@
 When submitting an issue, please take into account the following points.
 
 * Decide where your issue belongs. If it is non-technical or
-  conversational, it might be better-suited to [Discord](https://discord.gg/XM3AQVm).
+  conversational, it might be better-suited to [Discord](https://discord.gg/5uKQjhY).
   If you're not sure, then just head to Discord and someone will direct you to the correct place.
 * Make sure nobody else has already reported the issue.
-  You can find a search bar above [the list of issues](https://github.com/TheAmeliaDeWitt/HoneyPotServer/search?type=Issues).
+  You can find a search bar above [the list of issues](https://github.com/BarelyAPrincess/HoneyPotServer/search?type=Issues).
   If you've found a similar or identical issue, consider leaving a comment there instead.
 * Describe your issue clearly, giving instructions on how to reproduce it as far as you can.
 * If you have an error log, be sure to include it, preferably at the bottom of your issue description.

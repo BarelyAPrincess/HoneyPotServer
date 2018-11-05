@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -145,7 +145,7 @@ public class Route
 
 				if ( props.get( i ).matches( "\\[([a-zA-Z0-9]+)=\\]" ) )
 				{
-					weight = Strs.replaceAt( weight, i, "Z" );
+					weight = Strs.replaceAt( weight, i, 'Z' );
 
 					String key = props.get( i ).replaceAll( "[\\[\\]=]", "" );
 					String value = uris.get( i );
@@ -157,7 +157,7 @@ public class Route
 				}
 				else if ( props.get( i ).equals( uris.get( i ) ) )
 				{
-					weight = Strs.replaceAt( weight, i, "A" );
+					weight = Strs.replaceAt( weight, i, 'A' );
 
 					Networking.L.fine( "Found a match for " + prop + " on route " + this );
 					// MATCH

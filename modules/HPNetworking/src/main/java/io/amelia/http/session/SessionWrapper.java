@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -24,17 +24,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.http.HoneyCookie;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.lang.ApplicationException;
 import io.amelia.lang.SessionException;
 import io.amelia.messaging.MessageSender;
 import io.amelia.scripting.BindingProvider;
 import io.amelia.scripting.ScriptBinding;
 import io.amelia.scripting.ScriptingFactory;
+import io.amelia.support.Strs;
+import io.amelia.support.Voluntary;
+import io.netty.handler.codec.http.cookie.Cookie;
 
 /**
- * Acts as a bridge between a Session and the User
+ * Acts as a bridge between the session and the end user.
  * TODO If Session is nullified, we need to start a new one
  */
 public abstract class SessionWrapper implements BindingProvider, AccountAttachment
@@ -72,9 +78,9 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 			 * We transfer any global variables back into our parent session like so.
 			 * We also check to make sure keys like [out, _request, _response, _FILES, _REQUEST, etc...] are excluded.
 			 */
-			if ( bindings != null && variables != null )
+			if ( variables != null )
 				for ( Entry<String, Object> e : variables.entrySet() )
-					if ( !disallow.contains( e.getKey() ) && !( e.getKey().startsWith( "_" ) && UtilStrings.isUppercase( e.getKey() ) ) )
+					if ( !disallow.contains( e.getKey() ) && !( e.getKey().startsWith( "_" ) && Strs.isUppercase( e.getKey() ) ) )
 						bindings.put( e.getKey(), e.getValue() );
 
 			/*
@@ -104,9 +110,9 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 		return binding;
 	}
 
-	public abstract HttpCookie getCookie( String key );
+	public abstract Voluntary<Cookie, ApplicationException.Error> getCookie( String key );
 
-	public abstract Set<HttpCookie> getCookies();
+	public abstract Stream<Cookie> getCookies();
 
 	@Override
 	public String getDisplayName()
@@ -125,8 +131,7 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 		return getSession().getId();
 	}
 
-	@Override
-	public abstract Site getLocation();
+	public abstract Webroot getWebroot();
 
 	@Override
 	public final AccountPermissible getPermissible()
@@ -146,13 +151,7 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 		return factory;
 	}
 
-	public final HttpCookie getServerCookie( String key, String altDefault )
-	{
-		HttpCookie cookie = getServerCookie( key );
-		return cookie == null ? getServerCookie( altDefault ) : cookie;
-	}
-
-	protected abstract HttpCookie getServerCookie( String key );
+	protected abstract Voluntary<HoneyCookie, SessionException.Error> getServerCookie( String key );
 
 	/**
 	 * Gets the Session
@@ -162,7 +161,7 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 	public final Session getSession()
 	{
 		if ( session == null )
-			throw new IllegalStateException( "Detected an attempt to get session before startSession() was called" );
+			throw new IllegalStateException( "getSession() was called before startSession(). Possible race-condition programming bug." );
 		return session;
 	}
 
@@ -231,9 +230,9 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 	 *
 	 * @throws SessionException
 	 */
-	public Session startSession() throws SessionException
+	public Session startSession() throws SessionException.Error
 	{
-		session = Sessions.i().startSession( this );
+		session = SessionRegistry.i().startSession( this );
 		/*
 		 * Create our Binding
 		 */
@@ -249,12 +248,12 @@ public abstract class SessionWrapper implements BindingProvider, AccountAttachme
 		 */
 		binding.setVariable( "_SESSION", session.data.data );
 
-		Site site = getLocation();
+		Site site = getWebroot();
 
 		if ( site == null )
 			site = SiteModule.i().getDefaultSite();
 
-		session.setSite( site );
+		session.setWebroot( site );
 
 		for ( HttpCookie cookie : getCookies() )
 			session.putSessionCookie( cookie.getKey(), cookie );

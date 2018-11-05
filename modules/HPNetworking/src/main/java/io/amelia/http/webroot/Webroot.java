@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -30,11 +30,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 
+import io.amelia.data.TypeBase;
 import io.amelia.data.apache.ApacheConfiguration;
+import io.amelia.data.parcel.ConfigData;
 import io.amelia.database.Database;
 import io.amelia.database.elegant.ElegantQueryTable;
 import io.amelia.events.Events;
-import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigData;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Foundation;
@@ -45,8 +47,8 @@ import io.amelia.http.localization.Localization;
 import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.mappings.DomainNode;
 import io.amelia.http.routes.Routes;
+import io.amelia.http.session.SessionRegistry;
 import io.amelia.http.session.SessionPersistenceMethod;
-import io.amelia.http.session.Sessions;
 import io.amelia.http.ssl.CertificateWrapper;
 import io.amelia.lang.ConfigException;
 import io.amelia.lang.ExceptionReport;
@@ -69,14 +71,13 @@ import io.netty.handler.ssl.SslContext;
 
 public class Webroot
 {
-	public static final String PATH_ARCHIVE = "__archive";
 	// Storage Policy for Webroot Directories
 	private final static StoragePolicy STORAGE_POLICY = new StoragePolicy();
 
+	public final static TypeBase.TypeString CONFIG_TITLE = new TypeBase.TypeString( "title", "" );
+
 	static
 	{
-		Kernel.setPath( PATH_ARCHIVE, Kernel.PATH_STORAGE, "archive" );
-
 		// Language Files
 		STORAGE_POLICY.setLayoutDirectory( "lang", StoragePolicy.Strategy.CREATE );
 		// Public Files
@@ -101,7 +102,7 @@ public class Webroot
 	protected final ScriptBinding binding = new ScriptBinding();
 	protected final List<String> cachePatterns = new ArrayList<>();
 	protected final Path configurationFile;
-	protected final ConfigMap configuration;
+	protected final ConfigData data;
 	protected final Path directory;
 	protected final Env env;
 	protected final ScriptingFactory factory = ScriptingFactory.create( binding );
@@ -123,7 +124,7 @@ public class Webroot
 			this.webrootId = webrootId;
 
 			configurationFile = null;
-			configuration = ConfigMap.empty();
+			data = ConfigData.empty();
 			webrootTitle = Kernel.getDevMeta().getProductName();
 			database = Database.getDatabase();
 
@@ -138,50 +139,50 @@ public class Webroot
 		}
 	}
 
-	Webroot( @Nonnull Path directory, @Nonnull ConfigMap configuration, @Nonnull Env env ) throws WebrootException.Error
+	Webroot( @Nonnull Path directory, @Nonnull ConfigData data, @Nonnull Env env ) throws WebrootException.Error
 	{
 		try
 		{
 			this.directory = directory;
 			this.configurationFile = directory.resolve( "config" );
-			this.configuration = configuration;
+			this.data = data;
 			this.env = env;
 
-			StorageConversions.loadToStacker( configurationFile, configuration );
-			configuration.setEnvironmentVariables( env.map() );
+			StorageConversions.loadToStacker( configurationFile, data );
+			data.setEnvironmentVariables( env.map() );
 
-			webrootId = configuration.getString( "webroot.id" ).orElseThrow( () -> new WebrootException.Error( "Webroot Id is missing!" ) ).toLowerCase();
-			webrootTitle = configuration.getString( "webroot.title" ).orElse( ConfigRegistry.config.getString( WebrootManager.Config.WEBROOTS_DEFAULT_TITLE ) );
+			webrootId = data.getString( "webroot.id" ).orElseThrow( () -> new WebrootException.Error( "Webroot Id is missing!" ) ).toLowerCase();
+			webrootTitle = data.getString( "webroot.title" ).orElse( ConfigRegistry.config.getValue( WebrootRegistry.Config.WEBROOTS_DEFAULT_TITLE ) );
 
-			configuration.getList( "webroot.listen", ips );
+			data.getList( "webroot.listen", ips );
 
 			for ( String ip : ips )
 				if ( !NIO.isValidIPv4( ip ) && !NIO.isValidIPv6( ip ) )
-					WebrootManager.L.warning( String.format( "Webroot '%s' is set to listen on ip '%s', but the ip does not match the valid IPv4 or IPv6 regex formula.", webrootId, ip ) );
+					WebrootRegistry.L.warning( String.format( "Webroot '%s' is set to listen on ip '%s', but the ip does not match the valid IPv4 or IPv6 regex formula.", webrootId, ip ) );
 				else if ( !NIO.isAddressAssigned( ip ) )
-					WebrootManager.L.warning( String.format( "Webroot '%s' is set to listen on ip '%s', but that address is not assigned to any network interfaces.", webrootId, ip ) );
+					WebrootRegistry.L.warning( String.format( "Webroot '%s' is set to listen on ip '%s', but that address is not assigned to any network interfaces.", webrootId, ip ) );
 
 			if ( ips.contains( "localhost" ) )
 				throw new WebrootException.Error( "Webroots are not permitted to listen on hostname 'localhost', it is reserved for internal use only." );
 
-			if ( WebrootManager.getWebrootById( webrootId ) != null )
+			if ( WebrootRegistry.getWebrootById( webrootId ) != null )
 				throw new WebrootException.Error( String.format( "There already exists a webroot by the provided webroot id '%s'", webrootId ) );
 
-			WebrootManager.L.info( String.format( "Loading webroot '%s' with title '%s' from YAML file.", webrootId, webrootTitle ) );
+			WebrootRegistry.L.info( String.format( "Loading webroot '%s' with title '%s' from YAML file.", webrootId, webrootTitle ) );
 
 			this.localization = new Localization( getLangDirectory() );
 
-			if ( !configuration.hasValue( "webroot.web-allowed-origin" ) )
-				configuration.setValue( "webroot.web-allowed-origin", "*" );
+			if ( !data.hasValue( "webroot.web-allowed-origin" ) )
+				data.setValue( "webroot.web-allowed-origin", "*" );
 
-			mapDomain( configuration.getChildOrCreate( "webroot.domains" ) );
+			mapDomain( data.getChildOrCreate( "webroot.domains" ) );
 
 			Path ssl = getDirectory( "ssl" );
 			IO.forceCreateDirectory( ssl );
 
-			String sslCertFile = configuration.getString( "webroot.sslCert" ).orElse( null );
-			String sslKeyFile = configuration.getString( "webroot.sslKey" ).orElse( null );
-			String sslSecret = configuration.getString( "webroot.sslSecret" ).orElse( null );
+			String sslCertFile = data.getString( "webroot.sslCert" ).orElse( null );
+			String sslKeyFile = data.getString( "webroot.sslKey" ).orElse( null );
+			String sslSecret = data.getString( "webroot.sslSecret" ).orElse( null );
 
 			if ( sslCertFile != null && sslKeyFile != null )
 			{
@@ -194,21 +195,21 @@ public class Webroot
 				}
 				catch ( SSLException | FileNotFoundException | CertificateException | InvalidKeySpecException e )
 				{
-					WebrootManager.L.severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", webrootId, IO.relPath( sslCert ), IO.relPath( sslKey ), sslSecret != null && !sslSecret.isEmpty() ), e );
+					WebrootRegistry.L.severe( String.format( "Failed to load SslContext for webroot '%s' using cert '%s', key '%s', and hasSecret? %s", webrootId, IO.relPath( sslCert ), IO.relPath( sslKey ), sslSecret != null && !sslSecret.isEmpty() ), e );
 				}
 			}
 
 			if ( Exceptions.tryCatch( () -> Events.callEventWithException( new WebrootLoadEvent( this ) ), WebrootException.Error::new ).isCancelled() )
 				throw new WebrootException.Error( String.format( "Webroot '%s' was prevented from loading by an internal event.", webrootId ) );
 
-			if ( configuration.hasChild( "database" ) )
-				database = new Database( WebrootStorage.initDatabase( configuration.getChild( "database" ).toParcel() ) );
+			if ( data.hasChild( "database" ) )
+				database = new Database( WebrootStorage.initDatabase( data.getChild( "database" ) ) );
 
 			routes = new Routes( this );
 
-			configuration.getString( "sessions.persistenceMethod" ).ifPresent( persistenceMethod -> sessionPersistence = SessionPersistenceMethod.valueOfIgnoreCase( persistenceMethod ).orElse( null ) );
+			data.getString( "sessions.persistenceMethod" ).ifPresent( persistenceMethod -> sessionPersistence = SessionPersistenceMethod.valueOfIgnoreCase( persistenceMethod ).orElse( null ) );
 
-			configuration.getStringList( "scripts.on-load" ).ifPresent( onLoadScripts -> {
+			data.getStringList( "scripts.on-load" ).ifPresent( onLoadScripts -> {
 				for ( String script : onLoadScripts )
 				{
 					ScriptingResult result = factory.eval( ScriptingContext.fromFile( this, script ).shell( "groovy" ).Webroot( this ) );
@@ -216,19 +217,19 @@ public class Webroot
 					if ( result.hasExceptions() )
 					{
 						if ( result.hasException( FileNotFoundException.class ) )
-							WebrootManager.L.severe( String.format( "Failed to eval onLoadScript '%s' for webroot '%s' because the file was not found.", script, webrootId ) );
+							WebrootRegistry.L.severe( String.format( "Failed to eval onLoadScript '%s' for webroot '%s' because the file was not found.", script, webrootId ) );
 						else
 						{
-							WebrootManager.L.severe( String.format( "Exception caught while evaluate onLoadScript '%s' for webroot '%s'", script, webrootId ) );
+							WebrootRegistry.L.severe( String.format( "Exception caught while evaluate onLoadScript '%s' for webroot '%s'", script, webrootId ) );
 							ExceptionReport.printExceptions( result.getExceptions() );
 						}
 					}
 					else
-						WebrootManager.L.info( String.format( "Finished evaluate onLoadScript '%s' for webroot '%s' with result: %s", script, webrootId, result.getString( true ) ) );
+						WebrootRegistry.L.info( String.format( "Finished evaluate onLoadScript '%s' for webroot '%s' with result: %s", script, webrootId, result.getString( true ) ) );
 				}
 			} );
 
-			ConfigMap archive = configuration.getChildOrCreate( "archive" );
+			ConfigData archive = data.getChildOrCreate( "archive" );
 
 			if ( !archive.hasValue( "enable" ) )
 				archive.setValue( "enable", false );
@@ -274,15 +275,15 @@ public class Webroot
 					long lastRun = DateAndTime.epoch() - archive.getLong( "lastRun" ).orElse( 0L );
 					long nextRun = archive.getLong( "lastRun" ).orElse( 0L ) < 1L ? 600L : lastRun > timer ? 600L : timer - lastRun;
 
-					WebrootManager.L.info( String.format( "%s%sScheduled webroot archive for %s {nextRun: %s, interval: %s}", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, nextRun, timer ) );
+					WebrootRegistry.L.info( String.format( "%s%sScheduled webroot archive for %s {nextRun: %s, interval: %s}", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, nextRun, timer ) );
 
 					Tasks.scheduleSyncRepeatingTask( Foundation.getApplication(), nextRun, timer, () -> {
-						WebrootManager.L.info( String.format( "%s%sRunning archive for webroot %s...", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId ) );
+						WebrootRegistry.L.info( String.format( "%s%sRunning archive for webroot %s...", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId ) );
 
-						WebrootManager.cleanupBackups( webrootId, ".zip", archive.getInteger( "keep" ).orElse( 3 ) );
+						WebrootRegistry.cleanupBackups( webrootId, ".zip", archive.getInteger( "keep" ).orElse( 3 ) );
 						archive.setValue( "lastRun", DateAndTime.epoch() );
 
-						Path dir = Kernel.getPath( PATH_ARCHIVE ).resolve( webrootId );
+						Path dir = Kernel.getPath( WebrootRegistry.PATH_ARCHIVES ).resolve( webrootId );
 						IO.forceCreateDirectory( dir );
 
 						Path zip = dir.resolve( new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" ).format( new Date() ) + "-" + webrootId + ".zip" );
@@ -293,15 +294,15 @@ public class Webroot
 						}
 						catch ( IOException e )
 						{
-							WebrootManager.L.severe( String.format( "%s%sFailed archiving webroot %s to %s", EnumColor.RED, EnumColor.NEGATIVE, webrootId, IO.relPath( zip ) ), e );
+							WebrootRegistry.L.severe( String.format( "%s%sFailed archiving webroot %s to %s", EnumColor.RED, EnumColor.NEGATIVE, webrootId, IO.relPath( zip ) ), e );
 							return;
 						}
 
-						WebrootManager.L.info( String.format( "%s%sFinished archiving webroot %s to %s", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, IO.relPath( zip ) ) );
+						WebrootRegistry.L.info( String.format( "%s%sFinished archiving webroot %s to %s", EnumColor.AQUA, EnumColor.NEGATIVE, webrootId, IO.relPath( zip ) ) );
 					} );
 				}
 				else
-					WebrootManager.L.warning( String.format( "Failed to initialize webroot backup for webroot %s, interval did not match regex '[0-9]+[dhmsDHMS]?'.", webrootId ) );
+					WebrootRegistry.L.warning( String.format( "Failed to initialize webroot backup for webroot %s, interval did not match regex '[0-9]+[dhmsDHMS]?'.", webrootId ) );
 			}
 		}
 		catch ( Exception e )
@@ -356,9 +357,9 @@ public class Webroot
 		return cachePatterns;
 	}
 
-	public ConfigMap getConfig()
+	public ConfigData getConfig()
 	{
-		return configuration;
+		return data;
 	}
 
 	public Path getConfigFile()
@@ -413,7 +414,7 @@ public class Webroot
 	}
 
 	/**
-	 * Same as calling {@code WebrootManager.instance().getDomain( fullDomain ) } but instead checks the returned node belongs to this webroot.
+	 * Same as calling {@code WebrootRegistry.instance().getDomain( fullDomain ) } but instead checks the returned node belongs to this webroot.
 	 *
 	 * @param fullDomain The request domain
 	 *
@@ -421,13 +422,13 @@ public class Webroot
 	 */
 	public DomainNode getDomain( String fullDomain )
 	{
-		DomainNode node = WebrootManager.getDomain( fullDomain );
+		DomainNode node = WebrootRegistry.getDomain( fullDomain );
 		return node != null && node.getWebroot() == this ? node : null;
 	}
 
 	public Stream<DomainNode> getDomains()
 	{
-		return WebrootManager.getDomainsByWebroot( this );
+		return WebrootRegistry.getDomainsByWebroot( this );
 	}
 
 	public ScriptingFactory getEvalFactory()
@@ -549,13 +550,13 @@ public class Webroot
 	}
 
 	/**
-	 * Gets the webroot configured Session Key from configuration.
+	 * Gets the webroot configured Session Key from data.
 	 *
 	 * @return The Session Key
 	 */
 	public String getSessionKey()
 	{
-		return "_ws" + Strs.capitalizeWords( configuration.getString( "sessions.keyName" ).orElse( Sessions.getDefaultSessionName() ) );
+		return "_ws" + Strs.capitalizeWords( data.getString( "sessions.keyName" ).orElse( SessionRegistry.getDefaultSessionName() ) );
 	}
 
 	public SessionPersistenceMethod getSessionPersistenceMethod()
@@ -570,7 +571,7 @@ public class Webroot
 
 	public void setTitle( String title ) throws ConfigException.Error
 	{
-		configuration.setValue( "webroot.title", title );
+		data.setValue( CONFIG_TITLE, title );
 		webrootTitle = title;
 	}
 
@@ -584,12 +585,12 @@ public class Webroot
 		return defaultSslContext != null;
 	}
 
-	private void mapDomain( @Nonnull ConfigMap domains ) throws WebrootException.Configuration
+	private void mapDomain( @Nonnull ConfigData domains ) throws WebrootException.Configuration
 	{
 		mapDomain( domains, null, 0 );
 	}
 
-	private void mapDomain( @Nonnull ConfigMap domains, @Nullable DomainMapping mapping, @Nonnegative int depth ) throws WebrootException.Configuration
+	private void mapDomain( @Nonnull ConfigData domains, @Nullable DomainMapping mapping, @Nonnegative int depth ) throws WebrootException.Configuration
 	{
 		for ( String key : domains.getKeys() )
 		{
@@ -599,13 +600,13 @@ public class Webroot
 			if ( key.startsWith( "__" ) ) // Configuration Directive
 			{
 				if ( depth == 0 || mapping == null )
-					throw new WebrootException.Configuration( String.format( "Domain configuration directive [%s.%s] is not allowed here.", domains.getCurrentPath(), key ) );
+					throw new WebrootException.Configuration( String.format( "Domain data directive [%s.%s] is not allowed here.", domains.getCurrentPath(), key ) );
 				mapping.putConfig( key.substring( 2 ), domains.getString( key ).orElse( null ) );
 
 				if ( "__default".equals( key ) && domains.getBoolean( key ).orElse( false ) )
 				{
 					if ( defDomain != null )
-						throw new WebrootException.Configuration( String.format( "Domain configuration at [%s] is invalid, the DEFAULT domain was previously set to [%s]", domains.getCurrentPath(), defDomain ) );
+						throw new WebrootException.Configuration( String.format( "Domain data at [%s] is invalid, the DEFAULT domain was previously set to [%s]", domains.getCurrentPath(), defDomain ) );
 					defDomain = mapping.getFullDomain();
 				}
 			}
@@ -622,7 +623,7 @@ public class Webroot
 					throw new WebrootException.Configuration( e );
 				}
 			else /* Invalid Directive */
-				WebrootManager.L.warning( String.format( "Webroot configuration path [%s.%s] is invalid, domain directives MUST start with a double underscore (e.g., __key) and child domains must be a (empty) YAML section (e.g., {}).", domains.getCurrentPath(), key ) );
+				WebrootRegistry.L.warning( String.format( "Webroot data path [%s.%s] is invalid, domain directives MUST start with a double underscore (e.g., __key) and child domains must be a (empty) YAML section (e.g., {}).", domains.getCurrentPath(), key ) );
 		}
 	}
 
@@ -635,7 +636,7 @@ public class Webroot
 	{
 		// TODO Implement a similar save system to the ConfigRegistry.
 		// if ( configFile != null && ( Files.isRegularFile( configFile ) || force ) )
-		// IO.writeStringToPath( ParcelLoader.encodeYaml( configuration ), configFile );
+		// IO.writeStringToPath( ConfigDataLoader.encodeYaml( data ), configFile );
 	}
 
 	public void setGlobal( String key, Object val )

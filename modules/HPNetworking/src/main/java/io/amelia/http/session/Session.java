@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -20,14 +20,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
+import io.amelia.data.parcel.Parcel;
+import io.amelia.events.Events;
 import io.amelia.foundation.ConfigRegistry;
+import io.amelia.http.HoneyCookie;
+import io.amelia.http.Nonce;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.WebrootRegistry;
 import io.amelia.lang.SessionException;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Objs;
 import io.amelia.support.WeakReferenceList;
-import sun.security.krb5.internal.crypto.Nonce;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 
 /**
  * This class is used to carry data that is to be persistent from request to request.
@@ -74,27 +83,26 @@ public final class Session extends AccountPermissible implements Kickable
 	/**
 	 * The Session Cookie
 	 */
-	private HttpCookie sessionCookie;
+	private HoneyCookie sessionCookie;
 	/**
 	 * Tracks session sessionCookies
 	 */
-	private Map<String, HttpCookie> sessionCookies = new LinkedHashMap<>();
+	private Set<HoneyCookie> sessionCookies = new HashSet<>();
 	/**
 	 * The sessionKey of this session
 	 */
-	private String sessionKey = Sessions.getDefaultSessionName();
+	private String sessionKey;
 	/**
 	 * The site this session is bound to
 	 */
-	private Site site = SiteModule.i().getDefaultSite();
+	private Webroot webroot;
 	/**
 	 * The epoch for when this session is to be destroyed
 	 */
 	private long timeout = 0;
 
-	Session( SessionData data ) throws SessionException
+	Session( @Nonnull SessionData data ) throws SessionException.Error
 	{
-		Validate.notNull( data );
 		this.data = data;
 
 		sessionId = data.sessionId;
@@ -102,19 +110,19 @@ public final class Session extends AccountPermissible implements Kickable
 		sessionKey = data.sessionName;
 		timeout = data.timeout;
 		knownIps.addAll( Splitter.on( "|" ).splitToList( data.ipAddress ) );
-		site = SiteModule.i().getSiteById( data.site );
+		webroot = WebrootRegistry.getWebrootById( data.site );
 
-		if ( site == null )
+		if ( webroot == null )
 		{
-			site = SiteModule.i().getDefaultSite();
-			data.site = site.getId();
+			webroot = WebrootRegistry.getDefaultWebroot();
+			data.site = webroot.getWebrootId();
 		}
 
 		timeout = data.timeout;
 
 
-		if ( timeout > 0 && timeout < Timings.epoch() )
-			throw new SessionException( String.format( "The session '%s' expired at epoch '%s', might have expired while offline or this is a bug!", sessionId, timeout ) );
+		if ( timeout > 0 && timeout < DateAndTime.epoch() )
+			throw SessionException.error( String.format( "The session '%s' expired at epoch '%s', might have expired while offline or this is a bug!", sessionId, timeout ) );
 
 		/*
 		 * TODO Figure out how to track if a particular wrapper's IP changes
@@ -134,8 +142,8 @@ public final class Session extends AccountPermissible implements Kickable
 
 		// XXX New Session, Requested Session, Loaded Session
 
-		if ( Sessions.isDebug() )
-			Sessions.L.info( EnumColor.DARK_AQUA + "Session " + ( data.stale ? "Loaded" : "Created" ) + " `" + this + "`" );
+		if ( SessionRegistry.isDebug() )
+			SessionRegistry.L.info( EnumColor.DARK_AQUA + "Session " + ( data.stale ? "Loaded" : "Created" ) + " `" + this + "`" );
 
 		initialized();
 	}
@@ -145,28 +153,28 @@ public final class Session extends AccountPermissible implements Kickable
 		return !isInvalidated && dataChangeHistory.size() > 0;
 	}
 
-	public void destroy() throws SessionException
+	public void destroy() throws SessionException.Error
 	{
-		destroy( Sessions.MANUAL );
+		destroy( SessionRegistry.MANUAL );
 	}
 
-	public void destroy( int reasonCode ) throws SessionException
+	public void destroy( int reasonCode ) throws SessionException.Error
 	{
-		if ( Sessions.isDebug() )
-			Sessions.L.info( EnumColor.DARK_AQUA + "Session Destroyed `" + this + "`" );
+		if ( SessionRegistry.isDebug() )
+			SessionRegistry.L.info( EnumColor.DARK_AQUA + "Session Destroyed `" + this + "`" );
 
-		EventDispatcher.i().callEvent( new SessionDestroyEvent( this, reasonCode ) );
+		Events.callEvent( new SessionDestroyEvent( this, reasonCode ) );
 
 		// Account Auth Section
 		if ( "token".equals( getVariable( "auth" ) ) )
 		{
-			Validate.notNull( getVariable( "acctId" ) );
-			Validate.notNull( getVariable( "token" ) );
+			Objs.notNull( getVariable( "acctId" ) );
+			Objs.notNull( getVariable( "token" ) );
 
 			AccountAuthenticator.TOKEN.deleteToken( getVariable( "acctId" ), getVariable( "token" ) );
 		}
 
-		Sessions.sessions.remove( this );
+		SessionRegistry.sessions.remove( this );
 
 		for ( SessionWrapper wrap : wrappers )
 		{
@@ -211,19 +219,19 @@ public final class Session extends AccountPermissible implements Kickable
 	 *
 	 * @param key
 	 *
-	 * @return Candy
+	 * @return The cookie matching the requested key
 	 */
-	public HttpCookie getCookie( String key )
+	public HoneyCookie getCookie( String key )
 	{
-		return sessionCookies.containsKey( key ) ? sessionCookies.get( key ) : new HttpCookie( key, null );
+		return sessionCookies.stream().filter( sessionCookie -> key.equals( sessionCookie.name() ) ).findAny().orElseGet( () -> new HoneyCookie( key, null ) );
 	}
 
-	public Map<String, HttpCookie> getCookies()
+	public Stream<HoneyCookie> getCookies()
 	{
-		return Collections.unmodifiableMap( sessionCookies );
+		return sessionCookies.stream();
 	}
 
-	public Map<String, String> getDataMap()
+	public Parcel getDataMap()
 	{
 		return data.data;
 	}
@@ -253,12 +261,12 @@ public final class Session extends AccountPermissible implements Kickable
 	}
 
 	@Override
-	public Site getLocation()
+	public Webroot getWebroot()
 	{
-		if ( site == null )
-			return SiteModule.i().getDefaultSite();
+		if ( webroot == null )
+			return WebrootRegistry.getDefaultWebroot();
 		else
-			return site;
+			return webroot;
 	}
 
 	public String getName()
@@ -269,11 +277,11 @@ public final class Session extends AccountPermissible implements Kickable
 	public Nonce getNonce()
 	{
 		if ( nonce == null )
-			regenNonce();
+			initNonce();
 		return nonce;
 	}
 
-	public HttpCookie getSessionCookie()
+	public HoneyCookie getSessionCookie()
 	{
 		return sessionCookie;
 	}
@@ -305,16 +313,9 @@ public final class Session extends AccountPermissible implements Kickable
 	@Override
 	public String getVariable( String key, String def )
 	{
-		if ( !data.data.containsKey( key ) || data.data.get( key ) == null )
-		{
-			Sessions.L.fine( String.format( "%sGetting variable key `%s` which resulted in default value '%s'", EnumColor.GRAY, key, def ) );
+		SessionRegistry.L.fine( String.format( "%sGetting variable key `%s` with value '%s' and default value '%s'", EnumColor.GRAY, key, data.data.getString( key ), def ) );
 
-			return def;
-		}
-
-		Sessions.L.fine( String.format( "%sGetting variable key `%s` with value '%s' and default value '%s'", EnumColor.GRAY, key, data.data.getString( key ), def ) );
-
-		return data.data.get( key );
+		return data.data.getString( key ).orElse( def );
 	}
 
 	public boolean isInvalidated()
@@ -329,7 +330,7 @@ public final class Session extends AccountPermissible implements Kickable
 
 	public boolean isSet( String key )
 	{
-		return data.data.containsKey( key );
+		return data.data.hasValue( key );
 	}
 
 	@Override
@@ -360,13 +361,7 @@ public final class Session extends AccountPermissible implements Kickable
 
 	// TODO Sessions can outlive a login.
 	// TODO Sessions can have an expiration in 7 days and a login can have an expiration of 24 hours.
-	// TODO Remember should probably make it so logins last as long as the session does.
-
-	@EventHandler( priority = EventPriority.NORMAL )
-	public void onAccountMessageEvent( MessageEvent event )
-	{
-
-	}
+	// TODO Remember me would extend login expiration to the life of the session.
 
 	public void processSessionCookie( String domain )
 	{
@@ -384,8 +379,11 @@ public final class Session extends AccountPermissible implements Kickable
 		{
 			assert sessionId != null && !sessionId.isEmpty();
 
-			sessionKey = getLocation().getSessionKey();
-			sessionCookie = new HttpCookie( getLocation().getSessionKey(), sessionId ).setDomain( "." + domain ).setPath( "/" ).setHttpOnly( true );
+			sessionKey = getWebroot().getSessionKey();
+			sessionCookie = new DefaultCookie( getWebroot().getSessionKey(), sessionId );
+			sessionCookie.setDomain( "." + domain );
+			sessionCookie.setPath( "/" );
+			sessionCookie.setHttpOnly( true );
 			rearmTimeout();
 		}
 
@@ -415,7 +413,7 @@ public final class Session extends AccountPermissible implements Kickable
 		if ( isInvalidated )
 			throw new IllegalStateException( "This session has been invalidated" );
 
-		int defaultTimeout = Sessions.getDefaultTimeout();
+		int defaultTimeout = SessionRegistry.getDefaultTimeout();
 
 		// Grant the timeout an additional 10 minutes per request, capped at one hour or 6 requests.
 		requestCnt++;
@@ -423,10 +421,10 @@ public final class Session extends AccountPermissible implements Kickable
 		// Grant the timeout an additional 2 hours for having a user logged in.
 		if ( hasLogin() )
 		{
-			defaultTimeout = Sessions.getDefaultTimeoutWithLogin();
+			defaultTimeout = SessionRegistry.getDefaultTimeoutWithLogin();
 
 			if ( UtilObjects.isTrue( getVariable( "remember", "false" ) ) )
-				defaultTimeout = Sessions.getDefaultTimeoutWithRememberMe();
+				defaultTimeout = SessionRegistry.getDefaultTimeoutWithRememberMe();
 
 			if ( ConfigRegistry.i().getBoolean( "allowNoTimeoutPermission" ) && checkPermission( "com.chiorichan.noTimeout" ).isTrue() )
 				defaultTimeout = Integer.MAX_VALUE;
@@ -440,7 +438,11 @@ public final class Session extends AccountPermissible implements Kickable
 			sessionCookie.setExpiration( timeout );
 	}
 
-	public void regenNonce()
+	/**
+	 * Replaces current nonce instance with a new instance.
+	 * Can be called multiple times.
+	 */
+	public void initNonce()
 	{
 		nonce = new Nonce( this );
 	}
@@ -462,7 +464,7 @@ public final class Session extends AccountPermissible implements Kickable
 		knownIps.add( wrapper.getIpAddress() );
 	}
 
-	public void reload() throws SessionException
+	public void reload() throws SessionException.Error
 	{
 		if ( isInvalidated )
 			throw new IllegalStateException( "This session has been invalidated" );
@@ -523,7 +525,7 @@ public final class Session extends AccountPermissible implements Kickable
 		}
 		catch ( SessionException.Error e )
 		{
-			Sessions.L.severe( "We had a problem saving the current session, changes were not saved to the datastore!", e );
+			SessionRegistry.L.severe( "We had a problem saving the current session, changes were not saved to the datastore!", e );
 		}
 	}
 
@@ -535,14 +537,13 @@ public final class Session extends AccountPermissible implements Kickable
 		globals.put( key, val );
 	}
 
-	public void setSite( Site site )
+	public void setWebroot( @Nonnull Webroot webroot )
 	{
 		if ( isInvalidated )
 			throw new IllegalStateException( "This session has been invalidated" );
 
-		Objs.notNull( site );
-		this.site = site;
-		data.site = site.getId();
+		this.webroot = webroot;
+		data.site = webroot.getWebrootId();
 	}
 
 	@Override
@@ -551,7 +552,7 @@ public final class Session extends AccountPermissible implements Kickable
 		if ( isInvalidated )
 			throw new IllegalStateException( "This session has been invalidated" );
 
-		Sessions.L.info( String.format( "Setting session variable `%s` with value '%s'", key, value ) );
+		SessionRegistry.L.info( String.format( "Setting session variable `%s` with value '%s'", key, value ) );
 
 		if ( value == null )
 			data.data.remove( key );
@@ -575,7 +576,7 @@ public final class Session extends AccountPermissible implements Kickable
 		}
 		catch ( AccountException e )
 		{
-			Sessions.L.severe( "We had a problem making the current login resumable!", e );
+			SessionRegistry.L.severe( "We had a problem making the current login resumable!", e );
 		}
 
 		rearmTimeout();
@@ -585,14 +586,14 @@ public final class Session extends AccountPermissible implements Kickable
 	@Override
 	public String toString()
 	{
-		return "Session{key=" + sessionKey + ",id=" + sessionId + ",ipAddress=" + getIpAddresses() + ",timeout=" + timeout + ",isInvalidated=" + isInvalidated + ",data=" + data + ",requestCount=" + requestCnt + ",site=" + site + "}";
+		return "Session{key=" + sessionKey + ",id=" + sessionId + ",ipAddress=" + getIpAddresses() + ",timeout=" + timeout + ",isInvalidated=" + isInvalidated + ",data=" + data + ",requestCount=" + requestCnt + ",site=" + webroot + "}";
 	}
 
 	public void unload()
 	{
-		Sessions.L.fine( EnumColor.DARK_AQUA + "Session Unloaded `" + this + "`" );
+		SessionRegistry.L.fine( EnumColor.DARK_AQUA + "Session Unloaded `" + this + "`" );
 
-		Sessions.sessions.remove( this );
+		SessionRegistry.sessions.remove( this );
 
 		for ( SessionWrapper wrap : wrappers )
 		{

@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 
 import javax.annotation.Nonnull;
 
-import io.amelia.foundation.ConfigMap;
+import io.amelia.foundation.ConfigData;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.VendorMeta;
 import io.amelia.foundation.plugins.PluginBase;
@@ -129,7 +129,7 @@ public abstract class Plugin extends PluginBase
 		return newConfig;
 	}
 
-	public ConfigMap getConfigNode()
+	public ConfigData getConfigNode()
 	{
 		return ConfigRegistry.getChildOrCreate( "plugins." + getSimpleName() );
 	}
@@ -281,7 +281,7 @@ public abstract class Plugin extends PluginBase
 
 	public void publishConfig()
 	{
-		ConfigMap node = getConfigNode().destroyChildAndCreate( "conf" );
+		ConfigData node = getConfigNode().destroyChildAndCreate( "conf" );
 
 
 

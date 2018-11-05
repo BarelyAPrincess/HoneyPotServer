@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -30,7 +30,12 @@ import io.amelia.support.Objs;
 
 public class WebrootScriptingContext extends ScriptingContext
 {
-	public static WebrootScriptingContext fromFile( final Site site, final String file )
+	public static WebrootScriptingContext empty()
+	{
+
+	}
+
+	public static WebrootScriptingContext fromFile( final Webroot webroot, final String file )
 	{
 		// We block absolute file paths for both unix-like and windows
 		if ( file.startsWith( File.separator ) || file.matches( "[A-Za-z]:\\.*" ) )
@@ -39,44 +44,45 @@ public class WebrootScriptingContext extends ScriptingContext
 			throw new SecurityException( "To protect system resources, this page has been blocked from accessing a protected file path." );
 		try
 		{
-			return fromFile( site.resourceFile( file ) );
+			return fromFile( webroot.resourceFile( file ) );
 		}
 		catch ( IOException e )
 		{
-			ScriptingContext context = ScriptingContext.fromSource( "", file );
+			WebrootScriptingContext context = empty();
+			context.setFileName( file );
+			context.setWebroot( webroot );
 			context.getResult().addException( new ScriptingException( ReportingLevel.E_IGNORABLE, String.format( "Could not locate the file '%s' within webroot '%s'", file, site.getId() ), e ) );
-			context.site( site );
 			return context;
 		}
 	}
 
-	public static WebrootScriptingContext fromPackage( final Site site, final String pack )
+	public static WebrootScriptingContext fromPackage( final Webroot webroot, final String pack )
 	{
 		ScriptingContext context;
 
 		try
 		{
-			File packFile = site.resourcePackage( pack );
+			File packFile = webroot.resourcePackage( pack );
 			FileInterpreter fi = new FileInterpreter( packFile );
 			context = ScriptingContext.fromFile( fi );
 		}
 		catch ( IOException e )
 		{
 			context = ScriptingContext.fromSource( "", pack );
-			context.getResult().addException( new ScriptingException( ReportingLevel.E_IGNORABLE, String.format( "Could not locate the package '%s' within webroot '%s'", pack, site.getId() ), e ) );
+			context.getResult().addException( new ScriptingException( ReportingLevel.E_IGNORABLE, String.format( "Could not locate the package '%s' within webroot '%s'", pack, webroot.getId() ), e ) );
 		}
 
-		context.site( site );
+		context.site( webroot );
 
 		return context;
 	}
 
-	public static WebrootScriptingContext fromPackageWithException( final Site site, final String pack ) throws IOException
+	public static WebrootScriptingContext fromPackageWithException( final Webroot webroot, final String pack ) throws IOException
 	{
-		File packFile = site.resourcePackage( pack );
+		File packFile = webroot.resourcePackage( pack );
 		FileInterpreter fi = new FileInterpreter( packFile );
-		ScriptingContext context = ScriptingContext.fromFile( fi );
-		context.site( site );
+		WebrootScriptingContext context = fromFile( fi );
+		context.setWebroot( webroot );
 
 		return context;
 	}
@@ -144,7 +150,7 @@ public class WebrootScriptingContext extends ScriptingContext
 	@Override
 	protected Path getDefaultCachePath()
 	{
-		return webroot.getCachePath();
+		return webroot.getCacheDirectory();
 	}
 
 	@Override
@@ -163,5 +169,10 @@ public class WebrootScriptingContext extends ScriptingContext
 	{
 		Objs.notNull( webroot );
 		return webroot;
+	}
+
+	public void setWebroot( Webroot webroot )
+	{
+		this.webroot = webroot;
 	}
 }

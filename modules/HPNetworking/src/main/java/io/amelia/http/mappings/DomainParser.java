@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -24,7 +24,7 @@ public class DomainParser
 
 	private static List<String> getTldList()
 	{
-		return ConfigRegistry.config.getStringList( TLDS );
+		return ConfigRegistry.config.getValue( TLDS );
 	}
 
 	public static boolean isTld( String domain )
@@ -55,7 +55,7 @@ public class DomainParser
 
 		for ( int n = 0; n < ns.getNodeCount(); n++ )
 		{
-			String sns = ns.subNamespace( n ).getString();
+			String sns = ns.subNodes( n ).getString();
 			if ( isTld( sns ) )
 			{
 				parentNodePos = n;
@@ -65,8 +65,8 @@ public class DomainParser
 
 		if ( parentNodePos > 0 )
 		{
-			tld = ns.subNamespace( parentNodePos );
-			sub = ns.subNamespace( 0, parentNodePos );
+			tld = ns.subNodes( parentNodePos );
+			sub = ns.subNodes( 0, parentNodePos );
 		}
 		else
 		{
@@ -82,7 +82,7 @@ public class DomainParser
 
 	public Namespace getChildDomain()
 	{
-		return sub.getNodeCount() <= 1 ? new Namespace() : sub.subNamespace( 1 );
+		return sub.getNodeCount() <= 1 ? new Namespace() : sub.subNodes( 1 );
 	}
 
 	public Namespace getFullDomain()
@@ -92,7 +92,7 @@ public class DomainParser
 
 	public Namespace getRootDomain()
 	{
-		return Namespace.parseString( sub.getLast() + "." + tld.getString() );
+		return Namespace.parseString( sub.getStringLast() + "." + tld.getString() );
 	}
 
 	public Namespace getSub()

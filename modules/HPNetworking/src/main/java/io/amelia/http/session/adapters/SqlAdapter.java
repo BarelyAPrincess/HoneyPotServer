@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -20,7 +20,7 @@ import java.util.Map;
 import io.amelia.http.session.SessionAdapterImpl;
 import io.amelia.http.session.SessionData;
 import io.amelia.http.session.SessionWrapper;
-import io.amelia.http.session.Sessions;
+import io.amelia.http.session.SessionRegistry;
 import io.amelia.lang.DatabaseException;
 import io.amelia.lang.SessionException;
 import io.amelia.storage.Database;
@@ -72,7 +72,7 @@ public class SqlAdapter implements SessionAdapterImpl
 		}
 		catch ( DatabaseException e )
 		{
-			Sessions.getLogger().warning( "There was a problem reloading saved sessions.", e );
+			SessionRegistry.getLogger().warning( "There was a problem reloading saved sessions.", e );
 		}
 
 		PermissionDispatcher.getLogger().info( "SqlSession loaded " + data.size() + " sessions from the datastore in " + Timing.finish( this ) + "ms!" );
@@ -94,7 +94,7 @@ public class SqlAdapter implements SessionAdapterImpl
 			this.sessionId = sessionId;
 
 			ipAddress = wrapper.getIpAddress();
-			site = wrapper.getLocation().getId();
+			site = wrapper.getWebroot().getId();
 
 			save();
 		}
@@ -105,7 +105,7 @@ public class SqlAdapter implements SessionAdapterImpl
 			try
 			{
 				if ( StorageModule.i().getDatabase().table( "sessions" ).delete().where( "sessionId" ).matches( sessionId ).executeWithException().count() < 1 )
-					Sessions.getLogger().severe( "Failed to remove the session '" + sessionId + "' from the database, no results." );
+					SessionRegistry.getLogger().severe( "Failed to remove the session '" + sessionId + "' from the database, no results." );
 			}
 			catch ( DatabaseException e )
 			{

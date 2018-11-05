@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -15,8 +15,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import io.amelia.data.ContainerBase;
 import io.amelia.data.parcel.ParcelInterface;
 import io.amelia.data.parcel.ParcelReceiver;
 import io.amelia.foundation.bindings.BindingException;
@@ -32,11 +34,13 @@ import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
-import io.amelia.support.ConfigStorageLoader;
+import io.amelia.storage.StorageRegistry;
 import io.amelia.support.Encrypt;
 import io.amelia.support.EnumColor;
+import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Runlevel;
+import io.amelia.support.Strs;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -81,12 +85,6 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 		optionParser.accepts( arg, desc ).withRequiredArg().ofType( String.class );
 	}
 
-	public void checkOptionSet()
-	{
-		if ( optionSet == null )
-			throw new ApplicationException.Runtime( ReportingLevel.E_ERROR, "parse( String[] ) was never called." );
-	}
-
 	void dispose()
 	{
 		LooperRouter.dispose();
@@ -103,6 +101,12 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 	{
 		checkOptionSet();
 		return env;
+	}
+
+	public void checkOptionSet()
+	{
+		if ( optionSet == null )
+			throw new ApplicationException.Runtime( ReportingLevel.E_ERROR, "parse( String[] ) was never called." );
 	}
 
 	public String getId()
@@ -214,7 +218,19 @@ public abstract class ApplicationInterface implements VendorRegistrar, Exception
 			// XXX Use Encrypt::hash as an alternative to Encrypt::uuid
 			env.computeValue( "instance-id", Encrypt::uuid, true );
 
-			ConfigRegistry.init( env, new ConfigStorageLoader() );
+			Kernel.setAppPath( IO.buildPath( false, env.getString( "app-dir" ).orElse( null ) ) );
+			env.getStringsMap().filter( e -> e.getKey().endsWith( "-dir" ) ).forEach( e -> Kernel.setPath( e.getKey().substring( 0, e.getKey().length() - 4 ), Strs.split( e.getValue(), "/" ).toArray( String[]::new ) ) );
+
+			ConfigRegistry.config.setEnvironmentVariables( env.map() );
+
+			ConfigData envNode = ConfigRegistry.config.getChildOrCreate( "env" );
+			for ( Map.Entry<String, Object> entry : env.map().entrySet() )
+				envNode.setValue( entry.getKey().replace( '-', '_' ), entry.getValue() );
+			envNode.addFlag( ContainerBase.Flags.READ_ONLY, ContainerBase.Flags.NO_SAVE );
+
+			StorageRegistry.initDefault();
+			StorageRegistry.loadConfig();
+
 			Bindings.init();
 
 			/*

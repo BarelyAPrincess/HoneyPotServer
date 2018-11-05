@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -29,6 +29,7 @@ import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
 import io.amelia.looper.MainLooper;
 import io.amelia.support.EnumColor;
+import io.amelia.support.Exceptions;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
 import io.amelia.support.Runlevel;
@@ -72,7 +73,7 @@ public final class Foundation
 			@Override
 			public void log( Level level, Class<?> source, Throwable cause )
 			{
-				Strs.split( Strs.getStackTrace( cause ), "\n" ).forEach( str -> L.log( level, str ) );
+				Strs.split( Exceptions.getStackTrace( cause ), "\n" ).forEach( str -> L.log( level, str ) );
 			}
 		} );
 
@@ -358,7 +359,7 @@ public final class Foundation
 		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
 
-		if ( !ConfigRegistry.config.getBoolean( Config.DISABLE_METRICS ) )
+		if ( !ConfigRegistry.config.getValue( Config.DISABLE_METRICS ) )
 		{
 			// TODO Implement!
 

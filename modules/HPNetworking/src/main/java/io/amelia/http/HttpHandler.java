@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -20,12 +20,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
+import io.amelia.data.parcel.Parcel;
 import io.amelia.events.EventException;
 import io.amelia.events.Events;
 import io.amelia.foundation.ConfigRegistry;
@@ -35,10 +34,21 @@ import io.amelia.http.events.RequestEvent;
 import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.session.Session;
 import io.amelia.http.webroot.BaseWebroot;
+import io.amelia.http.webroot.Webroot;
+import io.amelia.http.webroot.WebrootScriptingContext;
+import io.amelia.lang.ExceptionContext;
 import io.amelia.lang.ExceptionReport;
 import io.amelia.lang.MultipleException;
+import io.amelia.lang.NonceException;
 import io.amelia.lang.ReportingLevel;
+import io.amelia.lang.ScriptingException;
+import io.amelia.logging.LogEvent;
+import io.amelia.networking.Networking;
+import io.amelia.scripting.ScriptTraceElement;
 import io.amelia.scripting.ScriptingContext;
+import io.amelia.scripting.ScriptingFactory;
+import io.amelia.scripting.ScriptingResult;
+import io.amelia.support.EnumColor;
 import io.amelia.support.HttpRequestContext;
 import io.amelia.support.Objs;
 import io.amelia.support.TriEnum;
@@ -142,7 +152,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	/**
 	 * The selected Webroot
 	 */
-	private BaseWebroot currentWebroot;
+	private Webroot webroot;
 	/**
 	 * The POST body decoder
 	 */
@@ -214,7 +224,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		{
 			if ( request == null || response == null )
 			{
-				NetworkManager.getLogger().severe( EnumColor.NEGATIVE + "" + EnumColor.RED + "We got an unexpected exception before the connection was processed:", cause );
+				Networking.L.severe( EnumColor.NEGATIVE + "" + EnumColor.RED + "We got an unexpected exception before the connection was processed:", cause );
 
 				StringBuilder sb = new StringBuilder();
 				sb.append( "<h1>500 - Internal Server Error</h1>\n" );
@@ -222,7 +232,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				sb.append( "<p>The exception has been logged to the console, so we can only hope the exception is noticed and resolved. We apologize for any inconvenience.</p>\n" );
 				sb.append( "<p><i>You have a good day now and we will see you again soon. :)</i></p>\n" );
 				sb.append( "<hr>\n" );
-				sb.append( Versioning.getHTMLFooter() );
+				sb.append( Kernel.getDevMeta().getHTMLFooter() );
 
 				FullHttpResponse response = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf( 500 ), Unpooled.wrappedBuffer( sb.toString().getBytes() ) );
 				ctx.write( response );
@@ -244,13 +254,13 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				if ( response.getStage() != HttpResponseStage.CLOSED )
 					response.sendError( ( HttpError ) cause );
 				else
-					NetworkManager.getLogger().severe( EnumColor.NEGATIVE + "" + EnumColor.RED + " [" + ip + "] For reasons unknown, we caught a HttpError but the connection was already closed.", cause );
+					Networking.L.severe( EnumColor.NEGATIVE + "" + EnumColor.RED + " [" + ip + "] For reasons unknown, we caught a HttpError but the connection was already closed.", cause );
 				return;
 			}
 
 			if ( requestFinished && "Connection reset by peer".equals( cause.getMessage() ) )
 			{
-				NetworkManager.getLogger().warning( EnumColor.NEGATIVE + "" + EnumColor.RED + " [" + ip + "] The connection was closed before we could finish the request, if the IP continues to abuse the system it WILL BE BANNED!" );
+				Networking.L.warning( EnumColor.NEGATIVE + "" + EnumColor.RED + " [" + ip + "] The connection was closed before we could finish the request, if the IP continues to abuse the system it WILL BE BANNED!" );
 				NetworkSecurity.addStrikeToIp( ip, IpStrikeType.CLOSED_EARLY );
 				return;
 			}
@@ -276,7 +286,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 			 */
 			if ( cause instanceof MultipleException )
 			{
-				IException most = null;
+				ExceptionContext most = null;
 
 				// The lower the intValue() to more important it became
 				for ( IException e : ( ( MultipleException ) cause ).getExceptions() )
@@ -314,7 +324,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				log.log( Level.SEVERE, EnumColor.NEGATIVE + "" + EnumColor.RED + "OutOfMemoryError! This is serious!!!" );
 				response.sendError( 500, "We have encountered an internal server error" );
 
-				if ( Versioning.isDevelopment() )
+				if ( Kernel.isDevelopment() )
 					cause.printStackTrace();
 			}
 			else if ( evalOrig == null )
@@ -323,7 +333,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				log.log( Level.SEVERE, "%s%sException %s thrown in file '%s' at line %s, message '%s'", EnumColor.NEGATIVE, EnumColor.RED, cause.getClass().getName(), cause.getStackTrace()[0].getFileName(), cause.getStackTrace()[0].getLineNumber(), cause.getMessage() );
 				response.sendException( cause );
 
-				if ( Versioning.isDevelopment() )
+				if ( Kernel.isDevelopment() )
 					cause.printStackTrace();
 			}
 			else
@@ -345,7 +355,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 
 				response.sendException( evalOrig );
 
-				if ( Versioning.isDevelopment() )
+				if ( Kernel.isDevelopment() )
 					cause.printStackTrace();
 			}
 
@@ -353,7 +363,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		}
 		catch ( Throwable t )
 		{
-			NetworkManager.getLogger().severe( EnumColor.NEGATIVE + "" + EnumColor.RED + "This is an uncaught exception from the exceptionCaught() method:", t );
+			Networking.L.severe( EnumColor.NEGATIVE + "" + EnumColor.RED + "This is an uncaught exception from the exceptionCaught() method:", t );
 			// ctx.fireExceptionCaught( t );
 		}
 	}
@@ -434,20 +444,20 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 	 *
 	 * @return selected Webroot
 	 */
-	public BaseWebroot getWebroot()
+	public Webroot getWebroot()
 	{
-		return currentWebroot;
+		return webroot;
 	}
 
 	/**
 	 * Handles the HTTP request. Each HTTP subsystem will be explicitly activated until a resolve is determined.
 	 *
-	 * @throws IOException                                        Universal exception for all Input/Output errors
-	 * @throws io.amelia.lang.HttpError                           for HTTP Errors
-	 * @throws com.chiorichan.permission.lang.PermissionException for permission problems, like access denied
-	 * @throws io.amelia.lang.MultipleException                   for multiple Scripting Factory Evaluation Exceptions
-	 * @throws io.amelia.lang.ScriptingException                  for Scripting Factory Evaluation Exception
-	 * @throws com.chiorichan.session.SessionException            for problems initializing a new or used session
+	 * @throws IOException                                      Universal exception for all Input/Output errors
+	 * @throws io.amelia.lang.HttpError                         for HTTP Errors
+	 * @throws io.amelia.lang.PermissionException               for permission problems, like access denied
+	 * @throws io.amelia.lang.MultipleException                 for multiple Scripting Factory Evaluation Exceptions
+	 * @throws io.amelia.lang.ScriptingException.Error          for Scripting Factory Evaluation Exception
+	 * @throws io.amelia.lang.SessionException.Error            for problems initializing a new or used session
 	 */
 	private void handleHttp() throws Exception // IOException, HttpError, WebrootException, PermissionException, MultipleException, ScriptingException, SessionException
 	{
@@ -484,7 +494,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				reason = "Navigation Cancelled by Plugin Event";
 			}
 
-			NetworkManager.getLogger().warning( "Navigation was cancelled by a Plugin Event" );
+			Networking.L.warning( "Navigation was cancelled by a Plugin Event" );
 
 			throw new HttpError( status, reason );
 		}
@@ -497,8 +507,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 
 		response.annotations.putAll( fi.getAnnotations() );
 
-		currentWebroot = request.getLocation();
-		session.setWebroot( currentWebroot );
+		webroot = request.getWebroot();
+		session.setWebroot( webroot );
 
 		DomainMapping mapping = request.getDomainMapping();
 
@@ -521,7 +531,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		Objs.notNull( docRoot );
 
 		if ( !docRoot.exists() )
-			NetworkManager.getLogger().warning( String.format( "The webroot directory [%s] was missing, it will be created.", UtilIO.relPath( docRoot ) ) );
+			Networking.L.warning( String.format( "The webroot directory [%s] was missing, it will be created.", UtilIO.relPath( docRoot ) ) );
 
 		if ( docRoot.exists() && docRoot.isFile() )
 			docRoot.delete();
@@ -621,7 +631,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		/*
 		 * Start: Apache Configuration Section
 		 *
-		 * Loads a Apache configuration and .htaccess files into a common handler, then parsed for directives like access restrictions and basic auth
+		 * Loads a Apache data and .htaccess files into a common handler, then parsed for directives like access restrictions and basic auth
 		 * TODO Load server-wide Apache Configuration then merge with Webroot Configuration
 		 */
 		ApacheHandler htaccess = new ApacheHandler();
@@ -629,7 +639,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 
 		try
 		{
-			boolean result = htaccess.handleDirectives( currentWebroot.getApacheConfig(), this );
+			boolean result = htaccess.handleDirectives( webroot.getApacheConfig(), this );
 
 			if ( htaccess.overrideNone() || htaccess.overrideListNone() ) // Ignore .htaccess files
 			{
@@ -702,7 +712,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		 * So regardless what the nonce level is, nonce will have to be initialized by the login form.
 		 */
 
-		NonceLevel level = NonceLevel.parse( fi.get( "nonce" ) );
+		Nonce.NonceLevel level = Nonce.NonceLevel.parse( fi.get( "nonce" ) );
 		Nonce nonce = session.nonce();
 
 		boolean nonceProvided = nonce != null && request.getRequestMap().containsKey( nonce.key() );
@@ -727,7 +737,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				// Do Nothing
 		}
 
-		Map<String, String> nonceMap = new HashMap<>();
+		Parcel nonceData = Parcel.empty();
 
 		if ( processNonce )
 		{
@@ -739,7 +749,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			if ( level == NonceLevel.Required )
+			if ( level == Nonce.NonceLevel.Required )
 				// Required nonce levels are of the highest protected state
 				session.destroyNonce();
 
@@ -760,28 +770,28 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 			{
 				log.log( Level.INFO, "Request PASSED NONCE validation." );
 				request.nonceProcessed( true );
-				nonceMap = nonce.mapValues();
+				nonceData = nonce.getData();
 			}
 		}
 
 		if ( request.validateLogins() )
 			return;
 
-		if ( level != NonceLevel.Disabled )
-			request.setGlobal( "_NONCE", nonceMap );
+		if ( level != Nonce.NonceLevel.Disabled )
+			request.setGlobal( "_NONCE", nonceData );
 
-		if ( ConfigRegistry.i().getBoolean( "advanced.security.requestMapEnabled", true ) )
-			request.setGlobal( "_REQUEST", request.getRequestMap() );
+		if ( !ConfigRegistry.config.getValue( Config.SECURITY_DISABLE_REQUEST );
+		request.setGlobal( "_REQUEST", request.getRequestMap() );
 
 		ByteBuf rendered = Unpooled.buffer();
 
 		ScriptingFactory factory = request.getScriptingFactory();
 		factory.setEncoding( fi.getEncoding() );
 
-		NetworkSecurity.isForbidden( htaccess, currentWebroot, fi );
+		NetworkSecurity.isForbidden( htaccess, webroot, fi );
 
 		/* This annotation simply requests that the page requester must have a logged in account, the exact permission is not important. */
-		boolean reqLogin = Objs.castToBool( fi.get( "reqLogin" ) );
+		boolean reqLogin = Objs.castToBoolean( fi.get( "reqLogin" ) );
 
 		if ( reqLogin && !session.hasLogin() )
 			throw new PermissionDeniedException( PermissionDeniedReason.LOGIN_PAGE );
@@ -792,7 +802,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 		if ( reqPerm == null )
 			reqPerm = "-1";
 
-		session.requirePermission( reqPerm, currentWebroot.getId() );
+		session.requirePermission( reqPerm, webroot.getId() );
 
 		/* TODO Deprecated but removed for historical reasons
 		if ( fi.hasHTML() )
@@ -821,7 +831,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 					catch ( Exception e )
 					{
 						log.log( Level.SEVERE, "Exception Encountered: %s", e.getMessage() );
-						if ( Versioning.isDevelopment() )
+						if ( Kernel.isDevelopment() )
 							log.log( Level.SEVERE, e.getStackTrace()[0].toString() );
 					}
 			}
@@ -838,11 +848,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			ScriptingContext scriptingContext = ScriptingContext.fromFile( fi ).request( request ).Webroot( currentWebroot );
+			ScriptingContext scriptingContext = WebrootScriptingContext.fromFile( webroot, fi );
 			request.getArguments().forEach( arg -> {
 				scriptingContext.addOption( arg.getKey(), arg.getValue() );
 			} );
-			ScriptingResult result = factory.eval( scriptingContext );
+			ScriptingResult result = ( ( ScriptingFactory ) factory ).eval( scriptingContext );
 
 			if ( result.hasExceptions() )
 				// TODO Print notices to output like PHP does
@@ -867,7 +877,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 					{
 						rendered.writeBytes( result.getObject().toString().getBytes() );
 						log.log( Level.SEVERE, "Exception encountered while writing returned object to output. %s", e.getMessage() );
-						if ( Versioning.isDevelopment() )
+						if ( Kernel.isDevelopment() )
 							log.log( Level.SEVERE, e.getClass().getSimpleName() + ": " + e.getStackTrace()[0].toString() );
 					}
 			}
@@ -977,7 +987,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				return;
 			}
 
-			BaseWebroot currentWebroot = request.getLocation();
+			BaseWebroot currentWebroot = request.getWebroot();
 
 			File tmpFileDirectory = currentWebroot != null ? currentWebroot.getCacheDirectory() : ConfigRegistry.i().getDirectoryCache();
 
@@ -996,7 +1006,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				}
 				catch ( WebSocketHandshakeException e )
 				{
-					NetworkManager.getLogger().severe( "A request was made on the websocket uri '/fw/websocket' but it failed to handshake for reason '" + e.getMessage() + "'." );
+					Networking.L.severe( "A request was made on the websocket uri '/fw/websocket' but it failed to handshake for reason '" + e.getMessage() + "'." );
 					response.sendError( 500, null, "This URI is for websocket requests only<br />" + e.getMessage() );
 				}
 				return;
@@ -1062,7 +1072,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 				throw new UnsupportedOperationException( String.format( "%s frame types are not supported", frame.getClass().getName() ) );
 
 			String request = ( ( TextWebSocketFrame ) frame ).text();
-			NetworkManager.getLogger().fine( "Received '" + request + "' over WebSocket connection '" + ctx.channel() + "'" );
+			Networking.L.fine( "Received '" + request + "' over WebSocket connection '" + ctx.channel() + "'" );
 			ctx.channel().write( new TextWebSocketFrame( request.toUpperCase() ) );
 		}
 		else if ( msg instanceof DefaultHttpRequest )
@@ -1070,7 +1080,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 			// Do Nothing!
 		}
 		else
-			NetworkManager.getLogger().warning( "Received Object '" + msg.getClass() + "' and had nothing to do with it, is this a bug?" );
+			Networking.L.warning( "Received Object '" + msg.getClass() + "' and had nothing to do with it, is this a bug?" );
 	}
 
 	/**
@@ -1195,7 +1205,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object>
 					response.sendException( e );
 				}
 			else
-				NetworkManager.getLogger().warning( "File to be continued but should not!" );
+				Networking.L.warning( "File to be continued but should not!" );
 		}
 	}
 }

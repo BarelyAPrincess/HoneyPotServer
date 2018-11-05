@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -21,8 +21,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import io.amelia.data.TypeBase;
-import io.amelia.filesystem.SQLFileSystemProvider;
-import io.amelia.foundation.ConfigMap;
+import io.amelia.storage.StorageProvider;
+import io.amelia.foundation.ConfigData;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Kernel;
@@ -33,12 +33,12 @@ import io.amelia.support.IO;
 import io.amelia.support.StorageConversions;
 import io.amelia.support.Streams;
 
-public class WebrootManager
+public class WebrootRegistry
 {
 	public static final String PATH_ARCHIVES = "__archives";
 	public static final String PATH_WEBROOT = "__webroot";
 	private static final List<Webroot> WEBROOTS = new CopyOnWriteArrayList<>();
-	public static Kernel.Logger L = Kernel.getLogger( WebrootManager.class );
+	public static Kernel.Logger L = Kernel.getLogger( WebrootRegistry.class );
 
 	static
 	{
@@ -51,16 +51,16 @@ public class WebrootManager
 		Path path;
 		switch ( getDefaultBackend() )
 		{
-			case "file":
+			case FILE:
 				backend = FileSystems.getDefault();
 				path = Kernel.getPath( PATH_WEBROOT );
 				break;
-			case "sql":
-				backend = SQLFileSystemProvider.newFileSystem();
+			case SQL:
+				backend = StorageProvider.newFileSystem();
 				path = backend.getPath( "/" );
 				break;
 			default:
-				throw new WebrootException.Runtime( "WebrootManager has no set FileSystem backend." );
+				throw new WebrootException.Runtime( "The webroot backend is not set." );
 		}
 
 		try
@@ -68,10 +68,10 @@ public class WebrootManager
 			IO.forceCreateDirectory( path );
 
 			Streams.forEachWithException( Files.list( path ).filter( directory -> Files.isDirectory( directory ) && Files.isRegularFile( directory.resolve( "config.yaml" ) ) ), directory -> {
-				ConfigMap configuration = new ConfigMap();
-				StorageConversions.loadToStacker( directory.resolve( "config.yaml" ), configuration );
+				ConfigData data = ConfigData.empty();
+				StorageConversions.loadToStacker( directory.resolve( "config.yaml" ), data );
 				Env env = new Env( directory.resolve( ".env" ) );
-				WEBROOTS.add( new Webroot( directory, configuration, env ) );
+				WEBROOTS.add( new Webroot( directory, data, env ) );
 			} );
 		}
 		catch ( Exception e )
@@ -94,9 +94,9 @@ public class WebrootManager
 			Streams.forEachWithException( result.sorted( new IO.PathComparatorByCreated() ).limit( limit ), IO::deleteIfExists );
 	}
 
-	private static String getDefaultBackend()
+	private static Backend getDefaultBackend()
 	{
-		return "file";
+		return Backend.FILE;
 	}
 
 	public static Webroot getDefaultWebroot()
@@ -143,10 +143,17 @@ public class WebrootManager
 	{
 		public static final TypeBase WEBROOTS = new TypeBase( ConfigRegistry.Config.APPLICATION_BASE, "webroots" );
 		public static final TypeBase.TypeString WEBROOTS_DEFAULT_TITLE = new TypeBase.TypeString( WEBROOTS, "defaultTitle", "Unnamed Webroot" );
+		public static final TypeBase.TypeString WEBROOTS_ALLOW_ORIGIN = new TypeBase.TypeString( WEBROOTS, "web-allowed-origin", "*" );
 
 		private Config()
 		{
 			// Static Access
 		}
+	}
+
+	public enum Backend
+	{
+		FILE,
+		SQL
 	}
 }

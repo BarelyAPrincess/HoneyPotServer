@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -24,7 +24,7 @@ public class WebrootUtils
 	{
 		try
 		{
-			Path dir = Kernel.getPath( Webroot.PATH_ARCHIVE ).resolve( siteId );
+			Path dir = Kernel.getPath( WebrootRegistry.PATH_ARCHIVES ).resolve( siteId );
 			if ( !Files.isDirectory( dir ) )
 				return;
 			Stream<Path> files = Files.list( dir ).filter( path -> Files.isRegularFile( path ) && path.endsWith( suffix ) );
@@ -47,7 +47,7 @@ public class WebrootUtils
 
 	public static Path createWebrootDirectory( String webrootId )
 	{
-		return Kernel.getPath( WebrootManager.PATH_WEBROOT ).resolve( webrootId );
+		return Kernel.getPath( WebrootRegistry.PATH_WEBROOT ).resolve( webrootId );
 	}
 
 	private WebrootUtils()

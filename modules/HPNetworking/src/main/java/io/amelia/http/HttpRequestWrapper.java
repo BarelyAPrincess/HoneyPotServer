@@ -2,22 +2,16 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
 package io.amelia.http;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
-import java.net.HttpCookie;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
@@ -42,9 +36,9 @@ import io.amelia.http.mappings.DomainMapping;
 import io.amelia.http.session.Session;
 import io.amelia.http.session.SessionContext;
 import io.amelia.http.session.SessionWrapper;
-import io.amelia.http.webroot.BaseWebroot;
 import io.amelia.http.webroot.Webroot;
-import io.amelia.http.webroot.WebrootManager;
+import io.amelia.http.webroot.WebrootRegistry;
+import io.amelia.lang.ApplicationException;
 import io.amelia.logging.LogEvent;
 import io.amelia.networking.NetworkLoader;
 import io.amelia.networking.Networking;
@@ -52,12 +46,12 @@ import io.amelia.support.DateAndTime;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Http;
 import io.amelia.support.HttpRequestContext;
+import io.amelia.support.Maps;
 import io.amelia.support.NIO;
 import io.amelia.support.Objs;
-import io.amelia.support.Pair;
+import io.amelia.support.Strs;
+import io.amelia.support.Voluntary;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -65,7 +59,10 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.CharsetUtil;
 
 /**
  * Wraps the Netty HttpRequest and provides shortcut methods
@@ -89,7 +86,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	/**
 	 * Cookie Cache
 	 */
-	final Set<HttpCookie> cookies = new HashSet<>();
+	final Set<HoneyCookie> cookies = new HashSet<>();
 	/**
 	 * The Get Map
 	 */
@@ -121,7 +118,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	/**
 	 * Server Cookie Cache
 	 */
-	final Set<HttpCookie> serverCookies = new HashSet<>();
+	final Set<Cookie> serverCookies = new HashSet<>();
 	/**
 	 * Is this a SSL request
 	 */
@@ -173,10 +170,10 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		String host = Http.hostnameNormalize( getHostDomain() );
 
 		if ( Objs.isEmpty( host ) )
-			this.domainMapping = WebrootManager.getDefaultWebroot().getDefaultMapping();
+			this.domainMapping = WebrootRegistry.getDefaultWebroot().getDefaultMapping();
 		else if ( NIO.isValidIPv4( host ) || NIO.isValidIPv6( host ) )
 		{
-			Stream<DomainMapping> domains = WebrootManager.getDomainMappingsByIp( host );
+			Stream<DomainMapping> domains = WebrootRegistry.getDomainMappingsByIp( host );
 			domainMapping = domains.count() == 0 ? null : domains.findFirst().orElse( null );
 		}
 		else
@@ -184,20 +181,20 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			if ( "localhost".equals( host ) && !getIpAddress().startsWith( "127" ) && !getIpAddress().equals( getLocalIpAddress() ) )
 				throw new HttpError( 418 );
 
-			this.domainMapping = WebrootManager.getDomainMapping( host );
+			this.domainMapping = WebrootRegistry.getDomainMapping( host );
 		}
 
 		if ( domainMapping == null )
-			domainMapping = WebrootManager.getDefaultWebroot().getMappings( "" ).findFirst().orElse( null );
+			domainMapping = WebrootRegistry.getDefaultWebroot().getMappings( "" ).findFirst().orElse( null );
 
-		if ( getUri().startsWith( "/~" ) && domainMapping.getWebroot() == WebrootManager.getDefaultWebroot() )
+		if ( getUri().startsWith( "/~" ) && domainMapping.getWebroot() == WebrootRegistry.getDefaultWebroot() )
 		{
 			String uri = getUri();
 			int inx = uri.indexOf( "/", 2 );
 			String siteId = uri.substring( 2, inx == -1 ? uri.length() - 2 : inx );
 			String newUri = inx == -1 ? "/" : uri.substring( inx );
 
-			Webroot webroot = WebrootManager.getWebrootById( siteId );
+			Webroot webroot = WebrootRegistry.getWebrootById( siteId );
 			if ( !siteId.equals( "wisp" ) && webroot != null )
 			{
 				// Get the declared default domain mapping, the first if otherwise
@@ -235,12 +232,12 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		if ( var1 != null )
 			try
 			{
-				Set<Cookie> var2 = CookieDecoder.decode( var1 );
+				Set<Cookie> var2 = ServerCookieDecoder.LAX.decode( var1 );
 				for ( Cookie cookie : var2 )
 					if ( cookie.name().startsWith( "_ws" ) )
-						serverCookies.add( new HttpCookie( cookie ) );
+						serverCookies.add( cookie );
 					else
-						cookies.add( new HttpCookie( cookie ) );
+						cookies.add( cookie );
 			}
 			catch ( IllegalArgumentException | NullPointerException e )
 			{
@@ -323,7 +320,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	public Set<String> getArgumentKeys()
 	{
-		Set<String> keys = Sets.newHashSet();
+		Set<String> keys = new HashSet<>();
 		keys.addAll( getMap.keySet() );
 		keys.addAll( postMap.keySet() );
 		keys.addAll( rewriteMap.keySet() );
@@ -369,18 +366,18 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	}
 
 	@Override
-	public HttpCookie getCookie( String key )
+	public Voluntary<Cookie, ApplicationException.Error> getCookie( String key )
 	{
-		for ( HttpCookie cookie : cookies )
-			if ( cookie.getKey().equals( key ) )
-				return cookie;
-		return null;
+		for ( Cookie cookie : cookies )
+			if ( key.equalsIgnoreCase( cookie.name() ) )
+				return Voluntary.of( cookie );
+		return Voluntary.empty();
 	}
 
 	@Override
-	public Set<HttpCookie> getCookies()
+	public Stream<HoneyCookie> getCookies()
 	{
-		return Collections.unmodifiableSet( cookies );
+		return cookies.stream();
 	}
 
 	public DomainMapping getDomainMapping()
@@ -565,12 +562,6 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return ( ( InetSocketAddress ) channel.localAddress() ).getPort();
 	}
 
-	@Override
-	public BaseWebroot getLocation()
-	{
-		return domainMapping.getWebroot();
-	}
-
 	public HttpRequest getOriginal()
 	{
 		return http;
@@ -595,7 +586,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	{
 		if ( getMap.isEmpty() )
 			return "";
-		return "?" + Joiner.on( "&" ).withKeyValueSeparator( "=" ).join( getMap );
+		return "?" + Strs.join( getMap, "&", "=", "null" );
 	}
 
 	public String getRemoteHostname()
@@ -626,16 +617,9 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	public Map<String, String> getRequestMapRaw() throws Exception
 	{
 		Map<String, String> requestMap = new TreeMap<>();
-
-		if ( getMap != null )
-			UtilMaps.mergeMaps( requestMap, getMap );
-
-		if ( postMap != null )
-			UtilMaps.mergeMaps( requestMap, postMap );
-
-		if ( rewriteMap != null )
-			UtilMaps.mergeMaps( requestMap, rewriteMap );
-
+		Maps.joinMaps( requestMap, getMap );
+		Maps.joinMaps( requestMap, postMap );
+		Maps.joinMaps( requestMap, rewriteMap );
 		return requestMap;
 	}
 
@@ -665,14 +649,14 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 	}
 
 	@Override
-	protected HttpCookie getServerCookie( String key )
+	protected Voluntary<Cookie, ApplicationException.Error> getServerCookie( String key )
 	{
-		return serverCookies.stream().filter( c -> c.getKey().equals( key ) ).findFirst().orElse( null );
+		return Voluntary.of( serverCookies.stream().filter( cookie -> key.equalsIgnoreCase( cookie.name() ) ).findAny().orElse( null ) );
 	}
 
-	public Set<HttpCookie> getServerCookies()
+	public Stream<Cookie> getServerCookies()
 	{
-		return Collections.unmodifiableSet( serverCookies );
+		return serverCookies.stream();
 	}
 
 	public String getTopDomain()
@@ -718,13 +702,13 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 			try
 			{
-				uri = URLDecoder.decode( uri, Charsets.UTF_8.name() );
+				uri = URLDecoder.decode( uri, CharsetUtil.UTF_8.name() );
 			}
 			catch ( UnsupportedEncodingException e )
 			{
 				try
 				{
-					uri = URLDecoder.decode( uri, Charsets.ISO_8859_1.name() );
+					uri = URLDecoder.decode( uri, CharsetUtil.ISO_8859_1.name() );
 				}
 				catch ( UnsupportedEncodingException e1 )
 				{
@@ -762,9 +746,9 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		return getHeader( "User-Agent" );
 	}
 
-	public BaseWebroot getWebRoot()
+	public Webroot getWebroot()
 	{
-		return getLocation();
+		return domainMapping.getWebroot();
 	}
 
 	public String getWebSocketLocation( HttpObject req )
@@ -812,7 +796,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		vars.put( HttpServerKey.SERVER_NAME, meta.getProductName() );
 		vars.put( HttpServerKey.SERVER_PORT, getLocalPort() );
 		vars.put( HttpServerKey.HTTPS, isSecure() );
-		vars.put( HttpServerKey.DOCUMENT_ROOT, ServerLoader.getWebRoot() );
+		vars.put( HttpServerKey.DOCUMENT_ROOT, Kernel.getPath( WebrootRegistry.PATH_WEBROOT ) );
 		vars.put( HttpServerKey.SESSION, this );
 
 		if ( getAuth() != null )
@@ -882,7 +866,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 
 	private Map<String, Object> parseMapArrays( Map<String, String> origMap )
 	{
-		Map<String, Object> result = Maps.newLinkedHashMap();
+		Map<String, Object> result = new LinkedHashMap<>();
 
 		for ( Entry<String, String> e : origMap.entrySet() )
 		{
@@ -1062,7 +1046,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 		boolean remember = getArgumentBoolean( "remember" );
 		String target = getArgument( "target" );
 
-		String loginPost = target == null || target.isEmpty() ? getLocation().getConfig().getString( "scripts.login-post", "/" ) : target;
+		String loginPost = target == null || target.isEmpty() ? this.getWebroot().getConfig().getString( "scripts.login-post", "/" ) : target;
 
 		if ( loginPost.isEmpty() )
 			loginPost = "/";
@@ -1119,7 +1103,7 @@ public class HttpRequestWrapper extends SessionWrapper implements SessionContext
 			// XXX Should we revalidate logins with each request? It could be something worth considering for extra security. Maybe a config option?
 
 			/*
-			 * Maybe make this a server configuration option, e.g., sessions.revalidateLogins
+			 * Maybe make this a server data option, e.g., sessions.revalidateLogins
 			 *
 			 * try
 			 * {

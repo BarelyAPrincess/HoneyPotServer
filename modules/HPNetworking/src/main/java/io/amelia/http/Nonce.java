@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -10,12 +10,13 @@
 package io.amelia.http;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import io.amelia.data.parcel.Parcel;
 import io.amelia.http.session.Session;
 import io.amelia.lang.NonceException;
+import io.amelia.lang.ParcelableException;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.Encrypt;
 
@@ -26,7 +27,7 @@ public class Nonce
 {
 	private long created = DateAndTime.epoch();
 	private String key;
-	private Map<String, String> mapValues = new HashMap<>();
+	private Parcel data = Parcel.empty();
 	private String sessionId;
 	private String value;
 
@@ -44,19 +45,25 @@ public class Nonce
 		return key;
 	}
 
-	Map<String, String> mapValues()
+	Parcel getData()
 	{
-		return Collections.unmodifiableMap( mapValues );
+		return data;
 	}
 
-	public void mapValues( Map<String, String> values )
+	public void putAll( Map<String, String> values ) throws ParcelableException.Error
 	{
-		mapValues.putAll( values );
+		for ( Map.Entry<String, String> entry : values.entrySet() )
+		{
+			String key = entry.getKey();
+			if ( key.contains( data.getOptions().getSeparator() ) )
+				key = key.replace( data.getOptions().getSeparator(), data.getOptions().getSeparatorReplacement() );
+			data.setValue( key, entry.getValue() );
+		}
 	}
 
-	public void mapValues( String key, String val )
+	public void put( String key, String val ) throws ParcelableException.Error
 	{
-		mapValues.put( key, val );
+		data.setValue( key, value );
 	}
 
 	public String query()

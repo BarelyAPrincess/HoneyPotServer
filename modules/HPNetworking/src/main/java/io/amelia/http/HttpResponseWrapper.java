@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -10,7 +10,6 @@
 package io.amelia.http;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,10 +24,19 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import io.amelia.events.Events;
-import io.amelia.foundation.ConfigRegistry;
+import io.amelia.foundation.Kernel;
 import io.amelia.http.apache.ApacheHandler;
+import io.amelia.http.events.HttpErrorEvent;
+import io.amelia.http.events.HttpExceptionEvent;
+import io.amelia.http.session.Session;
+import io.amelia.http.webroot.WebrootRegistry;
+import io.amelia.lang.SessionException;
 import io.amelia.logging.LogEvent;
+import io.amelia.networking.Networking;
+import io.amelia.scripting.ScriptingContext;
 import io.amelia.scripting.api.Web;
+import io.amelia.support.EnumColor;
+import io.amelia.support.Exceptions;
 import io.amelia.support.Objs;
 import io.amelia.support.Strs;
 import io.netty.buffer.ByteBuf;
@@ -48,6 +56,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.stream.ChunkedStream;
 
 /**
@@ -55,8 +64,8 @@ import io.netty.handler.stream.ChunkedStream;
  */
 public class HttpResponseWrapper
 {
-	final Map<String, String> annotations = Maps.newHashMap();
-	final Map<String, String> headers = Maps.newHashMap();
+	final Map<String, String> annotations = new HashMap<>();
+	final Map<String, String> headers = new HashMap<>();
 	final LogEvent log;
 	final HttpRequestWrapper request;
 	Charset encoding = Charsets.UTF_8;
@@ -265,7 +274,7 @@ public class HttpResponseWrapper
 		resetBuffer();
 
 		// Trigger an internal Error Event to notify plugins of a possible problem.
-		HttpErrorEvent event = new HttpErrorEvent( request, statusCode, statusReason, ConfigRegistry.i().getBoolean( "server.developmentMode" ) );
+		HttpErrorEvent event = new HttpErrorEvent( request, statusCode, statusReason, Kernel.isDevelopment() );
 		Events.callEvent( event );
 
 		statusCode = event.getHttpCode();
@@ -310,7 +319,7 @@ public class HttpResponseWrapper
 				println( "</div>" );
 				println( "<div class=\"container\">" );
 
-				if ( Versioning.isDevelopment() )
+				if ( Kernel.isDevelopment() )
 				{
 					println( "<p>" + developerMessage + "</p>" );
 
@@ -350,9 +359,9 @@ public class HttpResponseWrapper
 					println( "<span class=\"debug-header\">Cookies</span>" );
 					printMap( new HashMap<String, Object>()
 					{{
-						for ( HttpCookie cookie : request.getCookies() )
+						for ( Cookie cookie : request.getCookies() )
 							put( cookie.getKey(), cookie.getValue() );
-						for ( HttpCookie cookie : request.getServerCookies() )
+						for ( Cookie cookie : request.getServerCookies() )
 							put( cookie.getKey() + " (Server Cookie)", cookie.getValue() );
 						// TODO Implement a HTML color code parser, like a built-in BBCode or Markdown parser
 						// put( cookie.getKey() + " <span style=\"color: #eee; font-weight: 300;\">(internal)</span>", cookie.getValue() );
@@ -370,10 +379,10 @@ public class HttpResponseWrapper
 					// TODO Environment Variables
 				}
 				else
-					NetworkManager.getLogger().severe( String.format( "%s%sHttpError Developer Message: %s", EnumColor.GOLD, EnumColor.NEGATIVE, developerMessage ) );
+					Networking.L.severe( String.format( "%s%sHttpError Developer Message: %s", EnumColor.GOLD, EnumColor.NEGATIVE, developerMessage ) );
 
 				println( "<hr>" );
-				println( "<small>Running <a href=\"https://github.com/ChioriGreene/ChioriWebServer\">" + Versioning.getProduct() + "</a> Version " + Versioning.getVersion() + " (Build #" + Versioning.getBuildNumber() + ")<br />" + Versioning.getCopyright() + "</small>" );
+				println( "<small>Running <a href=\"https://github.com/ChioriGreene/ChioriWebServer\">" + Kernel.getDevMeta().getProductName() + "</a> Version " + Kernel.getDevMeta().getVersionDescribe() + ")<br />" + Kernel.getDevMeta().getProductCopyright() + "</small>" );
 				println( "</div>" );
 				println( "</body></html>" );
 
@@ -406,23 +415,23 @@ public class HttpResponseWrapper
 			return;
 		}
 
-		HttpExceptionEvent event = new HttpExceptionEvent( request, cause, Versioning.isDevelopment() );
-		EventDispatcher.i().callEvent( event );
+		HttpExceptionEvent event = new HttpExceptionEvent( request, cause, Kernel.isDevelopment() );
+		Events.callEvent( event );
 
 		int httpCode = event.getHttpCode();
 
-		if ( Versioning.isDevelopment() )
+		if ( Kernel.isDevelopment() )
 		{
 			if ( Objs.isEmpty( event.getErrorHtml() ) )
 			{
 				if ( cause == null )
 					sendError( httpCode, null, "No Stacktrace Available!" );
 
-				String stackTrace = ExceptionUtils.getStackTrace( cause );
+				String stackTrace = Exceptions.getStackTrace( cause );
 
 				if ( request.getScriptingFactory() != null )
 					for ( Entry<String, ScriptingContext> e : request.getScriptingFactory().stack().getScriptTraceHistory().entrySet() )
-						stackTrace = stackTrace.replace( e.getKey(), e.getValue().filename() );
+						stackTrace = stackTrace.replace( e.getKey(), e.getValue().getFileName() );
 
 				sendError( httpCode, null, "<pre>" + stackTrace + "</pre>" );
 			}
@@ -448,7 +457,7 @@ public class HttpResponseWrapper
 	}
 
 	/**
-	 * Sends the client to the site login page found in configuration and also sends a please login message along with it.
+	 * Sends the client to the site login page found in data and also sends a please login message along with it.
 	 */
 	public void sendLoginPage()
 	{
@@ -486,10 +495,10 @@ public class HttpResponseWrapper
 	public void sendLoginPage( String msg, String level, String target )
 	{
 		Nonce nonce = request.getSession().getNonce();
-		nonce.mapValues( "msg", msg );
-		nonce.mapValues( "level", level == null || level.length() == 0 ? "danger" : level );
-		nonce.mapValues( "target", target == null || target.length() == 0 ? request.getFullUrl() : target );
-		String loginForm = request.getLocation().getLoginForm();
+		nonce.put( "msg", msg );
+		nonce.put( "level", level == null || level.length() == 0 ? "danger" : level );
+		nonce.put( "target", target == null || target.length() == 0 ? request.getFullUrl() : target );
+		String loginForm = request.getWebroot().getLoginForm();
 		if ( !loginForm.toLowerCase().startsWith( "http" ) )
 			loginForm = ( request.isSecure() ? "https://" : "http://" ) + loginForm;
 		sendRedirect( String.format( "%s?%s=%s", loginForm, nonce.key(), nonce.value() ) );
@@ -510,19 +519,17 @@ public class HttpResponseWrapper
 			{
 				request.getSession().save();
 			}
-			catch ( SessionException e )
+			catch ( SessionException.Error e )
 			{
 				e.printStackTrace();
 			}
 
-			for ( HttpCookie c : request.getCookies() )
-				if ( c.needsUpdating() )
-					h.add( "Set-Cookie", c.toHeaderValue() );
+			request.getCookies().filter( HoneyCookie::needsUpdating ).forEach( cookie -> h.add( "Set-Cookie", cookie.toString() ) );
 
 			if ( h.get( "Server" ) == null )
-				h.add( "Server", Versioning.getProduct() + " Version " + Versioning.getVersion() );
+				h.add( "Server", Kernel.getDevMeta().getProductName() + " Version " + Kernel.getDevMeta().getVersionDescribe() );
 
-			h.add( "Access-Control-Allow-Origin", request.getLocation().getConfig().getString( "site.web-allowed-origin", "*" ) );
+			h.add( "Access-Control-Allow-Origin", request.getWebroot().getConfig().getValue( WebrootRegistry.Config.WEBROOTS_ALLOW_ORIGIN ) );
 			h.add( "Connection", "close" );
 			h.add( "Cache-Control", "no-execute" );
 			h.add( "Cache-Control", "private" );
@@ -559,16 +566,16 @@ public class HttpResponseWrapper
 				@Override
 				public void operationComplete( ChannelProgressiveFuture future ) throws Exception
 				{
-					NetworkManager.getLogger().info( "Transfer complete." );
+					Networking.L.info( "Transfer complete." );
 				}
 
 				@Override
 				public void operationProgressed( ChannelProgressiveFuture future, long progress, long total )
 				{
 					if ( total < 0 )
-						NetworkManager.getLogger().info( "Transfer progress: " + progress );
+						Networking.L.info( "Transfer progress: " + progress );
 					else
-						NetworkManager.getLogger().info( "Transfer progress: " + progress + " / " + total );
+						Networking.L.info( "Transfer progress: " + progress + " / " + total );
 				}
 			} );
 		}
@@ -606,7 +613,7 @@ public class HttpResponseWrapper
 		if ( nonceValues != null && nonceValues.size() > 0 )
 		{
 			target += ( target.contains( "?" ) ? "&" : "?" ) + request.getSession().getNonce().query();
-			request.getSession().nonce().mapValues( nonceValues );
+			request.getSession().nonce().putAll( nonceValues );
 		}
 
 		if ( !isCommitted() )
@@ -655,7 +662,7 @@ public class HttpResponseWrapper
 			return;
 
 		FullHttpResponse response = new DefaultFullHttpResponse( HttpVersion.HTTP_1_1, httpStatus, output );
-		HttpHeaders h = response.headers();
+		HttpHeaders headers = response.headers();
 
 		if ( request.hasSession() )
 		{
@@ -667,12 +674,10 @@ public class HttpResponseWrapper
 			 */
 			session.processSessionCookie( request.getRootDomain() );
 
-			for ( HttpCookie c : session.getCookies().values() )
-				if ( c.needsUpdating() )
-					h.add( HttpHeaderNames.SET_COOKIE, c.toHeaderValue() );
+			session.getCookies().filter( HoneyCookie::needsUpdating ).forEach( cookie -> headers.add( HttpHeaderNames.SET_COOKIE, cookie.toString() ) );
 
 			if ( session.getSessionCookie().needsUpdating() )
-				h.add( HttpHeaderNames.SET_COOKIE, session.getSessionCookie().toHeaderValue() );
+				headers.add( HttpHeaderNames.SET_COOKIE, session.getSessionCookie().toString() );
 		}
 
 		/*
@@ -681,23 +686,23 @@ public class HttpResponseWrapper
 		 * We apologize that there is currently no way to disable this behavior.
 		 */
 
-		h.set( HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE );
-		h.add( HttpHeaderNames.SERVER, Versioning.getProduct() + " Version " + Versioning.getVersion() );
-		h.setInt( HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes() );
+		headers.set( HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE );
+		headers.add( HttpHeaderNames.SERVER, Kernel.getDevMeta().getProductName() + " Version " + Kernel.getDevMeta().getVersionDescribe() );
+		headers.setInt( HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes() );
 
 		// This might be a temporary measure - TODO Properly set the charset for each request.
-		h.set( HttpHeaderNames.CONTENT_TYPE, httpContentType + "; charset=" + encoding.name() );
+		headers.set( HttpHeaderNames.CONTENT_TYPE, httpContentType + "; charset=" + encoding.name() );
 
-		h.add( HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, request.getLocation().getConfig().getString( "site.web-allowed-origin", "*" ) );
+		headers.add( HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, request.getWebroot().getConfig().getValue( WebrootRegistry.Config.WEBROOTS_ALLOW_ORIGIN ) );
 
-		for ( Entry<String, String> header : headers.entrySet() )
-			h.add( header.getKey().toLowerCase(), header.getValue() );
+		for ( Entry<String, String> header : this.headers.entrySet() )
+			headers.add( header.getKey().toLowerCase(), header.getValue() );
 
 		// Expires: Wed, 08 Apr 2015 02:32:24 GMT
 		// DateTimeFormatter formatter = DateTimeFormat.forPattern( "EE, dd-MMM-yyyy HH:mm:ss zz" );
 
-		// h.set( HttpHeaderNames.EXPIRES, formatter.print( DateTime.now( DateTimeZone.UTC ).plusDays( 1 ) ) );
-		// h.set( HttpHeaderNames.CACHE_CONTROL, "public, max-age=86400" );
+		// headers.set( HttpHeaderNames.EXPIRES, formatter.print( DateTime.now( DateTimeZone.UTC ).plusDays( 1 ) ) );
+		// headers.set( HttpHeaderNames.CACHE_CONTROL, "public, max-age=86400" );
 
 		stage = HttpResponseStage.WRITTEN;
 
@@ -760,7 +765,7 @@ public class HttpResponseWrapper
 	 */
 	public boolean switchToSecure()
 	{
-		if ( !NetworkManager.isHttpsRunning() )
+		if ( !Networking.isHttpsRunning() )
 		{
 			log.log( Level.SEVERE, "We were going to attempt to switch to a secure HTTPS connection and aborted due to the HTTPS server not running." );
 			return false;
@@ -778,7 +783,7 @@ public class HttpResponseWrapper
 	 */
 	public boolean switchToUnsecure()
 	{
-		if ( !NetworkManager.isHttpRunning() )
+		if ( !Networking.isHttpRunning() )
 		{
 			log.log( Level.SEVERE, "We were going to attempt to switch to an unsecure HTTP connection and aborted due to the HTTP server not running." );
 			return false;

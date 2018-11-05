@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -51,11 +51,11 @@ public final class DomainTree
 
 		List<DomainRoot> list = domains.compute( root.setGlue( "_" ).getString( true ), ( k, v ) -> v == null ? new ArrayList<>() : v );
 
-		String first = child.getFirst();
+		String first = child.getStringFirst();
 		DomainNode node = Lists.findOrNew( list, v -> v.getNodeName().equals( first ), new DomainRoot( root.getString(), first ) );
 
 		if ( child.getNodeCount() > 1 )
-			for ( String s : child.subNodes( 1 ) )
+			for ( String s : child.subArray( 1 ) )
 				node = node.getChild( s, true );
 
 		return node;

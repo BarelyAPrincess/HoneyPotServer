@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -27,7 +27,7 @@ import io.amelia.support.HttpRequestContext;
 import io.amelia.support.Version;
 
 /**
- * Used to parse Apache configuration files, e.g., .htaccess
+ * Used to parse Apache data files, e.g., .htaccess
  */
 public class ApacheHandler
 {

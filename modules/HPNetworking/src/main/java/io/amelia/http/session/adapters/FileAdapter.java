@@ -2,7 +2,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia DeWitt <me@ameliadewitt.com>
+ * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
  * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
@@ -17,10 +17,10 @@ import java.io.IOException;
 import java.util.List;
 
 import io.amelia.foundation.Kernel;
+import io.amelia.http.session.SessionRegistry;
 import io.amelia.http.session.SessionAdapterImpl;
 import io.amelia.http.session.SessionData;
 import io.amelia.http.session.SessionWrapper;
-import io.amelia.http.session.Sessions;
 import io.amelia.lang.SessionException;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
@@ -35,7 +35,7 @@ public class FileAdapter implements SessionAdapterImpl
 	public static File getSessionsDirectory()
 	{
 		if ( sessionsDirectory == null )
-			sessionsDirectory = Kernel.getPath( Sessions.PATH_SESSIONS );
+			sessionsDirectory = Kernel.getPath( SessionRegistry.PATH_SESSIONS );
 
 		// IO.setDirectoryAccessWithException( sessionsDirectory );
 		return sessionsDirectory;
@@ -69,7 +69,7 @@ public class FileAdapter implements SessionAdapterImpl
 				e.printStackTrace();
 			}
 
-			Sessions.L.info( "FileSession loaded " + data.size() + " sessions from the datastore in " + Timing.finish( this ) + "ms!" );
+			SessionRegistry.L.info( "FileSession loaded " + data.size() + " sessions from the datastore in " + Timing.finish( this ) + "ms!" );
 
 		return data;
 	}
@@ -92,7 +92,7 @@ public class FileAdapter implements SessionAdapterImpl
 			this.sessionId = sessionId;
 
 			ipAddress = wrapper.getIpAddress();
-			site = wrapper.getLocation() == null ? null : wrapper.getLocation().getId();
+			site = wrapper.getWebroot() == null ? null : wrapper.getWebroot().getId();
 
 			save();
 		}
