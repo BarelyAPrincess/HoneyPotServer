@@ -1,4 +1,4 @@
-include ':AmeliaCommonLib', ':AmeliaScriptingLib', ':AmeliaStorageLib', ':AmeliaEventsLib', ':AmeliaLogLib', ':HPFoundation', ':HPNetworking', ':HPPermissions', ':HoneyUsers'
+include ':AmeliaCommonLib', ':AmeliaScriptingLib', ':AmeliaStorageLib', ':AmeliaEventsLib', ':AmeliaLogLib', ':HoneyFoundation', ':HoneyNetworking', ':HoneyPermissions', ':HoneyUsers'
 
 project( ':AmeliaCommonLib' ).projectDir = new File( 'modules/AmeliaCommonLib' )
 project( ':AmeliaScriptingLib' ).projectDir = new File( 'modules/AmeliaScriptingLib' )
@@ -6,9 +6,9 @@ project( ':AmeliaStorageLib' ).projectDir = new File( 'modules/AmeliaStorageLib'
 project( ':AmeliaEventsLib' ).projectDir = new File( 'modules/AmeliaEventsLib' )
 project( ':AmeliaLogLib' ).projectDir = new File( 'modules/AmeliaLogLib' )
 
-project( ':HPFoundation' ).projectDir = new File( 'modules/HPFoundation' )
-project( ':HPNetworking' ).projectDir = new File( 'modules/HPNetworking' )
-// project( ':HPAuth' ).projectDir = new File( 'modules/HPAuth' )
+project( ':HoneyFoundation' ).projectDir = new File( 'modules/HoneyFoundation' )
+project( ':HoneyNetworking' ).projectDir = new File( 'modules/HoneyNetworking' )
+// project( ':HoneyAuth' ).projectDir = new File( 'modules/HoneyAuth' )
 project( ':HoneyUsers' ).projectDir = new File( 'modules/HoneyUsers' )
 
 rootProject.name = 'HoneyPotServer'

@@ -128,9 +128,9 @@ dependencies {
 	compile project( ':AmeliaEventsLib' )
 	compile project( ':AmeliaLogLib' )
 
-	compile project( ':HPFoundation' )
-	compile project( ':HPNetworking' )
-	// compile project( ':HPAuth' )
+	compile project( ':HoneyFoundation' )
+	compile project( ':HoneyNetworking' )
+	// compile project( ':HoneyAuth' )
 
 	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 

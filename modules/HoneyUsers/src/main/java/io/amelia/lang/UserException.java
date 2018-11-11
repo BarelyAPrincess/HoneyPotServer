@@ -9,75 +9,85 @@
  */
 package io.amelia.lang;
 
-import io.amelia.users.User;
+import io.amelia.users.UserPrincipal;
 
 /**
- * User Exception Container
+ * UserPrincipal Exception Container
  */
 public class UserException
 {
 	private UserException()
 	{
-		// Static
+		// Static Access
 	}
 
 	public static class Error extends ApplicationException.Error
 	{
 		private static final long serialVersionUID = 5522301956671473324L;
 
-		private final User user;
+		private final UserPrincipal userPrincipal;
 
-		public Error( User user )
+		public Error( UserPrincipal userPrincipal )
 		{
 			super();
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, String message )
+		public Error( UserPrincipal userPrincipal, String message )
 		{
 			super( message );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, String message, Throwable cause )
+		public Error( UserPrincipal userPrincipal, String message, Throwable cause )
 		{
 			super( message, cause );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, Throwable cause )
+		public Error( UserPrincipal userPrincipal, Throwable cause )
 		{
 			super( cause );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, ReportingLevel level )
+		public Error( UserPrincipal userPrincipal, ReportingLevel level )
 		{
 			super( level );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, ReportingLevel level, String message )
+		public Error( UserPrincipal userPrincipal, ReportingLevel level, String message )
 		{
 			super( level, message );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, ReportingLevel level, String message, Throwable cause )
+		public Error( UserPrincipal userPrincipal, ReportingLevel level, String message, Throwable cause )
 		{
 			super( level, message, cause );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public Error( User user, ReportingLevel level, Throwable cause )
+		public Error( UserPrincipal userPrincipal, ReportingLevel level, Throwable cause )
 		{
 			super( level, cause );
-			this.user = user;
+			this.userPrincipal = userPrincipal;
 		}
 
-		public User getUser()
+		public Error( UserPrincipal userPrincipal, DescriptiveReason descriptiveReason, Throwable cause )
 		{
-			return user;
+			this( userPrincipal, descriptiveReason.getReportingLevel(), descriptiveReason.getReasonMessage(), cause );
+		}
+
+		public Error( UserPrincipal userPrincipal, DescriptiveReason descriptiveReason )
+		{
+			this( userPrincipal, descriptiveReason.getReportingLevel(), descriptiveReason.getReasonMessage() );
+		}
+
+		public UserPrincipal getUserPrincipal()
+		{
+			return userPrincipal;
 		}
 	}
 

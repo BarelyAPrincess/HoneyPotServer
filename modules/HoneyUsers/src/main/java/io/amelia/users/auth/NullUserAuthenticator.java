@@ -10,7 +10,7 @@
 package io.amelia.users.auth;
 
 import io.amelia.lang.UserException;
-import io.amelia.lang.UserResult;
+import io.amelia.lang.DescriptiveReason;
 import io.amelia.users.UserBackend;
 import io.amelia.users.UserMeta;
 import io.amelia.users.UserPermissible;
@@ -22,7 +22,7 @@ public final class NullUserAuthenticator extends UserAuthenticator
 {
 	class NullUserCredentials extends UserCredentials
 	{
-		NullUserCredentials( UserMeta user, UserResult.DescriptiveReason descriptiveReason )
+		NullUserCredentials( UserMeta user, DescriptiveReason.DescriptiveReason descriptiveReason )
 		{
 			super( NullUserAuthenticator.this, user, descriptiveReason.newUserResult() );
 		}
@@ -36,12 +36,12 @@ public final class NullUserAuthenticator extends UserAuthenticator
 	@Override
 	public UserCredentials authorize( UserMeta user, UserPermissible permissible ) throws UserException.Error
 	{
-		return new NullUserCredentials( user, UserBackend.isNullUser( user ) ? UserResult.LOGIN_SUCCESS : UserResult.INCORRECT_LOGIN );
+		return new NullUserCredentials( user, UserBackend.isNullUser( user ) ? DescriptiveReason.LOGIN_SUCCESS : DescriptiveReason.INCORRECT_LOGIN );
 	}
 
 	@Override
 	public UserCredentials authorize( UserMeta user, Object... credentials ) throws UserException.Error
 	{
-		return new NullUserCredentials( user, UserBackend.isNullUser( user ) ? UserResult.LOGIN_SUCCESS : UserResult.INCORRECT_LOGIN );
+		return new NullUserCredentials( user, UserBackend.isNullUser( user ) ? DescriptiveReason.LOGIN_SUCCESS : DescriptiveReason.INCORRECT_LOGIN );
 	}
 }

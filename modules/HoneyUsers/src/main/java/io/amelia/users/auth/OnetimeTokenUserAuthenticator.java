@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.lang.DatabaseException;
 import io.amelia.lang.ReportingLevel;
-import io.amelia.lang.UserResult;
+import io.amelia.lang.DescriptiveReason;
 import io.amelia.support.DateAndTime;
 import io.amelia.support.Encrypt;
 import io.amelia.users.UserMeta;
@@ -28,7 +28,7 @@ public class OnetimeTokenUserAuthenticator extends UserAuthenticator
 	{
 		private String token;
 
-		OnetimeTokenUserCredentials( UserMeta meta, UserResult.DescriptiveReason descriptiveReason, String token )
+		OnetimeTokenUserCredentials( UserMeta meta, DescriptiveReason.DescriptiveReason descriptiveReason, String token )
 		{
 			super( OnetimeTokenUserAuthenticator.this, meta, descriptiveReason.newUserResult() );
 			this.token = token;
@@ -178,7 +178,7 @@ public class OnetimeTokenUserAuthenticator extends UserAuthenticator
 	 */
 	public String issueToken( @Nonnull UserMeta user )
 	{
-		String token = Encrypt.randomize( user.getUserId() ) + DateAndTime.epoch();
+		String token = Encrypt.randomize( user.getUuid() ) + DateAndTime.epoch();
 		try
 		{
 			user.getUserBackend()

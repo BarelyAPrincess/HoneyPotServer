@@ -9,7 +9,7 @@
  */
 package io.amelia.users;
 
-public class UserPermissible extends Permissible implements User
+public class UserPermissible extends Permissible
 {
 
 }

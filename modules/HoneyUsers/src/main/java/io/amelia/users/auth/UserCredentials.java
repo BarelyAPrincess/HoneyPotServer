@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 
 import io.amelia.lang.ReportingLevel;
 import io.amelia.lang.UserException;
-import io.amelia.lang.UserResult;
+import io.amelia.lang.DescriptiveReason;
 import io.amelia.users.UserBackend;
 import io.amelia.users.UserMeta;
 import io.amelia.users.UserPermissible;
@@ -24,10 +24,10 @@ import io.amelia.users.UserPermissible;
 public abstract class UserCredentials
 {
 	private final UserAuthenticator userAuthenticator;
-	private final UserResult userResult;
+	private final DescriptiveReason userResult;
 	private final UserMeta userMeta;
 
-	UserCredentials( UserAuthenticator userAuthenticator, UserMeta userMeta, UserResult userResult )
+	UserCredentials( UserAuthenticator userAuthenticator, UserMeta userMeta, DescriptiveReason userResult )
 	{
 		this.userAuthenticator = userAuthenticator;
 		this.userMeta = userMeta;
@@ -44,7 +44,7 @@ public abstract class UserCredentials
 		return userAuthenticator;
 	}
 
-	public final UserResult getUserResult()
+	public final DescriptiveReason getUserResult()
 	{
 		return userResult;
 	}
@@ -72,7 +72,7 @@ public abstract class UserCredentials
 
 		user.setVariable( "auth", "token" );
 		user.setVariable( "locationId", userMeta.getLocationId() );
-		user.setVariable( "userId", userMeta.getUserId() );
+		user.setVariable( "userId", userMeta.getUuid() );
 		user.setVariable( "token", UserAuthenticator.TOKEN.issueToken( userMeta ) );
 	}
 }
