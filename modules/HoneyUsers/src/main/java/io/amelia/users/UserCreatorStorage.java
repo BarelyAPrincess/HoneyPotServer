@@ -19,8 +19,8 @@ class UserCreatorStorage extends UserCreator
 		this.storagePath = storageBackend.getRootPath().resolve( storagePath );
 
 
-		if ( !this.storagePath.supports( TableStorageType.class ); )
-			throw new StorageException.Error( "Only the TableStorageType is supported." );
+		if ( !this.storagePath.supportsType( TableStorageType.class ); )
+		throw new StorageException.Error( "Only the TableStorageType is supported." );
 	}
 
 	@Override
@@ -46,7 +46,11 @@ class UserCreatorStorage extends UserCreator
 	{
 		TableStorageType tableStorage = storagePath.getStorageType( TableStorageType.class );
 
-
+		tableStorage.getRecords().forEach( record -> {
+			UserContext userContext = new UserContext( this, record.getString( "uuid" ) );
+			userContext.setValues( record );
+			HoneyUsers.users.add( userContext );
+		} );
 	}
 
 	@Override

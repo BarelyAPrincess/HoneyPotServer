@@ -8,7 +8,6 @@ project( ':AmeliaLogLib' ).projectDir = new File( 'modules/AmeliaLogLib' )
 
 project( ':HoneyFoundation' ).projectDir = new File( 'modules/HoneyFoundation' )
 project( ':HoneyNetworking' ).projectDir = new File( 'modules/HoneyNetworking' )
-// project( ':HoneyAuth' ).projectDir = new File( 'modules/HoneyAuth' )
 project( ':HoneyUsers' ).projectDir = new File( 'modules/HoneyUsers' )
 
 rootProject.name = 'HoneyPotServer'

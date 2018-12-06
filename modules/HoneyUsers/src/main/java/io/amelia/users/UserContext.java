@@ -9,6 +9,7 @@
  */
 package io.amelia.users;
 
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ import io.amelia.users.auth.UserCredentials;
  *
  * UserCreator (The Backend) -> UserContext (The User Details) -> UserMeta (The User Processed) -> UserInstance (The User Logged In and can have multiple instances)
  */
-public class UserContext implements UserPrincipal, Comparable<UserContext>, KeyValueTypesTrait, KeyValueSetterTrait<Object, ParcelableException.Error>, KeyValueGetterTrait<Object>
+public class UserContext implements UserPrincipal, Comparable<UserContext>, KeyValueTypesTrait, KeyValueSetterTrait<Object, ParcelableException.Error>, KeyValueGetterTrait<Object, ParcelableException.Error>
 {
 	private final UserCreator creator;
 	private final boolean isUnloadable;
@@ -76,6 +77,12 @@ public class UserContext implements UserPrincipal, Comparable<UserContext>, KeyV
 		UserEntity instance = new UserEntity( this );
 		instances.add( instance );
 		return instance;
+	}
+
+	@Override
+	public Set<String> getKeys()
+	{
+		return parcel.getKeys();
 	}
 
 	public UserCredentials getLastUsedCredentials()
@@ -129,7 +136,7 @@ public class UserContext implements UserPrincipal, Comparable<UserContext>, KeyV
 		return name;
 	}
 
-	public void save()
+	public void save() throws UserException.Error
 	{
 		creator.save( this );
 	}

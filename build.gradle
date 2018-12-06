@@ -181,8 +181,10 @@ dependencies {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
+Properties buildProperties = getBuildProperties();
+
 mainClassName = "io.amelia.main.EntryPoint"
-def rawVersion = getVersionNumber()
+def rawVersion = buildProperties.getProperty( "versionMajor" ) + "." + buildProperties.getProperty( "versionMinor" ) + "." + buildProperties.getProperty( "versionRevision" )
 def jenkins_build = System.getenv( "BUILD_NUMBER" )
 def travis_build = System.getenv( "TRAVIS_BUILD_NUMBER" )
 def buildNumber = '0'
@@ -195,7 +197,7 @@ libsDirName = 'dist'
 
 if ( System.getenv( "RELEASE" ) != null )
 {
-	version = getVersionNumber() + "-" + System.getenv( "RELEASE" )
+	version = buildProperties.getProperty( "versionMajor" ) + "." + buildProperties.getProperty( "versionMinor" ) + "." + buildProperties.getProperty( "versionRevision" ) + "-" + System.getenv( "RELEASE" )
 }
 else if ( jenkins_build != null )
 {
@@ -229,14 +231,13 @@ def gitDescribe()
 	}
 }
 
-def getVersionNumber()
+def getBuildProperties()
 {
 	try
 	{
 		Properties props = new Properties()
 		props.load( new FileInputStream( new File( "./src/main/resources/build.properties" ) ) )
-
-		return props.getProperty( "versionMajor" ) + "." + props.getProperty( "versionMinor" ) + "." + props.getProperty( "versionRevision" )
+		return props
 	}
 	catch ( Throwable e )
 	{
@@ -245,15 +246,15 @@ def getVersionNumber()
 }
 
 eclipse {
-	project {name = 'HoneyPotServer'}
+	project {name = buildProperties.getProperty( "gitRepo", "HoneyPotServer" )}
 }
 
 jar {
 	manifest {
-		attributes 'Implementation-Title': 'Honey Pot Server'
+		attributes 'Implementation-Title': buildProperties.getProperty( "productName", 'Honey Pot Server' )
 		attributes 'Implementation-Version': version
-		attributes 'Implementation-Vendor': 'Amelia DeWitt'
-		attributes 'Implementation-Vendor-Id': 'TheAmeliaDeWitt@gmail.com'
+		attributes 'Implementation-Vendor': buildProperties.getProperty( "devName", 'Amelia Sara Greene' )
+		attributes 'Implementation-Vendor-Id': buildProperties.getProperty( "devEmail", 'BarelyAPrincess@gmail.com' )
 		attributes 'Main-Class': mainClassName
 	}
 
