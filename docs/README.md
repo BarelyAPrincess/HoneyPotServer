@@ -26,7 +26,7 @@ Git Branches:
 Pull requests that fix security and app breaking bugs should be made against the `incubating` branch (if relevant). All others must be made against the `master-dev` branch.
 
 ```bash
-git clone --recursive https://github.com/TheAmeliaDeWitt/HoneyPotServer
+git clone --recursive https://github.com/BarelyAPrincess/HoneyPotServer
 cd HoneyPotServer
 ```
 

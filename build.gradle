@@ -99,7 +99,7 @@ allprojects {
 }
 
 subprojects {
-	libsDirName = '../../build/dist'
+	libsDirName = '../../../build/dist'
 	artifacts {archives jar}
 }
 
@@ -127,10 +127,9 @@ dependencies {
 	compile project( ':AmeliaStorageLib' )
 	compile project( ':AmeliaEventsLib' )
 	compile project( ':AmeliaLogLib' )
+	compile project( ':AmeliaNetworkingLib' )
 
 	compile project( ':HoneyFoundation' )
-	compile project( ':HoneyNetworking' )
-	// compile project( ':HoneyAuth' )
 
 	compile group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '4.7'
 

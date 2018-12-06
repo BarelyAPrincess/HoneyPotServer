@@ -70,6 +70,28 @@ else
 		echo "NOTICE: No Changes!"
 	fi
 
+        cd "$DIR/modules/AmeliaNetworkingLib"
+        echo "Submodule: $(pwd)"
+
+        if [ -n "$(git status --short)" ]; then
+                git add --all
+                git commit -m "HPS $HASH: $1"
+                git push
+        else
+                echo "NOTICE: No Changes!"
+        fi
+
+        cd "$DIR/modules/AmeliaUsersLib"
+        echo "Submodule: $(pwd)"
+
+        if [ -n "$(git status --short)" ]; then
+                git add --all
+                git commit -m "HPS $HASH: $1"
+                git push
+        else
+                echo "NOTICE: No Changes!"
+        fi
+
 	cd "$DIR"
 	echo "Root Repository: $(pwd)"
 

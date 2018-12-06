@@ -390,7 +390,7 @@ public final class Foundation
 		 * bindings:
 		 *   facades:
 		 *     permissions:
-		 *       class: io.amelia.foundation.facades.PermissionsService
+		 *       class:io.amelia.foundation.facades.PermissionsService
 		 *       priority: NORMAL
 		 *     events:
 		 *       class: io.amelia.foundation.facades.EventService
