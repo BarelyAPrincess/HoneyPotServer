@@ -26,3 +26,11 @@
 	path = modules/AmeliaUsersLib
 	url = git@github.com:BarelyAPrincess/AmeliaLib.git
 	branch = users
+[submodule "AmeliaAppLib"]
+	path = modules/AmeliaAppLib
+	url = git@github.com:BarelyAPrincess/AmeliaLib.git
+	branch = app
+[submodule "AmeliaPluginsLib"]
+	path = modules/AmeliaPluginsLib
+	url = git@github.com:BarelyAPrincess/AmeliaLib.git
+	branch = plugins

@@ -1,105 +1,111 @@
-#!/bin/bash
+#!/bin/bash -x
 
-# A helper script for making commits for the root repository and using the same commit message for each submodule.
-# This script will commit all changes, to stage indivigual changes -- don't use this script!
+# A bash helper script for committing submodule code before also committing the root repository.
+# This script will commit all changes, to stage individual changes -- don't use this script!
+# This script is intended to be ran from the root directory of the root project.
 
-if [ -z "$1" ]; then
+git_state () {
+	git remote -v update
+
+	LOCAL="$(git rev-parse @)"
+	REMOTE="$(git rev-parse @{u})"
+	BASE="$(git merge-base @ @{u})"
+
+	if [[ ${LOCAL} = ${REMOTE} ]]; then
+		echo "Status: Up-to-date"
+		return 0
+	elif [[ ${LOCAL} = ${BASE} ]]; then
+		echo "Status: Need to pull"
+		return 1
+	elif [[ ${REMOTE} = ${BASE} ]]; then
+		echo "Status: Need to push"
+		return 2
+	else
+		echo "Status: Diverged"
+		return -1
+	fi
+}
+
+commit_submodule_merge () {
+		read -p "The remote repo has changes not yet merged, would you like to (m)erge, (c)ontinue, or (a)bort? " -n 1 -r
+		echo
+
+		if [[ $REPLY =~ ^[Mm]$ ]]; then
+			git pull
+			git mergetool
+		elif [[ $REPLY =~ ^[Cc]$ ]]; then
+			return
+		elif [[ $REPLY =~ ^[Aa]$ ]]; then
+			exit 1
+		esle
+			commit_submodule_merge
+		fi
+}
+
+commit_submodule () {
+	if [[ -z "$1" ]]; then
+		echo "No submodule path specified. :("
+		return
+	fi
+
+	cd "$DIR/$1"
+	echo "Committing Submodule: $1"
+
+	git_state
+	if [[ "$?" -eq "1" ]]; then
+		commit_submodule_merge
+	elif [[ "$?" -eq "-1" ]]; then
+		exit 1
+	fi
+
+	if [[ -n "$(git status --short)" ]]; then
+		git add --all
+		git commit -m "$MSG"
+		git push
+	else
+		echo "NOTICE: No Changes!"
+	fi
+
+	cd "$DIR"
+}
+
+if [[ -z "$1" ]]; then
 	echo "ERROR: You must specify a commit message!"
 	exit 1
 fi
 
-if [ -z "$(git status --short)" ]; then
-	echo "NOTICE: There are no changes to commit!"
+git_state
+if [[ "$?" -eq "1" ]]; then
+	echo "ERROR: The remote repo has changes not yet merged!"
+	exit 1
+elif [[ "$?" -eq "-1" ]]; then
+	exit 1
+fi
+
+DIR=`dirname $0`
+DIR=`realpath $DIR`
+HASH=`git rev-parse --short HEAD`
+MSG="HPS $HASH: $1"
+
+# for PATH in `cat .gitmodules | grep "path = " | cut -d' ' -f3`; do
+#	commit_submodule "${PATH}"
+# done
+
+commit_submodule "module/AmeliaPluginsLib"
+
+exit 0
+
+if [[ -z "$(git status --short)" ]]; then
+	echo "There are no changes to commit!"
 else
-	DIR=`dirname $0`
-	DIR=`realpath $DIR`
-	HASH=`git rev-parse --short HEAD`
-
-	cd "$DIR/modules/AmeliaCommonLib"
-	echo "Submodule: $(pwd)"
-
-	if [ -n "$(git status --short)" ]; then
-		git add --all
-		git commit -m "HPS $HASH: $1"
-		git push
-	else
-		echo "NOTICE: No Changes!"
-	fi
-
-	cd "$DIR/modules/AmeliaStorageLib"
-	echo "Submodule: $(pwd)"
-
-	if [ -n "$(git status --short)" ]; then
-		git add --all
-		git commit -m "HPS $HASH: $1"
-		git push
-	else
-		echo "NOTICE: No Changes!"
-	fi
-
-	cd "$DIR/modules/AmeliaScriptingLib"
-	echo "Submodule: $(pwd)"
-
-	if [ -n "$(git status --short)" ]; then
-		git add --all
-		git commit -m "HPS $HASH: $1"
-		git push
-	else
-		echo "NOTICE: No Changes!"
-	fi
-
-	cd "$DIR/modules/AmeliaEventsLib"
-	echo "Submodule: $(pwd)"
-
-	if [ -n "$(git status --short)" ]; then
-		git add --all
-		git commit -m "HPS $HASH: $1"
-		git push
-	else
-		echo "NOTICE: No Changes!"
-	fi
-
-	cd "$DIR/modules/AmeliaLogLib"
-	echo "Submodule: $(pwd)"
-
-	if [ -n "$(git status --short)" ]; then
-		git add --all
-		git commit -m "HPS $HASH: $1"
-		git push
-	else
-		echo "NOTICE: No Changes!"
-	fi
-
-        cd "$DIR/modules/AmeliaNetworkingLib"
-        echo "Submodule: $(pwd)"
-
-        if [ -n "$(git status --short)" ]; then
-                git add --all
-                git commit -m "HPS $HASH: $1"
-                git push
-        else
-                echo "NOTICE: No Changes!"
-        fi
-
-        cd "$DIR/modules/AmeliaUsersLib"
-        echo "Submodule: $(pwd)"
-
-        if [ -n "$(git status --short)" ]; then
-                git add --all
-                git commit -m "HPS $HASH: $1"
-                git push
-        else
-                echo "NOTICE: No Changes!"
-        fi
-
 	cd "$DIR"
 	echo "Root Repository: $(pwd)"
 
-	git add --all
-	git commit -m "$1"
-	git push
+#	git add --all
+#	git commit -m "$1"
+#	git push
 
-	echo "MSG: Finished!"
+	echo "Finished!"
 fi
 
 exit 0

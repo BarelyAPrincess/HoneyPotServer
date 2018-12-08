@@ -10,8 +10,11 @@
 package io.amelia;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Paths;
 
 import io.amelia.data.parcel.ParcelCarrier;
+import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Foundation;
@@ -20,14 +23,21 @@ import io.amelia.foundation.NetworkedApplication;
 import io.amelia.foundation.PropDevMeta;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ParcelException;
+import io.amelia.lang.StorageException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
 import io.amelia.networking.NetworkLoader;
+import io.amelia.storage.HoneyStorage;
+import io.amelia.storage.HoneyStorageProvider;
+import io.amelia.storage.backend.FileStorageBackend;
+import io.amelia.storage.backend.StorageBackend;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
+import io.amelia.support.NodePath;
 import io.amelia.support.Runlevel;
+import io.amelia.support.Streams;
 import io.amelia.support.Sys;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -126,6 +136,21 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		}
 	}
 
+	protected void parse() throws Exception
+	{
+		Streams.forEachWithException( ConfigRegistry.config.getChild( HoneyUsers.ConfigKeys.CREATORS ).getChildren(), child -> {
+			URI userCreatorPath = URI.create( ConfigRegistry.config.getString( "path" ).orElseThrow( () -> new StorageException.Error( "Malformed user creator configuration. {backend=" + child.getCurrentPath() + "}" ) ) );
+			StorageBackend storageBackend;
+
+			if ( HoneyStorageProvider.SCHEME.equals( userCreatorPath.getScheme() ) )
+				storageBackend = HoneyStorage.getBackend( NodePath.of( userCreatorPath.getPath() ) ).orElseThrow( () -> new StorageException.Error( "The user creator " + userCreatorPath + " was not found." ) );
+			else
+				storageBackend = new FileStorageBackend( Paths.get( userCreatorPath ) );
+
+			HoneyUsers.addCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
+		} );
+	}
+
 	@Override
 	public void sendToAll( ParcelCarrier parcel )
 	{
@@ -149,11 +174,11 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		 * Specifies a config key for disabling a application metrics.
 		 *
 		 * <pre>
-		 * app:
+		 * foundation:
 		 *   disableMetrics: false
 		 * </pre>
 		 */
-		public static final String DISABLE_METRICS = "app.disableMetrics";
+		public static final String DISABLE_METRICS = "foundation.disableMetrics";
 
 		private ConfigKeys()
 		{

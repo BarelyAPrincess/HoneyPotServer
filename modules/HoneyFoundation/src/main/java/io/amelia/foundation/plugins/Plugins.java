@@ -29,9 +29,11 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
+import io.amelia.events.EventHandlers;
+import io.amelia.events.EventPriority;
+import io.amelia.events.Events;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
-import io.amelia.foundation.events.EventHandlers;
 import io.amelia.foundation.events.EventPriority;
 import io.amelia.foundation.events.Events;
 import io.amelia.foundation.events.RunlevelEvent;

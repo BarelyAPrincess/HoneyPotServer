@@ -17,7 +17,9 @@ import javax.annotation.Nullable;
 
 import io.amelia.data.TypeBase;
 import io.amelia.events.Events;
+import io.amelia.foundation.bindings.Bindings;
 import io.amelia.foundation.bindings.FacadeRegistration;
+import io.amelia.foundation.bindings.FoundationBindingResolver;
 import io.amelia.foundation.events.RunlevelEvent;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
@@ -62,7 +64,7 @@ public final class Foundation
 
 	static
 	{
-		Kernel.setLogHandler( new ImplLogHandler()
+		Kernel.setLogHandler( new LogHandler()
 		{
 			@Override
 			public void log( Level level, Class<?> source, String message, Object... args )
@@ -77,7 +79,7 @@ public final class Foundation
 			}
 		} );
 
-		Kernel.setImplUtils( new ImplUtils()
+		Kernel.setKernelHandler( new KernelHandler()
 		{
 			@Override
 			public boolean isPrimaryThread()
@@ -96,29 +98,6 @@ public final class Foundation
 		return ( T ) app;
 	}
 
-	/**
-	 * Sets an instance of ApplicationInterface for use by the Kernel
-	 *
-	 * @param app The ApplicationInterface instance
-	 */
-	public static void setApplication( @Nonnull ApplicationInterface app ) throws ApplicationException.Error
-	{
-		if ( isRunlevel( Runlevel.DISPOSED ) )
-			throw ApplicationException.error( "The application has been DISPOSED!" );
-		if ( Foundation.app != null )
-			throw ApplicationException.error( "The application instance has already been set!" );
-
-		LooperRouter.setMainLooper( new FoundationLooper( app ) );
-		Kernel.setExceptionRegistrar( app );
-
-		Foundation.app = app;
-
-		if ( !app.hasArgument( "no-banner" ) )
-			app.showBanner( L );
-
-		L.info( "Application Instance Identity: " + app.getId() );
-	}
-
 	public static String getCurrentRunlevelReason()
 	{
 		return currentRunlevelReason;
@@ -134,14 +113,9 @@ public final class Foundation
 		return currentRunlevel;
 	}
 
-	public static void setRunlevel( @Nonnull Runlevel level )
-	{
-		setRunlevel( level, null );
-	}
-
 	public static boolean isPrimaryThread()
 	{
-		// If app has yet to be set, then it's anyone's guess which thread is primary and were not willing to take that risk. :(
+		// If foundation has yet to be set, then it's anyone's guess which thread is primary and were not willing to take that risk. :(
 		return app == null || app.isPrimaryThread();
 	}
 
@@ -162,8 +136,8 @@ public final class Foundation
 		// Internal runlevel changes happen after this point. Generally progressing the application from each runlevel to the next.
 
 		// TODO Register Foundation Resolver at STARTUP
-		// if ( currentRunlevel == Runlevel.STARTUP )
-		// Bindings.registerResolver( "io.amelia", new FoundationBindingResolver() );
+		if ( currentRunlevel == Runlevel.STARTUP )
+			Bindings.registerResolver( "io.amelia", new FoundationBindingResolver() );
 
 		// Indicates the application has begun the main loop
 		if ( currentRunlevel == Runlevel.MAINLOOP )
@@ -266,6 +240,34 @@ public final class Foundation
 	}
 
 	/**
+	 * Sets an instance of ApplicationInterface for use by the Kernel
+	 *
+	 * @param app The ApplicationInterface instance
+	 */
+	public static void setApplication( @Nonnull ApplicationInterface app ) throws ApplicationException.Error
+	{
+		if ( isRunlevel( Runlevel.DISPOSED ) )
+			throw ApplicationException.error( "The application has been DISPOSED!" );
+		if ( Foundation.app != null )
+			throw ApplicationException.error( "The application instance has already been set!" );
+
+		LooperRouter.setMainLooper( new FoundationLooper( app ) );
+		Kernel.setExceptionRegistrar( app );
+
+		Foundation.app = app;
+
+		if ( !app.hasArgument( "no-banner" ) )
+			app.showBanner( L );
+
+		L.info( "Application Instance Identity: " + app.getId() );
+	}
+
+	public static void setRunlevel( @Nonnull Runlevel level )
+	{
+		setRunlevel( level, null );
+	}
+
+	/**
 	 * Systematically changes the application runlevel.
 	 * If this method is called by the application main thread, the change is made immediate.
 	 */
@@ -273,7 +275,7 @@ public final class Foundation
 	{
 		Objs.notNull( level );
 		MainLooper mainLooper = LooperRouter.getMainLooper();
-		// If we confirm that the current thread is the one used by the ApplicationLooper, we make the runlevel change immediate instead of posting it for later.
+		// If we confirm that the current thread is the same one that run the Looper, we make the runlevel change immediate instead of posting it for later.
 		if ( !mainLooper.isThreadJoined() && app.isPrimaryThread() || mainLooper.isHeldByCurrentThread() )
 			setRunlevel0( level, reason );
 		else
@@ -285,7 +287,7 @@ public final class Foundation
 		try
 		{
 			if ( LooperRouter.getMainLooper().isThreadJoined() && !LooperRouter.getMainLooper().isHeldByCurrentThread() )
-				throw ApplicationException.error( "Runlevel can only be set from the application looper thread. Be more careful next time." );
+				throw ApplicationException.error( "Runlevel can only be set from the main looper thread. Be more careful next time." );
 			if ( currentRunlevel == runlevel )
 				throw ApplicationException.error( "Runlevel is already set to " + runlevel.name() + ". This might be a severe race bug." );
 			if ( !runlevel.checkRunlevelOrder( currentRunlevel ) )
@@ -296,13 +298,13 @@ public final class Foundation
 				String instanceId = getApplication().getEnv().getString( "instance-id" ).orElse( null );
 
 				if ( runlevel == Runlevel.RELOAD )
-					reason = String.format( "Server %s is restarting. Be back soon. :D", instanceId );
+					reason = String.format( "Server %s is reloading. Be back soon. :D", instanceId );
 				else if ( runlevel == Runlevel.CRASHED )
 					reason = String.format( "Server %s has crashed. Sorry about that. :(", instanceId );
 				else if ( runlevel == Runlevel.SHUTDOWN )
-					reason = String.format( "Server %s is shutting down. Good bye. :|", instanceId );
+					reason = String.format( "Server %s is shutting down. Good bye! :|", instanceId );
 				else
-					reason = "No reason was provided.";
+					reason = "No reason provided.";
 			}
 
 			Timing.start( runlevelTimingObject );
@@ -403,7 +405,7 @@ public final class Foundation
 		 * Specifies a config key for disabling a application metrics.
 		 *
 		 * <pre>
-		 * app:
+		 * foundation:
 		 *   disableMetrics: false
 		 * </pre>
 		 */

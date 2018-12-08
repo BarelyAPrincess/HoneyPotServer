@@ -11,9 +11,6 @@ package io.amelia.foundation.bindings;
 
 import io.amelia.foundation.ApplicationInterface;
 import io.amelia.foundation.Foundation;
-import io.amelia.foundation.bindings.BindingResolver;
-import io.amelia.foundation.bindings.DynamicBinding;
-import io.amelia.foundation.bindings.ProvidesBinding;
 import io.amelia.foundation.plugins.Plugins;
 
 public class FoundationBindingResolver extends BindingResolver
@@ -35,7 +32,7 @@ public class FoundationBindingResolver extends BindingResolver
 	}
 
 	@DynamicBinding
-	public ApplicationInterface router()
+	public ApplicationInterface app()
 	{
 		return Foundation.getApplication();
 	}

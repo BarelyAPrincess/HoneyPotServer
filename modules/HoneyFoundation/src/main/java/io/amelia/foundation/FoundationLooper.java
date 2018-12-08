@@ -39,17 +39,22 @@ public class FoundationLooper extends MainLooper
 	public boolean isPermitted( EntryAbstract entry )
 	{
 		if ( Foundation.getRunlevel().intValue() < Runlevel.MAINLOOP.intValue() && entry instanceof TaskEntry )
-			throw new ApplicationException.Runtime( entry.getClass().getSimpleName() + " can only be posted to the Application Looper at runlevel MAINLOOP and above. Current runlevel is " + Foundation.getRunlevel() );
+			throw new ApplicationException.Runtime( entry.getClass().getSimpleName() + " can only be posted to the FoundationLooper at runlevel MAINLOOP and above. Current runlevel is " + Foundation.getRunlevel() );
 
 		// TODO Check known built-in AbstractEntry sub-classes.
 		return true;
 	}
 
+	protected boolean canQuit()
+	{
+		return Foundation.getRunlevel().intValue() <= 100;
+	}
+
 	@Override
 	protected void quit( boolean removePendingMessages )
 	{
-		if ( Foundation.getRunlevel().intValue() > 100 )
-			throw ApplicationException.runtime( "Application Looper is not permitted to quit." );
+		if ( !canQuit() )
+			throw ApplicationException.runtime( "FoundationLooper is not permitted to quit." );
 
 		super.quit( removePendingMessages );
 	}
