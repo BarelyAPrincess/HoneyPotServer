@@ -48,6 +48,10 @@ commit_submodule () {
 		return
 	fi
 
+	if [[ ! -d "$DIR/$1" ]]; then
+		echo "Fatal: directory $DIR/$1 does not exist!"
+	fi
+
 	cd "$DIR/$1"
 	echo "Committing Submodule: $1"
 
