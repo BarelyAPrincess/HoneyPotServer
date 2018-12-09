@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # A bash helper script for committing submodule code before also committing the root repository.
 # This script will commit all changes, to stage individual changes -- don't use this script!
@@ -49,16 +49,18 @@ commit_submodule () {
 	fi
 
 	if [[ ! -d "$DIR/$1" ]]; then
-		echo "Fatal: directory $DIR/$1 does not exist!"
+		echo "Fatal: directory '$DIR/$1' does not exist!"
+		exit 1
 	fi
 
 	cd "$DIR/$1"
-	echo "Committing Submodule: $1"
+	echo "Now Committing Submodule $1"
 
 	git_state
-	if [[ "$?" -eq "1" ]]; then
+	STATE=$?
+	if [[ "$STATE" -eq "1" ]]; then
 		commit_submodule_merge
-	elif [[ "$?" -eq "-1" ]]; then
+	elif [[ "$STATE" -eq "-1" ]]; then
 		exit 1
 	fi
 
@@ -66,8 +68,10 @@ commit_submodule () {
 		git add --all
 		git commit -m "$MSG"
 		git push
+	elif [[ "$STATE" -eq "2" ]]; then
+		git push
 	else
-		echo "NOTICE: No Changes!"
+		echo "Nothing to Commit!"
 	fi
 
 	cd "$DIR"
@@ -89,15 +93,11 @@ fi
 DIR=`dirname $0`
 DIR=`realpath $DIR`
 HASH=`git rev-parse --short HEAD`
-MSG="HPS $HASH: $1"
+MSG="$(basename $(pwd)) $HASH: $1"
 
-# for PATH in `cat .gitmodules | grep "path = " | cut -d' ' -f3`; do
-#	commit_submodule "${PATH}"
-# done
-
-commit_submodule "module/AmeliaPluginsLib"
-
-exit 0
+for MOD in `cat .gitmodules | grep "path = " | cut -d' ' -f3`; do
+	commit_submodule "${MOD}"
+done
 
 if [[ -z "$(git status --short)" ]]; then
 	echo "There are no changes to commit!"
@@ -105,9 +105,9 @@ else
 	cd "$DIR"
 	echo "Root Repository: $(pwd)"
 
-#	git add --all
-#	git commit -m "$1"
-#	git push
+	git add --all
+	git commit -m "$1"
+	git push
 
 	echo "Finished!"
 fi
