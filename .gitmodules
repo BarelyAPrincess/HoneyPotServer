@@ -10,10 +10,6 @@
 	path = modules/AmeliaCommonLib
 	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
 	branch = common
-[submodule "AmeliaEventsLib"]
-	path = modules/AmeliaEventsLib
-	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git
-	branch = events
 [submodule "AmeliaLogLib"]
 	path = modules/AmeliaLogLib
 	url = git@github.com:TheAmeliaDeWitt/AmeliaLib.git

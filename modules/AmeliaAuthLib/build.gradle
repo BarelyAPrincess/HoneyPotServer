@@ -16,7 +16,6 @@ dependencies {
 	}
 
 	compile project( ":AmeliaLibCommon" )
-	compile project( ':HoneyFoundation' )
 
 	testCompile 'org.hamcrest:hamcrest-library:1.3'
 }

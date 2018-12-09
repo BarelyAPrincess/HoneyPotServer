@@ -22,7 +22,7 @@ public class EntryPoint
 {
 	public static void main( String... args ) throws Exception
 	{
-		/* Specify the ApplicationInterface for this environment. */
+		/* Specify the BaseApplication for this environment. */
 		HoneyPotServer app = new HoneyPotServer();
 
 		try

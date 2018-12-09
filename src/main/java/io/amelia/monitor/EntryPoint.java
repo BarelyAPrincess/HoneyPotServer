@@ -29,7 +29,7 @@ public class EntryPoint
 		// Prepare the environment by downloading and applying the builtin libraries required
 		Foundation.prepare();
 
-		// Specify the ApplicationInterface for this environment.
+		// Specify the BaseApplication for this environment.
 		MinimalApplication app = new MinimalApplication();
 		Foundation.setApplication( app );
 
