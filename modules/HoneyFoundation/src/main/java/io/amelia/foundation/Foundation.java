@@ -15,12 +15,9 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.amelia.data.TypeBase;
-import io.amelia.events.Events;
 import io.amelia.foundation.bindings.Bindings;
-import io.amelia.foundation.bindings.FacadeRegistration;
 import io.amelia.foundation.bindings.FoundationBindingResolver;
-import io.amelia.foundation.events.RunlevelEvent;
+import io.amelia.foundation.facade.Events;
 import io.amelia.injection.Libraries;
 import io.amelia.injection.MavenReference;
 import io.amelia.lang.ApplicationException;
@@ -30,11 +27,11 @@ import io.amelia.logcompat.LogBuilder;
 import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
 import io.amelia.looper.MainLooper;
+import io.amelia.plugins.events.RunlevelEvent;
 import io.amelia.support.EnumColor;
 import io.amelia.support.Exceptions;
 import io.amelia.support.IO;
 import io.amelia.support.Objs;
-import io.amelia.support.Runlevel;
 import io.amelia.support.Strs;
 import io.amelia.support.Timing;
 
@@ -257,7 +254,7 @@ public final class Foundation
 		Foundation.app = app;
 
 		if ( !app.hasArgument( "no-banner" ) )
-			app.showBanner( L );
+			app.showBanner( Kernel.L );
 
 		L.info( "Application Instance Identity: " + app.getId() );
 	}
@@ -361,7 +358,7 @@ public final class Foundation
 		// Initiate startup procedures.
 		setRunlevel( Runlevel.STARTUP );
 
-		if ( !ConfigRegistry.config.getValue( ConfigKeys.DISABLE_METRICS ) )
+		if ( !ConfigRegistry.config.getValue( Kernel.ConfigKeys.DISABLE_METRICS ) )
 		{
 			// TODO Implement!
 
@@ -380,40 +377,5 @@ public final class Foundation
 	private Foundation()
 	{
 		// Static Access
-	}
-
-	public static class ConfigKeys
-	{
-		/**
-		 * Specifies built-in facades which can be registered here or by calling {@link io.amelia.foundation.bindings.FacadeRegistration#add(FacadeRegistration.Entry)} {@see Bindings#bindNamespace(String)}}.
-		 * Benefits of using configuration for facade registration is it adds the ability for end-users to disable select facades, however, this should be used if the facade is used by scripts.
-		 *
-		 * <pre>
-		 * bindings:
-		 *   facades:
-		 *     permissions:
-		 *       class:io.amelia.foundation.facades.PermissionsService
-		 *       priority: NORMAL
-		 *     events:
-		 *       class: io.amelia.foundation.facades.EventService
-		 *       priority: NORMAL
-		 * </pre>
-		 */
-		public static final TypeBase BINDINGS_FACADES = new TypeBase( "bindings.facades" );
-
-		/**
-		 * Specifies a config key for disabling a application metrics.
-		 *
-		 * <pre>
-		 * foundation:
-		 *   disableMetrics: false
-		 * </pre>
-		 */
-		public static final TypeBase.TypeBoolean DISABLE_METRICS = new TypeBase.TypeBoolean( ConfigRegistry.ConfigKeys.APPLICATION_BASE, "disableMetrics", false );
-
-		private ConfigKeys()
-		{
-			// Static Access
-		}
 	}
 }

@@ -36,16 +36,16 @@ import io.amelia.storage.backend.StorageBackend;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.NodePath;
-import io.amelia.support.Runlevel;
+import io.amelia.foundation.Runlevel;
 import io.amelia.support.Streams;
 import io.amelia.support.Sys;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
-import static io.amelia.support.Runlevel.INITIALIZATION;
-import static io.amelia.support.Runlevel.MAINLOOP;
-import static io.amelia.support.Runlevel.NETWORKING;
-import static io.amelia.support.Runlevel.SHUTDOWN;
+import static io.amelia.foundation.Runlevel.INITIALIZATION;
+import static io.amelia.foundation.Runlevel.MAINLOOP;
+import static io.amelia.foundation.Runlevel.NETWORKING;
+import static io.amelia.foundation.Runlevel.SHUTDOWN;
 
 public class HoneyPotServer extends DefaultApplication implements NetworkedApplication
 {

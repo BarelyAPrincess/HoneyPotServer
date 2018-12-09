@@ -13,7 +13,6 @@ import io.amelia.data.parcel.ParcelReceiver;
 import io.amelia.lang.ApplicationException;
 import io.amelia.looper.MainLooper;
 import io.amelia.looper.queue.EntryAbstract;
-import io.amelia.support.Runlevel;
 
 public class FoundationLooper extends MainLooper
 {
