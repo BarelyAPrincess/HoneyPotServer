@@ -21,14 +21,17 @@ import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.NetworkedApplication;
 import io.amelia.foundation.PropDevMeta;
+import io.amelia.foundation.Runlevel;
+import io.amelia.bindings.BindingsException;
+import io.amelia.bindings.Bindings;
 import io.amelia.lang.ApplicationException;
 import io.amelia.lang.ParcelException;
 import io.amelia.lang.StorageException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
-import io.amelia.logcompat.Logger;
 import io.amelia.looper.LooperRouter;
 import io.amelia.networking.NetworkLoader;
+import io.amelia.plugins.AmeliaPlugins;
 import io.amelia.storage.HoneyStorage;
 import io.amelia.storage.HoneyStorageProvider;
 import io.amelia.storage.backend.FileStorageBackend;
@@ -36,9 +39,9 @@ import io.amelia.storage.backend.StorageBackend;
 import io.amelia.support.EnumColor;
 import io.amelia.support.IO;
 import io.amelia.support.NodePath;
-import io.amelia.foundation.Runlevel;
 import io.amelia.support.Streams;
 import io.amelia.support.Sys;
+import io.amelia.users.HoneyUsers;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
@@ -136,6 +139,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		}
 	}
 
+	@Override
 	protected void parse() throws Exception
 	{
 		Streams.forEachWithException( ConfigRegistry.config.getChild( HoneyUsers.ConfigKeys.CREATORS ).getChildren(), child -> {
@@ -151,6 +155,19 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		} );
 	}
 
+	public AmeliaPlugins plugins()
+	{
+		try
+		{
+			return Bindings.resolveClassOrFail( AmeliaPlugins.class );
+		}
+		catch ( BindingsException.Error e )
+		{
+			Kernel.getExceptionRegistrar().fatalError( e.getExceptionReport(), true );
+			return null;
+		}
+	}
+
 	@Override
 	public void sendToAll( ParcelCarrier parcel )
 	{
@@ -158,7 +175,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 	}
 
 	@Override
-	public void showBanner( Logger logger )
+	public void showBanner( Kernel.Logger logger )
 	{
 		InputStream is = getClass().getClassLoader().getResourceAsStream( "banner.txt" );
 		if ( is != null )

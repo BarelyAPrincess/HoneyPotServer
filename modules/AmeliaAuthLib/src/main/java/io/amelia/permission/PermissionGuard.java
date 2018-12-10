@@ -14,7 +14,7 @@ import io.amelia.foundation.events.EventDispatcher;
 import io.amelia.foundation.events.EventHandler;
 import io.amelia.foundation.events.EventPriority;
 import io.amelia.foundation.RegistrarBase;
-import io.amelia.foundation.bindings.AppBindings;
+import io.amelia.bindings.AppBindings;
 import io.amelia.foundation.facades.interfaces.PermissionService;
 import io.amelia.foundation.service.IPermission;
 import io.amelia.foundation.service.IWhitelist;

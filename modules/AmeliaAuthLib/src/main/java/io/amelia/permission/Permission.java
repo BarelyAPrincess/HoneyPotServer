@@ -9,7 +9,7 @@
  */
 package io.amelia.permission;
 
-import io.amelia.foundation.bindings.BindingReference;
+import io.amelia.bindings.BindingReference;
 import io.amelia.lang.EnumColor;
 import io.amelia.support.Strs;
 
