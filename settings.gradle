@@ -1,7 +1,8 @@
-include ':AmeliaCommonLib', ":AmeliaAppLib", ':AmeliaScriptingLib', ':AmeliaStorageLib', ':AmeliaPluginsLib', ':AmeliaLogLib', ':AmeliaNetworkingLib', ':AmeliaUsersLib'
+include ':AmeliaCommonLib', ":AmeliaAppLib", ':AmeliaPermissionsLib', ':AmeliaScriptingLib', ':AmeliaStorageLib', ':AmeliaPluginsLib', ':AmeliaLogLib', ':AmeliaNetworkingLib', ':AmeliaUsersLib'
 
 project( ':AmeliaCommonLib' ).projectDir = new File( 'modules/AmeliaCommonLib' )
 project( ':AmeliaAppLib' ).projectDir = new File( 'modules/AmeliaAppLib' )
+project( ':AmeliaPermissionsLib' ).projectDir = new File( 'modules/AmeliaPermissionsLib' )
 project( ':AmeliaScriptingLib' ).projectDir = new File( 'modules/AmeliaScriptingLib' )
 project( ':AmeliaStorageLib' ).projectDir = new File( 'modules/AmeliaStorageLib' )
 project( ':AmeliaPluginsLib' ).projectDir = new File( 'modules/AmeliaPluginsLib' );

@@ -10,6 +10,7 @@
 package io.amelia.main;
 
 import io.amelia.HoneyPotServer;
+import io.amelia.events.Events;
 import io.amelia.events.RunlevelEvent;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Runlevel;
@@ -42,7 +43,7 @@ public class EntryPoint
 		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP();
 
-		app.events().listen( app, RunlevelEvent.class, ( event ) -> {
+		Events.getInstance().listen( app, RunlevelEvent.class, ( event ) -> {
 			// Start the Networking
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{

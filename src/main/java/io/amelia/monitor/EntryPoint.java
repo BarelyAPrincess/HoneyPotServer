@@ -9,6 +9,7 @@
  */
 package io.amelia.monitor;
 
+import io.amelia.events.Events;
 import io.amelia.events.RunlevelEvent;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.MinimalApplication;
@@ -41,7 +42,7 @@ public class EntryPoint
 		// Load up Network UDP Driver
 		final UDPWorker udp = NetworkLoader.UDP();
 
-		Foundation.getApplication().events().listen( app, RunlevelEvent.class, ( event ) -> {
+		Events.getInstance().listen( app, RunlevelEvent.class, ( event ) -> {
 			if ( event.getRunLevel() == Runlevel.MAINLOOP )
 			{
 				try

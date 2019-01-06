@@ -67,8 +67,8 @@ allprojects {
 		           '**/banner.txt',
 		           '**/config.yaml'] )
 		ext.year = Calendar.getInstance().get( Calendar.YEAR )
-		ext.name = 'Amelia DeWitt'
-		ext.email = 'me@ameliadewitt.com'
+		ext.name = 'Amelia Sara Greene'
+		ext.email = 'barelyaprincess@gmail.com'
 	}
 
 	checkstyle {
@@ -328,7 +328,7 @@ task writePropertiesFile {
 	}
 }
 
-task wrapper( type: Wrapper ) {gradleVersion = '3.3'}
+task wrapper( type: Wrapper ) {gradleVersion = '4.10'}
 
 build.dependsOn writeDependenciesFile
 jar.dependsOn writePropertiesFile
