@@ -15,8 +15,8 @@ import io.amelia.events.RunlevelEvent;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Runlevel;
 import io.amelia.lang.StartupInterruptException;
-import io.amelia.networking.NetworkLoader;
-import io.amelia.networking.udp.UDPWorker;
+import io.amelia.net.NetworkLoader;
+import io.amelia.net.udp.UDPWorker;
 
 public class EntryPoint
 {

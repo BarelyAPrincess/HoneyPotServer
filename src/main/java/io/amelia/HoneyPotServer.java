@@ -29,7 +29,7 @@ import io.amelia.lang.StorageException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.looper.LooperRouter;
-import io.amelia.networking.NetworkLoader;
+import io.amelia.net.NetworkLoader;
 import io.amelia.plugins.BasePlugins;
 import io.amelia.storage.HoneyStorage;
 import io.amelia.storage.HoneyStorageProvider;

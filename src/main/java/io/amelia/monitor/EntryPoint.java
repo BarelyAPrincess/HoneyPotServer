@@ -18,9 +18,9 @@ import io.amelia.lang.ApplicationException;
 import io.amelia.lang.NetworkException;
 import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
-import io.amelia.networking.NetworkLoader;
-import io.amelia.networking.ipc.IPC;
-import io.amelia.networking.udp.UDPWorker;
+import io.amelia.net.NetworkLoader;
+import io.amelia.net.ipc.IPC;
+import io.amelia.net.udp.UDPWorker;
 
 public class EntryPoint
 {
