@@ -2,8 +2,8 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  * <p>
- * Copyright (c) 2018 Amelia Sara Greene <barelyaprincess@gmail.com>
- * Copyright (c) 2018 Penoaks Publishing LLC <development@penoaks.com>
+ * Copyright (c) 2019 Amelia Sara Greene <barelyaprincess@gmail.com>
+ * Copyright (c) 2019 Penoaks Publishing LLC <development@penoaks.com>
  * <p>
  * All Rights Reserved.
  */
@@ -29,8 +29,8 @@ import io.amelia.lang.StorageException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.looper.LooperRouter;
-import io.amelia.net.NetworkLoader;
-import io.amelia.plugins.BasePlugins;
+import io.amelia.net.wip.NetworkLoader;
+import io.amelia.plugins.Plugins;
 import io.amelia.storage.HoneyStorage;
 import io.amelia.storage.HoneyStorageProvider;
 import io.amelia.storage.backend.FileStorageBackend;
@@ -149,13 +149,13 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			else
 				storageBackend = new FileStorageBackend( Paths.get( userCreatorPath ) );
 
-			Foundation.getUsers().addUserCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
+			// Foundation.getUsers().addUserCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
 		} );
 	}
 
-	public BasePlugins plugins()
+	public Plugins plugins()
 	{
-		return Bindings.resolveClass( BasePlugins.class ).orElseHandleCause( e -> Kernel.getExceptionRegistrar().fatalError( e.getExceptionReport(), true ), () -> null );
+		return Bindings.resolveClass( Plugins.class ).orElseHandleCause( e -> Kernel.getExceptionRegistrar().fatalError( e.getExceptionReport(), true ), () -> null );
 	}
 
 	@Override
