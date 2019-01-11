@@ -98,8 +98,11 @@ allprojects {
 	jar.dependsOn dependenyBundler
 }
 
+def rootDir = rootProject.rootDir
+
 subprojects {
-	libsDirName = '../../../build/dist'
+	buildDir = new File( rootDir, '/build/' )
+	libsDirName = new File( rootDir, '/build/dist/' )
 	artifacts {archives jar}
 }
 
@@ -315,7 +318,7 @@ task writePropertiesFile {
 		props.load( new FileInputStream( file( "src/main/resources/build.properties" ) ) )
 		props.setProperty( "project.builtOn", sdf.format( new Date() ) )
 		props.setProperty( "project.build", buildNumber )
-		props.setProperty( "project.version", version )
+		props.setProperty( "project.version", version.toString() )
 
 		File f2 = file( "build/dist/build.properties" )
 		File f3 = file( "build/resources/main/build.properties" )

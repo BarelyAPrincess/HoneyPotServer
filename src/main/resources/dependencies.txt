@@ -13,6 +13,7 @@ mysql:mysql-connector-java:5.1.35
 org.xerial:sqlite-jdbc:3.8.11.2
 com.h2database:h2:1.4.187
 io.netty:netty-buffer:4.1.24.Final
+org.slf4j:slf4j-simple:1.7.25
 io.netty:netty-all:4.1.24.Final
 org.bouncycastle:bcprov-jdk15on:1.53
 org.codehaus.groovy:groovy-all:2.4.9

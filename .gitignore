@@ -8,6 +8,7 @@
 /.idea/
 /.env
 /.gradle
+/workspace
 
 /build/
 /**/build/

@@ -12,6 +12,7 @@ package io.amelia;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.logging.Level;
 
 import io.amelia.bindings.Bindings;
 import io.amelia.data.parcel.ParcelCarrier;
@@ -20,6 +21,7 @@ import io.amelia.foundation.DefaultApplication;
 import io.amelia.foundation.Env;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
+import io.amelia.foundation.LogHandler;
 import io.amelia.foundation.NetworkedApplication;
 import io.amelia.foundation.PropDevMeta;
 import io.amelia.foundation.Runlevel;
@@ -92,13 +94,34 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 
 			// Minimum 1GB memory recommended.
 			if ( Runtime.getRuntime().maxMemory() / 1024L / 1024L < 1024L )
-				LogBuilder.get().warning( "We detected less than the recommended 1024Mb of JVM ram, we recommended you dedicate more ram to guarantee a smoother experience. You can use the JVM options \"-Xmx1024M -Xms1024M\" to set the ram at 1GB." );
+				Kernel.L.warning( "We detected less than the recommended 1024Mb of JVM ram, we recommended you dedicate more ram to guarantee a smoother experience. You can use the JVM options \"-Xmx1024M -Xms1024M\" to set the ram at 1GB." );
 
 			try
 			{
 				Env env = getEnv();
 
 				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ).orElse( true ) ) );
+				Kernel.setLogHandler( new LogHandler()
+				{
+					@Override
+					public void log( Level level, Class<?> source, String message, Object... args )
+					{
+						LogBuilder.get( source ).log( level, message, args );
+					}
+
+					@Override
+					public void log( Level level, Class<?> source, Throwable cause )
+					{
+						LogBuilder.get( source ).log( level, cause );
+					}
+
+					@Override
+					public void log( Level level, Class<?> source, Throwable cause, String message, Object... args )
+					{
+						LogBuilder.get( source ).log( level, cause, message, args );
+					}
+				} );
+
 			}
 			catch ( Exception e )
 			{
@@ -121,15 +144,14 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			LooperRouter.getMainLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
 		if ( currentRunlevel == SHUTDOWN )
 		{
+			Kernel.L.info( "Shutting Down Plugin Manager..." );
+			Foundation.getPlugins().shutdown();
 
-			// LogBuilder.get().info( "Shutting Down Plugin Manager..." );
-			// PluginManager.shutdown();
+			// Kernel.L.info( "Shutting Down Permission Manager..." );
+			// Foundation.getPermissions().shutdown();
 
-			// LogBuilder.get().info( "Shutting Down Permission Manager..." );
-			// PermissionDispatcher.shutdown();
-
-			// LogBuilder.get().info( "Shutting Down Account Manager..." );
-			// AccountManager.shutdown();
+			// Kernel.L.info( "Shutting Down Account Manager..." );
+			// Foundation.getUsers().shutdown();
 		}
 		if ( currentRunlevel == NETWORKING )
 		{
@@ -147,7 +169,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			if ( HoneyStorageProvider.SCHEME.equals( userCreatorPath.getScheme() ) )
 				storageBackend = HoneyStorage.getBackend( NodePath.of( userCreatorPath.getPath() ) ).orElseThrow( () -> new StorageException.Error( "The user creator " + userCreatorPath + " was not found." ) );
 			else
-				storageBackend = new FileStorageBackend( Paths.get( userCreatorPath ) );
+				storageBackend = new FileStorageBackend( Paths.get( userCreatorPath ), NodePath.empty() );
 
 			// Foundation.getUsers().addUserCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
 		} );
@@ -170,7 +192,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		InputStream is = getClass().getClassLoader().getResourceAsStream( "banner.txt" );
 		if ( is != null )
 			for ( String line : IO.readStreamToLines( is ) )
-				LogBuilder.get().info( EnumColor.GOLD + line );
+				logger.info( EnumColor.GOLD + line );
 
 		super.showBanner( logger );
 	}
