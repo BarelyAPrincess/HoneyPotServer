@@ -331,8 +331,6 @@ task writePropertiesFile {
 	}
 }
 
-task wrapper( type: Wrapper ) {gradleVersion = '4.10'}
-
 build.dependsOn writeDependenciesFile
 jar.dependsOn writePropertiesFile
 

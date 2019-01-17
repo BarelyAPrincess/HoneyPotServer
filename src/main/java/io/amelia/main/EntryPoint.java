@@ -13,40 +13,49 @@ import io.amelia.HoneyPotServer;
 import io.amelia.events.Events;
 import io.amelia.events.RunlevelEvent;
 import io.amelia.foundation.Foundation;
+import io.amelia.foundation.Kernel;
 import io.amelia.foundation.Runlevel;
+import io.amelia.lang.StartupAbortException;
+import io.amelia.lang.StartupException;
 import io.amelia.lang.StartupInterruptException;
 import io.amelia.net.wip.NetworkLoader;
 import io.amelia.net.wip.udp.UDPWorker;
+import io.amelia.support.EnumColor;
+import io.amelia.support.Timing;
 
 public class EntryPoint
 {
 	public static void main( String... args ) throws Exception
 	{
-		/* Specify the BaseApplication for this environment. */
-		HoneyPotServer app = new HoneyPotServer();
-
 		try
 		{
-			app.parse( args );
-		}
-		catch ( StartupInterruptException e )
-		{
-			// Prevent exception from being printed to console
-			return;
-		}
+			Foundation.init();
 
-		Foundation.setApplication( app );
+			/* Specify the BaseApplication for this environment. */
+			HoneyPotServer app = new HoneyPotServer();
 
-		/* Prepare the environment by downloading and applying the builtin libraries required */
-		Foundation.prepare();
-
-		// Load up Network UDP Driver
-		final UDPWorker udp = NetworkLoader.UDP();
-
-		Events.getInstance().listen( app, RunlevelEvent.class, ( event ) -> {
-			// Start the Networking
-			if ( event.getRunLevel() == Runlevel.MAINLOOP )
+			try
 			{
+				app.parse( args );
+			}
+			catch ( StartupInterruptException e )
+			{
+				// Prevent exception from being printed to console
+				return;
+			}
+
+			Foundation.setApplication( app );
+
+			/* Prepare the environment by downloading and applying builtin libraries required */
+			Foundation.prepare();
+
+			// Load up Network UDP Driver
+			final UDPWorker udp = NetworkLoader.UDP();
+
+			Events.getInstance().listen( app, RunlevelEvent.class, ( event ) -> {
+				// Start the Networking
+				if ( event.getRunLevel() == Runlevel.MAINLOOP )
+				{
 				/*try
 				{
 					udp.start();
@@ -58,16 +67,25 @@ public class EntryPoint
 
 				if ( !udp.isStarted() )
 					throw new StartupException( "The UDP service failed to start for unknown reasons." );*/
-			}
+				}
 
-			// Make sure I'm the only process with my instanceId running
-			if ( event.getRunLevel() == Runlevel.NETWORKING )
-			{
-				// new HTTPWorker();
-			}
-		} );
+				// Make sure I'm the only process with my instanceId running
+				if ( event.getRunLevel() == Runlevel.NETWORKING )
+				{
+					// new HTTPWorker();
+				}
+			} );
 
-		/* Tell the Kernel the start the startup sequence */
-		Foundation.start();
+			/* Tell the Kernel the start the startup sequence */
+			Foundation.start();
+		}
+		catch ( StartupAbortException muted )
+		{
+			// Muted since abort information is normally communicated before this point.
+		}
+		finally
+		{
+			Kernel.L.info( EnumColor.AQUA + "Application has finished and ran for a total of " + Kernel.uptimeDescribe() + "." );
+		}
 	}
 }

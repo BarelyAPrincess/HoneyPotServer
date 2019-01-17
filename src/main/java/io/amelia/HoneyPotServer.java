@@ -9,12 +9,12 @@
  */
 package io.amelia;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
-import io.amelia.bindings.Bindings;
 import io.amelia.data.parcel.ParcelCarrier;
 import io.amelia.foundation.ConfigRegistry;
 import io.amelia.foundation.DefaultApplication;
@@ -31,8 +31,8 @@ import io.amelia.lang.StorageException;
 import io.amelia.logcompat.DefaultLogFormatter;
 import io.amelia.logcompat.LogBuilder;
 import io.amelia.looper.LooperRouter;
+import io.amelia.net.Networking;
 import io.amelia.net.wip.NetworkLoader;
-import io.amelia.plugins.Plugins;
 import io.amelia.storage.HoneyStorage;
 import io.amelia.storage.HoneyStorageProvider;
 import io.amelia.storage.backend.FileStorageBackend;
@@ -67,7 +67,14 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 		Kernel.setPath( PATH_DATABASE, Kernel.PATH_APP, "database" );
 		Kernel.setPath( PATH_SESSIONS, Kernel.PATH_STORAGE, "sessions" );
 
-		Kernel.setDevMeta( new PropDevMeta( HoneyPotServer.class, "build.properties" ) );
+		try
+		{
+			Kernel.setDevMeta( new PropDevMeta( HoneyPotServer.class, "build.properties" ) );
+		}
+		catch ( IOException e )
+		{
+			throw new RuntimeException( e );
+		}
 
 		addArgument( "console-fancy", "Specifies if control characters are written with console output to stylize it, e.g., fgcolor, bgcolor, bold, or inverted." );
 		addStringArgument( "cluster-id", "Specifies the cluster unique identity" );
@@ -99,6 +106,9 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			try
 			{
 				Env env = getEnv();
+
+				LogBuilder.addFileHandler( "latest", false, 6, Level.ALL );
+				LogBuilder.addFileHandler( "colored", true, 0, Level.ALL );
 
 				LogBuilder.setConsoleFormatter( new DefaultLogFormatter( env.getBoolean( "console-fancy" ).orElse( true ) ) );
 				Kernel.setLogHandler( new LogHandler()
@@ -141,7 +151,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			}
 		}
 		if ( currentRunlevel == MAINLOOP )
-			LooperRouter.getMainLooper().postTaskRepeatingLater( NetworkLoader::heartbeat, 50L, 50L );
+			LooperRouter.getMainLooper().postTaskRepeatingLater( entry -> Networking.heartbeat( entry.getLastPolledMillis() ), 50L, 50L );
 		if ( currentRunlevel == SHUTDOWN )
 		{
 			Kernel.L.info( "Shutting Down Plugin Manager..." );
@@ -173,11 +183,6 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 
 			// Foundation.getUsers().addUserCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
 		} );
-	}
-
-	public Plugins plugins()
-	{
-		return Bindings.resolveClass( Plugins.class ).orElseHandleCause( e -> Kernel.getExceptionRegistrar().fatalError( e.getExceptionReport(), true ), () -> null );
 	}
 
 	@Override
