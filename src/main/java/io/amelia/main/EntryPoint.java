@@ -15,13 +15,14 @@ import io.amelia.events.RunlevelEvent;
 import io.amelia.foundation.Foundation;
 import io.amelia.foundation.Kernel;
 import io.amelia.foundation.Runlevel;
-import io.amelia.lang.StartupAbortException;
-import io.amelia.lang.StartupException;
+import io.amelia.lang.ApplicationException;
+import io.amelia.lang.ExceptionReport;
+import io.amelia.foundation.FoundationCrashException;
 import io.amelia.lang.StartupInterruptException;
+import io.amelia.net.Networking;
 import io.amelia.net.wip.NetworkLoader;
 import io.amelia.net.wip.udp.UDPWorker;
 import io.amelia.support.EnumColor;
-import io.amelia.support.Timing;
 
 public class EntryPoint
 {
@@ -72,14 +73,21 @@ public class EntryPoint
 				// Make sure I'm the only process with my instanceId running
 				if ( event.getRunLevel() == Runlevel.NETWORKING )
 				{
-					// new HTTPWorker();
+					try
+					{
+						Networking.start();
+					}
+					catch ( ApplicationException.Error e )
+					{
+						ExceptionReport.handleSingleException( e );
+					}
 				}
 			} );
 
 			/* Tell the Kernel the start the startup sequence */
 			Foundation.start();
 		}
-		catch ( StartupAbortException muted )
+		catch ( FoundationCrashException muted )
 		{
 			// Muted since abort information is normally communicated before this point.
 		}

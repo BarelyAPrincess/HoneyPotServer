@@ -131,7 +131,6 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 						LogBuilder.get( source ).log( level, cause, message, args );
 					}
 				} );
-
 			}
 			catch ( Exception e )
 			{
@@ -181,7 +180,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 			else
 				storageBackend = new FileStorageBackend( Paths.get( userCreatorPath ), NodePath.empty() );
 
-			// Foundation.getUsers().addUserCreator( child.getName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
+			// Foundation.getUsers().addUserCreator( child.getLocalName(), storageBackend, child.getBoolean( "default" ).orElse( false ) );
 		} );
 	}
 
