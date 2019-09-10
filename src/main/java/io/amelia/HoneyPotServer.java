@@ -171,7 +171,7 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 	@Override
 	protected void parse() throws Exception
 	{
-		Streams.forEachWithException( ConfigRegistry.config.getChild( Users.ConfigKeys.CREATORS ).getChildren(), child -> {
+		Streams.forEachWithException( ConfigRegistry.config.getChildOrCreate( Users.ConfigKeys.CREATORS ).getChildren(), child -> {
 			URI userCreatorPath = URI.create( ConfigRegistry.config.getString( "path" ).orElseThrow( () -> new StorageException.Error( "Malformed user creator configuration. {backend=" + child.getCurrentPath() + "}" ) ) );
 			StorageBackend storageBackend;
 
@@ -203,16 +203,6 @@ public class HoneyPotServer extends DefaultApplication implements NetworkedAppli
 
 	public static class ConfigKeys
 	{
-		/**
-		 * Specifies a config key for disabling a application metrics.
-		 *
-		 * <pre>
-		 * foundation:
-		 *   disableMetrics: false
-		 * </pre>
-		 */
-		public static final String DISABLE_METRICS = "foundation.disableMetrics";
-
 		private ConfigKeys()
 		{
 			// Static Access

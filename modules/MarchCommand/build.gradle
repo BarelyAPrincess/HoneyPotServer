@@ -1,0 +1,29 @@
+group 'com.marchnetworks'
+version '2018.0'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	jcenter()
+	mavenCentral()
+}
+
+dependencies {
+	testCompile( group: 'junit', name: 'junit', version: '4.12' ) {
+		exclude group: 'org.hamcrest'
+	}
+
+	compile project( ":AmeliaCommonLib" )
+	compile project( ":AmeliaAppLib" )
+
+	required group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+
+	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+
+	testCompile 'org.hamcrest:hamcrest-library:1.3'
+}

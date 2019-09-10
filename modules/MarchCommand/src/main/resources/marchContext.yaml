@@ -1,0 +1,1480 @@
+beans:
+  startupDiagnosticsInit:
+    class: com.marchnetworks.monitoring.diagnostics.StartupDiagnosticsInit
+    initMethod: init
+      properties:
+      startupDiagnostics: startupDiagnosticsProxy
+  startupDiagnostics:
+    class: com.marchnetworks.monitoring.diagnostics.StartupDiagnosticsImpl
+      properties:
+      diagnosticTestDAO: diagnosticTestDAO
+  startupDiagnosticsProxy:
+    parent: transactionalBeanProxyTemplate
+      properties:
+      target: startupDiagnostics
+  diagnosticTestDAO:
+    class: com.marchnetworks.common.diagnostics.DiagnosticTestDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  commonConfiguration:
+    class: com.marchnetworks.shared.config.CommonConfiguration
+  alertDAO:
+    class: com.marchnetworks.health.dao.AlertDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  deviceAlertDAO:
+    class: com.marchnetworks.health.dao.DeviceAlertDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  testDeviceAlertDAO:
+    class: com.marchnetworks.health.dao.TestDeviceAlertDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  serverAlertDAO:
+    class: com.marchnetworks.health.dao.ServerAlertDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  alertConfigDAO:
+    class: com.marchnetworks.health.dao.AlertConfigDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  metricsDAO:
+    class: com.marchnetworks.monitoring.metrics.dao.MetricsDAOImpl
+  coreMigrationDAO:
+    class: com.marchnetworks.common.migration.CoreMigrationDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  migrationDAOimpl:
+    class: com.marchnetworks.command.api.migration.MigrationDAOImpl
+      properties:
+      entityManager: sharedEntityManager
+  alarmSourceDAO:
+    class: com.marchnetworks.alarm.dao.AlarmSourceDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  alarmEntryDAO:
+    class: com.marchnetworks.alarm.dao.AlarmEntryDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  testAlarmEntryDAO:
+    class: com.marchnetworks.alarm.dao.TestAlarmEntryDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  profileDAO:
+    class: com.marchnetworks.esm.common.dao.ProfileDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  memberDAO:
+    class: com.marchnetworks.esm.common.dao.MemberDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  appDAO:
+    class: com.marchnetworks.app.dao.AppDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  mapDAO:
+    class: com.marchnetworks.map.dao.MapDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  eventRegistry:
+    class: com.marchnetworks.server.event.EventRegistryImpl
+    properties:
+      commonConfiguration: commonConfiguration
+      taskScheduler: taskScheduler
+    addListeners:
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.topology.events.TopologyEvent
+          - topologyChangedEventListener
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.ChildDeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelRemovedEvent
+          - healthEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - alarmEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelRemovedEvent
+          - com.marchnetworks.management.topology.events.TopologyEvent
+          - appLicenseEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.ChildDeviceRegistrationEvent
+          - topologyDeviceChangeListener
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - topologyDeviceChangeListener
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - licenseEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        :constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.ChildDeviceRegistrationEvent
+          - deviceConfigRegistrationHandler
+        properties:
+          SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.ChildDeviceRegistrationEvent
+          - deviceRemovalHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - deviceSwitchEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - audioOutputEventHandler
+        properties:
+          processingType: SYNCHRONOUS_CHAINED
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - deviceCapabilityEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - deviceCapabilityEventHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.ChannelConnectionStateEvent
+          - channelStateEventHandlerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelChangedEvent
+          - channelChangedEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemChangedEvent
+          - systemChangedEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemChangedEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelChangedEvent
+          - com.marchnetworks.management.instrumentation.events.ChannelConnectionStateEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelsInUseEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelsMaxEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceIpChangedEvent
+          - topologyDeviceChangeListenerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAddedEvent
+          - deviceRegistrationSchedulerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelAddedEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelRemovedEvent
+          - childDeviceRegistrationHandlerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelAddedEvent
+          - topologyDeviceChangeListenerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.ServerIdHashEvent
+          - licenseEventHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemConfigHashEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelsMaxEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelsInUseEvent
+          - compositeDeviceChangedEventHandlerProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConfigRetrieveEvent
+          - deviceConfigRegistrationHandlerProxy
+        properties:
+          processingType: ASYNC_PARALLEL_PER_LISTENER
+          poolSize: 5
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceConfigurationEvent
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.CompositeDeviceUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemChangedEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemConfigHashEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelChangedEvent
+          - com.marchnetworks.management.firmware.event.FirmwareUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceDeferredUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - deviceConfigRegistrationHandlerProxy
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAlertEvent
+          - healthEventHandler
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAlertClosureDispatchEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceHealthReconciliationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceSetAlertConfigEvent
+          - healthEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAlarmEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceAlarmConfigEvent
+          - alarmEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAlarmReconciliationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceAlarmClosuresDispatchEvent
+          - alarmEventHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceModifySubscriptionEvent
+          - deviceSubscriptionManager
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.license.events.LicenseImportStartEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - licenseEventHandlerProxy
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.audit.events.AuditEvent
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceAuditEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.app.events.AppEvent
+          - auditLogEventHandler
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelRemovedEvent
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceStateEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceStatisticsListEvent
+          - statisticsCacheHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceSequenceIdUpdateEvent
+          - deviceSequenceIdUpdateEventHandlerProxy
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.topology.events.TopologyEvent
+          - com.marchnetworks.management.user.events.UserEvent
+          - userEventHandler
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppEvent
+          - com.marchnetworks.app.events.AppStateEvent
+          - userEventHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.user.events.UserEvent
+          - userLogoffEventHandler
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.file.events.FileStorageEvent
+          - userCertificateChangedEventHandler
+        properties:
+          processingType: ASYNC_SERIAL_PER_LISTENER
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateEvent
+          - deviceConnectionStateEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateEvent
+          - com.marchnetworks.management.instrumentation.events.ChannelConnectionStateEvent
+          - deferredEventPool
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceSwitchEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceSwitchConfigEvent
+          - deviceSwitchEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceAudioOutputEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceAudioOutputConfigEvent
+          - audioOutputEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - deviceOfflineHealthAlertMonitorProxy
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.server.event.BandwidthSettingsChangedEvent
+          - deviceUpgradeTaskDispatcher
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppStateEvent
+          - com.marchnetworks.app.events.AppEvent
+          - jsonSerializerService
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppEvent
+          - resourceTopologyServiceProxy_internal
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppEvent
+          - genericStorageServiceProxy_internal
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppStateEvent
+          - com.marchnetworks.app.events.AppEvent
+          - appManagementEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - archiverAssociationListener
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.topology.events.TopologyEvent
+          - com.marchnetworks.management.instrumentation.events.ExtractorJobEvent
+          - com.marchnetworks.management.user.events.UserEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - caseManagementServiceProxy_internal
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.MassRegistrationEvent
+          - massRegistrationEventHandler
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppStateEvent
+          - com.marchnetworks.app.events.AppEvent
+          - com.marchnetworks.management.user.events.UserEvent
+          - notificationServiceProxy
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.app.events.AppEvent
+          - scheduleServiceProxy
+        properties:
+          processingType: ASYNC_PARALLEL
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.monitoring.metrics.event.MetricsEvent
+          - metricsService
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - deviceServiceProxy
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceStateReconciliationEvent
+          - deviceService
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceDeferredUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.CompositeDeviceUpgradeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.firmware.event.FirmwareUpgradeEvent
+          - com.marchnetworks.management.file.events.FileStorageEvent
+          - com.marchnetworks.management.instrumentation.events.ChildDeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.GenericDeviceConfigurationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceChannelChangedEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceSystemChangedEvent
+          - com.marchnetworks.schedule.events.ScheduleEvent
+          - firmwareEventHandler
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.user.events.UserEvent
+          - localGroupServiceProxy_internal
+      com.marchnetworks.server.event.EventListenersRegistration:
+        constructor-arg:
+          - com.marchnetworks.management.instrumentation.events.DeviceConnectionStateChangeEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRestartEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceRegistrationEvent
+          - com.marchnetworks.management.instrumentation.events.DeviceIpChangedEvent
+          - com.marchnetworks.management.topology.events.ArchiverAssociationUpdatedEvent
+          - com.marchnetworks.management.topology.events.ArchiverAssociationRemovedEvent
+          - com.marchnetworks.management.instrumentation.events.ExtractorJobEvent
+          - coreExtractionService
+  healthService:
+    class: com.marchnetworks.health.service.HealthServiceImpl
+      <security:intercept-methods>
+        <security:protect access="ROLE_HEALTH_MONITORING, ROLE_ANONYMOUS" method="*
+      </security:intercept-methods>
+  healthService_internal:
+    class: com.marchnetworks.health.service.HealthServiceImpl
+  healthServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+     target: healthService
+  healthServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+     target: healthService_internal
+  alertManager:
+    class: com.marchnetworks.health.comms.AlertManagerImpl
+    properties:
+      deviceService: deviceService
+      alertDAO: alertDAO
+      deviceAlertDAO: deviceAlertDAO
+      serverAlertDAO: serverAlertDAO
+      eventRegistry: eventRegistry
+      alertConfigDAO: alertConfigDAO
+      deferredEventPool: deferredEventPool
+      taskScheduler: taskScheduler
+      deviceCapabilityService: deviceCapabilityService
+  metricsService:
+    class: com.marchnetworks.monitoring.metrics.service.MetricsServiceImpl" destroy-method="destroy
+    properties:
+      metricsDAO: metricsDAO
+  metricsServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: metricsService
+  healthNotificationManager:
+    class: com.marchnetworks.health.comms.HealthNotificationManagerImpl
+    properties:
+      notificationService: notificationService
+  healthNotificationManagerProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: healthNotificationManager
+  alarmEventHandler:
+    class: com.marchnetworks.alarm.events.AlarmEventHandler
+    properties:
+      alarmService: alarmServiceProxy_internal
+  alarmService:
+    class: com.marchnetworks.alarm.service.AlarmServiceImpl
+    properties:
+      alarmEntryDAO: alarmEntryDAO
+      alarmSourceDAO: alarmSourceDAO
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      deferredEventPool: deferredEventPool
+      taskScheduler: taskScheduler
+    <security:intercept-methods>
+    <security:protect access="ROLE_MANAGE_ALARMS" method="*
+    </security:intercept-methods>
+  alarmServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: alarmService
+  alarmService_internal:
+    class: com.marchnetworks.alarm.service.AlarmServiceImpl
+    properties:
+      alarmEntryDAO: alarmEntryDAO
+      alarmSourceDAO: alarmSourceDAO
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      deferredEventPool: deferredEventPool
+      taskScheduler: taskScheduler
+  alarmServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: alarmService_internal
+  alarmTestService:
+    class: com.marchnetworks.alarm.service.AlarmTestServiceImpl
+    properties:
+      alarmEntryDAO: alarmEntryDAO
+      testAlarmEntryDAO: testAlarmEntryDAO
+      alarmSourceDAO: alarmSourceDAO
+      deviceService: deviceService
+      alarmService: alarmService_internal
+      topologyService: resourceTopologyService_internal
+  alarmTestServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      targetName: alarmTestService
+  alertTestService:
+    class: com.marchnetworks.health.service.AlertTestServiceImpl
+    properties:
+      testDeviceAlertDAO: testDeviceAlertDAO
+      deviceAlertDAO: deviceAlertDAO
+      topologyTestService: topologyTestService
+      topologyService: resourceTopologyService_internal
+  alertTestServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      targetName: alertTestService
+  sessionCoreService:
+    class: com.marchnetworks.security.authentication.SessionServiceImpl
+    properties:
+      sessionRegistry: sessionRegistry
+  sessionCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: sessionCoreService
+  topologyCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: resourceTopologyService_internal
+  genericStorageCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: genericStorageService
+  archiverAssociationCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: archiverAssociationService_internal
+  exporterCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: exporterService
+  userCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: userService_internal
+  alarmCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: alarmService_internal
+  deviceSessionCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: deviceSessionHolderService
+  securityTokenCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: securityTokenService
+  licenseCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: licenseService_internal
+  notificationCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: notificationService
+  scheduleCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: scheduleService
+  appCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: appManager_internal
+  deviceTestServiceCoreProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      targetName: deviceTestService
+  osgiManager:
+    class: com.marchnetworks.app.core.OsgiManagerImpl" init-method="init" destroy-method="destroy
+    properties:
+      sessionCoreService: sessionCoreServiceProxy
+      topologyCoreService: topologyCoreServiceProxy
+      genericStorageCoreService: genericStorageCoreServiceProxy
+      archiverAssociationCoreService: archiverAssociationCoreServiceProxy
+      appEventCoreService: appEventCoreService
+      jsonSerializer: jsonSerializerService
+      userCoreService: userCoreServiceProxy
+      alarmCoreService: alarmCoreServiceProxy
+      deviceSessionCoreService: deviceSessionCoreServiceProxy
+      securityTokenCoreService: securityTokenCoreServiceProxy
+      appCoreService: appCoreServiceProxy
+      licenseCoreService: licenseCoreServiceProxy
+      notificationCoreService: notificationCoreServiceProxy
+      exporterCoreService: exporterCoreServiceProxy
+      scheduleCoreService: scheduleCoreServiceProxy
+      auditCoreService: auditCoreServiceProxy
+      scheduleConsumerService: firmwareServiceProxy_internal
+      idCoreService: idCoreServiceProxy
+      systemInfoCoreService: systemInfoCoreServiceProxy
+      metricsCoreService: metricsService
+      executionTriggerCoreService: executionTriggerService
+      deviceTestCoreService: deviceTestServiceCoreProxy
+      gpsExtractionService: coreExtractionService
+      transactionExtractionService: coreExtractionService
+  appManager:
+    class: com.marchnetworks.app.service.AppManagerImpl
+    properties:
+      appDAO: appDAO
+      eventRegistry: eventRegistry
+      licenseService: licenseService_internal
+      taskScheduler: taskScheduler
+      userService: userService_internal
+    <security:intercept-methods>
+    <security:protect access="ROLE_MANAGE_APPS, ROLE_ANONYMOUS" method="install
+    <security:protect access="ROLE_MANAGE_APPS, ROLE_ANONYMOUS" method="restart
+    <security:protect access="ROLE_MANAGE_APPS, ROLE_ANONYMOUS" method="uninstall
+    <security:protect access="ROLE_MANAGE_APPS, ROLE_ANONYMOUS" method="getApp
+    <security:protect access="ROLE_MANAGE_APPS, ROLE_ANONYMOUS" method="getAllApps
+    </security:intercept-methods>
+  appManager_internal:
+    class: com.marchnetworks.app.service.AppManagerImpl
+    properties:
+      appDAO: appDAO
+      eventRegistry: eventRegistry
+      licenseService: licenseService_internal
+      taskScheduler: taskScheduler
+  appManagerProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: appManager
+  appManagerProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: appManager_internal
+  appEventCoreService:
+    class: com.marchnetworks.server.event.app.AppEventServiceImpl
+    properties:
+      deviceService: deviceService
+      deviceTestService: deviceTestService
+      eventRegistry: eventRegistry
+  appManagementEventHandler:
+    class: com.marchnetworks.app.event.AppManagementEventHandler
+    properties:
+      appEventService: appEventCoreService
+  archiverAssociationListener:
+    class: com.marchnetworks.management.topology.event.ArchiverAssociationListener
+    properties:
+      archiverAssociationService: archiverAssociationServiceProxy
+  idCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: idService
+  systemInfoCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: systemInfoService
+  idDAO:
+    class: com.marchnetworks.common.id.IdDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  idService:
+    class: com.marchnetworks.common.id.IdServiceImpl
+    properties:
+      idDAO: idDAO
+  migration:
+    class: com.marchnetworks.common.migration.Migration" init-method="init
+    properties:
+      migrationService: migrationService
+  migrationService:
+    class: com.marchnetworks.common.migration.MigrationService" scope="prototype
+    properties:
+      coreMigrationDAO: coreMigrationDAO
+      userService: userService_internal
+      parameterSettingDAO: parameterSettingDAO
+      configuration: commonConfiguration
+  genericStorageService_internal:
+    class: com.marchnetworks.management.topology.GenericStorageServiceImpl
+    properties:
+      genericStorageCache: genericStorageCache
+      eventRegistry: eventRegistry
+      userService: userService_internal
+      genericStorageDAO: genericStorageDAO
+  genericStorageServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: genericStorageService_internal
+  topologyChangedEventListener:
+    class: com.marchnetworks.management.topology.util.TopologyChangedEventListener
+  healthEventHandler:
+    class: com.marchnetworks.health.event.HealthEventHandler
+    properties:
+      healthService: healthServiceProxy_internal
+  deviceRemovalHandler:
+    class: com.marchnetworks.management.instrumentation.DeviceRemovalHandler
+    properties:
+      deviceRegistry: deviceRegistry
+  eventPusher:
+    class: com.marchnetworks.server.event.EventPusherImpl
+    properties:
+      taskScheduler: taskScheduler
+      stateCacheService: stateCacheService
+  eventRequestContainer:
+    class: com.marchnetworks.server.event.EventRequestContainerImpl
+    properties:
+      taskScheduler: taskScheduler
+      eventPusher: eventPusher
+      configuration: commonConfiguration
+  jsonSerializerService:
+    class: com.marchnetworks.server.communications.serialization.JsonSerializerServiceImpl
+  fileStorageDAO:
+    class: com.marchnetworks.management.file.dao.FileStorageDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  fileStorageService:
+    class: com.marchnetworks.management.file.service.FileStorageServiceImpl
+    properties:
+      fileStorageDAO: fileStorageDAO
+      repositoryRoot: fileStorageRoot
+      eventRegistry: eventRegistry
+  fileStorageServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: fileStorageService
+  deviceConfigDAO:
+    class: com.marchnetworks.management.config.dao.DeviceConfigDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  configSnapshotDAO:
+    class: com.marchnetworks.management.config.dao.ConfigSnapshotDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  deviceImageDAO:
+    class: com.marchnetworks.management.config.dao.DeviceImageDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  deviceConfigRegistrationHandlerProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      targetName: deviceConfigRegistrationHandler
+  deviceConfigRegistrationHandler:
+    class: com.marchnetworks.management.config.DeviceConfigRegistrationHandler
+    properties:
+      deviceRegistry: deviceRegistry
+      devConfigDAO: deviceConfigDAO
+      snapshotDAO: configSnapshotDAO
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      configService: configService_internal
+      deferredEventPool: deferredEventPool
+  configurationMergeService:
+    class: com.marchnetworks.management.configmerge.ConfigurationMergeServiceImpl
+  logDownloadBean:
+    class: com.marchnetworks.management.logdownload.LogDownloadBean
+  configService:
+    class: com.marchnetworks.management.config.service.ConfigServiceImpl
+    properties:
+      imageDAO: deviceImageDAO
+      devConfigDAO: deviceConfigDAO
+      snapshotDAO: configSnapshotDAO
+      deviceRegistry: deviceRegistry
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      configurationMergeService: configurationMergeService
+      networkBandwidthService: networkBandwidthService
+      taskScheduler: taskScheduler
+      firmwareService: firmwareService_internal
+    <security:intercept-methods>
+    <security:protect access="ROLE_MASS_CONFIGURATION, ROLE_ANONYMOUS" method="*
+    </security:intercept-methods>
+  configServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: configService
+  configService_internal:
+    class: com.marchnetworks.management.config.service.ConfigServiceImpl
+    properties:
+      imageDAO: deviceImageDAO
+      devConfigDAO: deviceConfigDAO
+      snapshotDAO: configSnapshotDAO
+      deviceRegistry: deviceRegistry
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      configurationMergeService: configurationMergeService
+      networkBandwidthService: networkBandwidthService
+      taskScheduler: taskScheduler
+      firmwareService: firmwareService_internal
+  configServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: configService_internal
+  serverLicenseDAO:
+    class: com.marchnetworks.license.dao.ServerLicenseDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  deviceLicenseDAO:
+    class: com.marchnetworks.license.dao.DeviceLicenseDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  appLicenseDAO:
+    class: com.marchnetworks.license.dao.AppLicenseDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  deviceLicenseBO:
+    class: com.marchnetworks.license.DeviceLicenseBO
+    properties:
+      deviceLicenseDAO: deviceLicenseDAO
+      eventRegistry: eventRegistry
+      taskScheduler: taskScheduler
+      serverLicenseBO: serverLicenseBO
+      deviceService: deviceServiceProxy
+      deviceRegistry: deviceRegistry
+  serverLicenseBO:
+    class: com.marchnetworks.license.ServerLicenseBO" depends-on="applicationContextSupport
+    properties:
+      serverLicenseDAO: serverLicenseDAO
+      deviceLicenseBO: deviceLicenseBO
+      deviceService: deviceServiceProxy
+      deviceRegistry: deviceRegistry
+      eventRegistry: eventRegistry
+      healthService: healthService_internal
+      licenseService: licenseService_internal
+      resourceTopologyService: resourceTopologyService
+  licenseEventHandler:
+    class: com.marchnetworks.license.comm.LicenseEventHandler
+    properties:
+      deviceLicenseBO: deviceLicenseBO
+      licenseService: licenseService_internal
+  licenseEventHandlerProxy:
+    parent: transactionalBeanProxyNoRetryTemplate
+    properties:
+      target: licenseEventHandler
+  licenseService:
+    class: com.marchnetworks.license.service.LicenseServiceImpl
+    properties:
+      serverLicenseBO: serverLicenseBO
+      appLicenseService: appLicenseService
+      eventRegistry: eventRegistry
+      deviceRegistry: deviceRegistry
+      deviceService: deviceService
+      serverParameterStore: serverParameterStore
+    <security:intercept-methods>
+      <security:protect access="ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="importLicense
+      <security:protect access="ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="getAllLicenseInfo
+      <security:protect access="ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="getAllDeviceLicense
+      <security:protect access="ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="getDeviceLicense
+      <security:protect access="ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="setDeviceLicense
+      <security:protect access="ROLE_MANAGE_APPS,ROLE_MANAGE_DEVICES,ROLE_ANONYMOUS" method="getLicense
+      <security:protect access="ROLE_MANAGE_APPS,ROLE_ANONYMOUS" method="getLicenses
+      <security:protect access="ROLE_MANAGE_APPS,ROLE_ANONYMOUS" method="removeLicense
+      <security:protect access="ROLE_MANAGE_APPS,ROLE_ANONYMOUS" method="setLicenseResources
+    </security:intercept-methods>
+  licenseServiceProxy:
+    parent: transactionalIdentifyBeanProxyNoRetryTemplate
+    properties:
+      target: licenseService
+  licenseService_internal:
+    class: com.marchnetworks.license.service.LicenseServiceImpl
+    properties:
+      serverLicenseBO: serverLicenseBO
+      appLicenseService: appLicenseService
+      eventRegistry: eventRegistry
+      deviceRegistry: deviceRegistry
+      deviceService: deviceService
+      serverParameterStore: serverParameterStore
+  licenseServiceProxy_internal:
+    parent: transactionalBeanProxyNoRetryTemplate
+      properties:
+      target: licenseService_internal
+  appLicenseService:
+    class: com.marchnetworks.license.service.AppLicenseServiceImpl
+    properties:
+      appLicenseDAO: appLicenseDAO
+      licenseService: licenseService_internal
+      healthService: healthService_internal
+      eventRegistry: eventRegistry
+      stateCacheService: stateCacheServiceProxy
+  appLicenseServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: appLicenseService
+  appLicenseEventHandler:
+    class: com.marchnetworks.license.comm.AppLicenseEventHandler
+  userService:
+    class: com.marchnetworks.management.user.UserServiceImpl
+    properties:
+      profileDAO: profileDAO
+      memberDAO: memberDAO
+      eventRegistry: eventRegistry
+      genericStorageService: genericStorageService
+      commonConfiguration: commonConfiguration
+      ldapService: ldapService
+      exporterService: exporterService
+      appManager: appManager
+    <security:intercept-methods>
+      <security:protect access="ROLE_MANAGE_USERS, ROLE_ANONYMOUS" method="*
+      <security:protect access="IS_AUTHENTICATED_ANONYMOUSLY" method="getUser
+      <security:protect access="IS_AUTHENTICATED_ANONYMOUSLY" method="validateCertificates
+      <security:protect access="IS_AUTHENTICATED_ANONYMOUSLY" method="acceptTerms
+      <security:protect access="IS_AUTHENTICATED_ANONYMOUSLY" method="getAllAppRights
+    </security:intercept-methods>
+  userService_internal:
+    class: com.marchnetworks.management.user.UserServiceImpl
+    properties:
+      profileDAO: profileDAO
+      memberDAO: memberDAO
+      eventRegistry: eventRegistry
+      genericStorageService: genericStorageService
+      ldapService: ldapService
+      exporterService: exporterService
+      commonConfiguration: commonConfiguration
+      appManager: appManager_internal
+  userServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: userService
+  userServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: userService_internal
+  userEventHandler:
+    class: com.marchnetworks.management.user.events.UserEventHandler
+    properties:
+      userService: userServiceProxy_internal
+  userLogoffEventHandler:
+    class: com.marchnetworks.management.user.events.UserLogoffEventHandler
+    properties:
+      sessionService: sessionCoreServiceProxy
+  userCertificateChangedEventHandler:
+    class: com.marchnetworks.management.user.events.UserCertificateChangedEventHandler
+    properties:
+      userService: userServiceProxy_internal
+  firmwareDAO:
+    class: com.marchnetworks.management.firmware.dao.FirmwareDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  groupFirmwareDAO:
+    class: com.marchnetworks.management.firmware.dao.GroupFirmwareDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  firmwareService:
+    class: com.marchnetworks.management.firmware.service.FirmwareServiceImpl
+    properties:
+      configService: configService_internal
+      firmwareDAO: firmwareDAO
+      groupFirmwareDAO: groupFirmwareDAO
+      fileStorageService: fileStorageService
+      taskScheduler: taskScheduler
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      scheduleService: scheduleService
+      deviceCapabilityService: deviceCapabilityService
+      deferredEventPool: deferredEventPool
+      commonConfig: commonConfiguration
+    <security:intercept-methods>
+      <security:protect access="ROLE_MASS_CONFIGURATION, ROLE_ANONYMOUS" method="*
+    </security:intercept-methods>
+  firmwareServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: firmwareService
+  firmwareService_internal:
+    class: com.marchnetworks.management.firmware.service.FirmwareServiceImpl
+    properties:
+      configService: configService_internal
+      firmwareDAO: firmwareDAO
+      groupFirmwareDAO: groupFirmwareDAO
+      fileStorageService: fileStorageService
+      taskScheduler: taskScheduler
+      deviceService: deviceService
+      eventRegistry: eventRegistry
+      scheduleService: scheduleService
+      deviceCapabilityService: deviceCapabilityService
+      deferredEventPool: deferredEventPool
+      commonConfig: commonConfiguration
+  firmwareServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: firmwareService_internal
+  firmwareEventHandler:
+    class: com.marchnetworks.management.firmware.FirmwareEventHandler
+    properties:
+      firmwareService: firmwareServiceProxy_internal
+  ldapService:
+    class: com.marchnetworks.security.ldap.LDAPServiceImpl
+    properties:
+      commonConfig: commonConfiguration
+  serverAuditDAO:
+    class: com.marchnetworks.audit.dao.ServerAuditDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  deviceAuditDAO:
+    class: com.marchnetworks.audit.dao.DeviceAuditDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  auditDictionaryDAO:
+    class: com.marchnetworks.audit.dao.AuditDictionaryDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  auditLogService:
+    class: com.marchnetworks.audit.service.AuditLogServiceImpl
+    properties:
+      serverAuditDAO: serverAuditDAO
+      deviceAuditDAO: deviceAuditDAO
+      auditDictionaryDAO: auditDictionaryDAO
+      userService: userService_internal
+      topologyService: resourceTopologyService_internal
+    <security:intercept-methods>
+      <security:protect access="ROLE_MANAGE_USERS, ROLE_ANONYMOUS" method="getAuditLogs
+      <security:protect access="ROLE_MANAGE_DEVICES, ROLE_ANONYMOUS" method="getDeviceAuditLogs
+    </security:intercept-methods>
+  auditLogServiceProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: auditLogService
+  auditLogService_internal:
+    class: com.marchnetworks.audit.service.AuditLogServiceImpl
+    properties:
+      serverAuditDAO: serverAuditDAO
+      deviceAuditDAO: deviceAuditDAO
+      auditDictionaryDAO: auditDictionaryDAO
+      userService: userService_internal
+      topologyService: resourceTopologyService_internal
+  auditLogServiceProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: auditLogService_internal
+  auditCoreServiceProxy:
+    parent: transactionalAppBeanProxyTemplate
+    properties:
+      target: auditLogService
+  auditLogEventHandler:
+    class: com.marchnetworks.audit.event.AuditEventHandler
+    properties:
+      auditService: auditLogServiceProxy_internal
+  exporterService:
+    class: com.marchnetworks.exporter.ExporterServiceImpl
+  mapCache:
+    class: com.marchnetworks.common.cache.CacheImpl" init-method="init
+    properties:
+      taskScheduler: taskScheduler
+  mapService:
+    class: com.marchnetworks.map.service.MapServiceImpl
+    properties:
+      mapCache: mapCache
+      mapDAO: mapDAO
+  mapServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: mapService
+  parameterSettingDAO:
+    class: com.marchnetworks.common.system.parameter.model.ParameterSettingDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  serverParameterStore:
+    class: com.marchnetworks.common.system.ServerParameterStoreServiceImpl
+    properties:
+      parameterSettingDAO: parameterSettingDAO
+  serverParameterStoreProxy:
+    parent: transactionalIdentifyBeanProxyTemplate
+    properties:
+      target: serverParameterStore
+  serverParameterStoreProxy_internal:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: serverParameterStore
+  serverParameterStoreInit:
+    class: com.marchnetworks.common.system.ServerParameterStoreServiceInit
+    properties:
+      serverParameterStoreService: serverParameterStoreProxy
+  memoryPoolWatcher:
+    class: com.marchnetworks.common.diagnostics.memory.MemoryPoolWatcher
+    init-method: init
+  diagnosticsService:
+    class: com.marchnetworks.monitoring.diagnostics.DiagnosticsServiceImpl
+    properties:
+      memoryPoolWatcher: memoryPoolWatcher
+      healthService: healthServiceProxy_internal
+      memoryThresholds:
+          - 0.8
+          - 0.9
+          - 0.95
+      finalMemoryThreshold: 0.95
+  systemInfoDAO:
+    class: com.marchnetworks.common.diagnostics.database.SystemInfoDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  systemInfoService:
+    class: com.marchnetworks.common.diagnostics.database.SystemInfoServiceImpl
+    properties:
+      systemInfoDAO: systemInfoDAO
+  systemInfoServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: systemInfoService
+  systemTimeDiagnosticsService:
+    class: com.marchnetworks.monitoring.diagnostics.SystemTimeDiagnosticsServiceImpl
+    properties:
+      taskScheduler: taskScheduler
+      healthService: healthServiceProxy_internal
+      diagnosticsService: diagnosticsService
+      commonConfiguration: commonConfiguration
+      stateCacheService: stateCacheService
+      deviceService: deviceServiceProxy
+  deviceSessionHolderService:
+    class: com.marchnetworks.security.device.DeviceSessionHolderServiceImpl
+    properties:
+      securityTokenService: securityTokenService
+  userManagementInitService:
+    class: com.marchnetworks.esm.system.user.UserManagementInitService
+    properties:
+      configuration: commonConfiguration
+      profileDAO: profileDAO
+      memberDAO: memberDAO
+      userService: userService_internal
+      ldapService: ldapService
+      notificationService: notificationService
+  userManagementInitServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: userManagementInitService
+  certificationService:
+    class: com.marchnetworks.common.service.CertificationServiceImpl
+    init-method: init
+  scheduleDAO:
+    class: com.marchnetworks.schedule.dao.ScheduleDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  scheduleService:
+    class: com.marchnetworks.schedule.service.ScheduleServiceImpl
+    properties:
+      scheduleDAO: scheduleDAO
+      userService: userService_internal
+      eventRegistry: eventRegistry
+      scheduler: schedulerFactoryBean
+      appManager: appManager
+      resourceTopologyService: resourceTopologyService_internal
+      osgiManager: osgiManager
+  scheduleServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: scheduleService
+  notificationDAO:
+    class: com.marchnetworks.notification.dao.NotificationDAOImpl
+    properties:
+      entityManager: sharedEntityManager
+  executionTriggerService:
+    class: com.marchnetworks.execution.trigger.ExecutionTriggerServiceImpl
+    properties:
+      scheduler: schedulerFactoryBean
+  notificationService:
+    class: com.marchnetworks.notification.service.NotificationServiceImpl
+    properties:
+      notificationDAO: notificationDAO
+      userService: userService_internal
+      executionTriggerService: executionTriggerService
+      sendNotificationService: sendNotificationService
+      appManager: appManager
+  notificationServiceProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: notificationService
+  applicationInitializer:
+    class: com.marchnetworks.command.api.initialization.ApplicationInitializer" init-method="init
+    properties:
+      beforeListeners:
+        typeClass: com.marchnetworks.command.api.initialization.BeforeInitializationListener
+        values:
+          - licenseServiceProxy_internal
+      listeners:
+        typeClass: com.marchnetworks.command.api.initialization.InitializationListener
+        values:
+          - dnsLookupProxy
+          - metricsServiceProxy
+          - appLicenseServiceProxy
+          - networkBandwidthService
+          - notificationServiceProxy
+          - scheduleServiceProxy
+          - stateCacheServiceProxy
+          <ref bean="healthNotificationManager
+          <ref bean="healthServiceProxy_internal
+          <ref bean="diagnosticsService
+          <ref bean="resourceTopologyServiceProxy_internal
+          <ref bean="userManagementInitServiceProxy
+          <ref bean="deviceServiceProxy
+          <ref bean="deviceSubscriptionManager
+          <ref bean="configServiceProxy_internal
+          <ref bean="firmwareServiceProxy_internal
+          <ref bean="deviceOfflineHealthAlertMonitor
+          <ref bean="coreExtractionService
+          <ref bean="commonConfiguration
+          <ref bean="systemTimeDiagnosticsService
+          <ref bean="caseManagementServiceProxy_internal
+          <ref bean="appManagerProxy_internal
+  dnsLookup:
+    class:  com.marchnetworks.security.dns.DnsLookup
+    properties:
+      commonConfiguration: commonConfiguration
+      taskScheduler: taskScheduler
+      defaultDnsRefreshInterval: 1440
+  dnsLookupProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: dnsLookup
+  deviceOfflineHealthAlertMonitor:
+    class: com.marchnetworks.health.system.DeviceOfflineHealthAlertMonitor
+    properties:
+      healthService: healthService_internal
+      maxDisconnectionTime: 2880
+  deviceOfflineHealthAlertMonitorProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: deviceOfflineHealthAlertMonitor
+  licensePollHandler:
+    class: com.marchnetworks.license.LicensePollHandler
+    properties:
+      serverLicenseBO: serverLicenseBO
+      appLicenseService: appLicenseService
+  licensePollHandlerProxy:
+    parent: transactionalBeanProxyNoRetryTemplate
+    properties:
+      target: licensePollHandler
+  historicalDataPurgeTask:
+    class: com.marchnetworks.management.instrumentation.task.HistoricalDataPurgeTask
+    properties:
+      configuration: commonConfiguration
+      alarmService: alarmServiceProxy_internal
+      healthService: healthServiceProxy_internal
+      deviceService: deviceServiceProxy
+      auditLogService: auditLogServiceProxy_internal
+  deviceSubscriptionManager:
+    class: com.marchnetworks.management.instrumentation.subscription.DeviceSubscriptionManager
+    properties:
+      deviceRegistry: deviceRegistry
+      taskScheduler: taskScheduler
+      deferredEventPool: deferredEventPool
+  databaseDiagnosticCheck:
+    class: com.marchnetworks.monitoring.diagnostics.DatabaseDiagnosticCheckImpl
+    properties:
+      diagnosticTestDAO: diagnosticTestDAO
+      diagnosticsService: diagnosticsService
+      taskScheduler: taskScheduler
+  databaseDiagnosticCheckProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: databaseDiagnosticCheck
+  databaseSizeCheck:
+    class: com.marchnetworks.monitoring.diagnostics.DatabaseSizeCheck
+    properties:
+      systemInfoService: systemInfoService
+      healthService: healthServiceProxy_internal
+      configuration: commonConfiguration
+      stateCacheService: stateCacheService
+  databaseIndexCheck:
+    class: com.marchnetworks.monitoring.diagnostics.DatabaseIndexFragmentationCheck
+    properties:
+      systemInfoService: systemInfoServiceProxy
+  databaseSizeCheckProxy:
+    parent: transactionalBeanProxyTemplate
+    properties:
+      target: databaseSizeCheck
+  FWUpgradeMaintenanceTask:
+    class: com.marchnetworks.management.firmware.task.FWUpgradeMaintenanceTask
+    properties:
+      firmwareService: firmwareServiceProxy_internal
+    <!-- Scheduled Server Daemons -->
+  deviceOfflineHealthAlertMonitorDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: deviceOfflineHealthAlertMonitorProxy
+      targetMethod: handlePeriodicTransactionalTask
+      concurrent: false
+  historicalDataPurgeDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: historicalDataPurgeTask
+      targetMethod: purgeOldData
+      concurrent: false
+  licensePollDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: licensePollHandlerProxy
+      targetMethod: handlePeriodicTransactionalTask
+      concurrent: false
+  deviceSubscriptionDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: deviceSubscriptionManager
+      targetMethod: checkForOfflineDevices
+      concurrent: false
+  databaseDiagnosticCheckDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: databaseDiagnosticCheck
+      targetMethod: checkDatabase
+      concurrent: false
+  databaseSizeCheckDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: databaseSizeCheckProxy
+      targetMethod: handlePeriodicTransactionalTask
+      concurrent: false
+  deferredEventPoolDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: deferredEventPool
+      targetMethod: evictEvents
+      concurrent: false
+  FWUpgradeMaintenanceDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: FWUpgradeMaintenanceTask
+      targetMethod: upgradeMaintenanceCheck
+      concurrent: false
+  metricsSnapshotDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: metricsServiceProxy
+      targetMethod: snapshotMetrics
+      concurrent: false
+  metricsSaveDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: metricsServiceProxy
+      targetMethod: saveMetrics
+      concurrent: false
+  databaseIndexCheckDaemon:
+    class: org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean
+    properties:
+      targetObject: databaseIndexCheck
+      targetMethod: checkIndex
+      concurrent: false
+
+    <!-- Task Triggers -->
+  deviceOfflineTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: deviceOfflineHealthAlertMonitorDaemon
+    <!-- Run every hour by default. Configurable in march.server.config.xml -->
+      repeatInterval: 3600000
+      startDelay: 180000  <!-- Add a delay of 3min to avoid raising false positives -->
+  historicalDataPurgeTrigger:
+    class: org.springframework.scheduling.quartz.CronTriggerBean
+    properties:
+      jobDetail: historicalDataPurgeDaemon
+    <!-- run every day at 23:30 PM -->
+      cronExpression: 0 0 23 * * ?
+  licensePollTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: licensePollDaemon
+      startDelay: 180000
+    <!-- Run every hour: (Normal)   -->
+      repeatInterval: 3600000
+    <!-- DEBUG: Run every 5 seconds:
+      repeatInterval: 5000" />  -->
+  deviceSubscriptionTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: deviceSubscriptionDaemon
+      startDelay: 300000
+    <!-- repeat every 1min  interval in millis -->
+      repeatInterval: 60000
+  databaseDiagnosticCheckTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: databaseDiagnosticCheckDaemon
+    <!-- repeat every 20 seconds interval in millis -->
+      repeatInterval: 20000
+      startDelay: 60000
+  databaseSizeCheckTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: databaseSizeCheckDaemon
+    <!-- repeat every 20 seconds interval in millis -->
+      repeatInterval: 3600000
+      startDelay: 30000
+  deferredEventPoolTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: deferredEventPoolDaemon
+    <!-- repeat every 60 seconds interval in millis -->
+      repeatInterval: 60000
+      startDelay: 60000
+  FWUpgradeMaintenanceTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: FWUpgradeMaintenanceDaemon
+    <!-- repeat every 5 minutes interval  -->
+      repeatInterval: 300000
+      startDelay: 90000
+  metricsSnapshotTrigger:
+    class: org.springframework.scheduling.quartz.SimpleTriggerBean
+    properties:
+      jobDetail: metricsSnapshotDaemon
+    <!-- repeat every 5 minutes interval  -->
+      repeatInterval: 1200000
+      startDelay: 1200000
+  metricsSaveTrigger:
+    class: org.springframework.scheduling.quartz.CronTriggerBean
+    properties:
+      jobDetail: metricsSaveDaemon
+    <!-- run every day at 23:55 PM -->
+      cronExpression: 0 55 23 * * ?
+  databaseIndexCheckTrigger:
+    class: org.springframework.scheduling.quartz.CronTriggerBean
+    properties:
+      jobDetail: databaseIndexCheckDaemon
+    <!-- run every day at 02:30 AM -->
+      cronExpression: 0 30 02 * * ?
+  schedulerFactoryBean:
+    class: org.springframework.scheduling.quartz.SchedulerFactoryBean
+    properties:
+      triggers:
+        - deviceOfflineTrigger
+        - historicalDataPurgeTrigger
+        - licensePollTrigger
+        - deviceSubscriptionTrigger
+        - databaseDiagnosticCheckTrigger
+        - databaseSizeCheckTrigger
+        - deferredEventPoolTrigger
+        - FWUpgradeMaintenanceTrigger
+        - metricsSnapshotTrigger
+        - metricsSaveTrigger
+        - databaseIndexCheckTrigger
+      quartzProperties:
+    <!-- ThreadPool -->
+        org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
+        org.quartz.threadPool.threadCount: 10
+    <!-- SET default mail properties -->
+    <!-- <bean id="mailSender: class: org.springframework.mail.javamail.JavaMailSenderImpl -->
+  mailSender:
+    class: com.marchnetworks.notification.service.CommandMailSenderImpl
+    properties:
+      host: localhost
+      protocol: smtp
+      port: 25
+      javaMailProperties:
+        mail.smtp.auth: true
+        mail.debug: true
+        mail.smtp.timeout: 10000
+  sendNotificationService:
+    class: com.marchnetworks.notification.service.SendNotificationServiceImpl" init-method="init
+    properties:
+      mailSender: mailSender
+      configuration: commonConfiguration
+      executor: taskScheduler

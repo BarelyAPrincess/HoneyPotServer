@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # A bash helper script for committing submodule code before also committing the root repository.
-# This script will commit all changes, to stage individual changes -- don't use this script!
+# This script will commit all changes. To stage individual changes -- don't use this script!
 # This script is intended to be ran from the root directory of the root project.
 
 git_state () {

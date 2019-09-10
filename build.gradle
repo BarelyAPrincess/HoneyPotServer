@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: "com.github.hierynomus.license"
+apply plugin: 'com.github.hierynomus.license'
 apply plugin: 'checkstyle'
 apply plugin: 'application'
 apply plugin: 'ch.raffael.pegdown-doclet'
@@ -131,6 +131,7 @@ dependencies {
 	compile project( ':AmeliaStorageLib' )
 	compile project( ':AmeliaPluginsLib' )
 	compile project( ':AmeliaLogLib' )
+	compile project( ':HoneyNetworking' )
 	compile project( ':AmeliaNetworkingLib' )
 	compile project( ':AmeliaUsersLib' )
 

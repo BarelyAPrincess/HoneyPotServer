@@ -31,11 +31,11 @@ publishing {
 					resolveStrategy = Closure.DELEGATE_FIRST
 					name project.name
 					description description
-					url 'https://github.com/TheAmeliaDeWitt/HoneyPotServer'
+					url 'https://github.com/BarelyAPrincess/HoneyPotServer'
 					scm {
-						url 'https://github.com/TheAmeliaDeWitt/HoneyPotServer'
-						connection 'scm:git:ssh:git@github.com:TheAmeliaDeWitt/HoneyPotServer.git'
-						developerConnection 'scm:git:ssh:git@github.com:TheAmeliaDeWitt/HoneyPotServer.git'
+						url 'https://github.com/BarelyAPrincess/HoneyPotServer'
+						connection 'scm:git:ssh:git@github.com:BarelyAPrincess/HoneyPotServer.git'
+						developerConnection 'scm:git:ssh:git@github.com:BarelyAPrincess/HoneyPotServer.git'
 					}
 					licenses {
 						license {
@@ -46,7 +46,7 @@ publishing {
 					}
 					developers {
 						developer {
-							id 'TheAmeliaDeWitt'
+							id 'BarelyAPrincess'
 							name 'Amelia DeWitt'
 							email 'me@ameliadewitt.com'
 						}

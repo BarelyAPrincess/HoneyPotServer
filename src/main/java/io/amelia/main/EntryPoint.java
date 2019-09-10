@@ -84,7 +84,7 @@ public class EntryPoint
 				}
 			} );
 
-			/* Tell the Kernel the start the startup sequence */
+			/* Tell the Kernel to start the startup sequence */
 			Foundation.start();
 		}
 		catch ( FoundationCrashException muted )
